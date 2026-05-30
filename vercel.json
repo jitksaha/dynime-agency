@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/webhooks/didit",
+      "destination": "https://isweduliawwjqwhyvwhp.supabase.co/functions/v1/didit-webhook"
+    },
     { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ],
   "headers": [

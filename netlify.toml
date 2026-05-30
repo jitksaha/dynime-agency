@@ -1,3 +1,13 @@
+# ── Webhook proxy ────────────────────────────────────────────────────────────
+# Forwards POST /api/webhooks/didit → Supabase Edge Function.
+# Must come BEFORE the SPA catch-all so it isn't swallowed by it.
+# Netlify proxies the raw body + all headers so HMAC verification stays valid.
+[[redirects]]
+  from = "/api/webhooks/didit"
+  to   = "https://isweduliawwjqwhyvwhp.supabase.co/functions/v1/didit-webhook"
+  status = 200
+  force  = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
