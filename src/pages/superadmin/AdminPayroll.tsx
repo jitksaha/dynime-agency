@@ -22,7 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { downloadPayslip, type PayslipData } from "@/lib/payslip-pdf";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 // ---------- types ----------
 type Run = {
@@ -321,6 +321,19 @@ export default function AdminPayroll() {
   });
 
   // ---------- exports ----------
+  const rowsToCsv = (rows: Record<string, unknown>[]) => {
+    if (!rows.length) return "";
+    const headers = Object.keys(rows[0]);
+    const escape = (v: unknown) => JSON.stringify(v ?? "");
+    return [headers.join(","), ...rows.map(r => headers.map(h => escape(r[h])).join(","))].join("\n");
+  };
+  const downloadCsv = (csv: string, filename: string) => {
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  };
   const exportItemsCsv = () => {
     const rows = filteredItems.map(i => ({
       Employee: i.employee_name, Department: i.department, Designation: i.designation,
@@ -330,19 +343,21 @@ export default function AdminPayroll() {
       UnpaidLeave: i.leave_unpaid_days, Prorate: i.prorate_deduction, Tax: i.tax,
       Net: i.net_pay, Paid: i.paid_amount, Status: i.status, PaymentMethod: i.payment_method,
     }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Payroll");
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob([csv], { type: "text/csv" });
+    downloadCsv(rowsToCsv(rows), `payroll-${currentRun?.period_year}-${String(currentRun?.period_month).padStart(2, "0")}.csv`);
+  };
+  const exportItemsXlsx = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Payroll");
+    if (filteredItems.length > 0) {
+      worksheet.columns = Object.keys(filteredItems[0]).map(key => ({ header: key, key }));
+      worksheet.addRows(filteredItems as Record<string, unknown>[]);
+    }
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `payroll-${currentRun?.period_year}-${String(currentRun?.period_month).padStart(2, "0")}.csv`; a.click();
-  };
-  const exportItemsXlsx = () => {
-    const rows = filteredItems;
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Payroll");
-    XLSX.writeFile(wb, `payroll-${currentRun?.period_year}-${String(currentRun?.period_month).padStart(2, "0")}.xlsx`);
+    a.download = `payroll-${currentRun?.period_year}-${String(currentRun?.period_month).padStart(2, "0")}.xlsx`;
+    a.click();
   };
   const exportRunsCsv = () => {
     const rows = (runs.data ?? []).map(r => ({
@@ -352,12 +367,7 @@ export default function AdminPayroll() {
       Allowances: r.totals?.allowances ?? 0, Deductions: r.totals?.deductions ?? 0,
       Tax: r.totals?.tax ?? 0, Net: r.totals?.net ?? 0, Paid: r.totals?.paid ?? 0, Pending: r.totals?.pending ?? 0,
     }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `payroll-runs.csv`; a.click();
+    downloadCsv(rowsToCsv(rows), "payroll-runs.csv");
   };
 
   const downloadPayslipFor = async (item: Item) => {
