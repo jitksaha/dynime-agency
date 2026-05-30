@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "होम",
+    "about": "हमारे बारे में",
+    "services": "सेवाएं",
+    "pricing": "मूल्य",
+    "portfolio": "पोर्टफोलियो",
+    "blog": "ब्लॉग",
+    "careers": "करियर",
+    "contact": "संपर्क"
+  },
+  "common": {
+    "language": "भाषा",
+    "currency": "मुद्रा",
+    "getStarted": "शुरू करें",
+    "learnMore": "और जानें",
+    "viewAll": "सभी देखें",
+    "loading": "लोड हो रहा है...",
+    "submit": "जमा करें",
+    "cancel": "रद्द करें"
+  },
+  "footer": {
+    "preferences": "प्राथमिकताएं",
+    "autoDetected": "{{country}} से स्वचालित रूप से पता चला",
+    "language": "भाषा",
+    "currency": "मुद्रा"
+  },
+  "checkout": {
+    "title": "चेकआउट",
+    "summary": "ऑर्डर सारांश",
+    "subtotal": "उप-योग",
+    "discount": "छूट",
+    "total": "कुल",
+    "payNow": "अभी भुगतान करें",
+    "billingAddress": "बिलिंग पता",
+    "currencyNote": "मूल्य {{currency}} में दिखाए गए"
+  }
+}

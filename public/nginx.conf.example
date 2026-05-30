@@ -1,0 +1,34 @@
+# Example Nginx config for SPA hosting (VPS, Hostinger Cloud/VPS, DigitalOcean, etc.)
+# Copy the relevant parts into your server's /etc/nginx/sites-available/<your-site>.conf
+#
+# This is NOT auto-loaded by any host — it's documentation for manual setups.
+
+server {
+  listen 80;
+  server_name your-domain.com www.your-domain.com;
+
+  root /var/www/your-site/dist;
+  index index.html;
+
+  # Gzip
+  gzip on;
+  gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+  gzip_min_length 1024;
+
+  # Cache hashed assets aggressively
+  location ~* \.(js|css|woff2?|ttf|otf|eot|svg|png|jpe?g|gif|webp|ico)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+    try_files $uri =404;
+  }
+
+  # Never cache index.html
+  location = /index.html {
+    add_header Cache-Control "no-cache, no-store, must-revalidate";
+  }
+
+  # SPA fallback — send all unknown routes to index.html
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "pricing": "Pricing",
+    "portfolio": "Portfolio",
+    "blog": "Blog",
+    "careers": "Careers",
+    "contact": "Contact"
+  },
+  "common": {
+    "language": "Language",
+    "currency": "Currency",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More",
+    "viewAll": "View All",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "footer": {
+    "preferences": "Preferences",
+    "autoDetected": "Auto-detected from {{country}}",
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "payNow": "Pay Now",
+    "billingAddress": "Billing Address",
+    "currencyNote": "Prices shown in {{currency}}"
+  }
+}

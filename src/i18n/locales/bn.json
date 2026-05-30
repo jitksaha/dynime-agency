@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "হোম",
+    "about": "আমাদের সম্পর্কে",
+    "services": "সেবাসমূহ",
+    "pricing": "মূল্য",
+    "portfolio": "পোর্টফোলিও",
+    "blog": "ব্লগ",
+    "careers": "ক্যারিয়ার",
+    "contact": "যোগাযোগ"
+  },
+  "common": {
+    "language": "ভাষা",
+    "currency": "মুদ্রা",
+    "getStarted": "শুরু করুন",
+    "learnMore": "আরও জানুন",
+    "viewAll": "সব দেখুন",
+    "loading": "লোড হচ্ছে...",
+    "submit": "জমা দিন",
+    "cancel": "বাতিল"
+  },
+  "footer": {
+    "preferences": "পছন্দসমূহ",
+    "autoDetected": "{{country}} থেকে স্বয়ংক্রিয়ভাবে শনাক্ত",
+    "language": "ভাষা",
+    "currency": "মুদ্রা"
+  },
+  "checkout": {
+    "title": "চেকআউট",
+    "summary": "অর্ডার সারসংক্ষেপ",
+    "subtotal": "সাবটোটাল",
+    "discount": "ছাড়",
+    "total": "মোট",
+    "payNow": "এখন পরিশোধ করুন",
+    "billingAddress": "বিলিং ঠিকানা",
+    "currencyNote": "মূল্য {{currency}} এ প্রদর্শিত"
+  }
+}

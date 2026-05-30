@@ -1,0 +1,1 @@
+UPDATE contact_info SET label = 'Email' WHERE label = 'Main Email';

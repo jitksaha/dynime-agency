@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "services": "服务",
+    "pricing": "价格",
+    "portfolio": "作品集",
+    "blog": "博客",
+    "careers": "招聘",
+    "contact": "联系我们"
+  },
+  "common": {
+    "language": "语言",
+    "currency": "货币",
+    "getStarted": "立即开始",
+    "learnMore": "了解更多",
+    "viewAll": "查看全部",
+    "loading": "加载中...",
+    "submit": "提交",
+    "cancel": "取消"
+  },
+  "footer": {
+    "preferences": "偏好设置",
+    "autoDetected": "已从 {{country}} 自动检测",
+    "language": "语言",
+    "currency": "货币"
+  },
+  "checkout": {
+    "title": "结账",
+    "summary": "订单摘要",
+    "subtotal": "小计",
+    "discount": "折扣",
+    "total": "总计",
+    "payNow": "立即付款",
+    "billingAddress": "账单地址",
+    "currencyNote": "价格以 {{currency}} 显示"
+  }
+}

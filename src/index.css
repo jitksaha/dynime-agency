@@ -1,0 +1,710 @@
+/* Fonts are preloaded in index.html (non-blocking, font-display: swap via Google Fonts CSS) */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
+
+    --card: 240 8% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 240 100% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 8% 14%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 5% 55%;
+
+    --accent: 240 100% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 8% 16%;
+    --input: 240 8% 16%;
+    --ring: 240 100% 60%;
+
+    --radius: 0.75rem;
+
+    --glass-bg: 240 8% 8%;
+    --glass-border: 240 8% 20%;
+    --gradient-primary: linear-gradient(135deg, hsl(240 100% 60%), hsl(220 100% 55%));
+    --gradient-accent: linear-gradient(135deg, hsl(240 100% 65%), hsl(260 100% 60%));
+    --gradient-glass: linear-gradient(135deg, hsla(240, 8%, 12%, 0.7), hsla(240, 8%, 8%, 0.4));
+    --shadow-glow: 0 0 40px -10px hsl(240 100% 60% / 0.3);
+    --shadow-card: 0 8px 32px -8px hsl(240 10% 2% / 0.6);
+    --shadow-elevated: 0 20px 60px -15px hsl(240 10% 2% / 0.8);
+
+    --sidebar-background: 240 8% 6%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 240 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 8% 14%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 240 8% 16%;
+    --sidebar-ring: 240 100% 60%;
+  }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 240 100% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 92%;
+    --secondary-foreground: 240 10% 20%;
+
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 5% 40%;
+
+    --accent: 240 100% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5% 87%;
+    --input: 240 5% 87%;
+    --ring: 240 100% 55%;
+
+    --glass-bg: 0 0% 100%;
+    --glass-border: 240 5% 87%;
+    --gradient-primary: linear-gradient(135deg, hsl(240 100% 55%), hsl(220 100% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(240 100% 60%), hsl(260 100% 55%));
+    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.8), hsla(240, 5%, 96%, 0.5));
+    --shadow-glow: 0 0 40px -10px hsl(240 100% 55% / 0.15);
+    --shadow-card: 0 8px 32px -8px hsl(240 10% 80% / 0.3);
+    --shadow-elevated: 0 20px 60px -15px hsl(240 10% 80% / 0.4);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 240 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 92%;
+    --sidebar-accent-foreground: 240 10% 20%;
+    --sidebar-border: 240 5% 87%;
+    --sidebar-ring: 240 100% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-size: 16px;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+  }
+
+  /* Prevent any element from blowing past its container */
+  * {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Wrap long content gracefully — URLs, emails, code-y strings */
+  p, li, dd, dt, blockquote, figcaption, span, a, label, small {
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: auto;
+  }
+
+  /* Headings — consistent fluid scale, balanced wrapping, no overflow */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-foreground;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem); line-height: 1.1; }
+  h2 { font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem); }
+  h3 { font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem); line-height: 1.25; }
+  h4 { font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem); line-height: 1.3; }
+  h5 { font-size: 1.0625rem; line-height: 1.35; }
+  h6 { font-size: 0.9375rem; line-height: 1.4; letter-spacing: 0; text-transform: uppercase; }
+
+  p {
+    @apply text-foreground/90;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  /* Media never overflows */
+  img, svg, video, canvas, audio, iframe, embed, object {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  input, textarea, button {
+    font: inherit;
+    color: inherit;
+    max-width: 100%;
+  }
+
+  code, kbd, samp {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.875em;
+    overflow-wrap: anywhere;
+  }
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /* Global focus + text-selection colors — applied site-wide (public site
+     and admin panel) so the highlight is always brand-coloured and readable
+     in both light and dark modes. */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 4px hsl(var(--ring) / 0.18);
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.85);
+    color: hsl(var(--primary-foreground));
+    text-shadow: none;
+  }
+  ::-moz-selection {
+    background-color: hsl(var(--primary) / 0.85);
+    color: hsl(var(--primary-foreground));
+    text-shadow: none;
+  }
+
+  /* Selection inside dark surfaces (cards, code blocks) keeps high contrast */
+  .dark ::selection,
+  [data-theme="dark"] ::selection {
+    background-color: hsl(var(--primary) / 0.55);
+    color: hsl(var(--foreground));
+  }
+
+  /* Inputs & textareas — ensure native caret/selection match the brand */
+  input, textarea, [contenteditable="true"] {
+    caret-color: hsl(var(--primary));
+  }
+  input::selection, textarea::selection, [contenteditable="true"] ::selection {
+    background-color: hsl(var(--primary) / 0.85);
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl;
+    box-shadow: var(--shadow-card);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-500;
+  }
+
+  .glass-card-hover:hover {
+    @apply border-primary/30 -translate-y-1;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .gradient-text-accent {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-accent);
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     SPACING SYSTEM — use these instead of ad-hoc padding on sections
+     ────────────────────────────────────────────────────────────── */
+  .section-padding {
+    @apply py-8 md:py-12 lg:py-14;
+  }
+
+  .section-padding-sm {
+    @apply py-5 md:py-7 lg:py-8;
+  }
+
+  .section-padding-lg {
+    @apply py-10 md:py-16 lg:py-20;
+  }
+
+  /* Solid header: first page section keeps its own vertical padding so the
+     top breathing matches the bottom. No first-child overrides needed. */
+
+  /* Soft section tints — alternating backgrounds to help eyes parse sections.
+     Use sparingly: 2 tints + the default surface = 3-color rhythm.
+     Light mode uses a faint primary/accent wash; dark mode uses neutral
+     surface lifts so text stays high-contrast and readable. */
+  .section-tint-a {
+    background-color: hsl(var(--primary) / 0.04);
+  }
+  .section-tint-b {
+    background-color: hsl(var(--accent) / 0.06);
+  }
+  :is(.dark) .section-tint-a,
+  :root:not(.light) .section-tint-a {
+    background-color: hsl(240 8% 9% / 0.85);
+    border-top: 1px solid hsl(var(--border) / 0.5);
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+  :is(.dark) .section-tint-b,
+  :root:not(.light) .section-tint-b {
+    background-color: hsl(240 10% 6% / 0.9);
+    border-top: 1px solid hsl(var(--border) / 0.4);
+    border-bottom: 1px solid hsl(var(--border) / 0.4);
+  }
+
+  /* Modern FAQ item — gradient border on hover, soft surface, big tap target.
+     Uses a solid card surface so it stays readable on tinted section
+     backgrounds in both light and dark mode. */
+  .faq-item-modern {
+    @apply relative rounded-2xl border border-border/60 bg-card
+           transition-all duration-300 overflow-hidden;
+  }
+  :is(.dark) .faq-item-modern,
+  :root:not(.light) .faq-item-modern {
+    background-color: hsl(240 8% 11%);
+    border-color: hsl(var(--border) / 0.8);
+  }
+  .faq-item-modern::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.55), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .faq-item-modern:hover::before,
+  .faq-item-modern[data-state="open"]::before {
+    opacity: 1;
+  }
+  .faq-item-modern[data-state="open"] {
+    background-color: hsl(var(--primary) / 0.05);
+  }
+  :is(.dark) .faq-item-modern[data-state="open"],
+  :root:not(.light) .faq-item-modern[data-state="open"] {
+    background-color: hsl(240 30% 14%);
+  }
+
+  .container-custom {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    overflow-wrap: break-word;
+  }
+
+  .container-narrow {
+    @apply w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-wide {
+    @apply w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Vertical rhythm helpers — see plain CSS rules below for `> * + *` */
+
+  /* ──────────────────────────────────────────────────────────────
+     TYPOGRAPHY UTILITIES — opt-in classes for editorial copy
+     ────────────────────────────────────────────────────────────── */
+  .typo-display {
+    font-size: clamp(2.5rem, 1.8rem + 3vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  .typo-eyebrow {
+    @apply text-primary text-xs font-semibold uppercase tracking-[0.18em];
+  }
+
+  .typo-lead {
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    line-height: 1.65;
+    @apply text-muted-foreground;
+    text-wrap: pretty;
+  }
+
+  .typo-body {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    @apply text-foreground/90;
+  }
+
+  .typo-caption {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    @apply text-muted-foreground;
+  }
+
+  .sticky-cta {
+    @apply fixed bottom-6 right-6 z-50;
+  }
+
+  .brand-blue-card {
+    @apply border-2 border-primary/40 bg-card/80 rounded-xl p-6 transition-all duration-300;
+  }
+
+  .brand-blue-card:hover {
+    @apply border-primary bg-primary/5 -translate-y-1;
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /*
+   * Hover-lift cards: ensure transforms (translate/scale) on hover
+   * NEVER affect layout/row heights. Transforms are composited on the
+   * GPU and isolated so siblings stay perfectly aligned.
+   */
+  .hover-lift-safe {
+    transform: translateZ(0);
+    will-change: transform;
+    isolation: isolate;
+    backface-visibility: hidden;
+  }
+
+  /* Force grid rows to stretch so cards remain equal height
+     regardless of any hover transform on individual cells. */
+  .grid-equal-rows {
+    align-items: stretch;
+    grid-auto-rows: 1fr;
+  }
+
+  /* ──────────────────────────────────────────────────────────────
+     RESPONSIVE CARD SAFETY
+     Card containers should always fill the row height so siblings
+     stay aligned even when text wraps to more lines on small screens.
+     ────────────────────────────────────────────────────────────── */
+  .card-safe {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Make the last text/CTA in a card-safe stretch and push to bottom */
+  .card-safe > .card-spacer {
+    flex: 1 1 auto;
+  }
+
+  /* Smart wrap: respect words on mobile, balance lines on larger screens */
+  .wrap-balanced {
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: auto;
+  }
+  @media (min-width: 768px) {
+    .wrap-balanced {
+      text-wrap: balance;
+      hyphens: manual;
+    }
+  }
+
+  /* Stop ALL grid/flex children from forcing horizontal overflow.
+     Common cause of broken card layouts on mobile. */
+  .min-w-0-children > * {
+    min-width: 0;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GLOBAL CARD/GRID ALIGNMENT SAFETY (applies everywhere)
+   - Direct children of any CSS Grid stretch to row height
+   - Flex children get min-width:0 so long words wrap instead of
+     pushing the row wider than the viewport
+   ────────────────────────────────────────────────────────────── */
+[class*="grid-cols"] > * {
+  min-width: 0;
+  height: 100%;
+}
+
+[class*="flex"] > * {
+  min-width: 0;
+}
+
+/* Card wrappers stretch to fill row height ONLY when used as direct
+   children of a grid/flex layout — keeps sibling cards aligned without
+   forcing flex-column/height:100% on standalone usages (filter bars,
+   empty states, single cards, etc.). Opt in explicitly elsewhere with
+   the `.glass-card-stretch` modifier. */
+.grid > .glass-card,
+.grid > .glass-card-hover,
+.grid > .brand-blue-card,
+.glass-card-stretch {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Buttons & links never collapse below their content but also never
+   force a row to overflow on narrow screens. */
+button, a {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* Telegram-style theme transition */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Smooth native scroll for all in-page anchor navigation */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* SECTION ARRIVE — minimal fade only, no slide or sweep */
+.section-arrive { animation: section-arrive-fade 0.35s ease-out both; }
+@keyframes section-arrive-fade {
+  from { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-arrive { animation: none !important; }
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   STACK utilities — consistent vertical rhythm.
+   Kept outside @layer to avoid Tailwind nesting parser issues
+   with the `> * + *` selector.
+   ────────────────────────────────────────────────────────────── */
+.stack-y > * + * { margin-top: 1rem; }
+.stack-y-sm > * + * { margin-top: 0.5rem; }
+.stack-y-lg > * + * { margin-top: 1.5rem; }
+.stack-y-xl > * + * { margin-top: 2rem; }
+
+/* ──────────────────────────────────────────────────────────────
+   Google Translate — completely hide native widget UI; we drive
+   it programmatically from a custom popover.
+   ────────────────────────────────────────────────────────────── */
+
+/* Hide the top banner Google injects when translation is active */
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.skiptranslate iframe,
+#goog-gt-tt,
+.goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
+
+/* Force body back to top — Google pushes it down by 40px when banner shows */
+body { top: 0 !important; position: static !important; }
+
+/* Completely hide the native gadget — we render our own popover */
+.gtranslate-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* Prevent translated tooltip overlays from breaking layout */
+.goog-tooltip, .goog-tooltip:hover { display: none !important; }
+.goog-text-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* NProgress — Apple-style ultra-thin top bar */
+#nprogress .bar {
+  background: linear-gradient(90deg,
+    hsl(var(--primary) / 0) 0%,
+    hsl(var(--primary)) 40%,
+    hsl(var(--primary)) 60%,
+    hsl(var(--primary) / 0) 100%) !important;
+  height: 1.5px !important;
+  z-index: 9999;
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.45);
+}
+#nprogress .peg { display: none !important; }
+
+/* Apple-style route entrance — subtle fade + lift + de-blur */
+@keyframes appleRouteEnter {
+  0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+  100% { opacity: 1; transform: translateY(0);   filter: blur(0);  }
+}
+.route-enter {
+  animation: appleRouteEnter 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  will-change: opacity, transform, filter;
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-enter { animation: none !important; }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   HOVER / HIGHLIGHTED CONTRAST FIX
+   When a Radix Select/Dropdown/Command/Menu item is highlighted
+   (hover, keyboard focus) or selected, the row gets the vivid
+   `--accent` background. Descendant spans that opted into
+   muted/foreground tints (e.g. text-muted-foreground) become
+   unreadable on that background — force every descendant to
+   inherit the accent foreground while highlighted.
+   ────────────────────────────────────────────────────────────── */
+[role="option"][data-highlighted],
+[role="option"][data-state="checked"],
+[role="menuitem"][data-highlighted],
+[role="menuitemcheckbox"][data-highlighted],
+[role="menuitemradio"][data-highlighted],
+[cmdk-item][data-selected="true"],
+[data-radix-collection-item][data-highlighted] {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+/* Currently-selected (checked) but NOT highlighted row — keep it readable
+   with a soft tint instead of the vivid accent so it doesn't dominate. */
+[role="option"][data-state="checked"]:not([data-highlighted]),
+[cmdk-item][aria-selected="true"]:not([data-selected="true"]) {
+  background-color: hsl(var(--accent) / 0.12) !important;
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600;
+}
+
+[role="option"][data-highlighted] *,
+[role="option"][data-state="checked"][data-highlighted] *,
+[role="menuitem"][data-highlighted] *,
+[role="menuitemcheckbox"][data-highlighted] *,
+[role="menuitemradio"][data-highlighted] *,
+[cmdk-item][data-selected="true"] *,
+[data-radix-collection-item][data-highlighted] * {
+  color: inherit !important;
+  opacity: 1;
+}
+
+/* Anchor / button hover — keep description-style muted text readable
+   when its parent flips to a primary-tinted hover background. */
+a:hover .text-muted-foreground,
+button:hover .text-muted-foreground,
+[role="button"]:hover .text-muted-foreground,
+.group:hover .text-muted-foreground,
+[data-state="open"] .text-muted-foreground {
+  color: hsl(var(--foreground) / 0.85);
+}
+
+/* Print: only show the HR document, hide app chrome */
+@media print {
+  @page { size: A4; margin: 15mm 14mm; }
+  html, body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  .hr-doc, .hr-doc * { visibility: visible !important; }
+  .hr-doc {
+    position: absolute !important;
+    left: 0; top: 0;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ============================================
+   Mobile responsiveness safety net (admin/HR/payroll)
+   ============================================ */
+@layer utilities {
+  /* Prevent stray horizontal page scroll on small screens */
+  html, body { overflow-x: hidden; }
+
+  /* Tab strips: allow horizontal scroll on mobile instead of overflowing */
+  [role="tablist"] {
+    max-width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+  [role="tablist"]::-webkit-scrollbar { display: none; }
+  [role="tablist"] > * { flex-shrink: 0; }
+
+  /* Cards / containers must not push their parents wider than viewport */
+  main > *, main section, main .card { min-width: 0; }
+
+  /* Long unbroken strings (emails, URLs) inside admin tables/cells */
+  .break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
+}

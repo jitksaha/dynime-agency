@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Loading…</title>
+    <script>
+      // SPA fallback for static hosts that serve 404.html for unknown routes
+      // (GitHub Pages, some Hostinger static setups, etc.)
+      // Preserves the original path + query + hash and redirects to index.html
+      // so React Router can take over.
+      (function () {
+        var path = window.location.pathname + window.location.search + window.location.hash;
+        sessionStorage.setItem("spa-redirect", path);
+        window.location.replace("/");
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting…</p>
+  </body>
+</html>

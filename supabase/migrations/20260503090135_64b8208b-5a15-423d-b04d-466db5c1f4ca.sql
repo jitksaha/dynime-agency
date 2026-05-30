@@ -1,0 +1,140 @@
+INSERT INTO public.careers
+(slug, title, department, location, employment_type, experience_level, salary_range,
+ description, content_html, hero_image_url, responsibilities, requirements, apply_url,
+ posting_channels, is_featured, is_active, sort_order)
+VALUES
+-- ========== MANAGEMENT ==========
+('chief-operating-officer', 'Chief Operating Officer (COO)', 'Management', 'Remote / Hybrid', 'Full-time', 'Executive', 'Negotiable',
+ 'Run daily operations across our SaaS and services lines, ensuring flawless execution at scale.',
+ '<h2>About the role</h2><p>As COO you will be the operational backbone of Dynime Technologies, orchestrating teams across product, services, marketing, and support to deliver consistent, high-quality outcomes.</p><h2>What you''ll do</h2><ul><li>Own company-wide OKRs, weekly business reviews, and execution rhythm</li><li>Build scalable processes for SaaS delivery and services operations</li><li>Partner with the CEO and CTO on hiring, budget, and strategic priorities</li><li>Lead operational metrics: gross margin, utilization, on-time delivery</li></ul><h2>Why join us</h2><p>You''ll shape how a 20+ person global team scales — with autonomy, ownership, and direct impact on revenue.</p>',
+ '/career-heroes/management.jpg',
+ '["Run weekly business reviews and execution cadence","Scale SaaS + services operations","Own hiring plan and team performance","Track and improve KPIs across departments"]'::jsonb,
+ '["7+ years in operations leadership at SaaS or agency","Proven record scaling teams of 20+","Data-driven, comfortable with finance and metrics","Excellent written + verbal communication"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 1),
+
+-- ========== PRODUCT & ENGINEERING ==========
+('product-manager', 'Product Manager — SaaS', 'Product & Engineering', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Own the SaaS roadmap end-to-end: from user research to launch and iteration.',
+ '<h2>About the role</h2><p>You will be the voice of the customer inside the engineering org, shipping features that move retention and revenue.</p><h2>What you''ll do</h2><ul><li>Define and prioritize the product roadmap</li><li>Run discovery, write specs, and partner with design + engineering</li><li>Close the feedback loop with sales and customer success</li><li>Measure feature impact and iterate fast</li></ul>',
+ '/career-heroes/engineering.jpg',
+ '["Own product roadmap and feature prioritization","Lead user research and feedback synthesis","Write clear PRDs and acceptance criteria","Track adoption, retention, and feature ROI"]'::jsonb,
+ '["3+ years as a Product Manager in SaaS","Strong analytical and communication skills","Familiar with tools like Linear, Figma, Mixpanel/Amplitude","Bonus: technical background"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 2),
+
+('full-stack-developer', 'Full Stack Developer', 'Product & Engineering', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Build core SaaS platform features across frontend and backend. (3 openings)',
+ '<h2>About the role</h2><p>Ship production code on a modern React + Node/Postgres stack. You''ll work end-to-end on features that thousands of users touch every day.</p><h2>What you''ll do</h2><ul><li>Develop new features across the stack</li><li>Write clean, tested, performant code</li><li>Collaborate with PM and design daily</li><li>Participate in code reviews and technical decisions</li></ul><p><strong>Open positions:</strong> 3</p>',
+ '/career-heroes/engineering.jpg',
+ '["Build features end-to-end (UI + API + DB)","Write tests and maintain code quality","Optimize performance and DX","Collaborate in a remote-first team"]'::jsonb,
+ '["3+ years building production web apps","Strong React + TypeScript skills","Comfortable with Node.js and SQL/Postgres","Familiar with Supabase, REST/GraphQL APIs"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 3),
+
+('frontend-specialist', 'Frontend Specialist', 'Product & Engineering', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Own the polish, performance, and responsiveness of our SaaS UI.',
+ '<h2>About the role</h2><p>If you obsess over pixel-perfect design, animation timing, and Lighthouse scores, this role is for you.</p><h2>What you''ll do</h2><ul><li>Implement and refine UI components in React + Tailwind</li><li>Optimize Core Web Vitals and bundle size</li><li>Build a shared component library</li><li>Partner closely with UI/UX designers</li></ul>',
+ '/career-heroes/engineering.jpg',
+ '["Build delightful, accessible UI components","Optimize performance (LCP, INP, CLS)","Maintain a design system","Implement micro-interactions and animations"]'::jsonb,
+ '["3+ years frontend with React + TypeScript","Deep CSS/Tailwind expertise","Familiar with Radix/shadcn, Framer Motion","Strong eye for design and detail"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 4),
+
+('devops-engineer', 'DevOps Engineer', 'Product & Engineering', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Own deployments, CI/CD, uptime, and cloud cost efficiency.',
+ '<h2>About the role</h2><p>Keep our SaaS reliable, fast, and cost-efficient. You''ll own the developer experience and production infrastructure.</p><h2>What you''ll do</h2><ul><li>Maintain and improve CI/CD pipelines</li><li>Monitor uptime, alerting, and incident response</li><li>Manage cloud infra (Vercel, Supabase, AWS, Cloudflare)</li><li>Optimize cost and performance</li></ul>',
+ '/career-heroes/engineering.jpg',
+ '["Own CI/CD and deployment pipelines","Monitor production and respond to incidents","Manage cloud infrastructure and cost","Implement observability and security hardening"]'::jsonb,
+ '["3+ years DevOps / SRE experience","Hands-on with GitHub Actions, Docker, Terraform","Familiar with Supabase, Vercel, AWS","Strong scripting (Bash/Node/Python)"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 5),
+
+('ui-ux-designer', 'UI/UX Designer', 'Product & Engineering', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Design intuitive SaaS experiences — onboarding, dashboards, and core flows.',
+ '<h2>About the role</h2><p>Turn complex problems into elegant interfaces. You''ll own end-to-end design from research to high-fidelity Figma.</p><h2>What you''ll do</h2><ul><li>Design SaaS dashboards and onboarding flows</li><li>Run usability tests and synthesize feedback</li><li>Maintain and evolve our design system</li><li>Partner with PM and engineering daily</li></ul>',
+ '/career-heroes/engineering.jpg',
+ '["Design end-to-end SaaS flows","Build and maintain a design system in Figma","Run user research and usability tests","Iterate based on data and feedback"]'::jsonb,
+ '["3+ years UI/UX in SaaS","Strong portfolio demonstrating product thinking","Mastery of Figma","Bonus: motion / prototyping skills"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 6),
+
+-- ========== GROWTH & MARKETING ==========
+('growth-manager', 'Growth Manager', 'Growth & Marketing', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Own the funnel from traffic to retention. Drive measurable revenue growth.',
+ '<h2>About the role</h2><p>You''ll lead growth experiments across acquisition, activation, and retention to compound revenue month over month.</p><h2>What you''ll do</h2><ul><li>Own funnel metrics and growth experiments</li><li>Coordinate paid, content, and product-led initiatives</li><li>Run A/B tests on landing pages and onboarding</li><li>Report directly to leadership on growth KPIs</li></ul>',
+ '/career-heroes/marketing.jpg',
+ '["Own funnel KPIs (CAC, conversion, retention)","Run weekly growth experiments","Align marketing, sales, and product","Build dashboards and growth playbooks"]'::jsonb,
+ '["4+ years in SaaS growth or performance marketing","Strong analytical mindset (SQL or analytics tools)","Experience with A/B testing and CRO","Excellent written communication"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 7),
+
+('performance-marketer', 'Performance Marketer', 'Growth & Marketing', 'Remote', 'Full-time', 'Mid-level', 'Negotiable',
+ 'Run paid acquisition across Meta, Google, and LinkedIn with strong ROAS.',
+ '<h2>About the role</h2><p>Own paid media end-to-end — from creative briefing to bidding strategy and weekly reporting.</p><h2>What you''ll do</h2><ul><li>Plan and execute paid campaigns across platforms</li><li>Manage budget, bids, and creative testing</li><li>Optimize for CAC, ROAS, and LTV</li><li>Partner with content for landing page conversion</li></ul>',
+ '/career-heroes/marketing.jpg',
+ '["Run paid campaigns on Meta, Google, LinkedIn","Manage budget and creative testing","Track and optimize CAC / ROAS","Report weekly on performance"]'::jsonb,
+ '["2+ years managing paid budgets ($10k+/mo)","Hands-on with Meta Ads, Google Ads, LinkedIn","Strong analytical and creative sense","Familiar with GA4, GTM, conversion tracking"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 8),
+
+('content-seo-specialist', 'Content + SEO Specialist', 'Growth & Marketing', 'Remote', 'Full-time', 'Mid-level', 'Negotiable',
+ 'Drive organic growth through landing pages, blogs, and on-page SEO.',
+ '<h2>About the role</h2><p>You''ll own our organic acquisition engine — from keyword research to publishing and link-building.</p><h2>What you''ll do</h2><ul><li>Plan content calendar around target keywords</li><li>Write or commission long-form articles and landing pages</li><li>Optimize on-page SEO and internal linking</li><li>Track organic traffic and rankings</li></ul>',
+ '/career-heroes/marketing.jpg',
+ '["Own SEO strategy and execution","Write and edit content","Optimize landing pages for conversion","Build topical authority through clusters"]'::jsonb,
+ '["2+ years in SEO + content marketing","Excellent written English","Familiar with Ahrefs/SEMrush, Search Console","Bonus: technical SEO knowledge"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 9),
+
+-- ========== SALES ==========
+('sales-manager', 'Sales Manager', 'Sales', 'Remote', 'Full-time', 'Senior', 'Negotiable',
+ 'Close deals and build a disciplined pipeline strategy for our SaaS + services.',
+ '<h2>About the role</h2><p>Lead our sales motion from qualification to close. Build playbooks, forecasts, and a winning team culture.</p><h2>What you''ll do</h2><ul><li>Own quota and pipeline strategy</li><li>Close enterprise and mid-market deals</li><li>Coach BDE and SDR team members</li><li>Partner with marketing on lead quality</li></ul>',
+ '/career-heroes/sales.jpg',
+ '["Own quota and forecast","Close deals end-to-end","Coach the sales team","Refine sales playbooks"]'::jsonb,
+ '["5+ years in B2B SaaS sales","Track record closing $50k+ deals","Strong CRM discipline (HubSpot/Pipedrive)","Excellent negotiation and discovery skills"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 10),
+
+('business-development-executive', 'Business Development Executive', 'Sales', 'Remote', 'Full-time', 'Mid-level', 'Negotiable',
+ 'Drive outreach, partnerships, and inbound handling to grow pipeline.',
+ '<h2>About the role</h2><p>You''ll be the first human touchpoint for many prospects — qualifying, nurturing, and opening doors.</p><h2>What you''ll do</h2><ul><li>Handle inbound leads and book demos</li><li>Run outbound campaigns to ICP accounts</li><li>Build partnership pipeline</li><li>Qualify and hand off to AEs</li></ul>',
+ '/career-heroes/sales.jpg',
+ '["Qualify inbound leads","Run outbound sequences","Book qualified meetings","Maintain CRM hygiene"]'::jsonb,
+ '["2+ years in B2B sales/BD","Strong written and verbal communication","Comfortable with CRM and outreach tools","Self-motivated and target-driven"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 11),
+
+('sdr-lead-generator', 'SDR / Lead Generator', 'Sales', 'Remote', 'Full-time', 'Entry–Mid', 'Negotiable',
+ 'Cold email, LinkedIn outreach, and appointment setting for our sales team.',
+ '<h2>About the role</h2><p>This is a high-velocity outbound role. You''ll book meetings that fuel the entire revenue engine.</p><h2>What you''ll do</h2><ul><li>Run cold email and LinkedIn sequences</li><li>Research target accounts and contacts</li><li>Book qualified meetings for AEs</li><li>Iterate on messaging weekly</li></ul>',
+ '/career-heroes/sales.jpg',
+ '["Run outbound sequences daily","Research and enrich prospect lists","Book qualified meetings","Track activity in CRM"]'::jsonb,
+ '["1+ year in outbound SDR/BDR role","Excellent written English","Persistent, coachable, and metric-driven","Familiar with Apollo, Lemlist, or similar"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 12),
+
+-- ========== CUSTOMER SUCCESS & SUPPORT ==========
+('customer-success-manager', 'Customer Success Manager', 'Customer Success & Support', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Own onboarding, retention, and account expansion for our SaaS customers.',
+ '<h2>About the role</h2><p>You''ll be the trusted advisor who turns new signups into long-term advocates and expansion revenue.</p><h2>What you''ll do</h2><ul><li>Own customer onboarding and time-to-value</li><li>Run quarterly business reviews</li><li>Identify and execute upsell/cross-sell opportunities</li><li>Reduce churn through proactive outreach</li></ul>',
+ '/career-heroes/support.jpg',
+ '["Onboard new customers","Drive retention and NRR","Identify upsell opportunities","Capture product feedback"]'::jsonb,
+ '["3+ years in CSM role at SaaS","Excellent communication and empathy","Comfortable with data and CRM","Track record of expanding accounts"]'::jsonb,
+ '/contact', '[]'::jsonb, true, true, 13),
+
+('support-executive', 'Support Executive', 'Customer Success & Support', 'Remote', 'Full-time', 'Entry–Mid', 'Negotiable',
+ 'Handle tickets, live chat, and basic troubleshooting to keep customers happy.',
+ '<h2>About the role</h2><p>Be the friendly, fast voice that solves customer problems and escalates the tricky ones.</p><h2>What you''ll do</h2><ul><li>Respond to tickets and chat within SLA</li><li>Troubleshoot common product issues</li><li>Document FAQs and help articles</li><li>Escalate bugs to engineering</li></ul>',
+ '/career-heroes/support.jpg',
+ '["Resolve tickets and chats","Maintain a helpful knowledge base","Escalate technical issues","Track CSAT and response time"]'::jsonb,
+ '["1+ year in customer support","Excellent written English","Patient, empathetic, and detail-oriented","Familiar with Intercom/Zendesk or similar"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 14),
+
+-- ========== SERVICES DELIVERY ==========
+('project-manager', 'Project Manager — Services', 'Services Delivery', 'Remote', 'Full-time', 'Mid–Senior', 'Negotiable',
+ 'Manage client projects end-to-end: timelines, scope, communication, and delivery.',
+ '<h2>About the role</h2><p>You''ll own the success of our service engagements — from kickoff to handoff — keeping clients delighted.</p><h2>What you''ll do</h2><ul><li>Run project kickoffs and weekly client check-ins</li><li>Manage scope, timelines, and budgets</li><li>Coordinate with developers and designers</li><li>Ensure on-time, on-quality delivery</li></ul>',
+ '/career-heroes/services.jpg',
+ '["Own client communication and delivery","Manage timelines and resources","Track scope and change requests","Report status to stakeholders"]'::jsonb,
+ '["3+ years managing digital projects","Strong client-facing communication","Familiar with PM tools (ClickUp, Asana, Jira)","Bonus: agency or web dev background"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 15),
+
+('web-developer-digital-specialist', 'Web Developer / Digital Specialist', 'Services Delivery', 'Remote', 'Full-time', 'Mid-level', 'Negotiable',
+ 'Execute service work — WordPress, Shopify, landing pages, and integrations.',
+ '<h2>About the role</h2><p>You''ll be the hands-on builder turning client briefs into polished, performant websites.</p><h2>What you''ll do</h2><ul><li>Build and maintain client websites (WordPress, Shopify, custom)</li><li>Implement designs pixel-perfectly</li><li>Set up integrations, SEO basics, and analytics</li><li>Hand off and train clients</li></ul>',
+ '/career-heroes/services.jpg',
+ '["Build WordPress and Shopify sites","Implement responsive designs","Set up analytics, SEO, and integrations","Maintain client sites post-launch"]'::jsonb,
+ '["2+ years building WordPress/Shopify sites","Comfortable with HTML, CSS, JS","Familiar with Elementor, themes, plugins","Bonus: light React or PHP skills"]'::jsonb,
+ '/contact', '[]'::jsonb, false, true, 16)
+
+ON CONFLICT (slug) DO NOTHING;

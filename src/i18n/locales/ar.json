@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "services": "الخدمات",
+    "pricing": "الأسعار",
+    "portfolio": "أعمالنا",
+    "blog": "المدونة",
+    "careers": "الوظائف",
+    "contact": "تواصل معنا"
+  },
+  "common": {
+    "language": "اللغة",
+    "currency": "العملة",
+    "getStarted": "ابدأ الآن",
+    "learnMore": "اعرف المزيد",
+    "viewAll": "عرض الكل",
+    "loading": "جاري التحميل...",
+    "submit": "إرسال",
+    "cancel": "إلغاء"
+  },
+  "footer": {
+    "preferences": "التفضيلات",
+    "autoDetected": "تم الكشف تلقائياً من {{country}}",
+    "language": "اللغة",
+    "currency": "العملة"
+  },
+  "checkout": {
+    "title": "الدفع",
+    "summary": "ملخص الطلب",
+    "subtotal": "المجموع الفرعي",
+    "discount": "الخصم",
+    "total": "الإجمالي",
+    "payNow": "ادفع الآن",
+    "billingAddress": "عنوان الفوترة",
+    "currencyNote": "الأسعار معروضة بـ {{currency}}"
+  }
+}

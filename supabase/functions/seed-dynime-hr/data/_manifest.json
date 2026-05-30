@@ -1,0 +1,27 @@
+[
+  {
+    "table": "dynime_employees",
+    "file": "dynime_employees.json",
+    "rows": 243
+  },
+  {
+    "table": "dynime_leave_records",
+    "file": "dynime_leave_records.json",
+    "rows": 3201
+  },
+  {
+    "table": "dynime_recruitment_history",
+    "file": "dynime_recruitment_history.json",
+    "rows": 243
+  },
+  {
+    "table": "dynime_departments",
+    "file": "dynime_departments.json",
+    "rows": 10
+  },
+  {
+    "table": "dynime_sales_team_performance",
+    "file": "dynime_sales_team_performance.json",
+    "rows": 849
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "about": "Nosotros",
+    "services": "Servicios",
+    "pricing": "Precios",
+    "portfolio": "Portafolio",
+    "blog": "Blog",
+    "careers": "Carreras",
+    "contact": "Contacto"
+  },
+  "common": {
+    "language": "Idioma",
+    "currency": "Moneda",
+    "getStarted": "Comenzar",
+    "learnMore": "Saber más",
+    "viewAll": "Ver todo",
+    "loading": "Cargando...",
+    "submit": "Enviar",
+    "cancel": "Cancelar"
+  },
+  "footer": {
+    "preferences": "Preferencias",
+    "autoDetected": "Detectado automáticamente desde {{country}}",
+    "language": "Idioma",
+    "currency": "Moneda"
+  },
+  "checkout": {
+    "title": "Pago",
+    "summary": "Resumen del pedido",
+    "subtotal": "Subtotal",
+    "discount": "Descuento",
+    "total": "Total",
+    "payNow": "Pagar ahora",
+    "billingAddress": "Dirección de facturación",
+    "currencyNote": "Precios mostrados en {{currency}}"
+  }
+}

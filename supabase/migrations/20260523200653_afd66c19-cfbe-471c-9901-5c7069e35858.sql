@@ -1,0 +1,1 @@
+DELETE FROM public.service_addons; DELETE FROM public.service_pricing;

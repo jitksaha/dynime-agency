@@ -1,0 +1,55 @@
+# Dynime Inc.
+
+> Premium digital studio offering web development, digital marketing, e-commerce, UI/UX design and global business registration (US/UK company formation, addresses, payment gateways) for ambitious founders and enterprises.
+
+## Pages
+
+- [Home](/): Studio overview, featured services and case studies.
+- [About](/about): Senior multidisciplinary team, 500+ projects across 25+ countries.
+- [Services](/services): Full catalogue of design, engineering, marketing and formation services.
+- [Portfolio](/portfolio): Selected work and case studies.
+- [Blog](/blog): Essays on design, engineering and brand strategy.
+- [Shop](/shop): Digital products and packaged services.
+- [Contact](/contact): Project inquiries and partnerships.
+- [Careers](/careers): Open roles for senior designers, engineers and strategists.
+- [Track Order](/track): Look up order status by invoice or email.
+
+## Web development
+
+- [WordPress design](/wordpress-woocommerce)
+- [Website redesign](/website-redesign)
+- [WordPress maintenance](/maintenance-security)
+- [Speed optimization](/speed-optimization)
+- [WooCommerce](/wordpress-woocommerce)
+- [Shopify](/shopify)
+- [UI/UX design](/ui-ux-design)
+- [Custom web apps](/react-mern-apps)
+
+## Digital marketing
+
+- [Social media](/social-media)
+- [Facebook ads](/facebook-ads)
+- [Google ads](/google-ads)
+- [SEO](/seo)
+- [Brand strategy](/brand-strategy)
+- [Content marketing](/content-marketing)
+- [Email marketing](/email-marketing)
+- [Analytics](/analytics)
+
+## Business solutions
+
+- [USA company formation](/usa-business-formation)
+- [UK company formation](/uk-company)
+- [US business address](/us-address)
+- [UK business address](/uk-address)
+- [Payment gateway setup](/payment-gateway)
+- [Consulting](/consulting)
+
+## Legal
+
+- [Privacy](/privacy)
+- [Terms](/terms)
+- [Refund policy](/refund)
+- [Cookies](/cookies)
+- [AML / Compliance](/compliance)
+- [Acceptable use](/acceptable-use)

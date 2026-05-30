@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link id="app-favicon" rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-site-verification" content="x64R8Sjn4fXxXs0WkEwpLzWK2VrSbiyMB8i8RB21IkM" />
+
+    <!-- Font loading: preconnect + non-blocking stylesheet with font-display: swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@600;700&family=Caveat:wght@600;700&family=Allison&family=Pacifico&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@600;700&family=Caveat:wght@600;700&family=Allison&family=Pacifico&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@600;700&family=Caveat:wght@600;700&family=Allison&family=Pacifico&display=swap"
+      />
+    </noscript>
+
+    <title>Dynime Inc. — Web, SEO, AI & Formation Agency</title>
+    <meta name="description" content="Global digital agency for web development, e-commerce, SEO, paid ads, AI software and US/UK company formation. 500+ projects in 25+ countries.">
+    <meta name="keywords" content="Dynime Inc., digital agency, web development company, e-commerce development, SEO agency, performance marketing, AI software development, company formation, Shopify development, WordPress development, custom software, global web agency">
+    <meta name="author" content="Dynime Inc." />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://dynime.com/" />
+
+    <!-- Per-route canonical and og:url are injected by useSEO at runtime to avoid duplicate canonicals across pages. -->
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dynime Inc." />
+    <meta property="og:image" content="https://dynime.com/og-image.jpg">
+    <meta property="og:image:secure_url" content="https://dynime.com/og-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Dynime Inc. — Web Development, Digital Marketing & Business Solutions">
+
+    <!-- Dark-mode variant for clients that support multiple og:image entries -->
+    <meta property="og:image" content="https://dynime.com/og-image-dark.jpg">
+    <meta property="og:image:secure_url" content="https://dynime.com/og-image-dark.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Dynime Inc. — dark theme social preview">
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@dynime" />
+    <meta name="twitter:creator" content="@dynime" />
+    <meta name="twitter:domain" content="dynime.com" />
+    <meta name="twitter:url" content="https://dynime.com" />
+    <meta name="twitter:image" content="https://dynime.com/og-image.jpg">
+    <meta name="twitter:image:src" content="https://dynime.com/og-image.jpg">
+    <meta name="twitter:image:alt" content="Dynime Inc. — Web Development, Digital Marketing & Business Solutions">
+    <meta name="twitter:image:width" content="1200">
+    <meta name="twitter:image:height" content="630">
+
+    <meta property="og:title" content="Dynime Inc. — Web, SEO, AI & Formation Agency">
+    <meta name="twitter:title" content="Dynime Inc. — Web, SEO, AI & Formation Agency">
+    <meta property="og:description" content="Global digital agency for web, e-commerce, SEO, paid ads, AI software and US/UK company formation. 500+ projects in 25+ countries.">
+    <meta name="twitter:description" content="Global digital agency for web, e-commerce, SEO, paid ads, AI software and US/UK company formation. 500+ projects in 25+ countries.">
+    <meta property="og:url" content="https://dynime.com/" />
+
+    <!-- Organization + WebSite + BreadcrumbList JSON-LD are injected per-route by useSEO to avoid duplication. -->
+
+  </head>
+
+  <body>
+    <style>
+      /* Apple-style boot loader: brand logo + ultra-thin progress.
+         Background + logo flip with the app's theme (light/dark) so the
+         first paint matches the user's actual color scheme — no white flash
+         in dark mode and no black flash in light mode.
+         We don't pick a color here; main.tsx adds .light/.dark on <html>
+         BEFORE this paints, so we just inherit via the rules below. */
+      html.light #app-boot { background: #ffffff; }
+      html.dark  #app-boot { background: #000000; }
+      #app-boot {
+        position: fixed; inset: 0; z-index: 99999;
+        display: flex; align-items: center; justify-content: center;
+        background: #ffffff; /* fallback before theme class lands */
+        transition: opacity .55s ease, visibility .55s ease;
+        -webkit-font-smoothing: antialiased;
+      }
+      #app-boot .boot-stage {
+        display: flex; flex-direction: column; align-items: center; gap: 18px;
+        /* No entrance animation — logo + wordmark appear instantly. */
+      }
+      #app-boot .boot-logo {
+        width: 72px; height: 72px; object-fit: contain;
+        /* Instant render: no pulse / scale delay. */
+      }
+      #app-boot .boot-wordmark {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        line-height: 1;
+      }
+      #app-boot .boot-name {
+        font-family: 'Comfortaa', system-ui, -apple-system, Segoe UI, sans-serif;
+        font-weight: 700;
+        font-size: 28px;
+        letter-spacing: -0.01em;
+        color: #0a0a0a;
+      }
+      html.dark #app-boot .boot-name { color: #ffffff; }
+      #app-boot .boot-tagline {
+        font-family: 'UberMove', 'Uber Move', 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+        font-weight: 500;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: lowercase;
+        color: #6b7280;
+      }
+      html.dark #app-boot .boot-tagline { color: #9ca3af; }
+      /* Default: show light, hide dark (matches default theme in main.tsx).
+         Once <html> gets .light or .dark, the rules below take over. */
+      #app-boot .boot-logo-dark { display: none; }
+      html.light #app-boot .boot-logo-dark  { display: none; }
+      html.dark  #app-boot .boot-logo-light { display: none; }
+      html.dark  #app-boot .boot-logo-dark  { display: block; }
+      #app-boot .boot-track {
+        width: 160px; height: 2px; border-radius: 2px;
+        background: rgba(0,0,0,.08); overflow: hidden; margin-top: 6px;
+      }
+      html.dark #app-boot .boot-track { background: rgba(255,255,255,.12); }
+      #app-boot .boot-fill {
+        display: block; width: 40%; height: 100%; border-radius: 2px;
+        background: linear-gradient(90deg, transparent, #1919F5, transparent);
+        animation: bootSlide 1.3s cubic-bezier(.65,.05,.36,1) infinite;
+      }
+      #app-boot.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+      @keyframes bootSlide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(350%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-boot .boot-fill { animation: none !important; }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Plus+Jakarta+Sans:wght@500&display=swap">
+    <div id="app-boot" aria-hidden="true">
+      <div class="boot-stage">
+        <img class="boot-logo boot-logo-light" src="/dynime-icon-light.svg" alt="" width="72" height="72" decoding="async" fetchpriority="high" />
+        <img class="boot-logo boot-logo-dark"  src="/dynime-icon-dark.svg"  alt="" width="72" height="72" decoding="async" fetchpriority="high" />
+        <div class="boot-wordmark">
+          <span class="boot-name">dynime</span>
+          <span class="boot-tagline">complete business os</span>
+        </div>
+        <div class="boot-track"><span class="boot-fill"></span></div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      (function () {
+        var root = document.getElementById('root');
+        var boot = document.getElementById('app-boot');
+        if (!root || !boot) return;
+        var hidden = false;
+        function hide() {
+          if (hidden) return;
+          hidden = true;
+          boot.classList.add('is-hidden');
+          setTimeout(function () { boot && boot.parentNode && boot.parentNode.removeChild(boot); }, 700);
+        }
+        var mo = new MutationObserver(function () {
+          if (root.childElementCount > 0) { mo.disconnect(); hide(); }
+        });
+        mo.observe(root, { childList: true });
+        // Hard safety net so the loader never sticks.
+        setTimeout(hide, 6000);
+      })();
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

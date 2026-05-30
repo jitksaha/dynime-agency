@@ -1,0 +1,404 @@
+import Layout from "@/components/layout/Layout";
+import CountryEligibilityChecker from "@/components/contact/CountryEligibilityChecker";
+import { usePageSEO } from "@/hooks/use-page-seo";
+import { SEO_DEFAULTS } from "@/lib/seo-defaults";
+import ScrollReveal from "@/components/shared/ScrollReveal";
+import PageHero from "@/components/shared/PageHero";
+import ContactForm from "@/components/shared/ContactForm";
+import { useContactInfo } from "@/hooks/use-data";
+import { Mail, Phone, MapPin, MessageCircle, Sparkles, Clock, Globe2 } from "lucide-react";
+import SocialIcons from "@/components/shared/SocialIcons";
+
+const Contact = () => {
+  const { data: contacts } = useContactInfo();
+
+  const phones = contacts?.filter((c) => c.type === "phone") || [];
+  const emails = contacts?.filter((c) => c.type === "email") || [];
+  const addresses = contacts?.filter((c) => c.type === "address") || [];
+  const whatsapps =
+    contacts?.filter(
+      (c) => c.type === "whatsapp" || (c.type === "phone" && /whatsapp/i.test(c.label || "")),
+    ) || [];
+  const others = contacts?.filter((c) => !["phone", "email", "address", "social", "whatsapp"].includes(c.type)) || [];
+
+  usePageSEO("contact", {
+    title: SEO_DEFAULTS.contact.title,
+    description: SEO_DEFAULTS.contact.description,
+    keywords: SEO_DEFAULTS.contact.keywords,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        url: "https://dynime.com/contact",
+        name: "Contact Dynime Inc.",
+        description: SEO_DEFAULTS.contact.description,
+        mainEntity: {
+          "@type": "Organization",
+          name: "Dynime Inc.",
+          url: "https://dynime.com",
+          email: emails[0]?.value || "support@dynimetechnologies.com",
+          telephone: phones[0]?.value || undefined,
+          address: addresses[0]?.value
+            ? { "@type": "PostalAddress", streetAddress: addresses[0].value }
+            : undefined,
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              contactType: "customer support",
+              email: emails[0]?.value || "support@dynimetechnologies.com",
+              telephone: phones[0]?.value || undefined,
+              areaServed: "Worldwide",
+              availableLanguage: ["English", "Bengali"],
+            },
+            {
+              "@type": "ContactPoint",
+              contactType: "sales",
+              email: emails[0]?.value || "support@dynimetechnologies.com",
+              areaServed: "Worldwide",
+              availableLanguage: ["English", "Bengali"],
+            },
+          ],
+        },
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "@id": "https://dynime.com/#localbusiness",
+        name: "Dynime Inc.",
+        url: "https://dynime.com",
+        image: "https://dynime.com/og-image.jpg",
+        email: emails[0]?.value || "support@dynimetechnologies.com",
+        telephone: phones[0]?.value || undefined,
+        priceRange: "$$",
+        areaServed: "Worldwide",
+        address: addresses.map((a) => ({
+          "@type": "PostalAddress",
+          streetAddress: a.value,
+          name: a.label || undefined,
+        })),
+        location: addresses.map((a) => ({
+          "@type": "Place",
+          name: a.label || "Office",
+          address: { "@type": "PostalAddress", streetAddress: a.value },
+        })),
+      },
+    ],
+  });
+
+  const primaryEmail = emails[0]?.value || "support@dynimetechnologies.com";
+  const whatsappEntry =
+    contacts?.find((c) => c.type === "whatsapp") ||
+    phones.find((p) => /whatsapp/i.test(p.label));
+  const whatsappNumber = whatsappEntry?.value || "+16468840271";
+  const whatsappHref = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`;
+
+  const mapEmbedSrc = (value: string) =>
+    `https://www.google.com/maps?q=${encodeURIComponent(value)}&output=embed`;
+  const mapLinkHref = (value: string) =>
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}`;
+
+  return (
+    <Layout>
+      <PageHero
+        eyebrow="A reply within 24 hours — always"
+        eyebrowIcon={Sparkles}
+        title={
+          <>
+            Begin a <span className="gradient-text">Conversation</span> That Matters
+          </>
+        }
+        description="Share your vision, your ambition, or simply a question. Our team will return with a thoughtful response — and the first steps toward something remarkable."
+        primaryCta={{ label: "Send us a message", href: "#contact-form" }}
+        secondaryCta={{ label: "View our services", href: "/services" }}
+      />
+
+      {/* Quick contact tiles — fully dynamic from contact_info.
+          Multiple values of the same kind (emails, phones, whatsapps) are
+          stacked inside a single card. Addresses get their own dedicated
+          cards further down the page. */}
+      <section className="pb-10">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {emails.length > 0 && (
+              <ScrollReveal delay={0.05}>
+                <div className="group block h-full rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5 hover:border-primary/40 hover:bg-card transition-all hover:-translate-y-0.5">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Email</p>
+                  <ul className="space-y-2">
+                    {emails.map((e) => (
+                      <li key={e.id} className="flex items-center gap-2.5">
+                        <span className="relative inline-flex h-2 w-2 flex-shrink-0">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500/70 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgb(16_185_129_/_0.9)]" />
+                        </span>
+                        <a
+                          href={`mailto:${e.value}`}
+                          className="font-heading font-semibold text-sm text-foreground break-all hover:text-primary transition-colors"
+                        >
+                          {e.value}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </ScrollReveal>
+            )}
+
+            {phones.length > 0 && (
+              <ScrollReveal delay={0.1}>
+                <div className="group block h-full rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5 hover:border-primary/40 hover:bg-card transition-all hover:-translate-y-0.5">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Phone</p>
+                  <ul className="space-y-2">
+                    {phones.map((p) => (
+                      <li key={p.id} className="flex items-center gap-2.5">
+                        <span className="relative inline-flex h-2 w-2 flex-shrink-0">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500/70 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgb(16_185_129_/_0.9)]" />
+                        </span>
+                        <a
+                          href={`tel:${p.value.replace(/\s+/g, "")}`}
+                          className="font-heading font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                        >
+                          {p.value}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </ScrollReveal>
+            )}
+
+            {(whatsapps.length > 0 ? whatsapps : [{ id: "wa-default", value: "+16468840271", label: "" }]).length > 0 && (
+              <ScrollReveal delay={0.15}>
+                <div className="group block h-full rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5 hover:border-primary/40 hover:bg-card transition-all hover:-translate-y-0.5">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">WhatsApp</p>
+                  <ul className="space-y-2">
+                    {(whatsapps.length > 0
+                      ? whatsapps
+                      : [{ id: "wa-default", value: "+16468840271", label: "" } as typeof whatsapps[number]]
+                    ).map((w) => {
+                      const digits = w.value.replace(/[^0-9]/g, "");
+                      return (
+                        <li key={w.id} className="flex items-center gap-2.5">
+                          <span className="relative inline-flex h-2 w-2 flex-shrink-0">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500/70 opacity-75 animate-ping" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgb(16_185_129_/_0.9)]" />
+                          </span>
+                          <a
+                            href={`https://wa.me/${digits}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-heading font-semibold text-sm text-foreground hover:text-primary transition-colors"
+                          >
+                            {w.value}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </ScrollReveal>
+            )}
+
+            <ScrollReveal delay={0.2}>
+              <div className="h-full rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Hours</p>
+                <p className="font-heading font-semibold text-sm text-foreground">Mon–Sat · 9am–7pm</p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Form + Sidebar */}
+      <section id="contact-form" className="pb-14 md:pb-16 scroll-mt-24">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <ScrollReveal className="lg:col-span-3 lg:h-full">
+              <div className="relative h-full rounded-3xl border border-border/60 bg-card/70 backdrop-blur-md p-6 md:p-10 shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.4)] flex flex-col">
+                <div className="mb-6">
+                  <span className="text-primary text-xs font-semibold uppercase tracking-wider">Get a Quote</span>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mt-2">Send us a message</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Fill out the form and we'll respond within one business day.
+                  </p>
+                </div>
+                <ContactForm slug="contact" />
+              </div>
+            </ScrollReveal>
+
+            <div className="lg:col-span-2 space-y-5">
+              {addresses.length > 0 && (
+                <ScrollReveal delay={0.1}>
+                  <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="w-4 h-4 text-primary" />
+                      <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+                        Our Offices
+                      </h3>
+                    </div>
+                    <ul className="space-y-3">
+                      {addresses.map((a) => (
+                        <li key={a.id} className="flex gap-3 text-sm">
+                          <Globe2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium text-foreground">{a.label}</p>
+                            <p className="text-muted-foreground text-xs leading-relaxed">{a.value}</p>
+                            <a
+                              href={mapLinkHref(a.value)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary text-xs font-medium hover:underline inline-flex items-center gap-1 mt-1"
+                            >
+                              View on map →
+                            </a>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </ScrollReveal>
+              )}
+
+              {(emails.length > 1 || phones.length > 1 || others.length > 0) && (
+                <ScrollReveal delay={0.12}>
+                  <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-6">
+                    <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
+                      All channels
+                    </h3>
+                    <ul className="space-y-3 text-sm">
+                      {emails.map((e) => (
+                        <li key={e.id} className="flex gap-3">
+                          <Mail className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium text-foreground">{e.label}</p>
+                            <a href={`mailto:${e.value}`} className="text-muted-foreground text-xs hover:text-primary break-all">{e.value}</a>
+                          </div>
+                        </li>
+                      ))}
+                      {phones.map((p) => (
+                        <li key={p.id} className="flex gap-3">
+                          <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium text-foreground">{p.label}</p>
+                            <a href={`tel:${p.value.replace(/\s+/g, "")}`} className="text-muted-foreground text-xs hover:text-primary">{p.value}</a>
+                          </div>
+                        </li>
+                      ))}
+                      {others.map((o) => (
+                        <li key={o.id} className="flex gap-3">
+                          <Sparkles className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium text-foreground">{o.label}</p>
+                            <p className="text-muted-foreground text-xs break-all">{o.value}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </ScrollReveal>
+              )}
+
+              <ScrollReveal delay={0.15}>
+                <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card/60 to-card/30 p-6">
+                  <h3 className="font-heading font-semibold text-base mb-2">Prefer a quick chat?</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Book a free 15-min discovery call with our solutions team.
+                  </p>
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:brightness-110 transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat on WhatsApp
+                  </a>
+                </div>
+              </ScrollReveal>
+
+              <ScrollReveal delay={0.2}>
+                <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-6">
+                  <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">
+                    Follow us
+                  </h3>
+                  <SocialIcons size="md" variant="vibrant" />
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Country eligibility checker */}
+      <CountryEligibilityChecker />
+
+      {/* Locations on map — one card per address from the database */}
+      {addresses.length > 0 && (
+        <section className="pb-14 md:pb-16">
+          <div className="container-custom">
+            <div className="text-center max-w-2xl mx-auto mb-8">
+              <span className="text-primary text-xs font-semibold uppercase tracking-wider">Find us</span>
+              <h2 className="font-heading text-2xl md:text-3xl font-bold mt-2">Our Locations</h2>
+              <p className="text-sm text-muted-foreground mt-2">
+                Visit any of our offices around the world.
+              </p>
+            </div>
+            <div
+              className={`grid gap-6 ${
+                addresses.length === 1
+                  ? "grid-cols-1"
+                  : addresses.length === 2
+                  ? "md:grid-cols-2"
+                  : addresses.length === 3
+                  ? "md:grid-cols-2 lg:grid-cols-3"
+                  : "md:grid-cols-2 lg:grid-cols-4"
+              }`}
+            >
+              {addresses.map((a) => (
+                <ScrollReveal key={a.id}>
+                  <div className="rounded-3xl border border-border/60 bg-card/60 backdrop-blur-sm overflow-hidden shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.4)] h-full flex flex-col">
+                    <div className="p-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="font-heading text-lg font-bold text-foreground">{a.label}</h3>
+                        <p className="text-sm text-muted-foreground mt-1 flex items-start gap-2">
+                          <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <span>{a.value}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="aspect-[16/9] w-full mt-auto">
+                      <iframe
+                        title={`Map — ${a.label}`}
+                        src={mapEmbedSrc(a.value)}
+                        width="100%"
+                        height="100%"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        className="border-0 w-full h-full"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </Layout>
+  );
+};
+
+export default Contact;

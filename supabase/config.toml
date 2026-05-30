@@ -1,0 +1,20 @@
+project_id = "isweduliawwjqwhyvwhp"
+
+[functions.imap-poll]
+verify_jwt = false
+
+
+[functions.crm-automation-tick]
+verify_jwt = false
+
+[functions.flexpay-apply]
+verify_jwt = false
+
+[functions.companies-house-search]
+verify_jwt = false
+
+[functions.didit-create-session]
+verify_jwt = false
+
+[functions.didit-webhook]
+verify_jwt = false
