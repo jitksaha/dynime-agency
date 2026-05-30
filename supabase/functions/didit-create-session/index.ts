@@ -1,4 +1,4 @@
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { corsHeaders } from "./_cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 interface Body {
