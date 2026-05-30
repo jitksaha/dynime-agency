@@ -400,7 +400,7 @@ const Footer = () => {
       {/* ============================================================ */}
       {/*  B. TRUST STRIP                                              */}
       {/* ============================================================ */}
-      <Link to="/contact" aria-label="Go to contact page" className="block border-t border-border/60 dark:border-white/[0.06] hover:bg-muted/30 transition-colors">
+      <div className="block border-t border-border/60 dark:border-white/[0.06]">
         <div className="mx-auto max-w-[1200px] px-6 lg:px-8 py-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
             {contactChips.length > 0 ? (
@@ -409,15 +409,15 @@ const Footer = () => {
               ))
             ) : (
               <>
-                <TrustChip icon={Shield} title="Secure & Trusted" subtitle="SSL · GDPR Compliant" />
-                <TrustChip icon={Award} title="Award-winning" subtitle="500+ projects delivered" />
-                <TrustChip icon={Globe} title="Global Reach" subtitle="Clients in 25+ countries" />
-                <TrustChip icon={Heart} title="24/7 Support" subtitle="Real humans, fast replies" />
+                <TrustChip icon={Shield} title="Secure & Trusted" subtitle="SSL · GDPR Compliant" to="/contact" />
+                <TrustChip icon={Award} title="Award-winning" subtitle="500+ projects delivered" to="/portfolio" />
+                <TrustChip icon={Globe} title="Global Reach" subtitle="Clients in 25+ countries" to="/contact" />
+                <TrustChip icon={Heart} title="24/7 Support" subtitle="Real humans, fast replies" to="/contact" />
               </>
             )}
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* ============================================================ */}
       {/*  C. MAIN GRID — brand + nav + newsletter                     */}
