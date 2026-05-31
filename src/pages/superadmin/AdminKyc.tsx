@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
+import { apiGet, apiPost } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,43 +17,31 @@ const AdminKyc = () => {
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-kyc"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("kyc_verifications")
-        .select("*")
-        .order("updated_at", { ascending: false });
-      const rows = data ?? [];
-      const uids = Array.from(new Set(rows.map((r: any) => r.user_id))).filter(Boolean);
-      if (uids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,email,full_name").in("id", uids);
-        const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-        rows.forEach((r: any) => { r.profiles = map.get(r.user_id) ?? null; });
-      }
-      return rows;
-    },
+    queryFn: () => apiGet<any[]>("/verification/kyc"),
     refetchInterval: 20_000,
   });
 
   const filtered = rows.filter((r: any) =>
-    !search || [r.profiles?.email, r.profiles?.full_name, r.user_id, r.didit_session_id].some(
-      (v: string) => v?.toLowerCase().includes(search.toLowerCase())
-    )
+    !search || [r.profile?.email, r.profile?.full_name, r.user_id, r.didit_session_id].some(
+      (v: string) => v?.toLowerCase().includes(search.toLowerCase()),
+    ),
   );
 
   const triggerFor = async (userId: string) => {
     setBusyId(userId);
     try {
-      const { data, error } = await supabase.functions.invoke("didit-create-session", {
-        body: { type: "kyc", target_user_id: userId },
+      const data = await apiPost<{ verification_url?: string }>("/verification/session", {
+        type: "kyc",
+        target_user_id: userId,
+        frontend_origin: window.location.origin,
       });
-      if (error) throw error;
       if (data?.verification_url) {
         navigator.clipboard.writeText(data.verification_url);
         toast.success("New verification link created and copied");
       }
       qc.invalidateQueries({ queryKey: ["admin-kyc"] });
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed");
+      toast.error(e?.message ?? "Failed to create verification link");
     } finally { setBusyId(null); }
   };
 
@@ -86,8 +74,8 @@ const AdminKyc = () => {
                   {filtered.map((r: any) => (
                     <TableRow key={r.id}>
                       <TableCell>
-                        <div className="font-medium">{r.profiles?.full_name || r.profiles?.email || r.user_id.slice(0, 8)}</div>
-                        <div className="text-xs text-muted-foreground">{r.profiles?.email}</div>
+                        <div className="font-medium">{r.profile?.full_name || r.profile?.email || r.user_id.slice(0, 8)}</div>
+                        <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
                       </TableCell>
                       <TableCell><VerificationBadge status={r.status} /></TableCell>
                       <TableCell className="text-sm">{r.verification_date ? new Date(r.verification_date).toLocaleString() : "—"}</TableCell>

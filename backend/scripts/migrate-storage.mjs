@@ -30,13 +30,27 @@ const EXECUTE = process.argv.includes('--execute');
 
 function deriveSupabaseUrl() {
   if (process.env.SUPABASE_URL) return process.env.SUPABASE_URL.replace(/\/+$/, '');
+
+  // Try to extract project ref from a JWT service-role key (3-part base64url)
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
-  const payload = JSON.parse(
-    Buffer.from(key.split('.')[1], 'base64').toString('utf8'),
+  if (key && key.split('.').length === 3) {
+    try {
+      const payload = JSON.parse(
+        Buffer.from(key.split('.')[1], 'base64url').toString('utf8'),
+      );
+      if (payload.ref) return `https://${payload.ref}.supabase.co`;
+    } catch { /* fall through */ }
+  }
+
+  // Fall back to deriving the project ref from the pooler username
+  // (postgres.<ref>@aws-*.pooler.supabase.com)
+  const dbUrl = process.env.SUPABASE_DB_URL ?? process.env.DATABASE_URL ?? '';
+  const refMatch = dbUrl.match(/postgres\.([a-z0-9]+)[:@]/);
+  if (refMatch) return `https://${refMatch[1]}.supabase.co`;
+
+  throw new Error(
+    'Cannot derive Supabase project URL. Set SUPABASE_URL in env.',
   );
-  if (!payload.ref) throw new Error('Cannot derive project ref from service-role key');
-  return `https://${payload.ref}.supabase.co`;
 }
 
 function minioClient() {

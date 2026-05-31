@@ -12,8 +12,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Package, Eye, ExternalLink, Search, Filter, Plus, Download, Pencil,
   ShieldCheck, ShieldAlert, ShieldQuestion, ServerCog, RefreshCw, Clock, Trash2, X, Link2,
-  Receipt, Undo2,
+  Receipt, Undo2, Send, Loader2, Copy,
 } from "lucide-react";
+import { apiPost } from "@/lib/api";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
 const buildPublicInvoiceUrl = (ref: string) => `${PUBLIC_INVOICE_HOST}/invoice/${ref}`;
@@ -98,6 +99,9 @@ const AdminOrders = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [verifyType, setVerifyType] = useState<"kyc" | "kyb" | "aml">("kyc");
+  const [verifyBusy, setVerifyBusy] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<{ url: string; type: string } | null>(null);
   const qc = useQueryClient();
 
   useOrdersRealtime("admin-orders-list", [
@@ -482,7 +486,7 @@ const AdminOrders = () => {
       )}
 
       {/* Order Detail Dialog */}
-      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => { if (!open) { setSelectedOrder(null); setVerifyResult(null); } }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
@@ -546,6 +550,79 @@ const AdminOrders = () => {
               {selectedOrder.payment_verification && (
                 <VerificationDetails meta={selectedOrder.payment_verification as VerificationMeta} />
               )}
+
+              {/* Identity / business verification request */}
+              <div className="border rounded-lg p-3 space-y-2">
+                <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <Send className="h-4 w-4 text-primary" />Request Verification
+                </p>
+                {verifyResult ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      {verifyResult.type.toUpperCase()} link created. Copy and send to the customer.
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        readOnly
+                        value={verifyResult.url}
+                        className="flex-1 text-xs font-mono border rounded px-2 py-1 bg-muted/40 truncate"
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => { navigator.clipboard.writeText(verifyResult.url); toast.success("Link copied"); }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setVerifyResult(null)}>
+                      New request
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    <Select value={verifyType} onValueChange={(v) => setVerifyType(v as typeof verifyType)}>
+                      <SelectTrigger className="w-28 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="kyc">KYC</SelectItem>
+                        <SelectItem value="kyb">KYB</SelectItem>
+                        <SelectItem value="aml">AML</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={verifyBusy}
+                      onClick={async () => {
+                        setVerifyBusy(true);
+                        try {
+                          const { data: profileRow } = await supabase
+                            .from("profiles")
+                            .select("id")
+                            .eq("email", selectedOrder.customer_email)
+                            .maybeSingle();
+                          if (!profileRow?.id) throw new Error("Could not find user account for this email");
+                          const result = await apiPost<{ verification_url?: string }>("/verification/admin/request", {
+                            user_id: profileRow.id,
+                            type: verifyType,
+                            order_id: selectedOrder.id,
+                            frontend_origin: window.location.origin,
+                          });
+                          if (!result?.verification_url) throw new Error("No verification URL returned");
+                          setVerifyResult({ url: result.verification_url, type: verifyType });
+                        } catch (e: any) {
+                          toast.error(e?.message ?? "Failed to create verification link");
+                        } finally { setVerifyBusy(false); }
+                      }}
+                    >
+                      {verifyBusy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                      Send
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               <div className="flex gap-2">
                 <Select value={selectedOrder.status} onValueChange={(v) => updateStatus(selectedOrder.id, v)}>

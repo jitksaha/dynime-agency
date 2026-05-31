@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
+import { apiGet } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,26 +15,13 @@ const AdminKyb = () => {
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-kyb"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("kyb_verifications")
-        .select("*")
-        .order("updated_at", { ascending: false });
-      const rows = data ?? [];
-      const uids = Array.from(new Set(rows.map((r: any) => r.user_id))).filter(Boolean);
-      if (uids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,email,full_name").in("id", uids);
-        const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-        rows.forEach((r: any) => { r.profiles = map.get(r.user_id) ?? null; });
-      }
-      return rows;
-    },
+    queryFn: () => apiGet<any[]>("/verification/kyb"),
     refetchInterval: 20_000,
   });
 
   const filtered = rows.filter((r: any) =>
-    !search || [r.company_name, r.profiles?.email, r.registration_number, r.didit_session_id]
-      .some((v: string) => v?.toLowerCase().includes(search.toLowerCase()))
+    !search || [r.company_name, r.profile?.email, r.registration_number, r.didit_session_id]
+      .some((v: string) => v?.toLowerCase().includes(search.toLowerCase())),
   );
 
   return (
@@ -71,7 +58,7 @@ const AdminKyb = () => {
                         <div className="font-medium">{r.company_name}</div>
                         <div className="text-xs text-muted-foreground">{r.registration_number}</div>
                       </TableCell>
-                      <TableCell className="text-sm">{r.profiles?.email || r.user_id.slice(0, 8)}</TableCell>
+                      <TableCell className="text-sm">{r.profile?.email || r.user_id.slice(0, 8)}</TableCell>
                       <TableCell className="text-sm">{r.country || "—"}</TableCell>
                       <TableCell><VerificationBadge status={r.status} /></TableCell>
                       <TableCell className="text-sm">{r.verification_date ? new Date(r.verification_date).toLocaleString() : "—"}</TableCell>

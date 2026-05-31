@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import AccountLayout from "@/components/account/AccountLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -54,25 +55,14 @@ const AccountVerification = () => {
   });
 
   /* ── Queries ── */
-  const { data: kyc } = useQuery({
+  const { data: verificationStatus } = useQuery({
     enabled: !!user,
-    queryKey: ["kyc", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase.from("kyc_verifications").select("*").eq("user_id", user!.id).maybeSingle();
-      return data;
-    },
+    queryKey: ["verification-status", user?.id],
+    queryFn: () => apiGet<{ kyc: any; kyb: any[] }>("/verification/me"),
     refetchInterval: 10_000,
   });
-
-  const { data: kybs = [] } = useQuery({
-    enabled: !!user,
-    queryKey: ["kyb", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase.from("kyb_verifications").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
-      return data ?? [];
-    },
-    refetchInterval: 10_000,
-  });
+  const kyc = verificationStatus?.kyc ?? null;
+  const kybs: any[] = verificationStatus?.kyb ?? [];
 
   const { data: creditApps = [] } = useQuery({
     enabled: !!user,
@@ -88,19 +78,16 @@ const AccountVerification = () => {
     const kyc_done = searchParams.get("kyc_done");
     const kyb_done = searchParams.get("kyb_done");
     if (kyc_done || kyb_done) {
-      // Remove the params from the URL without a hard reload
       setSearchParams({}, { replace: true });
       toast.success("Verification submitted! Status will update shortly.");
-      // Give the webhook a few seconds then force-refetch
       setTimeout(() => {
-        qc.invalidateQueries({ queryKey: ["kyc"] });
-        qc.invalidateQueries({ queryKey: ["kyb"] });
+        qc.invalidateQueries({ queryKey: ["verification-status"] });
       }, 2000);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Popup lifecycle ── */
-  const startPopupPoll = (popup: Window, type: "kyc" | "kyb") => {
+  const startPopupPoll = (popup: Window, _type: "kyc" | "kyb") => {
     if (pollRef.current) clearInterval(pollRef.current);
     pollRef.current = setInterval(() => {
       if (!popup || popup.closed) {
@@ -108,8 +95,7 @@ const AccountVerification = () => {
         pollRef.current = null;
         setPopupType(null);
         popupRef.current = null;
-        qc.invalidateQueries({ queryKey: ["kyc"] });
-        qc.invalidateQueries({ queryKey: ["kyb"] });
+        qc.invalidateQueries({ queryKey: ["verification-status"] });
         toast.info("Checking verification status…");
       }
     }, 600);
@@ -120,19 +106,18 @@ const AccountVerification = () => {
     popupRef.current?.close();
     popupRef.current = null;
     setPopupType(null);
-    qc.invalidateQueries({ queryKey: ["kyc"] });
-    qc.invalidateQueries({ queryKey: ["kyb"] });
+    qc.invalidateQueries({ queryKey: ["verification-status"] });
   };
 
   /* ── Actions ── */
   const startKyc = async () => {
     setCreatingKyc(true);
     try {
-      const { data, error } = await supabase.functions.invoke("didit-create-session", {
-        body: { type: "kyc", frontend_origin: window.location.origin },
+      const data = await apiPost<{ verification_url?: string }>("/verification/session", {
+        type: "kyc",
+        frontend_origin: window.location.origin,
       });
-      if (error) throw error;
-      const url: string | undefined = data?.verification_url;
+      const url = data?.verification_url;
       if (!url) throw new Error("No verification URL returned");
 
       const popup = openCenteredPopup(url, "didit_kyc");
@@ -141,11 +126,10 @@ const AccountVerification = () => {
         setPopupType("kyc");
         startPopupPoll(popup, "kyc");
       } else {
-        // Popup blocked — fall back to new tab
         window.open(url, "_blank", "noopener,noreferrer");
         toast.info("Opened in a new tab — return here when done.");
       }
-      qc.invalidateQueries({ queryKey: ["kyc"] });
+      qc.invalidateQueries({ queryKey: ["verification-status"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to start verification");
     } finally { setCreatingKyc(false); }
@@ -155,11 +139,12 @@ const AccountVerification = () => {
     if (!kybForm.company_name.trim()) return toast.error("Company name is required");
     setCreatingKyb(true);
     try {
-      const { data, error } = await supabase.functions.invoke("didit-create-session", {
-        body: { type: "kyb", frontend_origin: window.location.origin, ...kybForm },
+      const data = await apiPost<{ verification_url?: string }>("/verification/session", {
+        type: "kyb",
+        frontend_origin: window.location.origin,
+        ...kybForm,
       });
-      if (error) throw error;
-      const url: string | undefined = data?.verification_url;
+      const url = data?.verification_url;
       if (!url) throw new Error("No verification URL returned");
 
       setKybOpen(false);
@@ -174,7 +159,7 @@ const AccountVerification = () => {
         window.open(url, "_blank", "noopener,noreferrer");
         toast.info("Opened in a new tab — return here when done.");
       }
-      qc.invalidateQueries({ queryKey: ["kyb"] });
+      qc.invalidateQueries({ queryKey: ["verification-status"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to start business verification");
     } finally { setCreatingKyb(false); }

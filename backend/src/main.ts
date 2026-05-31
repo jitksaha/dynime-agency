@@ -7,7 +7,10 @@ import compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    rawBody: true, // required for HMAC signature verification on webhook endpoints
+  });
 
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 

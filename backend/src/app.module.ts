@@ -11,6 +11,7 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { StorageModule } from './storage/storage.module';
+import { VerificationModule } from './verification/verification.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -32,6 +33,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     AuthModule,
     UsersModule,
     StorageModule,
+    VerificationModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
