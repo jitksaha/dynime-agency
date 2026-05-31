@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import AccountLayout from "@/components/account/AccountLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -68,8 +68,7 @@ const AccountVerification = () => {
     enabled: !!user,
     queryKey: ["credit-apps", user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from("credit_applications").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
-      return data ?? [];
+      return apiGet<any[]>("/credit/applications/mine");
     },
   });
 
@@ -173,8 +172,7 @@ const AccountVerification = () => {
     if (!amt || amt <= 0) return toast.error("Enter a valid requested limit");
     setCreatingCredit(true);
     try {
-      const { error } = await supabase.from("credit_applications").insert({
-        user_id: user!.id,
+      await apiPost("/credit/applications", {
         requested_limit: amt,
         business_revenue: creditForm.business_revenue ? parseFloat(creditForm.business_revenue) : null,
         business_age: creditForm.business_age || null,
@@ -182,7 +180,6 @@ const AccountVerification = () => {
         country: creditForm.country || null,
         notes: creditForm.notes || null,
       });
-      if (error) throw error;
       toast.success("Credit application submitted");
       setCreditOpen(false);
       setCreditForm({ requested_limit: "", business_revenue: "", business_age: "", industry: "", country: "", notes: "" });

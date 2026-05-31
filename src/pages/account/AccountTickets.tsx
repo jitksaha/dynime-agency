@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -54,32 +54,12 @@ const NewTicketDialog = ({ onCreated }: { onCreated: () => void }) => {
     }
     setSubmitting(true);
     try {
-      const fullName = (user.user_metadata as any)?.full_name as string | undefined;
-      const { data: ticket, error } = await supabase
-        .from("support_tickets")
-        .insert({
-          user_id: user.id,
-          customer_email: user.email,
-          customer_name: fullName || null,
-          subject: form.subject.trim(),
-          category: form.category,
-          priority: form.priority,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-
-      const { error: msgError } = await supabase
-        .from("ticket_messages")
-        .insert({
-          ticket_id: ticket.id,
-          sender_type: "customer",
-          sender_name: fullName || null,
-          sender_email: user.email,
-          message: form.message.trim(),
-        });
-      if (msgError) throw msgError;
-
+      const ticket = await apiPost<any>("/tickets", {
+        subject: form.subject.trim(),
+        category: form.category,
+        priority: form.priority,
+        message: form.message.trim(),
+      });
       toast.success(`Ticket ${ticket.ticket_number} created`);
       setForm({ subject: "", category: "general", priority: "normal", message: "" });
       setOpen(false);
@@ -167,15 +147,7 @@ const AccountTickets = () => {
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: ["account-tickets", user?.email],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("support_tickets")
-        .select("*")
-        .or(`user_id.eq.${user!.id},customer_email.eq.${user!.email}`)
-        .order("last_reply_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>("/tickets/mine"),
     enabled: !!user?.email,
   });
 

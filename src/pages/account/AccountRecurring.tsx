@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RotateCw, Calendar, AlertTriangle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPatch } from "@/lib/api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -17,13 +17,12 @@ const AccountRecurring = () => {
   const qc = useQueryClient();
 
   const toggleAutoRenew = async (id: string, value: boolean) => {
-    const { error } = await supabase.functions.invoke("cancel-recurring", {
-      body: { service_id: id, auto_renew: value },
-    });
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await apiPatch(`/subscriptions/${id}`, { auto_renew: value });
       toast.success(value ? "Auto-renew enabled" : "Auto-renew cancelled");
       qc.invalidateQueries({ queryKey: ["customer-services"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to update");
     }
   };
 

@@ -15,28 +15,6 @@ function authHeader(tok: string | null): Record<string, string> {
   return tok ? { Authorization: `Bearer ${tok}` } : {};
 }
 
-export async function apiPost<T = unknown>(
-  path: string,
-  body: unknown,
-): Promise<T> {
-  const tok = await token();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...authHeader(tok),
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(
-      (err as { message?: string }).message ?? `HTTP ${res.status}`,
-    );
-  }
-  return res.json() as Promise<T>;
-}
-
 export async function apiGet<T = unknown>(path: string): Promise<T> {
   const tok = await token();
   const res = await fetch(`${API_BASE}${path}`, {
@@ -44,9 +22,48 @@ export async function apiGet<T = unknown>(path: string): Promise<T> {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(
-      (err as { message?: string }).message ?? `HTTP ${res.status}`,
-    );
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function apiPost<T = unknown>(path: string, body: unknown): Promise<T> {
+  const tok = await token();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader(tok) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function apiPatch<T = unknown>(path: string, body: unknown): Promise<T> {
+  const tok = await token();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeader(tok) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function apiDelete<T = unknown>(path: string): Promise<T> {
+  const tok = await token();
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'DELETE',
+    headers: authHeader(tok),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: res.statusText }));
+    throw new Error((err as { message?: string }).message ?? `HTTP ${res.status}`);
   }
   return res.json() as Promise<T>;
 }

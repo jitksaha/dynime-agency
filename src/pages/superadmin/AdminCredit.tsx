@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
+import { apiGet, apiPatch } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,38 +11,23 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const AdminCredit = () => {
-  const { user } = useAuth();
   const qc = useQueryClient();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-credit"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("credit_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
-      const rows = data ?? [];
-      const uids = Array.from(new Set(rows.map((r: any) => r.user_id))).filter(Boolean);
-      if (uids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,email,full_name").in("id", uids);
-        const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-        rows.forEach((r: any) => { r.profiles = map.get(r.user_id) ?? null; });
-      }
-      return rows;
-    },
+    queryFn: () => apiGet<any[]>("/credit/applications"),
     refetchInterval: 20_000,
   });
 
   const setStatus = async (id: string, status: "approved" | "rejected" | "info_requested") => {
     setBusyId(id);
     try {
-      const { error } = await supabase.from("credit_applications").update({
-        status, admin_notes: notes[id] ?? null,
-        reviewed_by: user?.id ?? null, reviewed_at: new Date().toISOString(),
-      }).eq("id", id);
-      if (error) throw error;
+      await apiPatch(`/credit/applications/${id}`, {
+        status,
+        admin_notes: notes[id] ?? null,
+      });
       toast.success(`Marked as ${status}`);
       qc.invalidateQueries({ queryKey: ["admin-credit"] });
     } catch (e: any) {
@@ -79,7 +63,7 @@ const AdminCredit = () => {
                   {rows.map((r: any) => (
                     <TableRow key={r.id}>
                       <TableCell>
-                        <div className="font-medium text-sm">{r.profiles?.email || r.user_id.slice(0, 8)}</div>
+                        <div className="font-medium text-sm">{r.profiles?.email || r.user_id?.slice(0, 8)}</div>
                         <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</div>
                       </TableCell>
                       <TableCell className="font-medium">${Number(r.requested_limit).toLocaleString()}</TableCell>

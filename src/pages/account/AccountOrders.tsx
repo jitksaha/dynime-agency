@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -75,18 +76,16 @@ const AccountOrders = () => {
     }
     setClaiming(true);
     try {
-      const { data, error } = await supabase.rpc(
-        "claim_order_to_account" as never,
-        { _invoice: claimInvoice.trim(), _email: claimEmail.trim(), _phone: claimPhone.trim() } as never,
+      const res = await apiPost<{ invoice?: string; matches: number; matched_fields: string[] }>(
+        "/orders/claim",
+        { invoice: claimInvoice.trim(), email: claimEmail.trim(), phone: claimPhone.trim() },
       );
-      if (error) throw error;
-      const res = data as { ok?: boolean; invoice_number?: string; matches?: number; matched_fields?: string[] } | null;
-      if (!res?.ok) throw new Error("Could not claim this order");
+      if (!res?.matches) throw new Error("Could not claim this order");
       const fields = res.matched_fields || [];
       const labels = fields.map((f) => FIELD_LABEL[f] || f);
-      setClaimResult({ invoice: res.invoice_number, matches: res.matches || fields.length, matched_fields: fields });
+      setClaimResult({ invoice: res.invoice, matches: res.matches, matched_fields: fields });
       toast.success(
-        `Order ${res.invoice_number || ""} added — ${res.matches || fields.length}/3 fields matched`,
+        `Order ${res.invoice || ""} added — ${res.matches}/3 fields matched`,
         { description: labels.length ? `Matched: ${labels.join(", ")}` : undefined },
       );
       setClaimInvoice(""); setClaimPhone("");
@@ -111,15 +110,7 @@ const AccountOrders = () => {
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["account-orders-full", user?.email],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("customer_email", user!.email!)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>("/orders/mine"),
     enabled: !!user?.email,
   });
 
@@ -141,10 +132,7 @@ const AccountOrders = () => {
   const cancelOrder = async (orderId: string) => {
     setCancelling(true);
     try {
-      const { data, error } = await supabase.rpc("cancel_own_order" as never, { _order_id: orderId } as never);
-      if (error) throw error;
-      const res = data as { ok?: boolean } | null;
-      if (!res?.ok) throw new Error("Could not cancel this order");
+      await apiPost(`/orders/${orderId}/cancel`, {});
       toast.success("Order cancelled");
       setCancelTarget(null);
       qc.invalidateQueries({ queryKey: ["account-orders-full", user?.email] });

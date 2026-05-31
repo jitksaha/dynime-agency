@@ -12,6 +12,11 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { StorageModule } from './storage/storage.module';
 import { VerificationModule } from './verification/verification.module';
+import { OrdersModule } from './orders/orders.module';
+import { CreditModule } from './credit/credit.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -34,6 +39,11 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     UsersModule,
     StorageModule,
     VerificationModule,
+    OrdersModule,
+    CreditModule,
+    SubscriptionsModule,
+    TicketsModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

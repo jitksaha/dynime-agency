@@ -14,7 +14,7 @@ import {
   ShieldCheck, ShieldAlert, ShieldQuestion, ServerCog, RefreshCw, Clock, Trash2, X, Link2,
   Receipt, Undo2, Send, Loader2, Copy,
 } from "lucide-react";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiPatch } from "@/lib/api";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
 const buildPublicInvoiceUrl = (ref: string) => `${PUBLIC_INVOICE_HOST}/invoice/${ref}`;
@@ -118,9 +118,10 @@ const AdminOrders = () => {
   });
 
   const updateStatus = async (orderId: string, newStatus: string) => {
-    const { error } = await supabase.from("orders").update({ status: newStatus }).eq("id", orderId);
-    if (error) {
-      toast.error("Failed to update status");
+    try {
+      await apiPatch(`/orders/${orderId}`, { status: newStatus });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to update status");
       return;
     }
     toast.success(`Order status updated to ${newStatus}`);

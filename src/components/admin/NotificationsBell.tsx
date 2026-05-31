@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Inbox, MessageSquare, LifeBuoy, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { apiPatch } from "@/lib/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -144,10 +145,10 @@ const NotificationsBell = () => {
 
     await Promise.all([
       subIds.length
-        ? supabase.from("form_submissions").update({ status: "read" }).in("id", subIds)
+        ? apiPatch("/notifications/submissions/read", { ids: subIds })
         : Promise.resolve(),
       chatIds.length
-        ? supabase.from("chat_messages").update({ is_read: true }).in("id", chatIds)
+        ? apiPatch("/notifications/chats/read", { ids: chatIds })
         : Promise.resolve(),
     ]);
     fetchAll();

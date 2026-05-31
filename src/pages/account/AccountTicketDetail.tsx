@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -32,29 +32,13 @@ const AccountTicketDetail = () => {
 
   const { data: ticket, isLoading } = useQuery({
     queryKey: ["ticket", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("support_tickets")
-        .select("*")
-        .eq("id", id!)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => apiGet<any>(`/tickets/${id}`),
     enabled: !!id,
   });
 
   const { data: messages } = useQuery({
     queryKey: ["ticket-messages", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("ticket_messages")
-        .select("*")
-        .eq("ticket_id", id!)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>(`/tickets/${id}/messages`),
     enabled: !!id,
     refetchInterval: 15000,
   });
@@ -67,15 +51,7 @@ const AccountTicketDetail = () => {
     if (!reply.trim() || !user || !ticket) return;
     setSending(true);
     try {
-      const fullName = (user.user_metadata as any)?.full_name as string | undefined;
-      const { error } = await supabase.from("ticket_messages").insert({
-        ticket_id: ticket.id,
-        sender_type: "customer",
-        sender_name: fullName || null,
-        sender_email: user.email,
-        message: reply.trim(),
-      });
-      if (error) throw error;
+      await apiPost(`/tickets/${ticket.id}/messages`, { message: reply.trim() });
       setReply("");
       qc.invalidateQueries({ queryKey: ["ticket-messages", id] });
       qc.invalidateQueries({ queryKey: ["ticket", id] });
@@ -88,13 +64,13 @@ const AccountTicketDetail = () => {
 
   const setStatus = async (status: string) => {
     if (!ticket) return;
-    const { error } = await supabase
-      .from("support_tickets")
-      .update({ status })
-      .eq("id", ticket.id);
-    if (error) return toast.error(error.message);
-    toast.success(`Ticket ${status}`);
-    qc.invalidateQueries({ queryKey: ["ticket", id] });
+    try {
+      await apiPatch(`/tickets/${ticket.id}/status`, { status });
+      toast.success(`Ticket ${status}`);
+      qc.invalidateQueries({ queryKey: ["ticket", id] });
+    } catch (e: any) {
+      toast.error(e?.message || "Failed");
+    }
   };
 
   if (isLoading) {

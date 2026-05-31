@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { useAuth } from "./use-auth";
 
 export type CustomerService = {
@@ -32,15 +32,11 @@ export const useCustomerServices = (filter?: { category?: string; type?: "recurr
   return useQuery({
     queryKey: ["customer-services", user?.email, filter],
     queryFn: async () => {
-      let q = supabase
-        .from("customer_services")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (filter?.category) q = q.eq("category", filter.category);
-      if (filter?.type) q = q.eq("type", filter.type);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data || []) as unknown as CustomerService[];
+      const params = new URLSearchParams();
+      if (filter?.category) params.set("category", filter.category);
+      if (filter?.type) params.set("type", filter.type);
+      const qs = params.toString() ? `?${params.toString()}` : "";
+      return apiGet<CustomerService[]>(`/subscriptions/mine${qs}`);
     },
     enabled: !!user?.email,
   });

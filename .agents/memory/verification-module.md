@@ -28,13 +28,13 @@ description: NestJS Modules 4/5/6 — KYC, KYB, AML via Didit API. Covers servic
 - All events logged to `didit_webhook_events`; status changes propagated to `kyc_verifications` or `kyb_verifications`.
 
 ## Frontend integration
-- `src/lib/api.ts` — `apiGet`/`apiPost` auto-attach Supabase session Bearer token.
-- `AccountVerification.tsx` — replaced `supabase.functions.invoke("didit-create-session")` with `apiPost("/verification/session")`. KYC+KYB data from single `apiGet("/verification/me")` query key `["verification-status", userId]`. Credit applications still on Supabase.
-- `AdminKyc.tsx` / `AdminKyb.tsx` — replaced supabase queries with `apiGet("/verification/kyc|kyb")`. Profile field is now `r.profile` (not `r.profiles`).
-- `AdminOrders.tsx` — "Request Verification" panel in order detail dialog: look up user_id via `profiles.email`, then `apiPost("/verification/admin/request")`. Returns verification URL to copy/send.
+- `src/lib/api.ts` — `apiGet`/`apiPost`/`apiPatch`/`apiDelete` auto-attach Supabase session Bearer token.
+- `AccountVerification.tsx` — KYC+KYB via NestJS; credit_applications via `/credit/applications` NestJS endpoint.
+- `AdminKyc.tsx` / `AdminKyb.tsx` — replaced supabase queries with `apiGet("/verification/kyc|kyb")`. Profile field is `r.profile`.
+- `AdminOrders.tsx` — "Request Verification" panel; status updates via `apiPatch("/orders/:id")`.
 
 ## Admin roles
-`ADMIN_ROLES = ['super_admin', 'manager', 'admin']` — defined in `VerificationService`.
+`ADMIN_ROLES = ['super_admin', 'manager', 'admin']` — defined in VerificationService.
 
 ## Prisma models used
 `kyc_verifications` (user_id unique), `kyb_verifications` (multiple per user), `didit_webhook_events` — all in `@@schema("public")`.

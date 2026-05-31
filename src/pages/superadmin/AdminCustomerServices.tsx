@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPatch } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,35 +63,33 @@ const AdminCustomerServices = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-customer-services", cat],
-    queryFn: async () => {
-      let q = supabase
-        .from("customer_services")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (cat !== "all") q = q.eq("category", cat);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data || []) as Svc[];
+    queryFn: () => {
+      const qs = cat !== "all" ? `?category=${cat}` : "";
+      return apiGet<Svc[]>(`/subscriptions${qs}`);
     },
   });
 
   const update = async (id: string, patch: any) => {
-    const { error } = await supabase.from("customer_services").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await apiPatch(`/subscriptions/${id}`, patch);
       toast.success("Service updated");
       qc.invalidateQueries({ queryKey: ["admin-customer-services"] });
       setEditing(null);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to update");
     }
   };
 
   const quickStatus = async (id: string, status: string) => {
     const patch: any = { status };
     if (status === "delivered") patch.delivered_at = new Date().toISOString();
-    const { error } = await supabase.from("customer_services").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await apiPatch(`/subscriptions/${id}`, patch);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed");
+      return;
+    }
+    {
       toast.success(`Marked ${status.replace("_", " ")}`);
       qc.invalidateQueries({ queryKey: ["admin-customer-services"] });
     }
