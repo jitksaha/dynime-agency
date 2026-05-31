@@ -8,6 +8,8 @@ import { validateEnv } from './config/env.validation';
 import { winstonConfig } from './config/logger.config';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -26,6 +28,8 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     ]),
     PrismaModule,
     HealthModule,
+    AuthModule,
+    UsersModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
