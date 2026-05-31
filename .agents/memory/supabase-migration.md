@@ -25,3 +25,10 @@ description: Environment quirks and decisions for migrating this repo off Supaba
 
 ## Module order (each = own approval checkpoint)
 Users → Auth → Storage → KYC → KYB → AML → Orders → Transactions → Notifications → Admin → (Payments, FlexPay, CRM, HR/ATS, SEO, Email).
+
+## Auth module (Module 2) — durable decisions
+- Refresh tokens: server-side, opaque random, stored as SHA-256 hash; family-based rotation with reuse/theft detection (replaying a revoked token revokes whole family).
+- **Rotation must be atomic**: claim the old row with a compare-and-set (`updateMany WHERE id=? AND revoked_at IS NULL`) BEFORE minting the successor. A zero-count claim means concurrent rotation → treat as reuse and revoke the family. **Why:** read-then-update let two concurrent refreshes both mint valid descendants, defeating single-use/theft detection.
+- Auth error messages must be generic externally (banned users get "Invalid email or password", not "Account is suspended") to avoid account-status enumeration; record the real reason only in app_auth_audit_log.
+- Password-reset token: stateless JWT signed with `accessSecret + ':' + encrypted_password` so it self-invalidates once the password changes; reset revokes all sessions. Raw token is logged ONLY when env !== 'production' (real delivery deferred to Email module). Never log it in prod.
+- Audit coverage must include failures: token_refresh_failure (unknown/expired), token_reuse_detected, password_reset_request with {found:true|false}.
