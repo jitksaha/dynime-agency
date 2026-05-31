@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -9,20 +10,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import VerificationBadge from "@/components/verification/VerificationBadge";
-import { ShieldCheck, Building2, CreditCard, ExternalLink, Copy, Loader2 } from "lucide-react";
+import { ShieldCheck, Building2, CreditCard, Copy, Loader2, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 
+/* ─── Popup helpers ────────────────────────────────────────────────── */
+const openCenteredPopup = (url: string, name: string) => {
+  const w = 540;
+  const h = 720;
+  const left = Math.max(0, Math.round((window.screen.width - w) / 2));
+  const top = Math.max(0, Math.round((window.screen.height - h) / 2));
+  return window.open(
+    url, name,
+    `width=${w},height=${h},left=${left},top=${top},scrollbars=yes,resizable=yes`,
+  );
+};
+
+/* ─── Component ─────────────────────────────────────────────────────── */
 const AccountVerification = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [creatingKyc, setCreatingKyc] = useState(false);
   const [creatingKyb, setCreatingKyb] = useState(false);
   const [creatingCredit, setCreatingCredit] = useState(false);
   const [kybOpen, setKybOpen] = useState(false);
   const [creditOpen, setCreditOpen] = useState(false);
+
+  const [popupType, setPopupType] = useState<"kyc" | "kyb" | null>(null);
+  const popupRef = useRef<Window | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [kybForm, setKybForm] = useState({
     company_name: "", registration_number: "", country: "", business_type: "",
@@ -33,6 +53,7 @@ const AccountVerification = () => {
     industry: "", country: "", notes: "",
   });
 
+  /* ── Queries ── */
   const { data: kyc } = useQuery({
     enabled: !!user,
     queryKey: ["kyc", user?.id],
@@ -40,7 +61,7 @@ const AccountVerification = () => {
       const { data } = await supabase.from("kyc_verifications").select("*").eq("user_id", user!.id).maybeSingle();
       return data;
     },
-    refetchInterval: 15_000,
+    refetchInterval: 10_000,
   });
 
   const { data: kybs = [] } = useQuery({
@@ -50,7 +71,7 @@ const AccountVerification = () => {
       const { data } = await supabase.from("kyb_verifications").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
       return data ?? [];
     },
-    refetchInterval: 15_000,
+    refetchInterval: 10_000,
   });
 
   const { data: creditApps = [] } = useQuery({
@@ -62,18 +83,67 @@ const AccountVerification = () => {
     },
   });
 
-  const kybVerified = useMemo(() => kybs.some((k: any) => k.status === "verified"), [kybs]);
-  const kycVerified = kyc?.status === "verified";
-  const creditEligible = kycVerified && kybVerified;
+  /* ── Handle Didit redirect-back params (?kyc_done=1 / ?kyb_done=1) ── */
+  useEffect(() => {
+    const kyc_done = searchParams.get("kyc_done");
+    const kyb_done = searchParams.get("kyb_done");
+    if (kyc_done || kyb_done) {
+      // Remove the params from the URL without a hard reload
+      setSearchParams({}, { replace: true });
+      toast.success("Verification submitted! Status will update shortly.");
+      // Give the webhook a few seconds then force-refetch
+      setTimeout(() => {
+        qc.invalidateQueries({ queryKey: ["kyc"] });
+        qc.invalidateQueries({ queryKey: ["kyb"] });
+      }, 2000);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ── Popup lifecycle ── */
+  const startPopupPoll = (popup: Window, type: "kyc" | "kyb") => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(pollRef.current!);
+        pollRef.current = null;
+        setPopupType(null);
+        popupRef.current = null;
+        qc.invalidateQueries({ queryKey: ["kyc"] });
+        qc.invalidateQueries({ queryKey: ["kyb"] });
+        toast.info("Checking verification status…");
+      }
+    }, 600);
+  };
+
+  const dismissPopup = () => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    popupRef.current?.close();
+    popupRef.current = null;
+    setPopupType(null);
+    qc.invalidateQueries({ queryKey: ["kyc"] });
+    qc.invalidateQueries({ queryKey: ["kyb"] });
+  };
+
+  /* ── Actions ── */
   const startKyc = async () => {
     setCreatingKyc(true);
     try {
-      const { data, error } = await supabase.functions.invoke("didit-create-session", { body: { type: "kyc" } });
+      const { data, error } = await supabase.functions.invoke("didit-create-session", {
+        body: { type: "kyc", frontend_origin: window.location.origin },
+      });
       if (error) throw error;
-      if (data?.verification_url) {
-        window.open(data.verification_url, "_blank", "noopener,noreferrer");
-        toast.success("Verification link opened in a new tab");
+      const url: string | undefined = data?.verification_url;
+      if (!url) throw new Error("No verification URL returned");
+
+      const popup = openCenteredPopup(url, "didit_kyc");
+      if (popup) {
+        popupRef.current = popup;
+        setPopupType("kyc");
+        startPopupPoll(popup, "kyc");
+      } else {
+        // Popup blocked — fall back to new tab
+        window.open(url, "_blank", "noopener,noreferrer");
+        toast.info("Opened in a new tab — return here when done.");
       }
       qc.invalidateQueries({ queryKey: ["kyc"] });
     } catch (e: any) {
@@ -86,15 +156,24 @@ const AccountVerification = () => {
     setCreatingKyb(true);
     try {
       const { data, error } = await supabase.functions.invoke("didit-create-session", {
-        body: { type: "kyb", ...kybForm },
+        body: { type: "kyb", frontend_origin: window.location.origin, ...kybForm },
       });
       if (error) throw error;
-      if (data?.verification_url) {
-        window.open(data.verification_url, "_blank", "noopener,noreferrer");
-        toast.success("Business verification link opened");
-      }
+      const url: string | undefined = data?.verification_url;
+      if (!url) throw new Error("No verification URL returned");
+
       setKybOpen(false);
       setKybForm({ company_name: "", registration_number: "", country: "", business_type: "", website: "", tax_id: "" });
+
+      const popup = openCenteredPopup(url, "didit_kyb");
+      if (popup) {
+        popupRef.current = popup;
+        setPopupType("kyb");
+        startPopupPoll(popup, "kyb");
+      } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+        toast.info("Opened in a new tab — return here when done.");
+      }
       qc.invalidateQueries({ queryKey: ["kyb"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to start business verification");
@@ -102,7 +181,9 @@ const AccountVerification = () => {
   };
 
   const submitCredit = async () => {
-    if (!creditEligible) return toast.error("Both KYC and KYB must be verified first");
+    const kybVerified = kybs.some((k: any) => k.status === "verified");
+    const kycVerified = kyc?.status === "verified";
+    if (!kycVerified || !kybVerified) return toast.error("Both KYC and KYB must be verified first");
     const amt = parseFloat(creditForm.requested_limit);
     if (!amt || amt <= 0) return toast.error("Enter a valid requested limit");
     setCreatingCredit(true);
@@ -132,28 +213,74 @@ const AccountVerification = () => {
     toast.success("Link copied");
   };
 
+  /* ── Derived state ── */
+  const kybVerified = useMemo(() => kybs.some((k: any) => k.status === "verified"), [kybs]);
+  const kycVerified = kyc?.status === "verified";
+  const creditEligible = kycVerified && kybVerified;
+
   return (
     <AccountLayout title="Verification Center" description="Verify your identity and business to unlock services like payment processing, credit limits and virtual cards.">
+
+      {/* ── In-app verification overlay (shown while popup is open) ── */}
+      {popupType && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-background border rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 ring-2 ring-primary/20 mx-auto">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">
+                {popupType === "kyc" ? "Identity Verification" : "Business Verification"} in progress
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1.5">
+                Complete the steps in the popup window. Keep this page open — your status will update automatically when done.
+              </p>
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" size="sm" onClick={() => popupRef.current?.focus()}>
+                Back to popup
+              </Button>
+              <Button variant="ghost" size="sm" onClick={dismissPopup}>
+                <X className="h-4 w-4 mr-1" /> Dismiss
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* KYC */}
+        {/* ── KYC ── */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" />Identity (KYC)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />Identity (KYC)
+              </CardTitle>
               <VerificationBadge status={kyc?.status} />
             </div>
             <CardDescription>Personal identity verification powered by Didit.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {kyc?.verification_date && (
-              <div className="text-sm text-muted-foreground">Verified on {new Date(kyc.verification_date).toLocaleDateString()}</div>
+            {kyc?.status === "verified" && (
+              <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                {kyc.verification_date
+                  ? `Verified on ${new Date(kyc.verification_date).toLocaleDateString()}`
+                  : "Identity verified"}
+              </div>
             )}
             {kyc?.verification_url && kyc.status !== "verified" && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={kyc.verification_url} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4 mr-1" />Resume</a>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const popup = openCenteredPopup(kyc.verification_url, "didit_kyc");
+                  if (popup) { popupRef.current = popup; setPopupType("kyc"); startPopupPoll(popup, "kyc"); }
+                  else window.open(kyc.verification_url, "_blank", "noopener,noreferrer");
+                }}>
+                  Resume
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => copy(kyc.verification_url)}><Copy className="h-4 w-4 mr-1" />Copy link</Button>
+                <Button variant="ghost" size="sm" onClick={() => copy(kyc.verification_url)}>
+                  <Copy className="h-4 w-4 mr-1" />Copy link
+                </Button>
               </div>
             )}
             {kyc?.status !== "verified" && (
@@ -165,11 +292,13 @@ const AccountVerification = () => {
           </CardContent>
         </Card>
 
-        {/* KYB */}
+        {/* ── KYB ── */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5 text-primary" />Business (KYB)</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />Business (KYB)
+              </CardTitle>
               <VerificationBadge status={kybVerified ? "verified" : (kybs[0]?.status ?? "not_submitted")} />
             </div>
             <CardDescription>Verify your company for payment services and credit access.</CardDescription>
@@ -186,7 +315,9 @@ const AccountVerification = () => {
                     <div className="flex items-center gap-2">
                       <VerificationBadge status={k.status} />
                       {k.verification_url && k.status !== "verified" && (
-                        <Button size="icon" variant="ghost" onClick={() => copy(k.verification_url)}><Copy className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => copy(k.verification_url)}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -206,7 +337,7 @@ const AccountVerification = () => {
                     <div><Label>Country</Label><Input value={kybForm.country} onChange={e => setKybForm({ ...kybForm, country: e.target.value })} /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><Label>Business Type</Label><Input placeholder="LLC, Corp..." value={kybForm.business_type} onChange={e => setKybForm({ ...kybForm, business_type: e.target.value })} /></div>
+                    <div><Label>Business Type</Label><Input placeholder="LLC, Corp…" value={kybForm.business_type} onChange={e => setKybForm({ ...kybForm, business_type: e.target.value })} /></div>
                     <div><Label>Tax ID (optional)</Label><Input value={kybForm.tax_id} onChange={e => setKybForm({ ...kybForm, tax_id: e.target.value })} /></div>
                   </div>
                   <div><Label>Website</Label><Input value={kybForm.website} onChange={e => setKybForm({ ...kybForm, website: e.target.value })} /></div>
@@ -222,14 +353,16 @@ const AccountVerification = () => {
           </CardContent>
         </Card>
 
-        {/* Credit */}
+        {/* ── Credit Eligibility ── */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary" />Credit Eligibility</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />Credit Eligibility
+              </CardTitle>
               <VerificationBadge status={creditEligible ? "verified" : "pending"} />
             </div>
-            <CardDescription>Unlock credit limit & virtual cards by verifying both KYC and KYB.</CardDescription>
+            <CardDescription>Unlock credit limit &amp; virtual cards by verifying both KYC and KYB.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <ul className="text-sm space-y-1.5">
@@ -268,6 +401,7 @@ const AccountVerification = () => {
         </Card>
       </div>
 
+      {/* ── Credit Applications ── */}
       {creditApps.length > 0 && (
         <Card className="mt-6">
           <CardHeader><CardTitle>Your Credit Applications</CardTitle></CardHeader>

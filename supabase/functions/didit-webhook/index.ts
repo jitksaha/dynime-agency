@@ -1,13 +1,26 @@
 import { corsHeaders } from "./_cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Accepted Didit event types
+// Didit event types that carry a status we should persist.
+// We intentionally accept broadly — Didit's event names vary by plan/version.
 const ACCEPTED_EVENTS = new Set([
   "status.updated",
   "user.status.updated",
   "user.data.updated",
   "business.status.updated",
   "business.data.updated",
+  // Additional variants observed in the wild
+  "session.approved",
+  "session.declined",
+  "session.completed",
+  "session.status.updated",
+  "verification.approved",
+  "verification.declined",
+  "verification.completed",
+  "kyc.approved",
+  "kyc.declined",
+  "kyb.approved",
+  "kyb.declined",
 ]);
 
 const mapStatus = (s: string | undefined | null): string => {

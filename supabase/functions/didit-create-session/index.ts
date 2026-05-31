@@ -5,6 +5,8 @@ interface Body {
   type: "kyc" | "kyb";
   /** Optional: admin can create for another user */
   target_user_id?: string;
+  /** Frontend origin so the callback can redirect back to the app */
+  frontend_origin?: string;
   /** KYB only */
   company_name?: string;
   registration_number?: string;
@@ -63,8 +65,13 @@ Deno.serve(async (req) => {
       targetEmail = u?.user?.email ?? targetEmail;
     }
 
-    // Call Didit to create session
-    const callback = `${url.replace("supabase.co", "supabase.co")}/functions/v1/didit-webhook`;
+    // Call Didit to create session.
+    // callback = browser redirect URL after the user finishes verification.
+    // The server-side webhook is configured separately in the Didit dashboard.
+    const origin = body.frontend_origin || "https://dynime.com";
+    const callbackPath = body.type === "kyb" ? "/account/verification?kyb_done=1" : "/account/verification?kyc_done=1";
+    const callback = `${origin}${callbackPath}`;
+
     const diditPayload: Record<string, unknown> = {
       workflow_id: workflowId,
       vendor_data: targetUserId,
