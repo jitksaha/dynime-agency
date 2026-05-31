@@ -17,13 +17,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException
+    // Multer (multipart upload) errors are plain Errors, not HttpExceptions.
+    const multer = this.asMulterError(exception);
+
+    const status = multer
+      ? multer.status
+      : exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const payload =
-      exception instanceof HttpException
+    const payload = multer
+      ? { message: multer.message }
+      : exception instanceof HttpException
         ? exception.getResponse()
         : { message: 'Internal server error' };
 
@@ -40,5 +45,28 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       ...(typeof payload === 'object' ? payload : { message: payload }),
     });
+  }
+
+  private asMulterError(
+    exception: unknown,
+  ): { status: number; message: string } | null {
+    if (
+      typeof exception === 'object' &&
+      exception !== null &&
+      (exception as { name?: string }).name === 'MulterError'
+    ) {
+      const code = (exception as { code?: string }).code;
+      if (code === 'LIMIT_FILE_SIZE') {
+        return {
+          status: HttpStatus.PAYLOAD_TOO_LARGE,
+          message: 'Uploaded file exceeds the maximum allowed size',
+        };
+      }
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: (exception as { message?: string }).message ?? 'Upload error',
+      };
+    }
+    return null;
   }
 }
