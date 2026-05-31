@@ -1,0 +1,232 @@
+For Dynime, I would give Replit a very detailed system migration prompt.
+
+Before Migration, Make Sure These Are Preserved
+
+Must keep:
+
+All frontend UI/UX exactly as it is
+Existing database records
+User accounts
+KYC/KYB records
+Transaction history
+Orders
+Exchange records
+Uploaded files and documents
+Roles and permissions
+Admin panel
+API integrations
+Business logic
+SEO structure
+URLs and routing
+
+Must remove dependency on:
+
+Supabase Auth
+Supabase Database
+Supabase Storage
+Supabase Edge Functions
+Supabase Realtime
+Supabase Client SDK
+Replit Migration Prompt
+You are a senior software architect and migration engineer.
+
+Analyze the entire codebase and perform a complete migration from Supabase architecture to a fully independent production-grade backend while preserving all current functionality and frontend design.
+
+CRITICAL REQUIREMENTS:
+
+1. FRONTEND PRESERVATION
+- Do not modify existing UI design.
+- Do not change layouts, branding, pages, routes, styling, animations, or user experience.
+- All frontend functionality must continue working exactly as before.
+
+2. DATABASE MIGRATION
+Current Database:
+- Supabase PostgreSQL
+
+Target Database:
+- Standard PostgreSQL
+
+Requirements:
+- Extract all schemas.
+- Preserve all tables.
+- Preserve relationships.
+- Preserve indexes.
+- Preserve triggers where applicable.
+- Generate migration scripts.
+- Ensure no data loss.
+
+3. AUTHENTICATION SYSTEM
+Replace Supabase Auth with:
+
+Backend:
+- JWT Authentication
+- Refresh Tokens
+- Role Based Access Control (RBAC)
+- Session Management
+
+Features:
+- Registration
+- Login
+- Logout
+- Password Reset
+- Email Verification
+- User Roles
+- Admin Roles
+
+Maintain compatibility with all existing users.
+
+4. STORAGE SYSTEM
+Replace Supabase Storage.
+
+Implement:
+- Local Storage Layer
+or
+- S3 Compatible Storage
+
+Requirements:
+- Secure uploads
+- Secure downloads
+- Private file access
+- Public file access
+- Signed URLs
+- File validation
+- Malware-safe upload workflow
+
+Supported Files:
+- Images
+- PDFs
+- Identity Documents
+- Business Documents
+
+5. EDGE FUNCTIONS MIGRATION
+
+Analyze every Supabase Edge Function.
+
+Convert them into:
+
+- Express.js APIs
+or
+- Fastify APIs
+
+Requirements:
+- Preserve all business logic
+- Preserve all API responses
+- Preserve all validation rules
+- Preserve webhook functionality
+
+6. BACKEND ARCHITECTURE
+
+Build production-ready backend using:
+
+Node.js
+TypeScript
+Express.js
+PostgreSQL
+
+Architecture:
+
+/backend
+/controllers
+/routes
+/services
+/middleware
+/models
+/utils
+/jobs
+/storage
+/config
+
+Requirements:
+- Clean architecture
+- Service layer pattern
+- Dependency injection where appropriate
+- Environment-based configuration
+
+7. SECURITY IMPROVEMENTS
+
+Implement:
+
+- Rate Limiting
+- Helmet
+- CSRF Protection
+- Input Validation
+- SQL Injection Protection
+- XSS Protection
+- Audit Logging
+- Secure JWT Handling
+- IP Tracking
+- Activity Logs
+
+8. PERFORMANCE
+
+Implement:
+
+- Database indexing
+- Query optimization
+- Caching layer
+- Background jobs
+- Queue processing
+- Lazy loading
+- Pagination
+
+9. ADMIN SYSTEM
+
+Preserve:
+
+- Admin dashboard
+- User management
+- Transaction management
+- Verification management
+- Reporting tools
+
+10. FILES AND DATA
+
+IMPORTANT:
+- Never delete existing data.
+- Never delete existing tables.
+- Never delete user accounts.
+- Never delete uploaded documents.
+- Create backup scripts before migration.
+
+11. OUTPUT REQUIRED
+
+Generate:
+
+A. Full migration plan
+B. Database migration scripts
+C. New backend architecture
+D. API documentation
+E. Security audit report
+F. Supabase dependency removal checklist
+G. Deployment guide for Hostinger VPS
+H. Rollback strategy
+
+12. FINAL OBJECTIVE
+
+After migration:
+
+- Zero dependency on Supabase
+- Fully self-hosted backend
+- PostgreSQL database
+- Independent authentication system
+- Independent storage system
+- Production-ready architecture
+- Scalable to 100,000+ users
+- Maintain all existing functionality
+- Maintain all existing data
+- Maintain all frontend design
+Additional Recommendation
+
+Since Dynime is becoming an exchange, verification, and digital services platform, I would use:
+
+Node.js + TypeScript
+PostgreSQL
+Prisma ORM
+Redis
+JWT Auth
+MinIO (S3-compatible storage)
+BullMQ queues
+Docker
+Nginx
+
+This will be significantly more scalable and controllable than a Lovable + Supabase architecture while keeping your existing frontend intact.

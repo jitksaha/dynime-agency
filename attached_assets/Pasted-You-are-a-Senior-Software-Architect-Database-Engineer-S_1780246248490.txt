@@ -1,0 +1,489 @@
+You are a Senior Software Architect, Database Engineer, Security Engineer, and Migration Specialist.
+
+Your task is to analyze the entire project and perform a complete migration from a Lovable + Supabase architecture to a production-grade NestJS + PostgreSQL architecture.
+
+CRITICAL RULE:
+
+DO NOT MODIFY OR REMOVE ANY EXISTING FUNCTIONALITY.
+
+DO NOT DELETE ANY DATA.
+
+DO NOT CHANGE THE FRONTEND DESIGN.
+
+DO NOT BREAK EXISTING USER FLOWS.
+
+The final system must look and behave exactly the same from the user's perspective.
+
+==================================================
+PHASE 1: PROJECT AUDIT
+==================================================
+
+Before changing anything:
+
+1. Scan the entire codebase.
+2. Generate a complete dependency report.
+3. Identify every Supabase dependency.
+4. Identify:
+   - Tables
+   - Views
+   - Functions
+   - Triggers
+   - RPC calls
+   - Storage buckets
+   - Auth flows
+   - Realtime subscriptions
+   - Edge Functions
+   - Webhooks
+   - Environment variables
+
+Generate a Migration Audit Report.
+
+Do not start migration until the report is completed.
+
+==================================================
+PHASE 2: DATABASE ANALYSIS
+==================================================
+
+Analyze the current Supabase PostgreSQL database.
+
+Document:
+
+- All tables
+- All columns
+- Data types
+- Foreign keys
+- Constraints
+- Indexes
+- Policies
+- Triggers
+- Functions
+
+Generate:
+
+- Database schema documentation
+- ERD diagram structure
+- Migration SQL scripts
+
+Requirements:
+
+- Preserve all relationships
+- Preserve all data
+- Preserve IDs
+- Preserve timestamps
+- Preserve references
+
+==================================================
+PHASE 3: DATABASE MIGRATION
+==================================================
+
+Source:
+Supabase PostgreSQL
+
+Target:
+Standard PostgreSQL
+
+Requirements:
+
+- No data loss
+- No table loss
+- No record deletion
+- No schema corruption
+
+Create:
+
+1. Backup scripts
+2. Migration scripts
+3. Verification scripts
+4. Rollback scripts
+
+Migration must be reversible.
+
+==================================================
+PHASE 4: NESTJS BACKEND ARCHITECTURE
+==================================================
+
+Replace Supabase backend dependencies with NestJS.
+
+Required Stack:
+
+- NestJS
+- TypeScript
+- PostgreSQL
+- Prisma ORM
+
+Create enterprise architecture:
+
+src/
+
+auth/
+users/
+roles/
+permissions/
+
+kyc/
+kyb/
+aml/
+
+exchange/
+orders/
+transactions/
+wallets/
+
+storage/
+uploads/
+
+notifications/
+emails/
+
+audit/
+logs/
+
+admin/
+
+webhooks/
+
+common/
+
+database/
+
+config/
+
+health/
+
+Requirements:
+
+- Clean Architecture
+- Dependency Injection
+- Service Layer Pattern
+- Repository Pattern
+- DTO Validation
+- Modular Structure
+
+==================================================
+PHASE 5: AUTHENTICATION MIGRATION
+==================================================
+
+Replace Supabase Auth completely.
+
+Implement:
+
+- JWT Authentication
+- Refresh Tokens
+- Secure Sessions
+- Email Verification
+- Password Reset
+- Role Based Access Control
+
+Roles:
+
+- Super Admin
+- Admin
+- Manager
+- Staff
+- User
+
+Requirements:
+
+- Existing users remain active
+- Existing accounts preserved
+- Existing permissions preserved
+
+Do not force users to create new accounts.
+
+==================================================
+PHASE 6: STORAGE MIGRATION
+==================================================
+
+Replace Supabase Storage.
+
+Use:
+
+MinIO (S3 Compatible)
+
+Requirements:
+
+- Preserve existing files
+- Preserve existing URLs where possible
+- Support large uploads
+- Support secure downloads
+
+Supported:
+
+- Images
+- PDFs
+- KYC Documents
+- KYB Documents
+- Verification Files
+- Business Documents
+
+Implement:
+
+- Signed URLs
+- Private Buckets
+- Public Buckets
+- File Validation
+- Upload Security
+
+==================================================
+PHASE 7: EDGE FUNCTION MIGRATION
+==================================================
+
+Analyze every Supabase Edge Function.
+
+Convert into:
+
+NestJS
+
+For every function create:
+
+- Module
+- Controller
+- Service
+- DTO
+- Validation
+- Error Handling
+
+Requirements:
+
+- Preserve business logic
+- Preserve response formats
+- Preserve integrations
+- Preserve webhooks
+
+==================================================
+PHASE 8: DYNIME BUSINESS MODULES
+==================================================
+
+Verify and preserve:
+
+- User Registration
+- Login
+- Dashboard
+- KYC
+- KYB
+- AML
+- Exchange Services
+- Order Management
+- Transaction History
+- Wallet Operations
+- Verification Systems
+- Admin Panel
+- User Management
+- Notifications
+- Email System
+- Reporting
+- Audit Logs
+- Document Uploads
+- API Integrations
+
+All modules must continue working.
+
+==================================================
+PHASE 9: SECURITY HARDENING
+==================================================
+
+Implement:
+
+- Helmet
+- Rate Limiting
+- CSRF Protection
+- XSS Protection
+- SQL Injection Protection
+- Input Validation
+- Request Validation
+- Audit Logging
+- Activity Tracking
+- IP Tracking
+- Secure Headers
+
+Use:
+
+NestJS Guards
+NestJS Interceptors
+NestJS Middleware
+
+==================================================
+PHASE 10: PERFORMANCE OPTIMIZATION
+==================================================
+
+Implement:
+
+- Query Optimization
+- Database Indexing
+- Redis Cache
+- Pagination
+- Lazy Loading
+- Compression
+- Background Jobs
+
+Use:
+
+Redis
+BullMQ
+
+Requirements:
+
+- Scalable architecture
+- Fast response times
+- Support 100,000+ users
+
+==================================================
+PHASE 11: API DOCUMENTATION
+==================================================
+
+Generate:
+
+Swagger Documentation
+
+Include:
+
+- Authentication APIs
+- User APIs
+- Admin APIs
+- KYC APIs
+- KYB APIs
+- Exchange APIs
+- Storage APIs
+- Notification APIs
+
+==================================================
+PHASE 12: LOGGING & MONITORING
+==================================================
+
+Implement:
+
+- Winston Logger
+- Error Tracking
+- Request Logging
+- Audit Logs
+- System Health Checks
+
+Create:
+
+/health endpoint
+
+==================================================
+PHASE 13: FRONTEND COMPATIBILITY
+==================================================
+
+Frontend MUST remain unchanged.
+
+Requirements:
+
+- Same UI
+- Same Components
+- Same Pages
+- Same Styling
+- Same Routing
+- Same Branding
+
+Update API integrations only when required.
+
+Users must not notice visual changes.
+
+==================================================
+PHASE 14: TESTING
+==================================================
+
+Create:
+
+- Unit Tests
+- Integration Tests
+- Authentication Tests
+- Storage Tests
+- API Tests
+- Database Tests
+
+Generate:
+
+Migration Verification Report
+
+Do not mark migration complete until tests pass.
+
+==================================================
+PHASE 15: DEPLOYMENT
+==================================================
+
+Prepare production deployment.
+
+Stack:
+
+- Docker
+- Docker Compose
+- Nginx
+- PostgreSQL
+- Redis
+- MinIO
+- NestJS
+
+Generate:
+
+- Docker Configuration
+- Environment Templates
+- Deployment Guide
+- Backup Strategy
+- Disaster Recovery Plan
+
+==================================================
+PHASE 16: SUPABASE REMOVAL
+==================================================
+
+After all testing passes:
+
+Remove:
+
+- Supabase Auth
+- Supabase Storage
+- Supabase Edge Functions
+- Supabase SDK
+- Supabase Realtime
+
+Only remove after replacement systems are fully functional.
+
+==================================================
+FINAL DELIVERABLES
+==================================================
+
+Provide:
+
+1. Migration Audit Report
+2. Database Documentation
+3. Prisma Schema
+4. NestJS Architecture
+5. Security Audit Report
+6. API Documentation
+7. Testing Report
+8. Deployment Guide
+9. Rollback Guide
+10. Supabase Dependency Removal Checklist
+
+FINAL GOAL:
+
+Transform the project from Lovable + Supabase into a fully independent enterprise-grade platform using:
+
+Frontend:
+- Existing React Frontend (unchanged)
+
+Backend:
+- NestJS
+- TypeScript
+
+Database:
+- PostgreSQL
+
+ORM:
+- Prisma
+
+Storage:
+- MinIO
+
+Cache:
+- Redis
+
+Queue:
+- BullMQ
+
+Deployment:
+- Docker + Nginx
+
+Maintain 100% functionality, 100% data integrity, and 100% frontend compatibility while eliminating all Supabase dependencies.
