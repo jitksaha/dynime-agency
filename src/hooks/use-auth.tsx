@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+import {
+  exchangeForNestTokens,
+  clearNestTokens,
+  getNestRefreshToken,
+} from "@/lib/nestjs-tokens";
 
 interface AuthContextType {
   user: User | null;
@@ -48,10 +53,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  /** Exchange the current Supabase session token for NestJS tokens (fire-and-forget). */
+  const ensureNestTokens = (accessToken: string) => {
+    if (!getNestRefreshToken()) {
+      exchangeForNestTokens(accessToken).catch(() => {});
+    }
+  };
+
   useEffect(() => {
     let cancelled = false;
-    // Track the userId that onAuthStateChange already started fetching a role
-    // for, so the getSession fallback IIFE doesn't fire a duplicate fetch.
     let roleFetchedForUserId: string | null = null;
 
     const { data: subData } = supabase.auth.onAuthStateChange((event, s) => {
@@ -61,21 +71,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         roleFetchedForUserId = s.user.id;
         setRoleLoading(true);
         setTimeout(() => fetchRoleFromSupabase(s.user.id), 0);
-        // When the user's verified email changes, mirror it into profiles
-        // so order auto-linking uses the new address.
-        if (event === "USER_UPDATED" || event === "SIGNED_IN") {
+
+        // On sign-in / token refresh: exchange Supabase JWT for NestJS tokens.
+        if (
+          event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "USER_UPDATED"
+        ) {
+          if (s.access_token) ensureNestTokens(s.access_token);
+
+          // Mirror email changes into profiles for order auto-linking.
           setTimeout(() => {
             supabase.rpc("sync_my_profile_email").then(({ data, error }) => {
               if (!error && (data as any)?.relinked_orders > 0) {
-                // Soft notify via console; UI-level toast handled by caller pages.
                 console.info("[auth] relinked orders:", (data as any).relinked_orders);
               }
             });
           }, 0);
         }
+
+        if (event === "SIGNED_OUT") {
+          clearNestTokens();
+        }
       } else {
         setUserRole(null);
         setRoleLoading(false);
+        clearNestTokens();
       }
       setLoading(false);
     });
@@ -85,10 +106,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (cancelled) return;
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      // Only fetch the role here if onAuthStateChange hasn't already started
-      // fetching it for this user (avoids two concurrent DB reads on startup).
-      if (data.session?.user && data.session.user.id !== roleFetchedForUserId) {
-        await fetchRoleFromSupabase(data.session.user.id);
+      if (data.session?.user) {
+        if (data.session.user.id !== roleFetchedForUserId) {
+          await fetchRoleFromSupabase(data.session.user.id);
+        }
+        // Exchange on startup if we don't already have NestJS tokens.
+        if (data.session.access_token) ensureNestTokens(data.session.access_token);
       }
       setLoading(false);
     })();
@@ -102,9 +125,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
+    // NestJS tokens obtained via the SIGNED_IN onAuthStateChange event above.
   };
 
   const signOut = async () => {
+    // Revoke NestJS tokens before clearing Supabase session.
+    const refreshToken = getNestRefreshToken();
+    if (refreshToken) {
+      try {
+        const { data: s } = await supabase.auth.getSession();
+        const tok = s.session?.access_token;
+        if (tok) {
+          await fetch("/api/v1/auth/logout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${tok}`,
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+        }
+      } catch {
+        // Best-effort; proceed with sign-out regardless.
+      }
+    }
+    clearNestTokens();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

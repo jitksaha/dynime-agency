@@ -301,6 +301,21 @@ export class AuthService {
     };
   }
 
+  async exchangeToken(
+    user: { id: string; email: string | null; roles: string[] },
+    ctx?: RequestContext,
+  ) {
+    const tokenUser: TokenUser = { id: user.id, email: user.email, roles: user.roles };
+    const issued = await this.tokens.issueNewSession(tokenUser, ctx);
+    await this.audit({
+      event: 'token_exchange',
+      userId: user.id,
+      ctx,
+      tokenId: issued.refreshTokenId,
+    });
+    return { ...issued.response, user: this.toPublicUser(tokenUser) };
+  }
+
   async resetPassword(dto: ResetPasswordDto, ctx?: RequestContext) {
     const decoded = this.jwt.decode(dto.token) as
       | { sub?: string; type?: string }

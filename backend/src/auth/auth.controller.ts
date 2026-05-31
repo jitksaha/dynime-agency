@@ -12,8 +12,10 @@ import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { FlexAuthGuard } from './guards/flex-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { RequestContext } from './token.service';
+import { AuthUser } from './types/auth-user';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshDto } from './dto/refresh.dto';
@@ -90,6 +92,15 @@ export class AuthController {
   @ApiBearerAuth()
   session(@CurrentUser() user: unknown) {
     return { user };
+  }
+
+  @Post('exchange')
+  @Version('1')
+  @HttpCode(200)
+  @UseGuards(FlexAuthGuard)
+  @ApiBearerAuth()
+  exchange(@CurrentUser() user: AuthUser, @Req() req: Request) {
+    return this.auth.exchangeToken(user, context(req));
   }
 
   @Post('password/reset-request')
