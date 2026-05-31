@@ -1,0 +1,1 @@
+- [Supabase → NestJS migration (Dynime)](supabase-migration.md) — strangler-fig off Supabase; IPv6/pooler quirk, prisma engines fix, multiSchema, migration-boundary, per-module approval gates.

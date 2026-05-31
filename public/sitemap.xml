@@ -325,6 +325,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://dynime.com/blog/dynime-os-replaces-10-tools</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://dynime.com/blog/wordpress-speed-under-2s</loc>
     <lastmod>2026-05-28</lastmod>
     <changefreq>monthly</changefreq>
@@ -332,12 +338,6 @@
   </url>
   <url>
     <loc>https://dynime.com/blog/software-qa-automation-strategy</loc>
-    <lastmod>2026-05-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/dynime-os-replaces-10-tools</loc>
     <lastmod>2026-05-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -415,6 +415,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://dynime.com/blog/category/product</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://dynime.com/blog/category/development</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
@@ -422,12 +428,6 @@
   </url>
   <url>
     <loc>https://dynime.com/blog/category/software</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/category/product</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -452,6 +452,36 @@
   </url>
   <url>
     <loc>https://dynime.com/blog/category/compliance</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/blog/tag/dynime-os</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/blog/tag/saas</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/blog/tag/smb</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/blog/tag/hrm</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/blog/tag/crm</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -500,36 +530,6 @@
   </url>
   <url>
     <loc>https://dynime.com/blog/tag/automation</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/tag/dynime-os</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/tag/saas</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/tag/smb</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/tag/hrm</loc>
-    <lastmod>2026-05-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://dynime.com/blog/tag/crm</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
