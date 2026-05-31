@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import {
   Users, FileText, Printer, Mail, Trash2, Plus, Pencil, Send,
   Loader2, Briefcase, Banknote, ScrollText, ReceiptText, FileSignature,
@@ -59,12 +59,8 @@ const useCareerTitles = () => {
   const { data } = useQuery({
     queryKey: ["careers-titles-for-hr"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("careers")
-        .select("title, department")
-        .order("title", { ascending: true });
-      if (error) throw error;
-      return (data || []) as { title: string; department: string | null }[];
+      const data = await apiGet<{ title: string; department: string | null }[]>('/hrm/careers');
+      return data || [];
     },
     staleTime: 60_000,
   });
@@ -426,13 +422,8 @@ const buildMemberFromEmployee = (emp: Partial<Employee>, prev?: TeamMember): Tea
 
 const writePublicTeamFromEmployee = async (emp: Partial<Employee>, options: { showOnPublic: boolean }) => {
   // 1. Read current home_sections.
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("value")
-    .eq("key", HOME_SECTIONS_KEY)
-    .maybeSingle();
-  if (error) throw error;
-  let raw: unknown = data?.value ?? null;
+  const result = await apiGet<{ value: any } | null>(`/hrm/site-settings?key=${HOME_SECTIONS_KEY}`);
+  let raw: unknown = result?.value ?? null;
   while (typeof raw === "string") {
     try { raw = JSON.parse(raw); } catch { break; }
   }
@@ -457,10 +448,7 @@ const writePublicTeamFromEmployee = async (emp: Partial<Employee>, options: { sh
   }
 
   const next = { ...sections, team: { ...team, items } };
-  const { error: upErr } = await supabase
-    .from("site_settings")
-    .upsert([{ key: HOME_SECTIONS_KEY, value: JSON.stringify(next) }], { onConflict: "key" });
-  if (upErr) throw upErr;
+  await apiPost('/hrm/site-settings', { key: HOME_SECTIONS_KEY, value: JSON.stringify(next) });
 };
 
 const EmployeeDialog = ({
@@ -556,11 +544,9 @@ const EmployeeDialog = ({
         allowances: f.allowances || [],
         deductions: f.deductions || [],
       };
-      const q = initial?.id
-        ? supabase.from("employees").update(payload as any).eq("id", initial.id)
-        : supabase.from("employees").insert(payload as any).select().single();
-      const { data: savedRow, error } = await q;
-      if (error) throw error;
+      const savedRow = initial?.id
+        ? await apiPatch(`/hrm/employees/${initial.id}`, payload as any)
+        : await apiPost('/hrm/employees', payload as any);
 
       // Mirror the public-facing fields onto site_settings.home_sections.team
       // so the About page updates instantly — no second screen needed.
@@ -865,11 +851,9 @@ const InlineEmployeeEditor = ({
         allowances: f.allowances || [],
         deductions: f.deductions || [],
       };
-      const q = initial?.id
-        ? supabase.from("employees").update(payload as any).eq("id", initial.id)
-        : supabase.from("employees").insert(payload as any).select().single();
-      const { data: savedRow, error } = await q;
-      if (error) throw error;
+      const savedRow = initial?.id
+        ? await apiPatch(`/hrm/employees/${initial.id}`, payload as any)
+        : await apiPost('/hrm/employees', payload as any);
       try {
         const fullEmp: Partial<Employee> = { ...f, ...payload, id: initial?.id || (savedRow as any)?.id } as Partial<Employee>;
         await writePublicTeamFromEmployee(fullEmp, { showOnPublic });
@@ -1102,19 +1086,17 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
 
   const remove = async (id: string) => {
     if (!confirm("Delete this employee and all their HR documents?")) return;
-    const { error } = await supabase.from("employees").delete().eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("Employee deleted"); refetch(); }
+    try {
+      await apiDelete(`/hrm/employees/${id}`);
+      toast.success("Employee deleted"); refetch();
+    } catch (e: any) { toast.error(e.message); }
   };
 
   const togglePause = async (e: Employee, paused: boolean) => {
     const prevMeta = (e.metadata || {}) as Record<string, unknown>;
     const nextMeta = { ...prevMeta, paused, public_status: paused ? "paused" : (prevMeta.public_status || "active") };
-    const { error } = await supabase
-      .from("employees")
-      .update({ metadata: nextMeta as Json })
-      .eq("id", e.id);
-    if (error) { toast.error(error.message); return; }
+    try { await apiPatch(`/hrm/employees/${e.id}`, { metadata: nextMeta as Json }); }
+    catch (err: any) { toast.error(err.message); return; }
     try {
       await writePublicTeamFromEmployee({ ...e, metadata: nextMeta }, { showOnPublic: !paused });
     } catch (err) { console.warn("Public team writeback failed", err); }
@@ -1130,11 +1112,7 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
   const loadCardIds = useCallback(async () => {
     const keys = employees.map((e) => e.team_member_key || e.id).filter(Boolean);
     if (keys.length === 0) { setCardIds({}); return; }
-    const { data } = await supabase
-      .from("id_card_assignments")
-      .select("subject_key, card_id")
-      .eq("kind", "EMP")
-      .in("subject_key", keys);
+    const data = await apiGet<any[]>(`/hrm/id-card-assignments?kind=EMP&keys=${keys.join(',')}`);
     const map: Record<string, string> = {};
     for (const row of data || []) {
       map[(row as any).subject_key] = (row as any).card_id;
@@ -1152,12 +1130,7 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
     setIssuingId(e.id);
     try {
       const subjectKey = e.team_member_key || e.id;
-      const { data: existing } = await supabase
-        .from("id_card_assignments")
-        .select("card_id")
-        .eq("kind", "EMP")
-        .eq("subject_key", subjectKey)
-        .maybeSingle();
+      const existing = await apiGet<any>(`/hrm/id-card-assignments/single?kind=EMP&subject_key=${subjectKey}`);
       setConfirmIssue({
         employee: e,
         existingCardId: (existing?.card_id as string | undefined) || null,
@@ -1548,22 +1521,19 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
     if (!employee) { toast.error("Pick an employee first"); return; }
     sendEmail ? setEmailing(true) : setIssuing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("issue-hr-document", {
-        body: {
-          employee_id: employee.id,
-          kind,
-          issue_date: issueDate && issueDate.trim() !== "" ? issueDate : todayStr(),
-          effective_date: effectiveDate && String(effectiveDate).trim() !== "" ? effectiveDate : null,
-          period_month: kind === "payslip" ? periodMonth : null,
-          body_text: bodyText || null,
-          clauses: kind === "agreement" ? clauses : null,
-          validity_date: kind === "offer" ? (validityDate && validityDate.trim() !== "" ? validityDate : null) : null,
-          extra_earnings: kind === "payslip" ? extraEarnings : null,
-          extra_deductions: kind === "payslip" ? extraDeductions : null,
-          send_email: sendEmail,
-        },
+      const data = await apiPost('/hrm/issue-document', {
+        employee_id: employee.id,
+        kind,
+        issue_date: issueDate && issueDate.trim() !== "" ? issueDate : todayStr(),
+        effective_date: effectiveDate && String(effectiveDate).trim() !== "" ? effectiveDate : null,
+        period_month: kind === "payslip" ? periodMonth : null,
+        body_text: bodyText || null,
+        clauses: kind === "agreement" ? clauses : null,
+        validity_date: kind === "offer" ? (validityDate && validityDate.trim() !== "" ? validityDate : null) : null,
+        extra_earnings: kind === "payslip" ? extraEarnings : null,
+        extra_deductions: kind === "payslip" ? extraDeductions : null,
+        send_email: sendEmail,
       });
-      if (error) throw error;
       toast.success(sendEmail
         ? `Document ${data?.doc_number || ""} issued and emailed`
         : `Document ${data?.doc_number || ""} saved`);
@@ -1911,10 +1881,7 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
     const emp = empById[doc.employee_id];
     if (!emp?.email) { toast.error("Employee has no email"); return; }
     try {
-      const { error } = await supabase.functions.invoke("issue-hr-document", {
-        body: { resend_document_id: doc.id },
-      });
-      if (error) throw error;
+      await apiPost('/hrm/issue-document', { resend_document_id: doc.id });
       toast.success("Resent");
       refetch();
     } catch (e: any) {
@@ -1924,9 +1891,10 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
 
   const voidDoc = async (id: string) => {
     if (!confirm("Mark this document as void?")) return;
-    const { error } = await supabase.from("hr_documents").update({ status: "void" }).eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("Marked void"); refetch(); }
+    try {
+      await apiPatch(`/hrm/hr-documents/${id}/void`, {});
+      toast.success("Marked void"); refetch();
+    } catch (e: any) { toast.error(e.message); }
   };
 
   return (
@@ -1985,13 +1953,8 @@ export default function AdminHR() {
   const { data: publicTeamItems = EMPTY_TEAM_MEMBERS, isFetched: publicTeamFetched } = useQuery({
     queryKey: ["hr-public-team-source"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "home_sections")
-        .maybeSingle();
-      if (error) throw error;
-      let raw: unknown = data?.value ?? null;
+      const result = await apiGet<{ value: any } | null>('/hrm/site-settings?key=home_sections');
+      let raw: unknown = result?.value ?? null;
       while (typeof raw === "string") {
         try { raw = JSON.parse(raw); } catch { break; }
       }
@@ -2005,11 +1968,7 @@ export default function AdminHR() {
   const { data: employees = [], refetch: refetchEmployees } = useQuery({
     queryKey: ["hr-employees"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("employees")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const data = await apiGet<any[]>('/hrm/employees');
       return (data || []) as unknown as Employee[];
     },
   });
@@ -2017,12 +1976,7 @@ export default function AdminHR() {
   const { data: docs = [] } = useQuery({
     queryKey: ["hr-documents"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("hr_documents")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
+      const data = await apiGet<any[]>('/hrm/hr-documents');
       return (data || []) as unknown as HRDoc[];
     },
   });
@@ -2038,12 +1992,12 @@ export default function AdminHR() {
     if (!publicTeamFetched) return;
     setSyncing(true);
     try {
-      const [{ data: teamRes, error: teamErr }, { data: freshEmployees, error: empErr }] = await Promise.all([
-        supabase.functions.invoke("manage-team", { body: { action: "list_users" } }),
-        supabase.from("employees").select("*"),
+      const [teamUsers, freshEmployees] = await Promise.all([
+        apiGet<any[]>('/hrm/team-users'),
+        apiGet<any[]>('/hrm/employees'),
       ]);
-      if (teamErr || !teamRes?.users) throw teamErr || new Error("Could not load team accounts");
-      if (empErr) throw empErr;
+      const teamRes = { users: teamUsers || [] };
+      if (!teamUsers) throw new Error("Could not load team accounts");
       const currentEmployees = (freshEmployees || []) as unknown as Employee[];
       const sourceRows = sourceRowsFromTeam(teamRes.users as TeamUser[], publicTeamItems);
       const sourceKeys = new Set(sourceRows.map(syncKeyFor));
@@ -2080,8 +2034,7 @@ export default function AdminHR() {
         const needsUpdate = !existing || Object.entries(payload).some(([key, value]) => !valuesEqual(existingValues?.[key], value));
         if (!needsUpdate) continue;
         if (existing?.id) {
-          const { error } = await supabase.from("employees").update(payload).eq("id", existing.id);
-          if (!error) updated++;
+          try { await apiPatch(`/hrm/employees/${existing.id}`, payload); updated++; } catch {}
         } else {
           // Upsert on email (or team_member_key / user_id) so a concurrent sync
           // run or a stale local cache can't create a duplicate row — the DB
@@ -2093,11 +2046,14 @@ export default function AdminHR() {
               : payload.team_member_key
                 ? "team_member_key"
                 : undefined;
-          const query = conflictTarget
-            ? supabase.from("employees").upsert(payload, { onConflict: conflictTarget, ignoreDuplicates: false })
-            : supabase.from("employees").insert(payload);
-          const { error } = await query;
-          if (!error) added++;
+          try {
+            if (conflictTarget) {
+              await apiPost('/hrm/employees/upsert', { ...payload, conflict_on: conflictTarget });
+            } else {
+              await apiPost('/hrm/employees', payload);
+            }
+            added++;
+          } catch {}
         }
       }
 
@@ -2109,8 +2065,10 @@ export default function AdminHR() {
       });
       if (staleSynced.length) {
         const stalePayload: EmployeeUpdate = { status: "terminated", last_working_day: todayStr() };
-        const { error } = await supabase.from("employees").update(stalePayload).in("id", staleSynced.map((e) => e.id));
-        if (!error) retired = staleSynced.length;
+        try {
+          await apiPost('/hrm/employees/bulk-update', { ids: staleSynced.map(e => e.id), data: stalePayload });
+          retired = staleSynced.length;
+        } catch {}
       }
 
       setLastSyncedAt(new Date());
@@ -2144,27 +2102,8 @@ export default function AdminHR() {
   // Realtime: any change to employees or the home_sections row (from another
   // browser tab or another admin) re-fetches the affected queries so both the
   // HR list and the public Team Section stay in sync without a refresh.
-  useEffect(() => {
-    const channel = supabase
-      .channel("admin-hr-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "employees" }, () => {
-        qc.invalidateQueries({ queryKey: ["hr-employees"] });
-        qc.invalidateQueries({ queryKey: ["home-sections"] });
-      })
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "site_settings", filter: "key=eq.home_sections" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["hr-public-team-source"] });
-          qc.invalidateQueries({ queryKey: ["home-sections"] });
-        },
-      )
-      .on("postgres_changes", { event: "*", schema: "public", table: "hr_documents" }, () => {
-        qc.invalidateQueries({ queryKey: ["hr-documents"] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [qc]);
+  // Realtime subscriptions removed — NestJS WebSocket pub/sub pending.
+  // Queries invalidate after each mutation above.
 
 
   // Tab state synced with ?tab= so deep links / refresh land correctly.

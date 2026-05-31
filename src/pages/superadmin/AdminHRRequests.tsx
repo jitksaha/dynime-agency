@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -77,26 +78,7 @@ const AdminHRRequests = () => {
   const { data: rows, isLoading } = useQuery({
     queryKey: ["admin-hr-requests"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("hr_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      const requests = data ?? [];
-      const empIds = Array.from(
-        new Set(requests.map((r: any) => r.employee_id).filter(Boolean))
-      );
-      let empMap: Record<string, any> = {};
-      if (empIds.length > 0) {
-        const { data: emps } = await supabase
-          .from("employees")
-          .select("id, full_name, employee_code, email, designation, department")
-          .in("id", empIds);
-        (emps ?? []).forEach((e: any) => {
-          empMap[e.id] = e;
-        });
-      }
-      return requests.map((r: any) => ({ ...r, employees: empMap[r.employee_id] ?? null }));
+      return (await apiGet<any[]>('/hrm/hr-requests')) ?? [];
     },
   });
 
@@ -104,12 +86,7 @@ const AdminHRRequests = () => {
     queryKey: ["admin-hr-request-events", activeId],
     enabled: !!activeId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("hr_request_events")
-        .select("*")
-        .eq("request_id", activeId!)
-        .order("created_at", { ascending: true });
-      return data ?? [];
+      return (await apiGet<any[]>(`/hrm/hr-requests/${activeId}/events`)) ?? [];
     },
   });
 
@@ -133,30 +110,8 @@ const AdminHRRequests = () => {
     [queryClient, activeId]
   );
 
-  // Realtime: any change to hr_requests or hr_request_events funnels through refreshAll.
-  useEffect(() => {
-    const channel = supabase
-      .channel("admin-hr-requests-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "hr_requests" },
-        (payload: any) => refreshAll(payload.new?.id ?? payload.old?.id ?? null)
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "hr_request_events" },
-        (payload: any) => refreshAll(payload.new?.request_id ?? payload.old?.request_id ?? null)
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "employees" },
-        () => refreshAll()
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [refreshAll]);
+  // Realtime subscriptions removed — NestJS WebSocket pub/sub pending.
+  // Use the refresh button or mutations to re-fetch data.
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -212,16 +167,11 @@ const AdminHRRequests = () => {
         patch.decided_at = new Date().toISOString();
         if (trimmedNote) patch.decision_note = trimmedNote;
       }
-      const { error: updErr } = await supabase
-        .from("hr_requests")
-        .update(patch)
-        .eq("id", active.id);
-      if (updErr) throw updErr;
+      await apiPatch(`/hrm/hr-requests/${active.id}`, patch);
 
       const verb = ACTION_VERB[status] ?? `set to ${status}`;
       const summary = `Request ${verb}${trimmedNote ? ` — ${trimmedNote}` : ""}`;
-      const { error: evtErr } = await supabase.from("hr_request_events").insert({
-        request_id: active.id,
+      await apiPost(`/hrm/hr-requests/${active.id}/events`, {
         author_id: user!.id,
         author_role: "admin",
         event_type: "status_change",
@@ -235,7 +185,6 @@ const AdminHRRequests = () => {
           decided_at: patch.decided_at ?? null,
         },
       });
-      if (evtErr) throw evtErr;
 
       toast.success(`Request ${verb}`);
       setNote("");
@@ -251,14 +200,12 @@ const AdminHRRequests = () => {
     if (!active || !note.trim()) return;
     setBusy(true);
     try {
-      const { error } = await supabase.from("hr_request_events").insert({
-        request_id: active.id,
+      await apiPost(`/hrm/hr-requests/${active.id}/events`, {
         author_id: user!.id,
         author_role: "admin",
         event_type: "comment",
         message: note.trim(),
       });
-      if (error) throw error;
       toast.success("Comment added");
       setNote("");
       refreshAll(active.id);
@@ -304,20 +251,15 @@ const AdminHRRequests = () => {
 
       // 2) Update request: status=fulfilled, decision_note=text
       const decidedAt = new Date().toISOString();
-      const { error: updErr } = await supabase
-        .from("hr_requests")
-        .update({
-          status: "fulfilled",
-          decided_by: user!.id,
-          decided_at: decidedAt,
-          decision_note: text || active.decision_note || null,
-        })
-        .eq("id", active.id);
-      if (updErr) throw updErr;
+      await apiPatch(`/hrm/hr-requests/${active.id}`, {
+        status: "fulfilled",
+        decided_by: user!.id,
+        decided_at: decidedAt,
+        decision_note: text || active.decision_note || null,
+      });
 
       // 3) Insert a fulfillment event with attachments in metadata
-      const { error: evtErr } = await supabase.from("hr_request_events").insert({
-        request_id: active.id,
+      await apiPost(`/hrm/hr-requests/${active.id}/events`, {
         author_id: user!.id,
         author_role: "admin",
         event_type: "fulfillment",
@@ -332,7 +274,6 @@ const AdminHRRequests = () => {
           decided_at: decidedAt,
         },
       });
-      if (evtErr) throw evtErr;
 
       toast.success("Request fulfilled");
       setFulfillText("");

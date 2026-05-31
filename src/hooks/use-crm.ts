@@ -1,17 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 
 export const useCrmPipelines = () =>
   useQuery({
     queryKey: ["crm-pipelines"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("crm_pipelines")
-        .select("*, stages:crm_stages(*)")
-        .eq("is_active", true)
-        .order("created_at");
-      if (error) throw error;
+      const data = await apiGet<any[]>('/crm/pipelines');
       return (data || []).map((p: any) => ({
         ...p,
         stages: (p.stages || []).sort((a: any, b: any) => a.position - b.position),
@@ -23,13 +18,12 @@ export const useCrmLeads = (filters?: { status?: string; source?: string; q?: st
   useQuery({
     queryKey: ["crm-leads", filters],
     queryFn: async () => {
-      let q = supabase.from("crm_leads").select("*").order("created_at", { ascending: false }).limit(500);
-      if (filters?.status) q = q.eq("status", filters.status);
-      if (filters?.source) q = q.eq("source", filters.source);
-      if (filters?.q) q = q.or(`full_name.ilike.%${filters.q}%,email.ilike.%${filters.q}%,company.ilike.%${filters.q}%`);
-      const { data, error } = await q;
-      if (error) throw error;
-      return data || [];
+      const params = new URLSearchParams();
+      if (filters?.status) params.set('status', filters.status);
+      if (filters?.source) params.set('source', filters.source);
+      if (filters?.q) params.set('q', filters.q);
+      const qs = params.toString();
+      return (await apiGet<any[]>(`/crm/leads${qs ? '?' + qs : ''}`)) ?? [];
     },
   });
 
@@ -37,28 +31,19 @@ export const useCrmDeals = (pipelineId?: string) =>
   useQuery({
     queryKey: ["crm-deals", pipelineId],
     enabled: !!pipelineId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("crm_deals")
-        .select("*")
-        .eq("pipeline_id", pipelineId!)
-        .order("position");
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: async () =>
+      (await apiGet<any[]>(`/crm/deals?pipeline_id=${pipelineId}`)) ?? [],
   });
 
 export const useCrmActivities = (filters?: { mine?: boolean; status?: string }) =>
   useQuery({
     queryKey: ["crm-activities", filters],
     queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      let q = supabase.from("crm_activities").select("*").order("due_at", { ascending: true, nullsFirst: false }).limit(500);
-      if (filters?.mine && userData?.user) q = q.eq("assignee_id", userData.user.id);
-      if (filters?.status) q = q.eq("status", filters.status);
-      const { data, error } = await q;
-      if (error) throw error;
-      return data || [];
+      const params = new URLSearchParams();
+      if (filters?.mine) params.set('mine', 'true');
+      if (filters?.status) params.set('status', filters.status);
+      const qs = params.toString();
+      return (await apiGet<any[]>(`/crm/activities${qs ? '?' + qs : ''}`)) ?? [];
     },
   });
 
@@ -67,12 +52,10 @@ export const useUpsertLead = () => {
   return useMutation({
     mutationFn: async (payload: any) => {
       if (payload.id) {
-        const { error } = await supabase.from("crm_leads").update(payload).eq("id", payload.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("crm_leads").insert(payload);
-        if (error) throw error;
+        const { id, ...data } = payload;
+        return apiPatch(`/crm/leads/${id}`, data);
       }
+      return apiPost('/crm/leads', payload);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
@@ -85,10 +68,8 @@ export const useUpsertLead = () => {
 export const useMoveDeal = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, stage_id }: { id: string; stage_id: string }) => {
-      const { error } = await supabase.from("crm_deals").update({ stage_id }).eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async ({ id, stage_id }: { id: string; stage_id: string }) =>
+      apiPatch(`/crm/deals/${id}`, { stage_id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["crm-deals"] }),
   });
 };
@@ -98,12 +79,10 @@ export const useUpsertDeal = () => {
   return useMutation({
     mutationFn: async (payload: any) => {
       if (payload.id) {
-        const { error } = await supabase.from("crm_deals").update(payload).eq("id", payload.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("crm_deals").insert(payload);
-        if (error) throw error;
+        const { id, ...data } = payload;
+        return apiPatch(`/crm/deals/${id}`, data);
       }
+      return apiPost('/crm/deals', payload);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["crm-deals"] });
@@ -118,12 +97,10 @@ export const useUpsertActivity = () => {
   return useMutation({
     mutationFn: async (payload: any) => {
       if (payload.id) {
-        const { error } = await supabase.from("crm_activities").update(payload).eq("id", payload.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("crm_activities").insert(payload);
-        if (error) throw error;
+        const { id, ...data } = payload;
+        return apiPatch(`/crm/activities/${id}`, data);
       }
+      return apiPost('/crm/activities', payload);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["crm-activities"] });
@@ -136,19 +113,11 @@ export const useUpsertActivity = () => {
 export const useCrmCampaigns = () =>
   useQuery({
     queryKey: ["crm-campaigns"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("crm_campaigns").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: async () => (await apiGet<any[]>('/crm/campaigns')) ?? [],
   });
 
 export const useCrmSegments = () =>
   useQuery({
     queryKey: ["crm-segments"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("crm_segments").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: async () => (await apiGet<any[]>('/crm/segments')) ?? [],
   });

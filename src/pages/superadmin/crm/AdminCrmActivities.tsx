@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useCrmActivities, useUpsertActivity } from "@/hooks/use-crm";
 import { Plus, CheckCircle2, Circle, Clock } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPatch } from "@/lib/api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -61,10 +61,12 @@ const AdminCrmActivities = () => {
 
   const toggle = async (a: any) => {
     const next = a.status === "done" ? "open" : "done";
-    const { error } = await supabase.from("crm_activities").update({
-      status: next, completed_at: next === "done" ? new Date().toISOString() : null,
-    }).eq("id", a.id);
-    if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["crm-activities"] });
+    try {
+      await apiPatch(`/crm/activities/${a.id}`, {
+        status: next, completed_at: next === "done" ? new Date().toISOString() : null,
+      });
+      qc.invalidateQueries({ queryKey: ["crm-activities"] });
+    } catch (err: any) { toast.error(err.message); }
   };
 
   const save = async () => {

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,56 +25,29 @@ const AdminCrmAutomations = () => {
 
   const { data: workflows = [], isLoading } = useQuery({
     queryKey: ["crm-workflows"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("crm_workflows")
-        .select("*, steps:crm_workflow_steps(id)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: async () => (await apiGet<any[]>('/crm/workflows')) ?? [],
   });
 
   const { data: stats } = useQuery({
     queryKey: ["crm-workflow-stats"],
-    queryFn: async () => {
-      const { data } = await supabase.from("crm_workflow_runs").select("status");
-      const list = data || [];
-      return {
-        total: list.length,
-        running: list.filter((r: any) => r.status === "running" || r.status === "pending").length,
-        done: list.filter((r: any) => r.status === "done").length,
-        failed: list.filter((r: any) => r.status === "failed").length,
-      };
-    },
+    queryFn: async () => (await apiGet<any>('/crm/workflow-stats')) ?? { total: 0, running: 0, done: 0, failed: 0 },
   });
 
   const toggleActive = useMutation({
-    mutationFn: async ({ id, is_active }: any) => {
-      const { error } = await supabase.from("crm_workflows").update({ is_active }).eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async ({ id, is_active }: any) =>
+      apiPatch(`/crm/workflows/${id}`, { is_active }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["crm-workflows"] }),
   });
 
   const createNew = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data, error } = await supabase
-        .from("crm_workflows")
-        .insert({
-          name: "Untitled workflow",
-          trigger_type: "lead_created",
-          trigger_config: {},
-          is_active: false,
-          created_by: user?.id,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (wf) => {
+    mutationFn: async () =>
+      apiPost<any>('/crm/workflows', {
+        name: "Untitled workflow",
+        trigger_type: "lead_created",
+        trigger_config: {},
+        is_active: false,
+      }),
+    onSuccess: (wf: any) => {
       toast.success("Workflow created");
       navigate(`/superadmin/crm/automations/${wf.id}`);
     },
@@ -82,10 +55,7 @@ const AdminCrmAutomations = () => {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("crm_workflows").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async (id: string) => apiDelete(`/crm/workflows/${id}`),
     onSuccess: () => {
       toast.success("Deleted");
       qc.invalidateQueries({ queryKey: ["crm-workflows"] });

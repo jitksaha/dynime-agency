@@ -3,3 +3,4 @@
 - [Verification module architecture](verification-module.md) — NestJS Module 4/5/6 (KYC/KYB/AML) via Didit API; env vars required, webhook HMAC, admin request trigger from Orders section.
 - [Modules 7-11 (Orders/Credit/Subscriptions/Tickets/Notifications)](remaining-modules.md) — all routes, frontend pages migrated, what still uses Supabase, TFINAL still pending.
 - [TFINAL auth seam flip](tfinal-auth-seam.md) — dual-token: NestJS tokens in localStorage, exchange endpoint, api.ts prefers NestJS; Supabase auth still present for remaining pages.
+- [Prisma @@ignore models — raw SQL required](prisma-ignore-raw-sql.md) — models without a unique/PK get @@ignore; use $queryRaw, not prisma.<model>.findMany().

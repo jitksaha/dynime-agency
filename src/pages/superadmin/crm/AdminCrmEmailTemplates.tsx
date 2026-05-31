@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,19 +19,16 @@ const AdminCrmEmailTemplates = () => {
 
   const { data: list = [] } = useQuery({
     queryKey: ["crm-email-templates"],
-    queryFn: async () => (await supabase.from("crm_email_templates").select("*").order("name")).data || [],
+    queryFn: async () => (await apiGet<any[]>('/crm/email-templates')) ?? [],
   });
 
   const save = useMutation({
     mutationFn: async () => {
       const payload = { name: edit.name, subject: edit.subject, body_html: edit.body_html };
       if (edit.id) {
-        const { error } = await supabase.from("crm_email_templates").update(payload).eq("id", edit.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("crm_email_templates").insert(payload);
-        if (error) throw error;
+        return apiPatch(`/crm/email-templates/${edit.id}`, payload);
       }
+      return apiPost('/crm/email-templates', payload);
     },
     onSuccess: () => {
       toast.success("Saved");
@@ -42,10 +39,7 @@ const AdminCrmEmailTemplates = () => {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("crm_email_templates").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async (id: string) => apiDelete(`/crm/email-templates/${id}`),
     onSuccess: () => { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["crm-email-templates"] }); },
   });
 

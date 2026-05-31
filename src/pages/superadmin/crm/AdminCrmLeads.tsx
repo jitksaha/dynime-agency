@@ -14,7 +14,7 @@ import { Plus, Search, Mail, Phone, Settings2, Info, Copy, PhoneCall, MessageCir
 import PhoneInput, { detectCountryFromPhone } from "@/components/shared/PhoneInput";
 import LeadActivities from "@/components/shared/LeadActivities";
 import { format } from "date-fns";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPatch } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -77,10 +77,8 @@ const AdminCrmLeads = () => {
   const qc = useQueryClient();
 
   const changeStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("crm_leads").update({ status }).eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async ({ id, status }: { id: string; status: string }) =>
+      apiPatch(`/crm/leads/${id}`, { status }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["crm-leads"] });
       toast.success("Status updated");
@@ -101,8 +99,7 @@ const AdminCrmLeads = () => {
   const { data: weightsRow } = useQuery({
     queryKey: ["crm_score_weights"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("crm_score_weights").select("weights").eq("id", 1).maybeSingle();
-      if (error) throw error;
+      const data = await apiGet<any>('/crm/score-weights');
       return (data?.weights || {}) as Weights;
     },
   });
@@ -110,34 +107,22 @@ const AdminCrmLeads = () => {
   useEffect(() => { if (weightsRow) setDraftWeights(weightsRow); }, [weightsRow]);
 
   const saveWeights = useMutation({
-    mutationFn: async (w: Weights) => {
-      const { error } = await (supabase as any).from("crm_score_weights").update({ weights: w, updated_at: new Date().toISOString() }).eq("id", 1);
-      if (error) throw error;
-      // Recompute scores for existing leads
-      await (supabase as any).rpc("recompute_crm_lead_scores");
-    },
+    mutationFn: async (w: Weights) => apiPatch('/crm/score-weights', { weights: w }),
     onSuccess: () => {
       toast.success("Weights saved. Recomputing scores…");
       qc.invalidateQueries({ queryKey: ["crm_score_weights"] });
-      qc.invalidateQueries({ queryKey: ["crm_leads"] });
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
       setWeightsOpen(false);
     },
     onError: (e: any) => toast.error(e.message || "Failed to save"),
   });
 
-  const { data: statusCounts = {} } = useQuery({
-    queryKey: ["crm-leads", "status-counts", q || null],
-    queryFn: async () => {
-      let query = supabase.from("crm_leads").select("status", { count: "exact" });
-      if (q) query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,company.ilike.%${q}%`);
-      const { data, error } = await query.limit(5000);
-      if (error) throw error;
-      const by: Record<string, number> = {};
-      (data || []).forEach((l: any) => { by[l.status] = (by[l.status] || 0) + 1; });
-      return by;
-    },
-  });
-  const stats = statusCounts as Record<string, number>;
+  const statusCounts = useMemo(() => {
+    const by: Record<string, number> = {};
+    leads.forEach((l: any) => { by[l.status] = (by[l.status] || 0) + 1; });
+    return by;
+  }, [leads]);
+  const stats = statusCounts;
 
   const save = async () => {
     try {

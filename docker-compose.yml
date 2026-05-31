@@ -1,0 +1,112 @@
+version: "3.9"
+
+# ── Dynime Production Stack ──────────────────────────────────────────────────
+# Requires: .env file with all required secrets (see .env.example)
+#
+# Quick start:
+#   cp .env.example .env   # fill in values
+#   docker compose up -d
+
+services:
+
+  # ── PostgreSQL (if self-hosting DB; skip if using Supabase) ───────────────
+  # postgres:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB:       dynime
+  #     POSTGRES_USER:     dynime
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U dynime"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── MinIO (object storage) ────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - miniodata:/data
+    ports:
+      - "9001:9001"   # MinIO console (dev only — remove in production)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── NestJS Backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      NODE_ENV:                   production
+      PORT:                       3001
+      SUPABASE_DB_URL:            ${SUPABASE_DB_URL}
+      SUPABASE_SERVICE_ROLE_KEY:  ${SUPABASE_SERVICE_ROLE_KEY}
+      JWT_ACCESS_SECRET:          ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET:         ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL:             ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL:            ${JWT_REFRESH_TTL:-30d}
+      REDIS_URL:                  redis://redis:6379
+      MINIO_ENDPOINT:             minio
+      MINIO_PORT:                 9000
+      MINIO_USE_SSL:              "false"
+      MINIO_ACCESS_KEY:           ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY:           ${MINIO_SECRET_KEY:-minioadmin}
+      DIDIT_API_KEY:              ${DIDIT_API_KEY:-}
+      DIDIT_KYC_WORKFLOW_ID:      ${DIDIT_KYC_WORKFLOW_ID:-}
+      DIDIT_KYB_WORKFLOW_ID:      ${DIDIT_KYB_WORKFLOW_ID:-}
+      DIDIT_AML_WORKFLOW_ID:      ${DIDIT_AML_WORKFLOW_ID:-}
+      DIDIT_WEBHOOK_SECRET:       ${DIDIT_WEBHOOK_SECRET:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── Frontend + Nginx ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"   # add Certbot/Let's Encrypt volumes when enabling HTTPS
+
+volumes:
+  redisdata:
+  miniodata:
+  # pgdata:    # uncomment if self-hosting PostgreSQL

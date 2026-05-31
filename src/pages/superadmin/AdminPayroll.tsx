@@ -18,7 +18,7 @@ import {
   BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart as RPieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, Legend, ResponsiveContainer,
 } from "recharts";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { downloadPayslip, type PayslipData } from "@/lib/payslip-pdf";
@@ -57,63 +57,34 @@ const STATUS_COLORS: Record<string, string> = {
 function useRuns() {
   return useQuery({
     queryKey: ["payroll_runs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payroll_runs").select("*")
-        .order("period_year", { ascending: false })
-        .order("period_month", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data as Run[];
-    },
+    queryFn: async () => (await apiGet<Run[]>('/payroll/runs')) ?? [],
   });
 }
 function useItems(runId: string | null) {
   return useQuery({
     queryKey: ["payroll_items", runId],
     enabled: !!runId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payroll_items").select("*")
-        .eq("run_id", runId!).order("employee_name");
-      if (error) throw error;
-      return data as Item[];
-    },
+    queryFn: async () => (await apiGet<Item[]>(`/payroll/runs/${runId}/items`)) ?? [],
   });
 }
 function useAdjustments(itemId: string | null) {
   return useQuery({
     queryKey: ["payroll_adj", itemId],
     enabled: !!itemId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payroll_adjustments").select("*")
-        .eq("item_id", itemId!).order("created_at");
-      if (error) throw error;
-      return data as any[];
-    },
+    queryFn: async () => (await apiGet<any[]>(`/payroll/items/${itemId}/adjustments`)) ?? [],
   });
 }
 function useAudit(runId: string | null) {
   return useQuery({
     queryKey: ["payroll_audit", runId],
     enabled: !!runId,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("payroll_audit_logs").select("*")
-        .eq("run_id", runId!).order("created_at", { ascending: false }).limit(200);
-      if (error) throw error;
-      return data as any[];
-    },
+    queryFn: async () => (await apiGet<any[]>(`/payroll/runs/${runId}/audit`)) ?? [],
   });
 }
 function useEmployeesCount() {
   return useQuery({
     queryKey: ["employees_count_active"],
-    queryFn: async () => {
-      const { count } = await supabase.from("employees").select("id", { count: "exact", head: true }).eq("status", "active");
-      return count ?? 0;
-    },
+    queryFn: async () => (await apiGet<number>('/payroll/employees/count')) ?? 0,
   });
 }
 
@@ -140,11 +111,10 @@ export default function AdminPayroll() {
     setEnsuredKey(key);
     (async () => {
       try {
-        const { data, error } = await supabase.rpc("payroll_ensure_current_month", { _currency: "USD", _working_days: 22 });
-        if (error) throw error;
+        const runId = await apiPost<string>('/payroll/runs/ensure-current', { currency: "USD", working_days: 22 });
         await qc.invalidateQueries({ queryKey: ["payroll_runs"] });
         await qc.invalidateQueries({ queryKey: ["payroll_items"] });
-        if (!selectedRunId && data) setSelectedRunId(data as string);
+        if (!selectedRunId && runId) setSelectedRunId(runId as string);
       } catch (e: any) {
         // Non-fatal: user can still operate manually.
         console.warn("ensure current month failed:", e?.message);
@@ -164,8 +134,7 @@ export default function AdminPayroll() {
     if (!currentRun) return;
     setSyncing(true);
     try {
-      const { data, error } = await supabase.rpc("payroll_sync_run", { _run: currentRun.id });
-      if (error) throw error;
+      const data = await apiPost<number>(`/payroll/runs/${currentRun.id}/sync`, {});
       const added = Number(data ?? 0);
       toast.success(added > 0 ? `Added ${added} new employee${added === 1 ? "" : "s"} to this run` : "Already up to date");
       qc.invalidateQueries({ queryKey: ["payroll_runs"] });
@@ -259,9 +228,8 @@ export default function AdminPayroll() {
     if (!confirm("Seed full payroll history from Jan 2020 → current month for all active employees? This is idempotent.")) return;
     setSeeding(true);
     try {
-      const { data, error } = await supabase.functions.invoke("payroll-history-seed", { body: {} });
-      if (error) throw error;
-      toast.success(`Seeded ${data?.months ?? "?"} months of payroll`);
+      const data = await apiPost<any>('/payroll/seed-history', {});
+      toast.success(`Seeded ${(data as any)?.months ?? "?"} months of payroll`);
       qc.invalidateQueries({ queryKey: ["payroll_runs"] });
     } catch (e: any) {
       toast.error(e.message || "Seed failed");
@@ -282,40 +250,39 @@ export default function AdminPayroll() {
     }
     setGenerating(true);
     try {
-      const { data, error } = await supabase.rpc("payroll_generate_run", {
-        _year: genYear, _month: genMonth, _currency: "USD",
-        _working_days: genDays, _employee_ids: null, _replace: true,
+      const newRunId = await apiPost<string>('/payroll/runs/generate', {
+        periodYear: genYear, periodMonth: genMonth,
+        currency: "USD", workingDays: genDays,
       });
-      if (error) throw error;
       toast.success("Run generated");
       await qc.invalidateQueries({ queryKey: ["payroll_runs"] });
-      setSelectedRunId(data as string);
+      setSelectedRunId(newRunId as string);
     } catch (e: any) { toast.error(e.message); }
     finally { setGenerating(false); }
   };
 
   const approveRun = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.rpc("payroll_approve_run", { _run: id }); if (error) throw error; },
+    mutationFn: async (id: string) => apiPost(`/payroll/runs/${id}/approve`, {}),
     onSuccess: () => { toast.success("Run approved"); qc.invalidateQueries({ queryKey: ["payroll_runs"] }); },
     onError: (e: any) => toast.error(e.message),
   });
   const markPaidAll = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.rpc("payroll_mark_paid", { _run: id, _item_ids: null, _method: "bank" }); if (error) throw error; },
+    mutationFn: async (id: string) => apiPost(`/payroll/runs/${id}/mark-paid`, { item_ids: null, method: "bank" }),
     onSuccess: () => { toast.success("Marked paid"); qc.invalidateQueries({ queryKey: ["payroll_runs"] }); qc.invalidateQueries({ queryKey: ["payroll_items"] }); },
     onError: (e: any) => toast.error(e.message),
   });
   const markPaidOne = useMutation({
-    mutationFn: async (item: Item) => { const { error } = await supabase.rpc("payroll_mark_paid", { _run: item.run_id, _item_ids: [item.id], _method: "bank" }); if (error) throw error; },
+    mutationFn: async (item: Item) => apiPost(`/payroll/runs/${item.run_id}/mark-paid`, { item_ids: [item.id], method: "bank" }),
     onSuccess: () => { toast.success("Paid"); qc.invalidateQueries({ queryKey: ["payroll_runs"] }); qc.invalidateQueries({ queryKey: ["payroll_items"] }); },
     onError: (e: any) => toast.error(e.message),
   });
   const cancelItem = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.rpc("payroll_cancel_item", { _item: id, _reason: "Cancelled by admin" }); if (error) throw error; },
+    mutationFn: async (id: string) => apiPost(`/payroll/items/${id}/cancel`, { reason: "Cancelled by admin" }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll_items"] }); qc.invalidateQueries({ queryKey: ["payroll_runs"] }); toast.success("Cancelled"); },
     onError: (e: any) => toast.error(e.message),
   });
   const lockRun = useMutation({
-    mutationFn: async ({ id, lock }: { id: string; lock: boolean }) => { const { error } = await supabase.rpc("payroll_lock_run", { _run: id, _lock: lock }); if (error) throw error; },
+    mutationFn: async ({ id, lock }: { id: string; lock: boolean }) => apiPost(`/payroll/runs/${id}/lock`, { lock }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["payroll_runs"] }); toast.success("Updated"); },
     onError: (e: any) => toast.error(e.message),
   });
@@ -371,7 +338,7 @@ export default function AdminPayroll() {
   };
 
   const downloadPayslipFor = async (item: Item) => {
-    const { data: adj } = await supabase.from("payroll_adjustments").select("*").eq("item_id", item.id);
+    const adj = await apiGet<any[]>(`/payroll/items/${item.id}/adjustments`);
     const allowances = (adj ?? []).filter(a => a.category === "allowance").map(a => ({ label: a.label, amount: Number(a.amount) }));
     const deductions = (adj ?? []).filter(a => a.category === "deduction").map(a => ({ label: a.label, amount: Number(a.amount) }));
     const data: PayslipData = {

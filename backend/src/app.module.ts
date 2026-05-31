@@ -17,6 +17,10 @@ import { CreditModule } from './credit/credit.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { CrmModule } from './crm/crm.module';
+import { HrmModule } from './hrm/hrm.module';
+import { PayrollModule } from './payroll/payroll.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
@@ -44,6 +48,10 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     SubscriptionsModule,
     TicketsModule,
     NotificationsModule,
+    AnalyticsModule,
+    CrmModule,
+    HrmModule,
+    PayrollModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
