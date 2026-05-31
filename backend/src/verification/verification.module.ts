@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { VerificationService } from './verification.service';
 import { VerificationController } from './verification.controller';
+import { WebhookController } from './webhook.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { FlexAuthGuard } from '../auth/guards/flex-auth.guard';
 
@@ -11,7 +12,7 @@ import { FlexAuthGuard } from '../auth/guards/flex-auth.guard';
     JwtModule.register({}),
   ],
   providers: [VerificationService, FlexAuthGuard],
-  controllers: [VerificationController],
+  controllers: [VerificationController, WebhookController],
   exports: [VerificationService, FlexAuthGuard],
 })
 export class VerificationModule {}
