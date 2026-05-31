@@ -708,3 +708,11 @@ button:hover .text-muted-foreground,
   /* Long unbroken strings (emails, URLs) inside admin tables/cells */
   .break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
 }
+
+div#replit-agent-inbox-widget {
+    display: none !important;
+}
+
+div#replit-pill-host {
+    display: none !important;
+}
