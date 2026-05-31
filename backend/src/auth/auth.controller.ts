@@ -116,4 +116,12 @@ export class AuthController {
   reset(@Body() dto: ResetPasswordDto, @Req() req: Request) {
     return this.auth.resetPassword(dto, context(req));
   }
+
+  @Get('profile')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  profile(@CurrentUser('id') id: string) {
+    return this.auth.getProfile(id);
+  }
 }

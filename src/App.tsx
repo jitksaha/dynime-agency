@@ -79,7 +79,6 @@ const Invoice = lazy(() => import("./pages/Invoice.tsx"));
 const Agreement = lazy(() => import("./pages/Agreement.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const DynamicPage = lazy(() => import("./pages/DynamicPage.tsx"));
-const SupabaseStatus = lazy(() => import("./pages/SupabaseStatus.tsx"));
 const PaymentStatus = lazy(() => import("./pages/PaymentStatus.tsx"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder.tsx"));
 const Legal = lazy(() => import("./pages/Legal.tsx"));
@@ -323,7 +322,6 @@ const App = () => (
                   <Route path="/payment/status/:sessionId" element={<PaymentStatus />} />
                   <Route path="/track" element={<TrackOrder />} />
                   <Route path="/track/:ref" element={<TrackOrder />} />
-                  <Route path="/diagnostics/supabase" element={<ProtectedRoute><SupabaseStatus /></ProtectedRoute>} />
 
                   {/* Legal */}
                   <Route path="/privacy" element={<Legal docKey="privacy" />} />

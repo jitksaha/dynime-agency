@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 
 const AdminLogin = () => {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,10 +15,10 @@ const AdminLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await signIn(email, password);
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
     } else {
       toast.success("Logged in!");
       navigate("/admin");
@@ -32,7 +33,7 @@ const AdminLogin = () => {
             <Lock className="w-6 h-6 text-primary" />
           </div>
           <h1 className="font-heading text-2xl font-bold text-foreground">Admin Login</h1>
-          <p className="text-sm text-muted-foreground mt-1"><p className="text-sm text-muted-foreground mt-1">Dynime Inc.</p></p>
+          <p className="text-sm text-muted-foreground mt-1">Dynime Inc.</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

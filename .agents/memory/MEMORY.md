@@ -4,3 +4,4 @@
 - [Modules 7-11 (Orders/Credit/Subscriptions/Tickets/Notifications)](remaining-modules.md) — all routes, frontend pages migrated, what still uses Supabase, TFINAL still pending.
 - [TFINAL auth seam flip](tfinal-auth-seam.md) — dual-token: NestJS tokens in localStorage, exchange endpoint, api.ts prefers NestJS; Supabase auth still present for remaining pages.
 - [Prisma @@ignore models — raw SQL required](prisma-ignore-raw-sql.md) — models without a unique/PK get @@ignore; use $queryRaw, not prisma.<model>.findMany().
+- [Auth migration — NestJS pure auth](auth-migration.md) — use-auth.tsx, api.ts, and all 5 login pages/AuthDialog fully migrated to NestJS; Supabase client kept for data-only pages.

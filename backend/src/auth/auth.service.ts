@@ -361,4 +361,12 @@ export class AuthService {
 
     return { success: true };
   }
+
+  async getProfile(userId: string) {
+    const profile = await this.prisma.profiles.findUnique({ where: { id: userId } });
+    return {
+      full_name: profile?.full_name ?? null,
+      avatar_url: profile?.avatar_url ?? null,
+    };
+  }
 }

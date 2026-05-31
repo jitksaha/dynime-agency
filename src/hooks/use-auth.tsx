@@ -1,15 +1,22 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User, Session } from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import {
-  exchangeForNestTokens,
+  setNestTokens,
   clearNestTokens,
+  getNestAccessToken,
   getNestRefreshToken,
+  refreshNestTokens,
 } from "@/lib/nestjs-tokens";
 
+export interface AppUser {
+  id: string;
+  email: string | null;
+  roles: string[];
+  user_metadata?: { full_name?: string; avatar_url?: string; [key: string]: unknown };
+}
+
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: AppUser | null;
+  session: { access_token: string } | null;
   loading: boolean;
   userRole: string | null;
   isAdmin: boolean;
@@ -29,141 +36,106 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+function decodeJwtPayload(token: string): { sub: string; email?: string | null; roles?: string[] } | null {
+  try {
+    const [, payload] = token.split('.');
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchProfile(token: string): Promise<{ full_name?: string | null; avatar_url?: string | null } | null> {
+  try {
+    const res = await fetch('/api/v1/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [roleLoading, setRoleLoading] = useState(false);
 
-  const fetchRoleFromSupabase = async (userId: string) => {
-    setRoleLoading(true);
-    try {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .limit(1)
-        .single();
-      setUserRole(data?.role ?? null);
-    } catch {
-      setUserRole(null);
-    } finally {
-      setRoleLoading(false);
-    }
-  };
-
-  /** Exchange the current Supabase session token for NestJS tokens (fire-and-forget). */
-  const ensureNestTokens = (accessToken: string) => {
-    if (!getNestRefreshToken()) {
-      exchangeForNestTokens(accessToken).catch(() => {});
-    }
-  };
+  const hydrateUser = useCallback(async (token: string) => {
+    const payload = decodeJwtPayload(token);
+    if (!payload?.sub) return;
+    const profile = await fetchProfile(token);
+    setUser({
+      id: payload.sub,
+      email: payload.email ?? null,
+      roles: payload.roles ?? [],
+      user_metadata: {
+        full_name: profile?.full_name ?? undefined,
+        avatar_url: profile?.avatar_url ?? undefined,
+      },
+    });
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    let roleFetchedForUserId: string | null = null;
-
-    const { data: subData } = supabase.auth.onAuthStateChange((event, s) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        roleFetchedForUserId = s.user.id;
-        setRoleLoading(true);
-        setTimeout(() => fetchRoleFromSupabase(s.user.id), 0);
-
-        // On sign-in / token refresh: exchange Supabase JWT for NestJS tokens.
-        if (
-          event === "SIGNED_IN" ||
-          event === "TOKEN_REFRESHED" ||
-          event === "USER_UPDATED"
-        ) {
-          if (s.access_token) ensureNestTokens(s.access_token);
-
-          // Mirror email changes into profiles for order auto-linking.
-          setTimeout(() => {
-            supabase.rpc("sync_my_profile_email").then(({ data, error }) => {
-              if (!error && (data as any)?.relinked_orders > 0) {
-                console.info("[auth] relinked orders:", (data as any).relinked_orders);
-              }
-            });
-          }, 0);
-        }
-
-        if (event === "SIGNED_OUT") {
-          clearNestTokens();
-        }
-      } else {
-        setUserRole(null);
-        setRoleLoading(false);
-        clearNestTokens();
-      }
-      setLoading(false);
-    });
-
     (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) {
-        if (data.session.user.id !== roleFetchedForUserId) {
-          await fetchRoleFromSupabase(data.session.user.id);
-        }
-        // Exchange on startup if we don't already have NestJS tokens.
-        if (data.session.access_token) ensureNestTokens(data.session.access_token);
+      let token = getNestAccessToken();
+      if (!token) {
+        const ok = await refreshNestTokens();
+        if (ok) token = getNestAccessToken();
+      }
+      if (token) {
+        await hydrateUser(token);
       }
       setLoading(false);
     })();
-
-    return () => {
-      cancelled = true;
-      subData.subscription.unsubscribe();
-    };
-  }, []);
+  }, [hydrateUser]);
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
-    // NestJS tokens obtained via the SIGNED_IN onAuthStateChange event above.
+    try {
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as { message?: string };
+        return { error: err.message ?? 'Invalid email or password' };
+      }
+      const data = await res.json() as { accessToken: string; refreshToken: string; expiresIn: number };
+      setNestTokens(data);
+      await hydrateUser(data.accessToken);
+      return { error: null };
+    } catch {
+      return { error: 'Network error — please try again' };
+    }
   };
 
   const signOut = async () => {
-    // Revoke NestJS tokens before clearing Supabase session.
     const refreshToken = getNestRefreshToken();
-    if (refreshToken) {
+    const token = getNestAccessToken();
+    if (token) {
       try {
-        const { data: s } = await supabase.auth.getSession();
-        const tok = s.session?.access_token;
-        if (tok) {
-          await fetch("/api/v1/auth/logout", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${tok}`,
-            },
-            body: JSON.stringify({ refreshToken }),
-          });
-        }
-      } catch {
-        // Best-effort; proceed with sign-out regardless.
-      }
+        await fetch('/api/v1/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ refreshToken }),
+        });
+      } catch { /* best-effort */ }
     }
     clearNestTokens();
-    await supabase.auth.signOut();
     setUser(null);
-    setSession(null);
-    setUserRole(null);
   };
+
+  const userRole = user?.roles?.[0] ?? null;
+  const currentToken = getNestAccessToken();
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        session,
-        loading: loading || roleLoading,
+        session: user ? { access_token: currentToken ?? '' } : null,
+        loading,
         userRole,
-        isAdmin: !!userRole && ["super_admin","manager","editor","support","hr","sales"].includes(userRole),
+        isAdmin: !!userRole && ["super_admin", "manager", "editor", "support", "hr", "sales"].includes(userRole),
         isMock: false,
         signIn,
         signOut,

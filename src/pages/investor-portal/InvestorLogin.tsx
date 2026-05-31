@@ -2,21 +2,20 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Loader2, ShieldCheck, Lock, Eye, EyeOff, ArrowRight, Mail } from "lucide-react";
+import { Loader2, ShieldCheck, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useSEO } from "@/hooks/use-seo";
 
 const InvestorLogin = () => {
   usePageTitle("Investor Portal · Sign in");
   useSEO({ title: "Investor Portal Sign in", noIndex: true });
-  const { user } = useAuth();
+  const { user, signIn } = useAuth();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const next = params.get("next") || "/investor";
@@ -26,7 +25,6 @@ const InvestorLogin = () => {
   const [showPwd, setShowPwd] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
-  const [magicLoading, setMagicLoading] = useState(false);
 
   useEffect(() => {
     if (user) navigate(next, { replace: true });
@@ -38,40 +36,27 @@ const InvestorLogin = () => {
     setLoading(true);
     try {
       if (mode === "signin") {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) throw error;
+        const { error } = await signIn(email.trim(), password);
+        if (error) throw new Error(error);
         toast.success("Welcome back");
       } else {
         if (password.length < 6) throw new Error("Password must be at least 6 characters");
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: { emailRedirectTo: `${window.location.origin}${next}` },
+        const res = await fetch('/api/v1/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), password }),
         });
-        if (error) throw error;
-        toast.success("Account created — check your email to confirm");
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({})) as { message?: string };
+          throw new Error(err.message ?? 'Registration failed');
+        }
+        toast.success("Account created — you can now sign in");
+        setMode("signin");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Could not sign in");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Could not sign in");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleMagic = async () => {
-    if (!email) return toast.error("Enter your email first");
-    setMagicLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: { emailRedirectTo: `${window.location.origin}${next}` },
-      });
-      if (error) throw error;
-      toast.success("Magic link sent — check your inbox");
-    } catch (err: any) {
-      toast.error(err.message || "Could not send link");
-    } finally {
-      setMagicLoading(false);
     }
   };
 
@@ -91,7 +76,7 @@ const InvestorLogin = () => {
 
           <Card>
             <CardContent className="p-6">
-              <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
+              <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
                 <TabsList className="grid grid-cols-2 w-full">
                   <TabsTrigger value="signin">Sign in</TabsTrigger>
                   <TabsTrigger value="signup">Create account</TabsTrigger>
@@ -143,21 +128,6 @@ const InvestorLogin = () => {
                       )}
                     </Button>
                   </form>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">or</span>
-                    </div>
-                  </div>
-
-                  <Button type="button" variant="outline" className="w-full" onClick={handleMagic} disabled={magicLoading}>
-                    {magicLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                      <><Mail className="h-4 w-4 mr-1.5" /> Email me a sign-in link</>
-                    )}
-                  </Button>
 
                   <p className="text-xs text-muted-foreground text-center pt-2">
                     <Lock className="inline h-3 w-3 mr-1" />

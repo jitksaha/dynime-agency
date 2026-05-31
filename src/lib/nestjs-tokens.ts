@@ -1,7 +1,5 @@
 /**
  * NestJS token store — persists access + refresh tokens in localStorage.
- * Used by api.ts to prefer NestJS JWTs over Supabase tokens for all
- * /api/v1/* calls. Falls back gracefully when tokens aren't yet present.
  */
 
 const KEY_ACCESS = 'nj_at';
@@ -17,7 +15,6 @@ export interface NestTokens {
 export function setNestTokens({ accessToken, refreshToken, expiresIn }: NestTokens): void {
   localStorage.setItem(KEY_ACCESS, accessToken);
   localStorage.setItem(KEY_REFRESH, refreshToken);
-  // Store the absolute expiry minus a 30 s buffer so we refresh proactively.
   localStorage.setItem(KEY_EXPIRY, String(Date.now() + (expiresIn - 30) * 1000));
 }
 
@@ -56,42 +53,4 @@ export async function refreshNestTokens(): Promise<boolean> {
     clearNestTokens();
     return false;
   }
-}
-
-/**
- * Exchange any valid Bearer token (Supabase or NestJS) for a fresh NestJS
- * access + refresh pair. Call this after a Supabase SIGNED_IN event.
- */
-export async function exchangeForNestTokens(bearerToken: string): Promise<boolean> {
-  try {
-    const res = await fetch('/api/v1/auth/exchange', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${bearerToken}` },
-    });
-    if (!res.ok) return false;
-    const data = (await res.json()) as NestTokens;
-    setNestTokens(data);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Returns the best available access token: NestJS token if valid, refreshed
- * NestJS token if expired, otherwise the provided Supabase fallback.
- */
-export async function getBestToken(
-  supabaseFallback: () => Promise<string | null>,
-): Promise<string | null> {
-  const nestToken = getNestAccessToken();
-  if (nestToken) return nestToken;
-
-  const refreshed = await refreshNestTokens();
-  if (refreshed) {
-    const after = getNestAccessToken();
-    if (after) return after;
-  }
-
-  return supabaseFallback();
 }

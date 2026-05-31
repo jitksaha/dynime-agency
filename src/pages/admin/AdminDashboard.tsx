@@ -10,7 +10,7 @@ import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import {
   Inbox, MessageSquare, FileText, TrendingUp, TrendingDown, Mail,
   ShoppingBag, ClipboardList, Users, ArrowUpRight, Activity, DollarSign,
-  Plus, Briefcase, Tag, Sparkles, ExternalLink, CheckCircle2,
+  Plus, Briefcase, Tag, Sparkles, CheckCircle2,
   UserCog, Target, Wallet, CalendarRange, ChevronDown, Receipt,
 } from "lucide-react";
 import {
@@ -966,12 +966,6 @@ const AdminDashboard = () => {
                   </span>
                 </div>
               ))}
-              <Link
-                to="/supabase-status"
-                className="text-[11px] text-primary hover:underline inline-flex items-center gap-1 pt-1"
-              >
-                Open status page <ExternalLink className="w-3 h-3" />
-              </Link>
             </div>
           </Card>
         </div>
