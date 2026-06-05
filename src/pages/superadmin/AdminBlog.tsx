@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, Star, Eye, EyeOff, Search, Sparkles, Database, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import SeoScorePanel from "@/components/admin/SeoScorePanel";
 import OgImageUploader from "@/components/admin/OgImageUploader";
+import { useBlogPostsAdmin, useUpsertBlogPost, useDeleteBlogPost } from "@/hooks/use-cms-data";
 
 interface BlogPost {
   id: string;
@@ -66,24 +67,16 @@ const AdminBlog = () => {
   const [form, setForm] = useState<FormState>(empty);
   const [seeding, setSeeding] = useState(false);
 
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["admin-blog-posts"],
-    queryFn: async (): Promise<BlogPost[]> => {
-      const { data, error } = await supabase
-        .from("blog_posts" as any)
-        .select("*")
-        .order("published_at", { ascending: false });
-      if (error) throw error;
-      return (data as unknown as BlogPost[]) ?? [];
-    },
-  });
+  const { data: posts = [], isLoading } = useBlogPostsAdmin();
+  const upsertPost = useUpsertBlogPost();
+  const deletePost = useDeleteBlogPost();
 
   // Realtime auto-sync — reflects external edits instantly
   useEffect(() => {
     const channel = supabase
       .channel("admin:blog_posts")
       .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => {
-        qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+        qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
         qc.invalidateQueries({ queryKey: ["blog-posts"] });
       })
       .subscribe();
@@ -108,6 +101,7 @@ const AdminBlog = () => {
   const upsert = useMutation({
     mutationFn: async () => {
       const payload = {
+        id: editId || undefined,
         title: form.title.trim(),
         slug: (form.slug || slugify(form.title)).trim(),
         excerpt: form.excerpt.trim() || null,
@@ -120,47 +114,38 @@ const AdminBlog = () => {
         is_featured: form.is_featured,
         is_published: form.is_published,
       };
-      if (editId) {
-        const { error } = await supabase.from("blog_posts" as any).update(payload).eq("id", editId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("blog_posts" as any).insert(payload);
-        if (error) throw error;
-      }
+      return upsertPost.mutateAsync(payload);
     },
     onSuccess: () => {
       toast.success(editId ? "Post updated" : "Post created");
       setOpen(false); setEditId(null); setForm(empty);
-      qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
       qc.invalidateQueries({ queryKey: ["blog-posts"] });
     },
     onError: (e: any) => toast.error(e.message || "Failed to save"),
   });
 
   const togglePublish = useMutation({
-    mutationFn: async (p: BlogPost) => {
-      const { error } = await supabase.from("blog_posts" as any).update({ is_published: !p.is_published }).eq("id", p.id);
-      if (error) throw error;
+    mutationFn: (p: BlogPost) => upsertPost.mutateAsync({ id: p.id, is_published: !p.is_published }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
+      qc.invalidateQueries({ queryKey: ["blog-posts"] });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-blog-posts"] }),
   });
 
   const toggleFeatured = useMutation({
-    mutationFn: async (p: BlogPost) => {
-      const { error } = await supabase.from("blog_posts" as any).update({ is_featured: !p.is_featured }).eq("id", p.id);
-      if (error) throw error;
+    mutationFn: (p: BlogPost) => upsertPost.mutateAsync({ id: p.id, is_featured: !p.is_featured }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
+      qc.invalidateQueries({ queryKey: ["blog-posts"] });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-blog-posts"] }),
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("blog_posts" as any).delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) => deletePost.mutateAsync(id),
     onSuccess: () => {
       toast.success("Post deleted");
-      qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
       qc.invalidateQueries({ queryKey: ["blog-posts"] });
     },
     onError: (e: any) => toast.error(e.message || "Failed to delete"),

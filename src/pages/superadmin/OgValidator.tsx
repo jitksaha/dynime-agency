@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,8 +37,7 @@ const OgValidator = () => {
     setLoading(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.functions.invoke("validate-og", { body: { url: u } });
-      if (error) throw new Error(error.message);
+      const data = await apiPost<any>("/seo/validate-og", { url: u });
       setResult(data);
       if (!data.ok) toast.error(data.error || "Validation failed");
     } catch (e: any) {

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { cn } from "@/lib/utils";
+import { apiGet } from "@/lib/api";
 
 interface OrderRow {
   id: string;
@@ -166,13 +167,10 @@ const TrackOrder = () => {
     if (!value) return;
     setLoading(true); setError(null); setOrder(null);
     try {
-      let row: OrderRow | null = null;
-      const { data: r1 } = await supabase.rpc("lookup_order_for_tracking", { _term: value });
-      if (Array.isArray(r1) && r1.length) row = r1[0] as any;
-      if (!row) { setError("We couldn't find an order matching that invoice, order ID, payment reference, or email."); return; }
+      const row = await apiGet<OrderRow>(`/orders/public/track/${encodeURIComponent(value)}`);
       setOrder(row);
     } catch (e: any) {
-      setError(e?.message || "Failed to look up order");
+      setError(e?.message || "We couldn't find an order matching that invoice, order ID, payment reference, or email.");
     } finally {
       setLoading(false);
     }
@@ -183,18 +181,19 @@ const TrackOrder = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref]);
 
-  // Realtime subscription for live updates
+  // Polling for live updates if status is not final
   useEffect(() => {
-    if (!order?.id) return;
-    const channel = supabase
-      .channel(`track-${order.id}`)
-      .on("postgres_changes",
-        { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${order.id}` },
-        (payload) => setOrder((prev) => (prev ? { ...prev, ...(payload.new as any) } : prev))
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [order?.id]);
+    if (!order?.id || isFailed || order.status === "completed" || order.status === "delivered") return;
+    const interval = setInterval(async () => {
+      try {
+        const row = await apiGet<OrderRow>(`/orders/public/track/${encodeURIComponent(order.invoice_number || order.id)}`);
+        setOrder(row);
+      } catch (e) {
+        // ignore background errors
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [order?.id, order?.status, isFailed]);
 
   const currentIndex = order ? stepIndexFor(order.status) : -1;
   const isFailed = order && (order.status === "failed" || order.status === "cancelled" || order.status === "refunded");

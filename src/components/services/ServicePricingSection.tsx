@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -645,36 +646,18 @@ const ServicePricingSection = ({
   const showUnsupportedNotice =
     detection.source === "unsupported-region" && !unsupportedDismissed;
 
-  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["service-pricing", serviceSlug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("service_pricing")
-        .select("service_slug, service_title, is_enabled, tiers, quote_settings")
-        .eq("service_slug", serviceSlug)
-        .maybeSingle();
-      if (error) throw error;
-      return data as unknown as ServicePricingRow | null;
+      try {
+        const res = await apiGet<ServicePricingRow | null>(`/cms/service-pricing/${serviceSlug}`);
+        return res;
+      } catch (err) {
+        console.error("Failed to load service pricing from NestJS:", err);
+        return null;
+      }
     },
   });
-
-  // Realtime: admin pricing edits push to this service page instantly
-  useEffect(() => {
-    const channel = supabase
-      .channel(`service-pricing-${serviceSlug}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "service_pricing", filter: `service_slug=eq.${serviceSlug}` },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["service-pricing", serviceSlug] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [serviceSlug, queryClient]);
 
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [activeTierForQuote, setActiveTierForQuote] = useState<PricingTier | null>(null);
@@ -737,7 +720,7 @@ const ServicePricingSection = ({
   const toggleAddon = (id: string) => setSelectedAddons((p) => ({ ...p, [id]: !p[id] }));
 
   const handleAddTierToCart = (t: PricingTier, baseUsd: number) => {
-    addItem({ id: `${serviceSlug}-${t.id}`, name: `${serviceTitle} — ${t.name}`, price: baseUsd, slug: serviceSlug, period: t.period }, { silent: true });
+    addItem({ id: `${serviceSlug}-${t.id}`, name: `${serviceTitle} — ${t.name}`, price: baseUsd, slug: serviceSlug, period: t.period, features: t.features }, { silent: true });
     if (isUSFormation && selectedState && stateFeeUsd > 0) {
       addItem({
         id: `${serviceSlug}-statefee-${selectedState.abbr}-${entityType}`,

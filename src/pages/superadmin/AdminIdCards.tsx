@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toPng } from "html-to-image";
 import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import SiteLogo from "@/components/shared/SiteLogo";
 import { Button } from "@/components/ui/button";
@@ -473,10 +474,9 @@ const AdminIdCards = () => {
   const saveBrand = async () => {
     setSavingBrand(true);
     try {
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert([{ key: ID_CARD_BRAND_KEY, value: JSON.stringify(brand) }], { onConflict: "key" });
-      if (error) throw error;
+      await apiPost("/cms/site-settings/bulk", {
+        settings: [{ key: ID_CARD_BRAND_KEY, value: JSON.stringify(brand) }],
+      });
       toast.success("Brand saved · ID cards updated everywhere");
       setBrandDirty(false);
       qc.invalidateQueries({ queryKey: ["id-card-brand"] });

@@ -3,6 +3,7 @@ import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Eye } from "lucide-react";
@@ -15,13 +16,7 @@ const AccountInvoices = () => {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["account-invoices", user?.email],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("customer_email", user!.email!)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
+      return apiGet<any[]>("/orders/mine");
     },
     enabled: !!user?.email,
   });

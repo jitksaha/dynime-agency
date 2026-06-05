@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Save, ChevronUp, ChevronDown, Loader2, Milestone } from "lucide-react";
@@ -17,6 +16,7 @@ import {
   getTimelineIcon,
   type TimelineItem,
 } from "@/lib/about-timeline-defaults";
+import { useUpsertSiteSetting } from "@/hooks/use-cms-data";
 
 const blank = (): TimelineItem => ({
   year: "",
@@ -31,6 +31,7 @@ const AdminAboutTimeline = () => {
   const qc = useQueryClient();
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [saving, setSaving] = useState(false);
+  const upsertSetting = useUpsertSiteSetting();
 
   useEffect(() => {
     if (data) setItems(data);
@@ -54,10 +55,7 @@ const AdminAboutTimeline = () => {
     setSaving(true);
     try {
       const cleaned = items.filter((it) => it.title.trim() || it.year.trim());
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert([{ key: ABOUT_TIMELINE_KEY, value: JSON.stringify(cleaned) }], { onConflict: "key" });
-      if (error) throw error;
+      await upsertSetting.mutateAsync({ key: ABOUT_TIMELINE_KEY, value: JSON.stringify(cleaned) });
       toast.success("Timeline saved. About page will update automatically.");
       qc.invalidateQueries({ queryKey: ["about-timeline"] });
       qc.invalidateQueries({ queryKey: ["site-settings"] });

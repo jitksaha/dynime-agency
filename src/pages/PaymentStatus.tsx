@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import Layout from "@/components/layout/Layout";
 import { useSEO } from "@/hooks/use-seo";
 import { Loader2 } from "lucide-react";
+import { apiGet } from "@/lib/api";
 
 type OrderStatusRow = {
   id: string;
@@ -13,51 +13,52 @@ type OrderStatusRow = {
   items: Array<{ id: string; name: string; price: number; quantity: number }>;
   customer_name: string | null;
   customer_email: string;
-  created_at: string;
-  updated_at: string;
-  payment_verification: unknown;
 };
 
-const FINAL = new Set(["paid", "completed", "failed", "cancelled", "refunded"]);
+const FINAL = new Set(["paid", "confirmed", "completed", "failed", "cancelled", "refunded"]);
 
-const toShopStatus = (status: string, hint: string): "success" | "failed" | "cancelled" => {
-  if (status === "paid" || status === "completed") return "success";
-  if (status === "cancelled" || hint === "cancel") return "cancelled";
+const toShopStatus = (dbStatus: string, hint: string) => {
+  const h = hint.toLowerCase();
+  if (h.includes("success") || h.includes("succeed") || h.includes("complete")) return "success";
+  if (h.includes("cancel")) return "cancelled";
+  if (dbStatus === "paid" || dbStatus === "confirmed" || dbStatus === "completed") return "success";
+  if (dbStatus === "cancelled" || dbStatus === "refunded") return "cancelled";
   return "failed";
 };
 
-const destinationFor = (status: "success" | "failed" | "cancelled") => {
-  try { localStorage.removeItem("lastOrderType"); } catch {}
-  return `/checkout?payment=${status}`;
+const destinationFor = (status: string, orderId?: string) => {
+  const type = localStorage.getItem("lastOrderType");
+  if (type === "flexpay_compliance") {
+    return status === "success"
+      ? `/flexpay/apply?payment=success&order_id=${orderId || ""}`
+      : `/flexpay/apply?payment=${status}`;
+  }
+  return status === "success"
+    ? `/checkout?payment=success&order_id=${orderId || ""}`
+    : `/checkout?payment=${status}`;
 };
 
 /**
- * Auto-verify and redirect.
- * Visiting /payment/status/:sessionId no longer renders a timeline UI —
+ * We land here after returning from Stripe, SSLCommerz, DodoPayment, or bKash;
  * we briefly poll for a final state, then send the user back to /shop
  * with a single ?payment= flag that the Shop page handles via dialog.
- */
+ * */
 const PaymentStatus = () => {
   const { sessionId = "" } = useParams<{ sessionId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const redirectedRef = useRef(false);
 
-  const callbackHint =
-    searchParams.get("bkash") || searchParams.get("status") || "";
+  const callbackHint = (
+    searchParams.get("bkash") || searchParams.get("status") || ""
+  ).toLowerCase();
 
   useSEO({ title: "Verifying payment…", noIndex: true });
 
   const { data } = useQuery({
     queryKey: ["order-status-redirect", sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_order_status_by_session", {
-        _session_id: sessionId,
-      });
-      if (error) throw error;
-      const row = (Array.isArray(data) ? data[0] : data) as
-        | OrderStatusRow
-        | undefined;
+      const row = await apiGet<OrderStatusRow>(`/orders/public/status-by-session/${encodeURIComponent(sessionId)}`);
       return row ?? null;
     },
     enabled: !!sessionId,
@@ -81,7 +82,7 @@ const PaymentStatus = () => {
           const next = payload.new as Partial<OrderStatusRow>;
           if (next.status && FINAL.has(next.status) && !redirectedRef.current) {
             redirectedRef.current = true;
-            navigate(destinationFor(toShopStatus(next.status, callbackHint)), { replace: true });
+            navigate(destinationFor(toShopStatus(next.status, callbackHint), data.id), { replace: true });
           }
         },
       )
@@ -95,21 +96,30 @@ const PaymentStatus = () => {
   useEffect(() => {
     if (redirectedRef.current) return;
     if (callbackHint) {
-      redirectedRef.current = true;
-      const status =
-        callbackHint === "cancel"
-          ? "cancelled"
-          : callbackHint === "success"
-          ? "success"
-          : data && FINAL.has(data.status)
-          ? toShopStatus(data.status, callbackHint)
-          : "failed";
-      navigate(destinationFor(status), { replace: true });
-      return;
-    }
-    if (data && FINAL.has(data.status)) {
-      redirectedRef.current = true;
-      navigate(destinationFor(toShopStatus(data.status, callbackHint)), { replace: true });
+      const isSuccess = callbackHint.includes("success") || callbackHint.includes("succeed") || callbackHint.includes("complete");
+      const isCancel = callbackHint.includes("cancel");
+      
+      if (isSuccess) {
+        redirectedRef.current = true;
+        navigate(destinationFor("success", data?.id), { replace: true });
+        return;
+      }
+      if (isCancel) {
+        redirectedRef.current = true;
+        navigate(destinationFor("cancelled", data?.id), { replace: true });
+        return;
+      }
+
+      if (data && FINAL.has(data.status)) {
+        redirectedRef.current = true;
+        navigate(destinationFor(toShopStatus(data.status, callbackHint), data.id), { replace: true });
+        return;
+      }
+    } else {
+      if (data && FINAL.has(data.status)) {
+        redirectedRef.current = true;
+        navigate(destinationFor(toShopStatus(data.status, callbackHint), data.id), { replace: true });
+      }
     }
   }, [data, callbackHint, navigate]);
 
@@ -118,10 +128,11 @@ const PaymentStatus = () => {
     const t = window.setTimeout(() => {
       if (redirectedRef.current) return;
       redirectedRef.current = true;
-      navigate(destinationFor("success"), { replace: true });
+      navigate(destinationFor("success", data?.id), { replace: true });
     }, 3500);
     return () => window.clearTimeout(t);
-  }, [navigate]);
+  }, [navigate, data]);
+
   return (
     <section className="min-h-screen flex items-center justify-center px-6">
       <Loader2 className="w-6 h-6 animate-spin text-primary" />

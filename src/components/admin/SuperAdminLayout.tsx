@@ -12,8 +12,9 @@ import {
   LogOut, Menu, X, FormInput, Briefcase, Shield, Users, ShoppingBag, ClipboardList,
   Globe, PanelTop, CreditCard, Tag, DollarSign, Mail, Search, Bell, Sun, Moon,
   ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles, Home, Share2, Wand2, Sliders, Lock, LineChart, Link2, TrendingUp,
-  IdCard, Layers, Banknote, PieChart, UserCog, ScrollText, Receipt, Rocket, Wallet, Building2,
+  IdCard, Layers, Banknote, PieChart, UserCog, ScrollText, Receipt, Rocket, Wallet, Building2, GitMerge,
 } from "lucide-react";
+
 import SiteLogo from "@/components/shared/SiteLogo";
 import dynimeIconLight from "@/assets/dynime-icon-light.svg";
 import dynimeIconDark from "@/assets/dynime-icon-dark.svg";
@@ -79,7 +80,7 @@ const navGroupsContent: NavGroup = {
     { to: "/superadmin/pages", label: "Pages", icon: FileText },
     { to: "/superadmin/blog", label: "Blog", icon: FileText },
     { to: "/superadmin/portfolio", label: "Portfolio", icon: Briefcase },
-    { to: "/superadmin/team", label: "Team Accounts", icon: UserCog },
+    { to: "/superadmin/team", label: "User Management", icon: Users },
     { to: "/superadmin/about-timeline", label: "About Timeline", icon: FileText },
     {
       key: "seo",
@@ -120,9 +121,7 @@ const navGroupsVerification: NavGroup = {
       icon: Shield,
       badge: "New",
       children: [
-        { to: "/superadmin/kyc", label: "KYC (Identity)", icon: Shield },
-        { to: "/superadmin/kyb", label: "KYB (Business)", icon: Building2 as any },
-        { to: "/superadmin/credit", label: "Credit Review", icon: CreditCard },
+        { to: "/superadmin/verifications", label: "Identity & Business", icon: Shield },
       ],
     },
   ],
@@ -181,8 +180,20 @@ const navGroupsCommerce: NavGroup = {
     { to: "/superadmin/tax-settings", label: "Tax & VAT", icon: Receipt, badge: "New" },
     { to: "/superadmin/payment-gateways", label: "Payment Gateways", icon: CreditCard },
     { to: "/superadmin/flexpay", label: "FlexPay (BNPL)", icon: Wallet, badge: "New" },
+    {
+      key: "referrals",
+      label: "Referral & Partners",
+      icon: GitMerge,
+      badge: "New",
+      children: [
+        { to: "/superadmin/referrals", label: "Referral Dashboard", icon: TrendingUp },
+        { to: "/superadmin/referrals/partners", label: "Partner Accounts", icon: Users },
+        { to: "/superadmin/referrals/payouts", label: "Payout Requests", icon: Banknote },
+      ],
+    },
   ],
 };
+
 
 const navGroupsSystem: NavGroup = {
   label: "System",

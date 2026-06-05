@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Save, Share2, Link2, RefreshCw } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SOCIAL_DEFINITIONS } from "@/components/shared/SocialIcons";
+import { apiPost } from "@/lib/api";
 
 const AdminSocialLinks = () => {
   const { data: settings, isLoading } = useSiteSettings();
@@ -32,8 +33,7 @@ const AdminSocialLinks = () => {
         key: d.key,
         value: JSON.stringify((values[d.key] || "").trim()),
       }));
-      const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
-      if (error) throw error;
+      await apiPost("/cms/site-settings/bulk", { settings: rows });
       toast.success("Social links updated everywhere — auto synced.");
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     } catch (err: any) {

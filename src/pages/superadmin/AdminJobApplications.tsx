@@ -19,6 +19,7 @@ import {
   Sparkles, RefreshCw, AlertTriangle, UserX, Filter, Gauge,
 } from "lucide-react";
 import { streamCsvExport, type CsvColumn } from "@/lib/csv-export";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 
 interface AtsContactLinks {
   emails?: string[];
@@ -263,8 +264,7 @@ const AdminJobApplications = () => {
         const my = idx++;
         const app = targets[my];
         try {
-          const { error } = await supabase.functions.invoke("ats-scan-application", { body: { application_id: app.id } });
-          if (error) throw error;
+          await apiPost(`/cms/job-applications/${app.id}/scan`);
           ok++;
         } catch {
           fail++;
@@ -295,11 +295,7 @@ const AdminJobApplications = () => {
         const my = idx++;
         const app = targets[my];
         try {
-          const { error } = await supabase
-            .from("job_applications")
-            .update({ status: "rejected" })
-            .eq("id", app.id);
-          if (error) throw error;
+          await apiPatch(`/cms/job-applications/${app.id}`, { status: "rejected" });
           ok++;
           if (notify && app.email) {
             try {
@@ -328,12 +324,7 @@ const AdminJobApplications = () => {
   const { data: apps = [], isLoading } = useQuery<JobApplication[]>({
     queryKey: ["admin-job-applications"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("job_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as JobApplication[];
+      return apiGet<JobApplication[]>("/cms/job-applications");
     },
   });
 
@@ -392,8 +383,7 @@ const AdminJobApplications = () => {
   const updateMutation = useMutation({
     mutationFn: async (patch: { id: string; status?: string; admin_notes?: string; notifyStatus?: boolean; emailNote?: string }) => {
       const { id, notifyStatus, emailNote, ...rest } = patch;
-      const { error } = await supabase.from("job_applications").update(rest).eq("id", id);
-      if (error) throw error;
+      await apiPatch(`/cms/job-applications/${id}`, rest);
       // Email send is non-fatal: the DB status change has already persisted.
       // If we threw here on email failure, the dialog would roll back its local
       // state and the user would think the status change didn't stick.
@@ -426,8 +416,7 @@ const AdminJobApplications = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("job_applications").delete().eq("id", id);
-      if (error) throw error;
+      await apiDelete(`/cms/job-applications/${id}`);
     },
     onSuccess: () => {
       toast.success("Application deleted");
@@ -444,15 +433,14 @@ const AdminJobApplications = () => {
     if (!app.resume_url) return;
     const resumeName = app.resume_url.split("/").pop() || "candidate-resume";
 
-    const { data, error } = await supabase.storage
-      .from("job-applications")
-      .createSignedUrl(app.resume_url, 60 * 30); // 30 minutes
-    if (error || !data?.signedUrl) return;
-
-    // Fetch the file and expose it as an in-page data URL. Direct storage
-    // URLs and top-level blob: tabs can be blocked by browser extensions.
     try {
-      const resp = await fetch(data.signedUrl);
+      const data = await apiGet<{ signedUrl: string }>(`/cms/job-applications/${app.id}/resume-url`);
+      if (!data?.signedUrl) return;
+      const signedUrl = data.signedUrl;
+
+      // Fetch the file and expose it as an in-page data URL. Direct storage
+      // URLs and top-level blob: tabs can be blocked by browser extensions.
+      const resp = await fetch(signedUrl);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const blob = await resp.blob();
       const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -464,31 +452,21 @@ const AdminJobApplications = () => {
       setResumeUrl(dataUrl);
       setResumeMeta({ name: resumeName, type: blob.type || "application/octet-stream" });
     } catch (e) {
-      console.warn("Resume fetch failed, falling back to direct link", e);
-      // Fallback to the raw signed URL — user can right-click → open if their
-      // extension allows; otherwise they get a clear error in the toast below.
-      setResumeUrl(data.signedUrl);
-      setResumeMeta({ name: resumeName, type: resumeName.toLowerCase().endsWith(".pdf") ? "application/pdf" : "application/octet-stream" });
-      toast.error(
-        "Couldn't preload the resume — a browser extension (ad blocker / privacy guard) may be blocking supabase.co. Disable it for this site or use an incognito window.",
-      );
+      console.warn("Resume fetch failed", e);
     }
   };
 
   const runScan = async (id: string) => {
     setRescanning(true);
     try {
-      const { error } = await supabase.functions.invoke("ats-scan-application", {
-        body: { application_id: id },
-      });
-      if (error) throw error;
+      await apiPost(`/cms/job-applications/${id}/scan`);
       toast.success("ATS scan complete");
       await qc.invalidateQueries({ queryKey: ["admin-job-applications"] });
       // refresh dialog selection
-      const { data } = await supabase.from("job_applications").select("*").eq("id", id).maybeSingle();
-      if (data) setSelected(data as JobApplication);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Scan failed");
+      const data = await apiGet<JobApplication>(`/cms/job-applications/${id}`);
+      if (data) setSelected(data);
+    } catch (e: any) {
+      toast.error(e.message || "Scan failed");
     } finally {
       setRescanning(false);
     }

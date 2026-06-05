@@ -3,6 +3,7 @@ import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 import { useCustomerServices, daysUntil } from "@/hooks/use-customer-services";
 import { ShoppingBag, Package, FileText, DollarSign, ArrowRight, RotateCw, Clock, Building2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,13 +25,7 @@ const AccountDashboard = () => {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["account-orders", user?.email],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("customer_email", user!.email!)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
+      return apiGet<any[]>("/orders/mine");
     },
     enabled: !!user?.email,
   });

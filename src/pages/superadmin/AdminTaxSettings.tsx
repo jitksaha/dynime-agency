@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Save, Receipt, Percent, Info } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { computeTax, parseTaxSettings } from "@/lib/tax";
+import { apiPost } from "@/lib/api";
 
 const AdminTaxSettings = () => {
   const { data: settings, isLoading } = useSiteSettings();
@@ -51,8 +52,7 @@ const AdminTaxSettings = () => {
         { key: "tax_mode", value: JSON.stringify(mode) },
         { key: "tax_show_breakdown", value: JSON.stringify(showBreakdown ? "true" : "false") },
       ];
-      const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
-      if (error) throw error;
+      await apiPost("/cms/site-settings/bulk", { settings: rows });
       toast.success("Tax settings saved — now live across the site.");
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     } catch (err: any) {

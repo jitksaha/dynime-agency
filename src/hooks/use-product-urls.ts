@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 
 export type ProductUrl = {
   id: string;
@@ -47,15 +47,9 @@ const writeCache = (rows: ProductUrl[]) => {
 };
 
 export const fetchProductUrls = async (): Promise<ProductUrl[]> => {
-  const { data, error } = await supabase
-    .from("product_urls")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-  if (error) throw error;
-  const rows = (data || []) as ProductUrl[];
-  writeCache(rows);
-  return rows;
+  const rows = await apiGet<ProductUrl[]>("/seo/product-urls");
+  writeCache(rows || []);
+  return rows || [];
 };
 
 export const useProductUrls = () =>
@@ -69,16 +63,36 @@ export const useProductUrls = () =>
 export const useAllProductUrls = () =>
   useQuery({
     queryKey: ["product-urls", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("product_urls")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data || []) as ProductUrl[];
-    },
+    queryFn: () => apiGet<ProductUrl[]>("/seo/product-urls/admin"),
     staleTime: 30_000,
   });
+
+export const useUpsertProductUrl = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (item: any) => {
+      if (item.id) {
+        return apiPatch<ProductUrl>(`/seo/product-urls/${item.id}`, item);
+      }
+      return apiPost<ProductUrl>("/seo/product-urls", item);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["product-urls"] });
+      qc.invalidateQueries({ queryKey: ["product-urls", "all"] });
+    },
+  });
+};
+
+export const useDeleteProductUrl = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiDelete<any>(`/seo/product-urls/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["product-urls"] });
+      qc.invalidateQueries({ queryKey: ["product-urls", "all"] });
+    },
+  });
+};
 
 const getCachedList = (): ProductUrl[] | null => {
   if (typeof window === "undefined") return null;

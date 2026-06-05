@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
@@ -24,7 +25,7 @@ import { ELIGIBLE_COUNTRIES, isCountryEligible } from "@/data/eligible-countries
 import {
   ArrowLeft, ArrowRight, ShoppingCart, User, CreditCard,
   CheckCircle2, Trash2, Tag, Loader2, ShieldCheck, Sparkles, ChevronDown,
-  Copy, HelpCircle, Lock,
+  Copy, HelpCircle, Lock, AlertTriangle, Info,
 } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";
 import { getFeePercentForTenure } from "@/lib/flexpay-fees";
@@ -38,6 +39,8 @@ import { getServiceBySlug } from "@/data/services";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { computeTax, useTaxSettings } from "@/lib/tax";
+import { apiPost } from "@/lib/api";
+import { getReferralCode } from '@/components/shared/ReferralTracker';
 
 type StepKey = "cart" | "contact" | "pay";
 type MilestoneStage = { label: string; percent: number; amount: number };
@@ -222,9 +225,40 @@ const Checkout = () => {
     customerEmail?: string;
   } | null>(null);
 
-  const { user } = useAuth();
+  const { user, signIn } = useAuth();
   const queryClient = useQueryClient();
   const [authOpen, setAuthOpen] = useState(false);
+  const [createAccount, setCreateAccount] = useState(true);
+  const [accountPassword, setAccountPassword] = useState("");
+  const [emailCheckLoading, setEmailCheckLoading] = useState(false);
+  const [emailExists, setEmailExists] = useState<boolean | null>(null);
+
+  // Debounced email check to verify if account already exists
+  useEffect(() => {
+    const trimmed = details.email.trim();
+    if (!trimmed || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmed)) {
+      setEmailExists(null);
+      setEmailCheckLoading(false);
+      return;
+    }
+
+    setEmailCheckLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/auth/check-email?email=${encodeURIComponent(trimmed)}`);
+        if (res.ok) {
+          const data = await res.json() as { exists: boolean };
+          setEmailExists(data.exists);
+        }
+      } catch (err) {
+        console.error("Failed to check email existence:", err);
+      } finally {
+        setEmailCheckLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [details.email]);
 
   // Pre-fill from logged-in user and refetch user-scoped data on sign-in.
   useEffect(() => {
@@ -391,6 +425,14 @@ const Checkout = () => {
       const baseValid = details.full_name.trim().length > 1 &&
         /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(details.email);
       if (!baseValid) return false;
+
+      // Enforce that guest users must register and have a password
+      if (!user) {
+        if (emailExists === true) return false; // Must sign in instead of ordering as guest
+        if (!createAccount) return false; // Must keep create account checked
+        if (!accountPassword || accountPassword.length < 8) return false; // Must provide 8+ char password
+      }
+
       if (isConsultancyBooking && (!bookingDate || !bookingTime)) return false;
       // If a billing country is provided, it must be on the eligible list.
       if (details.country && !isCountryEligible(details.country)) return false;
@@ -405,7 +447,7 @@ const Checkout = () => {
       return true;
     }
     return true;
-  }, [step, items, details, isConsultancyBooking, bookingDate, bookingTime, categoriesInCart, categoryDetails]);
+  }, [step, items, details, isConsultancyBooking, bookingDate, bookingTime, categoriesInCart, categoryDetails, user, createAccount, accountPassword, emailExists]);
 
   const goNext = () => {
     const idx = STEPS.findIndex((s) => s.key === step);
@@ -455,6 +497,17 @@ const Checkout = () => {
   const submit = async () => {
     if (!gateway) { toast.error("Choose a payment method"); return; }
 
+    const includedFeatures = items.reduce((acc, item) => {
+      if (item.features && Array.isArray(item.features)) {
+        return [...acc, ...item.features];
+      }
+      return acc;
+    }, [] as string[]);
+
+    const finalFeatures = includedFeatures.length > 0 
+      ? includedFeatures 
+      : (primaryService && Array.isArray(primaryService.features) ? primaryService.features : []);
+
     // FlexPay branch — uses approved credit limit, no external gateway
     if (gateway === "flexpay") {
       const { data: u } = await supabase.auth.getUser();
@@ -490,6 +543,7 @@ const Checkout = () => {
             };
             return acc;
           }, {} as Record<string, any>),
+          included_services: finalFeatures,
         };
         const billingAddress = {
           line1: details.line1, city: details.city, state: details.state,
@@ -531,63 +585,85 @@ const Checkout = () => {
     }
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("process-payment", {
-        body: {
-          gateway,
-          customer_name: details.full_name,
-          customer_email: details.email.trim().toLowerCase(),
-          items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+      // 1. Automatic Account Creation & Login for Guest users if selected
+      if (!user && createAccount) {
+        if (!accountPassword || accountPassword.length < 8) {
+          throw new Error("Password must be at least 8 characters long");
+        }
+        toast.loading("Creating your secure account…", { id: "checkout-auth" });
+        try {
+          await apiPost<any>("/auth/register", {
+            email: details.email.trim().toLowerCase(),
+            password: accountPassword,
+            full_name: details.full_name,
+          });
+          const loginRes = await signIn(details.email.trim().toLowerCase(), accountPassword);
+          if (loginRes.error) {
+            throw new Error(loginRes.error);
+          }
+          toast.success("Account created and logged in!", { id: "checkout-auth" });
+        } catch (err: any) {
+          toast.error(err?.message || "Failed to create account. Please check your password or use a different email.", { id: "checkout-auth" });
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      const r = await apiPost<any>("/orders/public/process-payment", {
+        gateway,
+        customer_name: details.full_name,
+        customer_email: details.email.trim().toLowerCase(),
+        items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+        total: finalTotal,
+        charge_now: chargeNow,
+        coupon_code: appliedCoupon?.code || null,
+        tax: taxBreakdown.enabled ? {
+          amount: taxBreakdown.tax,
+          percent: taxBreakdown.percent,
+          mode: taxBreakdown.mode,
+          label: taxBreakdown.label,
+        } : null,
+        milestone: appliedCoupon?.is_milestone ? {
+          mode: appliedCoupon.milestone_mode,
+          stages: milestoneStages,
           total: finalTotal,
-          charge_now: chargeNow,
-          coupon_code: appliedCoupon?.code || null,
-          tax: taxBreakdown.enabled ? {
-            amount: taxBreakdown.tax,
-            percent: taxBreakdown.percent,
-            mode: taxBreakdown.mode,
-            label: taxBreakdown.label,
+        } : null,
+        service_brief: {
+          note: briefNote,
+          category: serviceCategory,
+          primary_service: primaryService?.title || null,
+          booking: isConsultancyBooking && bookingDate && bookingTime ? {
+            date: format(bookingDate, "yyyy-MM-dd"),
+            time: bookingTime,
+            timezone: bookingTimezone,
+            iso: `${format(bookingDate, "yyyy-MM-dd")}T${bookingTime}:00`,
           } : null,
-          milestone: appliedCoupon?.is_milestone ? {
-            mode: appliedCoupon.milestone_mode,
-            stages: milestoneStages,
-            total: finalTotal,
-          } : null,
-          service_brief: {
-            note: briefNote,
-            category: serviceCategory,
-            primary_service: primaryService?.title || null,
-            booking: isConsultancyBooking && bookingDate && bookingTime ? {
-              date: format(bookingDate, "yyyy-MM-dd"),
-              time: bookingTime,
-              timezone: bookingTimezone,
-              iso: `${format(bookingDate, "yyyy-MM-dd")}T${bookingTime}:00`,
-            } : null,
-            categories: categoriesInCart,
-            category_details: categoriesInCart.reduce((acc, cat) => {
-              const def = CATEGORY_INTAKE[cat];
-              const values = categoryDetails[cat] || {};
-              acc[cat] = {
-                title: def.title,
-                values: def.fields.reduce((v, f) => {
-                  v[f.key] = { label: f.label, value: values[f.key] ?? (f.type === "multiselect" ? [] : "") };
-                  return v;
-                }, {} as Record<string, { label: string; value: any }>),
-              };
-              return acc;
-            }, {} as Record<string, any>),
-          },
-          billing_address: {
-            line1: details.line1, city: details.city, state: details.state,
-            postal_code: details.postal_code, country: details.country, company: details.company,
-            tax_id: details.tax_id, phone: details.phone,
-          },
-          notes: briefNote,
-          currency: "USD",
-          success_url: `${window.location.origin}/checkout?payment=success`,
-          cancel_url: `${window.location.origin}/checkout?payment=cancelled`,
+          categories: categoriesInCart,
+          category_details: categoriesInCart.reduce((acc, cat) => {
+            const def = CATEGORY_INTAKE[cat];
+            const values = categoryDetails[cat] || {};
+            acc[cat] = {
+              title: def.title,
+              values: def.fields.reduce((v, f) => {
+                v[f.key] = { label: f.label, value: values[f.key] ?? (f.type === "multiselect" ? [] : "") };
+                return v;
+              }, {} as Record<string, { label: string; value: any }>),
+            };
+            return acc;
+          }, {} as Record<string, any>),
+          included_services: finalFeatures,
         },
+        billing_address: {
+          line1: details.line1, city: details.city, state: details.state,
+          postal_code: details.postal_code, country: details.country, company: details.company,
+          tax_id: details.tax_id, phone: details.phone,
+        },
+        notes: briefNote,
+        currency: "USD",
+        referral_code: getReferralCode() || undefined,
+        success_url: `${window.location.origin}/checkout?payment=success`,
+        cancel_url: `${window.location.origin}/checkout?payment=cancelled`,
       });
-      if (error) throw error;
-      const r: any = data;
       // Bank transfer — show admin-configured deposit info inline.
       if (r?.gateway === "bank_transfer" && r?.session_id) {
         clearCart();
@@ -968,19 +1044,22 @@ const Checkout = () => {
                   {/* STEP 2 — Contact (only 2 required fields) */}
                   {step === "contact" && (
                     <div className="space-y-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex items-start justify-between gap-3">
                         <div>
                           <h2 className="font-heading text-xl md:text-2xl font-bold">How do we reach you?</h2>
                           <p className="text-sm text-muted-foreground">Just two fields — we'll email your invoice & account link.</p>
                         </div>
                         {!user && (
-                          <button
-                            type="button"
-                            onClick={() => setAuthOpen(true)}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary hover:bg-primary/15 transition-colors"
-                          >
-                            <Lock className="w-3.5 h-3.5" /> Already a customer? Sign in
-                          </button>
+                          <div className="text-right flex-shrink-0 pt-1">
+                            <span className="block text-xs text-muted-foreground font-medium">Have an account?</span>
+                            <button
+                              type="button"
+                              onClick={() => setAuthOpen(true)}
+                              className="text-sm font-bold text-primary hover:underline hover:text-primary/90 transition-colors"
+                            >
+                              Sign In
+                            </button>
+                          </div>
                         )}
                       </div>
                       {user && (
@@ -997,12 +1076,79 @@ const Checkout = () => {
                         </div>
                         <div>
                           <Label htmlFor="ce">Email *</Label>
-                          <Input id="ce" type="email" autoComplete="email" inputMode="email"
-                            placeholder="you@company.com"
-                            value={details.email}
-                            onChange={(e) => setDetails({ ...details, email: e.target.value })} />
+                          <div className="relative">
+                            <Input id="ce" type="email" autoComplete="email" inputMode="email"
+                              placeholder="you@company.com"
+                              value={details.email}
+                              onChange={(e) => setDetails({ ...details, email: e.target.value })}
+                              className={cn(
+                                "pr-10",
+                                emailExists === true && "border-amber-500 focus-visible:ring-amber-500",
+                                emailExists === false && "border-emerald-500 focus-visible:ring-emerald-500"
+                              )}
+                            />
+                            {emailCheckLoading && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                              </div>
+                            )}
+                            {!emailCheckLoading && emailExists === true && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <AlertTriangle className="w-4 h-4 text-amber-500" />
+                              </div>
+                            )}
+                            {!emailCheckLoading && emailExists === false && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Clean Single Notices below the fields */}
+                      {!user && !emailCheckLoading && emailExists === true && (
+                        <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center justify-between gap-3 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 animate-fade-in">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-500" />
+                            <span>This email already has an account. Please sign in or use a different email.</span>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => setAuthOpen(true)}
+                            className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold px-3 py-1.5 h-8 text-xs rounded-lg flex-shrink-0 flex items-center gap-1 border border-amber-600 hover:border-amber-700 transition-colors shadow-sm"
+                          >
+                            <Lock className="w-3 h-3 mr-1" /> Sign In Now
+                          </Button>
+                        </div>
+                      )}
+
+                      {!user && !emailCheckLoading && emailExists === false && (
+                        <div className="space-y-3 animate-fade-in">
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                            <span>New customer email! An account will be created automatically to keep your records secure.</span>
+                          </div>
+                          <div className="w-full">
+                            <Label htmlFor="create-account-pw" className="text-xs font-semibold text-primary">Choose a password *</Label>
+                            <Input 
+                              id="create-account-pw" 
+                              type="password" 
+                              placeholder="Min. 8 characters" 
+                              value={accountPassword}
+                              onChange={(e) => setAccountPassword(e.target.value)}
+                              className="mt-1 focus-visible:ring-primary border-primary/30"
+                            />
+                            {accountPassword.length > 0 && accountPassword.length < 8 && (
+                              <p className="text-xs text-rose-500 font-medium mt-1 animate-fade-in">
+                                Password must be at least 8 characters long to proceed.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {isConsultancyBooking && (
                         <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-4 space-y-3">
                           <div className="flex items-center gap-2">
@@ -1339,6 +1485,20 @@ const Checkout = () => {
                         <p className="text-sm text-muted-foreground">No payment method configured. Contact support.</p>
                       )}
 
+                      {/* Glassmorphic Low-Amount Notice for DodoPayment */}
+                      {gateway === "dodopayment" && chargeNow < 0.50 && (
+                        <div className="rounded-xl border border-primary/20 bg-primary/5 dark:bg-primary/5 backdrop-blur-md p-4 flex gap-3 items-start text-sm text-foreground/90 animate-fade-in shadow-lg">
+                          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                          <div className="space-y-1">
+                            <p className="font-semibold text-foreground">DodoPayment Requirement</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              DodoPayment requires a transaction minimum of <strong className="text-foreground">$0.50 USD</strong>. 
+                              Since your current amount is <strong className="text-foreground">${chargeNow.toFixed(2)} USD</strong>, you can add another service to your cart or choose a different payment method (such as SSLCommerz or bKash) to complete your checkout.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       {/* FlexPay CTA for users without account */}
                       {!flexpayAccount && (
                         <Link to="/flexpay" className="block rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm hover:bg-primary/10 transition-colors">
@@ -1393,9 +1553,27 @@ const Checkout = () => {
                     Continue <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 ) : (
-                  <Button variant="hero" size="lg" onClick={submit} disabled={submitting || !gateway || (gateway === "flexpay" && (!flexpayTenure || chargeNow > flexpayAvailable))}>
-                    {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
-                    {gateway === "flexpay"
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    onClick={submit} 
+                    disabled={
+                      submitting || 
+                      !gateway || 
+                      (gateway === "flexpay" && (!flexpayTenure || chargeNow > flexpayAvailable)) || 
+                      (gateway === "dodopayment" && chargeNow < 0.50)
+                    }
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : gateway === "dodopayment" && chargeNow < 0.50 ? (
+                      <Info className="w-4 h-4 mr-2" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                    )}
+                    {gateway === "dodopayment" && chargeNow < 0.50
+                      ? "Minimum $0.50 USD required"
+                      : gateway === "flexpay"
                       ? `Finance $${chargeNow.toFixed(2)} with FlexPay`
                       : isBkash ? `Pay ৳${bdtTotal.toFixed(2)} BDT` : `Pay $${chargeNow.toFixed(2)}`}
                     {appliedCoupon?.is_milestone && <span className="ml-2 text-xs opacity-80">(advance)</span>}

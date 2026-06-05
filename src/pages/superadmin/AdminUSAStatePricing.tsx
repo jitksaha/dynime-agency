@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +9,7 @@ import { Save, Search, MapPin, RefreshCw } from "lucide-react";
 import { STATES } from "@/data/usa-formation";
 import type { UsaStatePricingRow } from "@/hooks/use-usa-state-pricing";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUsaStatePricingAdmin, useUpsertUsaStatePricing } from "@/hooks/use-cms-data";
 
 type Row = Omit<UsaStatePricingRow, "id"> & { id?: string };
 
@@ -35,29 +35,22 @@ const AdminUSAStatePricing = () => {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [rows, setRows] = useState<Row[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [dirty, setDirty] = useState<Set<string>>(new Set());
 
-  const load = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("usa_state_pricing" as any)
-      .select("*")
-      .order("sort_order", { ascending: true });
-    if (error) {
-      toast({ title: "Could not load", description: error.message, variant: "destructive" });
-      setLoading(false);
-      return;
-    }
-    setRows((data as unknown as Row[]) ?? []);
-    setLoading(false);
+  const { data: initialRows = [], isLoading: loading } = useUsaStatePricingAdmin();
+  const upsertStatePricing = useUpsertUsaStatePricing();
+
+  const load = () => {
+    qc.invalidateQueries({ queryKey: ["usa-state-pricing-admin"] });
   };
 
   useEffect(() => {
-    load();
-  }, []);
+    if (initialRows.length > 0) {
+      setRows(initialRows);
+    }
+  }, [initialRows]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -87,21 +80,21 @@ const AdminUSAStatePricing = () => {
       corp_renewal: Number(row.corp_renewal) || 0,
       sort_order: Number(row.sort_order) || 0,
     };
-    const { error } = await supabase
-      .from("usa_state_pricing" as any)
-      .upsert(payload as any, { onConflict: "abbr" });
-    setSaving(null);
-    if (error) {
+    try {
+      await upsertStatePricing.mutateAsync(payload);
+      setDirty((d) => {
+        const n = new Set(d);
+        n.delete(row.abbr);
+        return n;
+      });
+      qc.invalidateQueries({ queryKey: ["usa-state-pricing-admin"] });
+      qc.invalidateQueries({ queryKey: ["usa-state-pricing"] });
+      toast({ title: `${row.state} saved` });
+    } catch (error: any) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
-      return;
+    } finally {
+      setSaving(null);
     }
-    setDirty((d) => {
-      const n = new Set(d);
-      n.delete(row.abbr);
-      return n;
-    });
-    qc.invalidateQueries({ queryKey: ["usa-state-pricing"] });
-    toast({ title: `${row.state} saved` });
   };
 
   const seedMissing = async () => {
@@ -127,13 +120,15 @@ const AdminUSAStatePricing = () => {
       toast({ title: "Nothing to add — all 50 states already exist" });
       return;
     }
-    const { error } = await supabase.from("usa_state_pricing" as any).insert(toAdd as any);
-    if (error) {
+    try {
+      await Promise.all(
+        toAdd.map((item) => upsertStatePricing.mutateAsync(item))
+      );
+      toast({ title: `Added ${toAdd.length} missing state(s)` });
+      qc.invalidateQueries({ queryKey: ["usa-state-pricing-admin"] });
+    } catch (error: any) {
       toast({ title: "Seed failed", description: error.message, variant: "destructive" });
-      return;
     }
-    toast({ title: `Added ${toAdd.length} missing state(s)` });
-    load();
   };
 
   return (

@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useBlogPost, useBlogPosts, useIncrementBlogPostView } from "@/hooks/use-cms-data";
 import Layout from "@/components/layout/Layout";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import SocialShare from "@/components/shared/SocialShare";
@@ -52,63 +51,26 @@ const gradientFor = (cat: string) => GRADIENTS[cat] ?? GRADIENTS.General;
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const qc = useQueryClient();
 
-  const { data: post, isLoading, error } = useQuery({
-    queryKey: ["blog-post", slug],
-    enabled: !!slug,
-    queryFn: async (): Promise<BlogPost | null> => {
-      const { data, error } = await supabase
-        .from("blog_posts" as any)
-        .select("*")
-        .eq("slug", slug!)
-        .eq("is_published", true)
-        .maybeSingle();
-      if (error) throw error;
-      return (data as unknown as BlogPost) ?? null;
-    },
-  });
-
-  const { data: related = [] } = useQuery({
-    queryKey: ["blog-related", post?.category, post?.id],
-    enabled: !!post,
-    queryFn: async (): Promise<BlogPost[]> => {
-      const { data, error } = await supabase
-        .from("blog_posts" as any)
-        .select("id,slug,title,excerpt,cover_image_url,category,tags,author,read_minutes,is_featured,published_at")
-        .eq("is_published", true)
-        .eq("category", post!.category)
-        .neq("id", post!.id)
-        .order("published_at", { ascending: false })
-        .limit(3);
-      if (error) throw error;
-      return (data as unknown as BlogPost[]) ?? [];
-    },
-  });
+  const { data: post, isLoading, error } = useBlogPost(slug!);
+  
+  const { data: allRelated = [] } = useBlogPosts(post?.category);
+  const related = useMemo(() => {
+    if (!post) return [];
+    return allRelated.filter((r: any) => r.id !== post.id).slice(0, 3);
+  }, [allRelated, post]);
 
   // Increment view count once per slug per browser session
   const [liveViews, setLiveViews] = useState<number | null>(null);
+  const incrementView = useIncrementBlogPostView();
+  
   useEffect(() => {
-    if (!post?.slug) return;
+    if (!post?.id || !post?.slug) return;
     const key = `blog_viewed:${post.slug}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
-    supabase.rpc("increment_blog_view" as any, { _slug: post.slug }).then(({ data }) => {
-      if (typeof data === "number") setLiveViews(data);
-    });
-  }, [post?.slug]);
-
-  // Realtime auto-sync from superadmin edits
-  useEffect(() => {
-    const channel = supabase
-      .channel(`blog_post:${slug}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => {
-        qc.invalidateQueries({ queryKey: ["blog-post", slug] });
-        qc.invalidateQueries({ queryKey: ["blog-related"] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [slug, qc]);
+    incrementView.mutate(post.id);
+  }, [post?.id, post?.slug, incrementView]);
 
   usePageSEO(`blog/${slug ?? ""}`, {
     title: post ? `${post.title} | Dynime Insights` : "Blog post | Dynime",

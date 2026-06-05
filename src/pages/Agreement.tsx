@@ -7,6 +7,7 @@ import { Loader2, Printer, Download, ArrowLeft, Building2, UserRound, FileText, 
 import SiteLogo from "@/components/shared/SiteLogo";
 import { useSEO } from "@/hooks/use-seo";
 import { printWithSignatureFonts } from "@/lib/print-with-fonts";
+import { apiGet } from "@/lib/api";
 
 interface AgreementRow {
   id: string;
@@ -46,14 +47,7 @@ const Agreement = () => {
     if (!ref) return;
     setLoading(true);
     try {
-      let row: AgreementRow | null = null;
-      const { data: r1 } = await supabase.rpc("get_invoice_by_number", { _invoice: ref });
-      if (r1 && Array.isArray(r1) && r1.length) row = r1[0] as unknown as AgreementRow;
-      if (!row) {
-        const { data: r2 } = await supabase.from("orders").select("*").eq("id", ref).maybeSingle();
-        if (r2) row = r2 as unknown as AgreementRow;
-      }
-      if (!row) { setError("Agreement not found"); return; }
+      const row = await apiGet<AgreementRow>(`/orders/public/invoice/${encodeURIComponent(ref)}`);
       setData(row);
       setError(null);
     } catch (e) {

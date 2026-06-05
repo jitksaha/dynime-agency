@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,30 +45,38 @@ interface Props {
 
 const AddonsManager = ({ serviceSlug, serviceTitle }: Props) => {
   const { toast } = useToast();
+  const { session } = useAuth();
+  const token = session?.access_token;
   const [addons, setAddons] = useState<Addon[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (!token) return;
     let cancel = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("service_addons" as any)
-        .select("*")
-        .eq("service_slug", serviceSlug)
-        .order("sort_order", { ascending: true });
-      if (cancel) return;
-      if (error) {
-        toast({ title: "Failed to load add-ons", description: error.message, variant: "destructive" });
+      try {
+        const res = await fetch(`/api/v1/cms/service-addons/${serviceSlug}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error("Failed to load add-ons");
+        const data = await res.json();
+        if (cancel) return;
+        setAddons((data ?? []).map((a: any) => ({ ...a })));
+      } catch (error: any) {
+        if (!cancel) {
+          toast({ title: "Failed to load add-ons", description: error.message, variant: "destructive" });
+        }
       }
-      setAddons(((data as unknown as Addon[]) ?? []).map((a) => ({ ...a })));
       setLoading(false);
     })();
     return () => {
       cancel = true;
     };
-  }, [serviceSlug, toast]);
+  }, [serviceSlug, token, toast]);
 
   const update = (idx: number, patch: Partial<Addon>) => {
     setAddons((prev) => prev.map((a, i) => (i === idx ? { ...a, ...patch, _dirty: true } : a)));
@@ -89,8 +97,22 @@ const AddonsManager = ({ serviceSlug, serviceTitle }: Props) => {
   const remove = async (idx: number) => {
     const a = addons[idx];
     if (!a._new) {
-      const { error } = await supabase.from("service_addons" as any).delete().eq("id", a.id);
-      if (error) {
+      if (!token) {
+        toast({ title: "Delete failed", description: "Not authenticated", variant: "destructive" });
+        return;
+      }
+      try {
+        const res = await fetch(`/api/v1/cms/service-addons/${a.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || "Failed to delete add-on");
+        }
+      } catch (error: any) {
         toast({ title: "Delete failed", description: error.message, variant: "destructive" });
         return;
       }
@@ -99,6 +121,10 @@ const AddonsManager = ({ serviceSlug, serviceTitle }: Props) => {
   };
 
   const saveAll = async () => {
+    if (!token) {
+      toast({ title: "Save failed", description: "Not authenticated", variant: "destructive" });
+      return;
+    }
     setSaving(true);
     try {
       const payload = addons.map((a, i) => ({
@@ -112,10 +138,18 @@ const AddonsManager = ({ serviceSlug, serviceTitle }: Props) => {
         is_active: !!a.is_active,
         sort_order: i,
       }));
-      const { error } = await supabase
-        .from("service_addons" as any)
-        .upsert(payload, { onConflict: "id" });
-      if (error) throw error;
+      const res = await fetch(`/api/v1/cms/service-addons/${serviceSlug}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ addons: payload }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to save add-ons");
+      }
       setAddons((prev) => prev.map((a) => ({ ...a, _dirty: false, _new: false })));
       toast({ title: "Add-ons saved", description: `${payload.length} item(s) updated for ${serviceTitle}.` });
     } catch (e: any) {

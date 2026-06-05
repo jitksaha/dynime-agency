@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { STATES, type StateRecord } from "@/data/usa-formation";
 
 export interface UsaStatePricingRow {
@@ -30,13 +30,8 @@ export const useUsaStatePricing = () => {
   return useQuery({
     queryKey: ["usa-state-pricing"],
     queryFn: async (): Promise<StateRecord[]> => {
-      const { data, error } = await supabase
-        .from("usa_state_pricing" as any)
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      const rows = (data as unknown as UsaStatePricingRow[]) ?? [];
+      const data = await apiGet<UsaStatePricingRow[]>("/cms/usa-state-pricing");
+      const rows = data ?? [];
       if (rows.length === 0) return STATES;
       const byAbbr = new Map(STATES.map((s) => [s.abbr, s]));
       return rows.map((r) => {
@@ -61,6 +56,6 @@ export const useUsaStatePricing = () => {
         } satisfies StateRecord;
       });
     },
-    staleTime: 60_000,
+    staleTime: 5000,
   });
 };

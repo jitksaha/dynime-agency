@@ -16,7 +16,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { useSiteSettings } from "@/hooks/use-data";
 import { toast } from "sonner";
@@ -99,12 +99,13 @@ export default function AdminFxOrders() {
     const key = kind === "in" ? "fx_payment_in_options" : "fx_payment_out_options";
     const list = kind === "in" ? paymentInOptions : paymentOutOptions;
     const next = Array.from(new Set([...list, value.trim()].filter(Boolean)));
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key, value: JSON.stringify(next.join(",")) }, { onConflict: "key" });
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["site-settings"] });
-    toast.success("Option added");
+    try {
+      await apiPost("/cms/site-settings", { key, value: JSON.stringify(next.join(",")) });
+      qc.invalidateQueries({ queryKey: ["site-settings"] });
+      toast.success("Option added");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add option");
+    }
   };
 
   const [search, setSearch] = useState("");
@@ -116,13 +117,7 @@ export default function AdminFxOrders() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["fx-orders"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fx_orders" as any)
-        .select("*")
-        .order("order_date", { ascending: false })
-        .limit(1000);
-      if (error) throw error;
-      return (data || []) as unknown as FxOrder[];
+      return apiGet<FxOrder[]>("/orders/fx");
     },
   });
 
@@ -232,11 +227,9 @@ export default function AdminFxOrders() {
         throw new Error("Base and quote amounts are required");
       }
       if (editing) {
-        const { error } = await supabase.from("fx_orders" as any).update(payload).eq("id", editing.id);
-        if (error) throw error;
+        await apiPatch(`/orders/fx/${editing.id}`, payload);
       } else {
-        const { error } = await supabase.from("fx_orders" as any).insert(payload);
-        if (error) throw error;
+        await apiPost("/orders/fx", payload);
       }
     },
     onSuccess: () => {
@@ -250,8 +243,7 @@ export default function AdminFxOrders() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("fx_orders" as any).delete().eq("id", id);
-      if (error) throw error;
+      await apiDelete(`/orders/fx/${id}`);
     },
     onSuccess: () => {
       toast.success("Deleted");
@@ -263,8 +255,7 @@ export default function AdminFxOrders() {
 
   const setStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: FxOrder["status"] }) => {
-      const { error } = await supabase.from("fx_orders" as any).update({ status }).eq("id", id);
-      if (error) throw error;
+      await apiPatch(`/orders/fx/${id}`, { status });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fx-orders"] });

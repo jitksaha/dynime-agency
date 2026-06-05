@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Globe2 } from "lucide-react";
 import { toast } from "sonner";
+import { useCountryEligibilityAdmin, useUpsertCountryEligibility, useDeleteCountryEligibility } from "@/hooks/use-cms-data";
 
 interface Row {
   id: string;
@@ -50,35 +50,16 @@ const AdminCountryEligibility = () => {
   const [editing, setEditing] = useState<Row | null>(null);
   const [form, setForm] = useState<Omit<Row, "id">>(empty);
 
-  const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["country-eligibility-admin"],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("country_eligibility")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("name", { ascending: true });
-      if (error) throw error;
-      return (data as Row[]) ?? [];
-    },
-  });
+  const { data: rows = [], isLoading } = useCountryEligibilityAdmin();
+  const upsertCountry = useUpsertCountryEligibility();
+  const deleteCountry = useDeleteCountryEligibility();
 
   const upsert = useMutation({
-    mutationFn: async (payload: Omit<Row, "id"> & { id?: string }) => {
-      if (payload.id) {
-        const { id, ...rest } = payload;
-        const { error } = await (supabase as any)
-          .from("country_eligibility").update(rest).eq("id", id);
-        if (error) throw error;
-      } else {
-        const { error } = await (supabase as any)
-          .from("country_eligibility").insert(payload);
-        if (error) throw error;
-      }
-    },
+    mutationFn: (payload: Omit<Row, "id"> & { id?: string }) =>
+      upsertCountry.mutateAsync(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["country-eligibility-admin"] });
-      qc.invalidateQueries({ queryKey: ["country-eligibility-public"] });
+      qc.invalidateQueries({ queryKey: ["country-eligibility"] });
       toast.success("Saved");
       setOpen(false);
       setEditing(null);
@@ -88,14 +69,10 @@ const AdminCountryEligibility = () => {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await (supabase as any)
-        .from("country_eligibility").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) => deleteCountry.mutateAsync(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["country-eligibility-admin"] });
-      qc.invalidateQueries({ queryKey: ["country-eligibility-public"] });
+      qc.invalidateQueries({ queryKey: ["country-eligibility"] });
       toast.success("Deleted");
     },
     onError: (e: any) => toast.error(e.message ?? "Delete failed"),

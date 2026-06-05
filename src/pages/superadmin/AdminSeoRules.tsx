@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,13 +55,8 @@ const AdminSeoRules = () => {
   const { data: rules } = useQuery({
     queryKey: ["site-settings-row", "seo_rules"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "seo_rules")
-        .maybeSingle();
-      if (error && error.code !== "PGRST116") throw error;
-      let val: any = data?.value;
+      const res = await apiGet<any>("/cms/site-settings/seo_rules");
+      let val: any = res?.value;
       while (typeof val === "string") {
         try { val = JSON.parse(val); } catch { break; }
       }
@@ -75,23 +70,7 @@ const AdminSeoRules = () => {
 
   const save = useMutation({
     mutationFn: async (next: SeoRules) => {
-      const { data: existing } = await supabase
-        .from("site_settings")
-        .select("id")
-        .eq("key", "seo_rules")
-        .maybeSingle();
-      if (existing) {
-        const { error } = await supabase
-          .from("site_settings")
-          .update({ value: next as any })
-          .eq("key", "seo_rules");
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("site_settings")
-          .insert({ key: "seo_rules", value: next as any });
-        if (error) throw error;
-      }
+      await apiPost("/cms/site-settings", { key: "seo_rules", value: next });
     },
     onSuccess: () => {
       toast.success("SEO scoring rules updated");

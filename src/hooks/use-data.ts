@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { readCachedSiteSettings, writeCachedSiteSettings } from "@/lib/site-settings-cache";
+import { apiGet } from "@/lib/api";
 
 export const useContactInfo = () => {
   return useQuery({
@@ -36,8 +37,7 @@ export const useSiteSettings = () => {
     queryKey: ["site-settings"],
     initialData: readCachedSiteSettings,
     queryFn: async () => {
-      const { data, error } = await supabase.from("site_settings").select("*");
-      if (error) throw error;
+      const data = await apiGet<any[]>("/cms/site-settings");
       const map: Record<string, string> = {};
       data?.forEach((s) => {
         // Unwrap JSON value — could be a raw string, quoted string, or nested JSON
@@ -50,7 +50,7 @@ export const useSiteSettings = () => {
       writeCachedSiteSettings(map);
       return map;
     },
-    staleTime: 5 * 60_000,
+    staleTime: 5000,
   });
 };
 

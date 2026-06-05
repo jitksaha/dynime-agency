@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { servicePages, type ServicePageData } from "@/data/services";
-import { supabase } from "@/integrations/supabase/client";
 import { usePageSEO } from "@/hooks/use-page-seo";
 
 const CATEGORY_ORDER: Array<ServicePageData["category"]> = ["dws", "dms", "dss", "dcs"];
@@ -93,28 +92,6 @@ const ServicesPricing = () => {
       setParams(next, { replace: true });
     }
   }, [activeSlug, params, setParams]);
-
-  // Realtime sync: admin pricing edits push to public page instantly
-  useEffect(() => {
-    const channel = supabase
-      .channel("service-pricing-public")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "service_pricing" },
-        (payload) => {
-          const row = (payload.new || payload.old) as { service_slug?: string } | null;
-          if (row?.service_slug) {
-            queryClient.invalidateQueries({ queryKey: ["service-pricing", row.service_slug] });
-          } else {
-            queryClient.invalidateQueries({ queryKey: ["service-pricing"] });
-          }
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
 
   const handleSelect = (slug: string) => {
     setActiveSlug(slug);

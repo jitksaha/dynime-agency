@@ -1,0 +1,2844 @@
+=== AUDIT RESULT ===
+{
+  "tables": [
+    "customer_services",
+    "orders",
+    "pages",
+    "form_submissions",
+    "chat_messages",
+    "support_tickets",
+    "office_locations",
+    "service_pricing",
+    "site_settings",
+    "job_applications",
+    "contact_info",
+    "employees",
+    "order_milestones",
+    "form_templates",
+    "crm_activities",
+    "crm_leads",
+    "id_card_assignments",
+    "portfolio_projects",
+    "investment_plans\" as any).select(\"*",
+    "invest_settings\" as any).select(\"key,value",
+    "product_urls",
+    "careers",
+    "flexpay_settings",
+    "flexpay_credit_accounts",
+    "country_eligibility",
+    "flexpay_virtual_cards",
+    "flexpay_credit_applications",
+    "flexpay_emi_plans",
+    "flexpay_emi_installments",
+    "flexpay_application_documents",
+    "profiles",
+    "newsletter_subscribers",
+    "dynime_employees",
+    "dynime_kpi_monthly",
+    "[dynamic: table]",
+    "inbound_emails",
+    "admin_replies",
+    "blog_posts",
+    "hr_documents",
+    "hr_requests",
+    "hr_request_events",
+    "coupons",
+    "email_send_log",
+    "suppressed_emails",
+    "notification_settings",
+    "invest_leads",
+    "investments\" as any).select(\"*",
+    "investment_payouts\" as any).select(\"*",
+    "withdrawal_requests\" as any).select(\"*",
+    "tracked_keywords",
+    "keyword_rank_history",
+    "crm_email_templates",
+    "crm_workflows",
+    "crm_workflow_steps"
+  ],
+  "storage": [
+    "general storage usage",
+    "email-attachments",
+    "job-applications",
+    "bank-receipts",
+    "flexpay-documents",
+    "portfolio",
+    "hr-request-attachments",
+    "investor-documents",
+    "site-assets"
+  ],
+  "functions": [
+    "send-transactional-email",
+    "manage-team",
+    "admin-create-manual-investor",
+    "generate-og-image",
+    "seo-analyze",
+    "ats-scan-application",
+    "attach-bank-receipt",
+    "process-payment",
+    "subscribe-newsletter",
+    "seo-audit",
+    "seo-health",
+    "flexpay-apply",
+    "cancel-recurring",
+    "sync-newsletter-subscribers",
+    "imap-poll",
+    "get-my-hr-document",
+    "generate-investment-agreement",
+    "seed-blog-posts",
+    "admin-delete-order",
+    "track-keywords",
+    "validate-og",
+    "gsc-data",
+    "seo-integrations"
+  ],
+  "files": [
+    {
+      "file": "src/components/account/DocumentManager.tsx",
+      "tables": [
+        "customer_services",
+        "customer_services"
+      ],
+      "storage": [
+        "general storage usage"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 66,
+          "content": "const { data, error } = await supabase.storage"
+        },
+        {
+          "lineNum": 119,
+          "content": "await supabase.from(\"customer_services\").update(patch).eq(\"id\", serviceId);"
+        },
+        {
+          "lineNum": 133,
+          "content": "await supabase.storage.from(BUCKET).remove([`${serviceId}/${existing.name}`]);"
+        },
+        {
+          "lineNum": 135,
+          "content": "const { error } = await supabase.storage.from(BUCKET).upload(path, file, {"
+        },
+        {
+          "lineNum": 156,
+          "content": "const { error } = await supabase.storage.from(BUCKET).remove([`${serviceId}/${file.name}`]);"
+        },
+        {
+          "lineNum": 173,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/AddonsManager.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 92,
+          "content": "const { error } = await supabase.from(\"service_addons\" as any).delete().eq(\"id\", a.id);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/AdminLayout.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 27,
+          "content": "const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {"
+        },
+        {
+          "lineNum": 32,
+          "content": "supabase.auth.getSession().then(({ data: { session } }) => {"
+        },
+        {
+          "lineNum": 41,
+          "content": "await supabase.auth.signOut();"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/AdminReplyDialog.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 64,
+          "content": "const { error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 83,
+          "content": "const { error: logErr } = await supabase.from(\"admin_replies\" as any).insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/EmailAttachmentList.tsx",
+      "tables": [],
+      "storage": [
+        "email-attachments",
+        "email-attachments"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 33,
+          "content": "const { data } = await supabase.storage"
+        },
+        {
+          "lineNum": 139,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/MailRealtimeToasts.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 106,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/ManualEmployeeDialog.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "manage-team"
+      ],
+      "lines": [
+        {
+          "lineNum": 65,
+          "content": "const { data, error } = await supabase.functions.invoke(\"manage-team\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/ManualInvestorDialog.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "admin-create-manual-investor"
+      ],
+      "lines": [
+        {
+          "lineNum": 109,
+          "content": "const { data, error } = await supabase.functions.invoke("
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/ManualOrderDialog.tsx",
+      "tables": [
+        "orders",
+        "orders",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 104,
+          "content": "const { data: r2 } = await supabase.from(\"orders\").select(\"*\").eq(\"id\", ref).maybeSingle();"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/NewPageDialog.tsx",
+      "tables": [
+        "pages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 25,
+          "content": "const { error } = await supabase.from(\"pages\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/NotificationsBell.tsx",
+      "tables": [
+        "form_submissions",
+        "chat_messages",
+        "support_tickets"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 132,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/OfficeLocationsDialog.tsx",
+      "tables": [
+        "office_locations",
+        "office_locations",
+        "office_locations",
+        "office_locations"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 38,
+          "content": "let q = supabase.from(\"office_locations\").select(\"*\").order(\"sort_order\").order(\"name\");"
+        },
+        {
+          "lineNum": 77,
+          "content": "const { error } = await supabase.from(\"office_locations\").update(payload).eq(\"id\", editing.id);"
+        },
+        {
+          "lineNum": 80,
+          "content": "const { error } = await supabase.from(\"office_locations\").insert(payload);"
+        },
+        {
+          "lineNum": 94,
+          "content": "const { error } = await supabase.from(\"office_locations\").delete().eq(\"id\", id);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/OgImageUploader.tsx",
+      "tables": [],
+      "storage": [
+        "general storage usage"
+      ],
+      "functions": [
+        "generate-og-image"
+      ],
+      "lines": [
+        {
+          "lineNum": 47,
+          "content": "const { error } = await supabase.storage.from(BUCKET).upload(path, file, {"
+        },
+        {
+          "lineNum": 53,
+          "content": "const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);"
+        },
+        {
+          "lineNum": 71,
+          "content": "const { data, error } = await supabase.functions.invoke(\"generate-og-image\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/RecurringHealthWidget.tsx",
+      "tables": [
+        "customer_services"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/components/admin/ReplyHistory.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 61,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/SeoScorePanel.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "seo-analyze"
+      ],
+      "lines": [
+        {
+          "lineNum": 47,
+          "content": "const { data, error } = await supabase.functions.invoke(\"seo-analyze\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/ServiceItemPicker.tsx",
+      "tables": [
+        "service_pricing"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/components/admin/SiteLogoUploader.tsx",
+      "tables": [
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "site_settings"
+      ],
+      "storage": [
+        "general storage usage"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 352,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 356,
+          "content": "const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);"
+        },
+        {
+          "lineNum": 538,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 542,
+          "content": "const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/admin/TeamAvatarUploader.tsx",
+      "tables": [],
+      "storage": [
+        "general storage usage"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 34,
+          "content": "const { error } = await supabase.storage"
+        },
+        {
+          "lineNum": 38,
+          "content": "const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/careers/JobApplicationForm.tsx",
+      "tables": [
+        "job_applications"
+      ],
+      "storage": [
+        "job-applications"
+      ],
+      "functions": [
+        "send-transactional-email",
+        "ats-scan-application"
+      ],
+      "lines": [
+        {
+          "lineNum": 79,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 89,
+          "content": "const { error } = await supabase.from(\"job_applications\").insert([{"
+        },
+        {
+          "lineNum": 109,
+          "content": "const { error: emailError } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 123,
+          "content": "supabase.functions.invoke(\"ats-scan-application\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/checkout/BankDepositDialog.tsx",
+      "tables": [
+        "contact_info"
+      ],
+      "storage": [
+        "bank-receipts"
+      ],
+      "functions": [
+        "attach-bank-receipt"
+      ],
+      "lines": [
+        {
+          "lineNum": 142,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 147,
+          "content": "const { error: fnErr } = await supabase.functions.invoke(\"attach-bank-receipt\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/contact/CountryEligibilityChecker.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 355,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/employee/EmployeePortalLayout.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 30,
+          "content": "await supabase.auth.signOut();"
+        }
+      ]
+    },
+    {
+      "file": "src/components/employee/EmployeeProtectedRoute.tsx",
+      "tables": [
+        "employees"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/components/flexpay/InstallmentReceiptDialog.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 38,
+          "content": "supabase.from(\"orders\")"
+        }
+      ]
+    },
+    {
+      "file": "src/components/flexpay/PayInstallmentDialog.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [
+        "process-payment"
+      ],
+      "lines": [
+        {
+          "lineNum": 94,
+          "content": "const { data } = await supabase.from(\"site_settings\").select(\"key, value\");"
+        },
+        {
+          "lineNum": 140,
+          "content": "const { data, error } = await supabase.functions.invoke(\"process-payment\", {"
+        },
+        {
+          "lineNum": 167,
+          "content": "await supabase.rpc(\"flexpay_mark_installment_processing\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/flexpay/VirtualCard.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 55,
+          "content": "await supabase.rpc(\"flexpay_log_cvv_view\", { _card_id: card.id });"
+        },
+        {
+          "lineNum": 71,
+          "content": "const { error } = await supabase.rpc(\"flexpay_set_card_freeze\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/invest/InvestLeadForm.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 70,
+          "content": "const { error } = await supabase.from(\"invest_leads\" as any).insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/investor/InvestorNotificationsBell.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 61,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/components/investor/InvestorPortalLayout.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 35,
+          "content": "await supabase.auth.signOut();"
+        }
+      ]
+    },
+    {
+      "file": "src/components/invoice/PayInvoicePanel.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [
+        "process-payment"
+      ],
+      "lines": [
+        {
+          "lineNum": 231,
+          "content": "const { data, error } = await supabase.functions.invoke(\"process-payment\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/layout/Footer.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "subscribe-newsletter"
+      ],
+      "lines": [
+        {
+          "lineNum": 318,
+          "content": "const { data, error } = await supabase.functions.invoke(\"subscribe-newsletter\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/orders/BookingStatusCard.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/components/orders/OrderMilestones.tsx",
+      "tables": [
+        "orders",
+        "order_milestones",
+        "orders",
+        "order_milestones",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 85,
+          "content": "await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 110,
+          "content": "const { data: newId, error } = await supabase.rpc(\"generate_next_milestone_invoice\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/components/services/ServiceAddonsSection.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 52,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/services/ServicePricingSection.tsx",
+      "tables": [
+        "service_pricing",
+        "form_templates",
+        "form_submissions",
+        "form_templates"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 675,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 813,
+          "content": "const { error } = await supabase.from(\"form_submissions\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/services/ServicesLeadForm.tsx",
+      "tables": [
+        "form_templates",
+        "form_submissions"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 88,
+          "content": "const { error } = await supabase.from(\"form_submissions\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/services/UKFormationUpgrade.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 62,
+          "content": "const url = `https://isweduliawwjqwhyvwhp.supabase.co/functions/v1/companies-house-search?q=${encodeURIComponent(q)}`;"
+        }
+      ]
+    },
+    {
+      "file": "src/components/shared/ContactForm.tsx",
+      "tables": [
+        "form_templates",
+        "form_templates",
+        "form_submissions"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 153,
+          "content": "const { error } = await supabase.from(\"form_submissions\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/shared/LeadActivities.tsx",
+      "tables": [
+        "crm_activities",
+        "crm_activities",
+        "crm_leads",
+        "crm_activities"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 52,
+          "content": "const { error } = await supabase.from(\"crm_activities\").insert(payload);"
+        }
+      ]
+    },
+    {
+      "file": "src/components/shared/LiveChatWidget.tsx",
+      "tables": [
+        "chat_messages",
+        "chat_messages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 28,
+          "content": "const { data } = await supabase.rpc(\"get_chat_messages\", { _session_id: sessionId });"
+        },
+        {
+          "lineNum": 46,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 57,
+          "content": "await supabase.from(\"chat_messages\").insert({"
+        },
+        {
+          "lineNum": 67,
+          "content": "await supabase.from(\"chat_messages\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/components/shared/ThemeProvider.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/components/superadmin/SeoAuditPanel.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "seo-audit"
+      ],
+      "lines": [
+        {
+          "lineNum": 45,
+          "content": "const { data: res, error } = await supabase.functions.invoke(\"seo-audit\", { body: { origin, maxPages } });"
+        }
+      ]
+    },
+    {
+      "file": "src/components/superadmin/SeoHealthPanel.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "seo-health"
+      ],
+      "lines": [
+        {
+          "lineNum": 137,
+          "content": "const { data, error } = await supabase.functions.invoke(\"seo-health\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/hooks/use-about-timeline.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-card-id.ts",
+      "tables": [
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-data.ts",
+      "tables": [
+        "contact_info",
+        "contact_info",
+        "site_settings",
+        "form_templates",
+        "form_templates",
+        "form_submissions",
+        "chat_messages",
+        "chat_messages",
+        "form_submissions",
+        "chat_messages",
+        "portfolio_projects"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 39,
+          "content": "const { data, error } = await supabase.from(\"site_settings\").select(\"*\");"
+        },
+        {
+          "lineNum": 61,
+          "content": "const { data, error } = await supabase.from(\"form_templates\").select(\"*\").order(\"created_at\");"
+        },
+        {
+          "lineNum": 88,
+          "content": "let query = supabase.from(\"form_submissions\").select(\"*, form_templates(name)\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 145,
+          "content": "const { error } = await supabase.from(\"form_submissions\").insert({ form_id: formId, data });"
+        },
+        {
+          "lineNum": 155,
+          "content": "const { error } = await supabase.from(\"chat_messages\").insert(msg);"
+        }
+      ]
+    },
+    {
+      "file": "src/hooks/use-home-sections.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-id-card-brand.ts",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-invest.ts",
+      "tables": [
+        "investment_plans\" as any).select(\"*",
+        "invest_settings\" as any).select(\"key,value"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 77,
+          "content": "let q = supabase.from(\"investment_plans\" as any).select(\"*\").order(\"sort_order\", { ascending: true });"
+        },
+        {
+          "lineNum": 92,
+          "content": "const { data, error } = await supabase.from(\"invest_settings\" as any).select(\"key,value\");"
+        }
+      ]
+    },
+    {
+      "file": "src/hooks/use-my-employee.ts",
+      "tables": [
+        "employees",
+        "employees"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-product-urls.ts",
+      "tables": [
+        "product_urls",
+        "product_urls"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-realtime-sync.ts",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 244,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/hooks/use-seo-rules.ts",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/hooks/use-team-card-ids.ts",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 39,
+          "content": "const { data, error } = await supabase.rpc(\"list_team_card_ids\");"
+        }
+      ]
+    },
+    {
+      "file": "src/hooks/useOrdersRealtime.ts",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 29,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/integrations/supabase/client.ts",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 5,
+          "content": "const SUPABASE_URL = \"https://isweduliawwjqwhyvwhp.supabase.co\";"
+        }
+      ]
+    },
+    {
+      "file": "src/lib/id-card-pdf.ts",
+      "tables": [
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 179,
+          "content": "const { error } = await supabase.from(\"id_card_assignments\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/lib/notify-submission.ts",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "send-transactional-email",
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 100,
+          "content": "supabase.functions.invoke(\"send-transactional-email\", { body: adminPayload }),"
+        },
+        {
+          "lineNum": 104,
+          "content": "supabase.functions.invoke(\"send-transactional-email\", { body: customerPayload }),"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Agreement.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 50,
+          "content": "const { data: r1 } = await supabase.rpc(\"get_invoice_by_number\", { _invoice: ref });"
+        },
+        {
+          "lineNum": 53,
+          "content": "const { data: r2 } = await supabase.from(\"orders\").select(\"*\").eq(\"id\", ref).maybeSingle();"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Blog.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 88,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/BlogPost.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 96,
+          "content": "supabase.rpc(\"increment_blog_view\" as any, { _slug: post.slug }).then(({ data }) => {"
+        },
+        {
+          "lineNum": 110,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/BlogTaxonomy.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 91,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/CareerDetail.tsx",
+      "tables": [
+        "careers"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 77,
+          "content": "const { data, error } = await supabase.rpc(\"get_career_stats\", { _slug: slug! });"
+        },
+        {
+          "lineNum": 103,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        },
+        {
+          "lineNum": 120,
+          "content": "supabase.rpc(\"increment_career_view\", { _slug: slug }).then(() => {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Careers.tsx",
+      "tables": [
+        "careers"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 186,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Checkout.tsx",
+      "tables": [
+        "site_settings",
+        "flexpay_settings",
+        "flexpay_credit_accounts"
+      ],
+      "storage": [],
+      "functions": [
+        "process-payment"
+      ],
+      "lines": [
+        {
+          "lineNum": 290,
+          "content": "const { data } = await supabase.from(\"site_settings\").select(\"key, value\");"
+        },
+        {
+          "lineNum": 314,
+          "content": "const { data } = await supabase.from(\"flexpay_settings\").select(\"*\").eq(\"id\", 1).maybeSingle();"
+        },
+        {
+          "lineNum": 321,
+          "content": "const { data: u } = await supabase.auth.getUser();"
+        },
+        {
+          "lineNum": 423,
+          "content": "const { data, error } = await supabase.rpc(\"validate_coupon\", {"
+        },
+        {
+          "lineNum": 460,
+          "content": "const { data: u } = await supabase.auth.getUser();"
+        },
+        {
+          "lineNum": 499,
+          "content": "const { data, error } = await supabase.rpc(\"flexpay_checkout\", {"
+        },
+        {
+          "lineNum": 534,
+          "content": "const { data, error } = await supabase.functions.invoke(\"process-payment\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/DynamicPage.tsx",
+      "tables": [
+        "pages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/FlexPay.tsx",
+      "tables": [
+        "flexpay_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 68,
+          "content": "const { data } = await supabase.from(\"flexpay_settings\").select(\"*\").eq(\"id\", 1).maybeSingle();"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/FlexPayApply.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "flexpay-apply"
+      ],
+      "lines": [
+        {
+          "lineNum": 100,
+          "content": "const { data, error } = await supabase.functions.invoke(\"flexpay-apply\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Invest.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 574,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Invoice.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 98,
+          "content": "const { data: r1 } = await supabase.rpc(\"get_invoice_by_number\", { _invoice: invoiceParam });"
+        },
+        {
+          "lineNum": 101,
+          "content": "const { data: r2 } = await supabase.from(\"orders\").select(\"*\").eq(\"id\", invoiceParam).maybeSingle();"
+        },
+        {
+          "lineNum": 135,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Legal.tsx",
+      "tables": [
+        "country_eligibility"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 907,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/OrderHistory.tsx",
+      "tables": [
+        "orders",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/PaymentStatus.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 54,
+          "content": "const { data, error } = await supabase.rpc(\"get_order_status_by_session\", {"
+        },
+        {
+          "lineNum": 90,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/ServicesPricing.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 115,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/TrackOrder.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 170,
+          "content": "const { data: r1 } = await supabase.rpc(\"lookup_order_for_tracking\", { _term: value });"
+        },
+        {
+          "lineNum": 196,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/Unsubscribe.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 7,
+          "content": "const SUPABASE_URL = \"https://isweduliawwjqwhyvwhp.supabase.co\";"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/account/AccountCompliance.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "cancel-recurring",
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 84,
+          "content": "const { error } = await supabase.functions.invoke(\"cancel-recurring\", {"
+        },
+        {
+          "lineNum": 95,
+          "content": "const { error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/account/AccountDashboard.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/account/AccountFlexPay.tsx",
+      "tables": [
+        "flexpay_credit_accounts",
+        "flexpay_virtual_cards",
+        "flexpay_credit_applications",
+        "flexpay_emi_plans",
+        "flexpay_emi_installments",
+        "flexpay_application_documents",
+        "flexpay_application_documents"
+      ],
+      "storage": [
+        "flexpay-documents"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 116,
+          "content": "const { data } = await supabase.from(\"flexpay_credit_accounts\")"
+        },
+        {
+          "lineNum": 155,
+          "content": "const { data } = await supabase.from(\"flexpay_emi_plans\")"
+        },
+        {
+          "lineNum": 200,
+          "content": "supabase.removeChannel(ch);"
+        },
+        {
+          "lineNum": 858,
+          "content": "const { error: upErr } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/account/AccountInvoices.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/account/AccountMilestones.tsx",
+      "tables": [
+        "orders",
+        "order_milestones",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/account/AccountProfile.tsx",
+      "tables": [
+        "profiles",
+        "profiles"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 30,
+          "content": "const { data } = await supabase.from(\"profiles\").select(\"full_name\").eq(\"id\", user.id).maybeSingle();"
+        },
+        {
+          "lineNum": 40,
+          "content": "const { error } = await supabase.from(\"profiles\").upsert({ id: user.id, email: user.email!, full_name: fullName }, { onConflict: \"id\" });"
+        },
+        {
+          "lineNum": 48,
+          "content": "const { error } = await supabase.auth.updateUser({ password: pwd });"
+        },
+        {
+          "lineNum": 62,
+          "content": "const { error } = await supabase.auth.updateUser("
+        },
+        {
+          "lineNum": 80,
+          "content": "const { error } = await supabase.auth.updateUser({ email: user.email });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/account/AccountTracking.tsx",
+      "tables": [
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/account/FlexPayReceipt.tsx",
+      "tables": [
+        "flexpay_emi_installments",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/account/ResetPassword.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 24,
+          "content": "const { data: sub } = supabase.auth.onAuthStateChange((event) => {"
+        },
+        {
+          "lineNum": 27,
+          "content": "supabase.auth.getSession().then(({ data }) => {"
+        },
+        {
+          "lineNum": 38,
+          "content": "const { error } = await supabase.auth.updateUser({ password });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminChat.tsx",
+      "tables": [
+        "chat_messages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 58,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminContactInfo.tsx",
+      "tables": [
+        "contact_info",
+        "contact_info",
+        "contact_info"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 45,
+          "content": "await supabase.from(\"contact_info\").delete().eq(\"id\", item.id);"
+        },
+        {
+          "lineNum": 57,
+          "content": "await supabase.from(\"contact_info\").update(payload).eq(\"id\", item.id);"
+        },
+        {
+          "lineNum": 59,
+          "content": "await supabase.from(\"contact_info\").insert(payload);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminDashboard.tsx",
+      "tables": [
+        "orders",
+        "newsletter_subscribers",
+        "dynime_employees",
+        "dynime_kpi_monthly",
+        "[dynamic: table]"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 37,
+          "content": "let q: any = supabase.from(table).select(\"*\", { count: \"exact\", head: true });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminFormBuilder.tsx",
+      "tables": [
+        "form_templates",
+        "form_templates"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 71,
+          "content": "const { error } = await supabase.from(\"form_templates\").update(payload).eq(\"id\", selectedId);"
+        },
+        {
+          "lineNum": 74,
+          "content": "const { error } = await supabase.from(\"form_templates\").insert(payload);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminHeaderFooter.tsx",
+      "tables": [
+        "site_settings",
+        "site_settings",
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [
+        "sync-newsletter-subscribers"
+      ],
+      "lines": [
+        {
+          "lineNum": 268,
+          "content": "const { data, error } = await supabase.functions.invoke("
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminInbox.tsx",
+      "tables": [
+        "inbound_emails",
+        "admin_replies",
+        "inbound_emails",
+        "inbound_emails"
+      ],
+      "storage": [],
+      "functions": [
+        "imap-poll"
+      ],
+      "lines": [
+        {
+          "lineNum": 136,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 192,
+          "content": "const { data, error } = await supabase.functions.invoke(\"imap-poll\", {});"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminPages.tsx",
+      "tables": [
+        "pages",
+        "pages",
+        "pages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 54,
+          "content": "const { error } = await supabase.from(\"pages\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 74,
+          "content": "const { error } = await supabase.from(\"pages\").update({ is_published: published }).eq(\"id\", id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminPortfolio.tsx",
+      "tables": [
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects",
+        "portfolio_projects"
+      ],
+      "storage": [
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio",
+        "portfolio"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 124,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").update(updates as any).in(\"id\", ids);"
+        },
+        {
+          "lineNum": 139,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").delete().in(\"id\", ids);"
+        },
+        {
+          "lineNum": 187,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").update(payload as any).eq(\"id\", data.id);"
+        },
+        {
+          "lineNum": 190,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").insert(payload as any);"
+        },
+        {
+          "lineNum": 206,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 220,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").update({ [field]: value } as any).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 249,
+          "content": "const { data: { session } } = await supabase.auth.getSession();"
+        },
+        {
+          "lineNum": 269,
+          "content": "const { error: uploadErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 276,
+          "content": "const { error: histErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 282,
+          "content": "const { data } = supabase.storage.from(\"portfolio\").getPublicUrl(stablePath);"
+        },
+        {
+          "lineNum": 336,
+          "content": "const { data, error } = await supabase.storage"
+        },
+        {
+          "lineNum": 351,
+          "content": "const { data: pub } = supabase.storage.from(\"portfolio\").getPublicUrl(path);"
+        },
+        {
+          "lineNum": 375,
+          "content": "const { data: blob, error: dlErr } = await supabase.storage.from(\"portfolio\").download(item.path);"
+        },
+        {
+          "lineNum": 379,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 385,
+          "content": "const { data: pub } = supabase.storage.from(\"portfolio\").getPublicUrl(stablePath);"
+        },
+        {
+          "lineNum": 429,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 437,
+          "content": "const { data: pub } = supabase.storage.from(\"portfolio\").getPublicUrl(path);"
+        },
+        {
+          "lineNum": 482,
+          "content": "const { error } = await supabase.from(\"portfolio_projects\").insert(rows as any);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminSEO.tsx",
+      "tables": [
+        "pages",
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "blog_posts",
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 58,
+          "content": "const { data, error } = await supabase.from(\"pages\").select(\"*\").order(\"updated_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 72,
+          "content": "const { data: existing } = await supabase.from(\"site_settings\").select(\"id\").eq(\"key\", key).maybeSingle();"
+        },
+        {
+          "lineNum": 74,
+          "content": "const { error } = await supabase.from(\"site_settings\").update({ value: JSON.stringify(value) }).eq(\"key\", key);"
+        },
+        {
+          "lineNum": 77,
+          "content": "const { error } = await supabase.from(\"site_settings\").insert({ key, value: JSON.stringify(value) });"
+        },
+        {
+          "lineNum": 119,
+          "content": "supabase.removeChannel(ch);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminSettings.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 90,
+          "content": "const { error } = await supabase.from(\"site_settings\").upsert(rows, { onConflict: \"key\" });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/AdminSubmissions.tsx",
+      "tables": [
+        "form_submissions",
+        "form_submissions"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 104,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 130,
+          "content": "await supabase.from(\"form_submissions\").update({ status }).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 358,
+          "content": "await supabase.from(\"form_submissions\").update({ status: \"replied\" }).eq(\"id\", replyTo.id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/admin/PageEditor.tsx",
+      "tables": [
+        "pages",
+        "pages"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 36,
+          "content": "const { data, error } = await supabase.from(\"pages\").select(\"*\").eq(\"id\", id!).single();"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/employee/EmployeeDashboard.tsx",
+      "tables": [
+        "hr_documents",
+        "hr_requests",
+        "hr_requests",
+        "hr_requests"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 24,
+          "content": "supabase.from(\"hr_documents\").select(\"id\", { count: \"exact\", head: true }).eq(\"employee_id\", emp!.id),"
+        },
+        {
+          "lineNum": 25,
+          "content": "supabase.from(\"hr_requests\").select(\"id\", { count: \"exact\", head: true }).eq(\"employee_id\", emp!.id),"
+        },
+        {
+          "lineNum": 26,
+          "content": "supabase.from(\"hr_requests\").select(\"id\", { count: \"exact\", head: true }).eq(\"employee_id\", emp!.id).in(\"status\", [\"pending\", \"in_review\"]),"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/employee/EmployeeDocuments.tsx",
+      "tables": [
+        "hr_documents"
+      ],
+      "storage": [],
+      "functions": [
+        "get-my-hr-document"
+      ],
+      "lines": [
+        {
+          "lineNum": 45,
+          "content": "const { data, error } = await supabase.functions.invoke(\"get-my-hr-document\", { body: { doc_id: docId } });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/employee/EmployeeRequests.tsx",
+      "tables": [
+        "hr_requests",
+        "hr_request_events",
+        "hr_request_events",
+        "hr_requests",
+        "hr_requests"
+      ],
+      "storage": [
+        "hr-request-attachments",
+        "hr-request-attachments"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 116,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 124,
+          "content": "const { error } = await supabase.from(\"hr_requests\").insert({"
+        },
+        {
+          "lineNum": 541,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 549,
+          "content": "const { error } = await supabase.from(\"hr_request_events\").insert({"
+        },
+        {
+          "lineNum": 568,
+          "content": "const { error } = await supabase.from(\"hr_requests\").update({ status: \"cancelled\" }).eq(\"id\", request.id);"
+        },
+        {
+          "lineNum": 576,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/investor-portal/InvestorAgreements.tsx",
+      "tables": [],
+      "storage": [
+        "investor-documents"
+      ],
+      "functions": [
+        "generate-investment-agreement"
+      ],
+      "lines": [
+        {
+          "lineNum": 53,
+          "content": "const { data, error } = await supabase.functions.invoke(\"generate-investment-agreement\", {"
+        },
+        {
+          "lineNum": 81,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/investor-portal/InvestorProfile.tsx",
+      "tables": [
+        "profiles",
+        "profiles"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 37,
+          "content": "const { data } = await supabase.from(\"profiles\").select(\"*\").eq(\"id\", user!.id).maybeSingle();"
+        },
+        {
+          "lineNum": 133,
+          "content": "const { error } = await supabase.auth.updateUser({ password: newPwd });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/investor-portal/InvestorStatements.tsx",
+      "tables": [],
+      "storage": [
+        "investor-documents"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 49,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/investor-portal/InvestorWithdrawals.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 76,
+          "content": "const { error } = await supabase.from(\"withdrawal_requests\" as any).insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminAboutTimeline.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/superadmin/AdminBlog.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "seed-blog-posts"
+      ],
+      "lines": [
+        {
+          "lineNum": 90,
+          "content": "return () => { supabase.removeChannel(channel); };"
+        },
+        {
+          "lineNum": 124,
+          "content": "const { error } = await supabase.from(\"blog_posts\" as any).update(payload).eq(\"id\", editId);"
+        },
+        {
+          "lineNum": 127,
+          "content": "const { error } = await supabase.from(\"blog_posts\" as any).insert(payload);"
+        },
+        {
+          "lineNum": 142,
+          "content": "const { error } = await supabase.from(\"blog_posts\" as any).update({ is_published: !p.is_published }).eq(\"id\", p.id);"
+        },
+        {
+          "lineNum": 150,
+          "content": "const { error } = await supabase.from(\"blog_posts\" as any).update({ is_featured: !p.is_featured }).eq(\"id\", p.id);"
+        },
+        {
+          "lineNum": 158,
+          "content": "const { error } = await supabase.from(\"blog_posts\" as any).delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 186,
+          "content": "const { data, error } = await supabase.functions.invoke(\"seed-blog-posts\", { body: {} });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminBrandTone.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/superadmin/AdminCareers.tsx",
+      "tables": [
+        "careers",
+        "careers",
+        "careers",
+        "careers",
+        "careers",
+        "careers"
+      ],
+      "storage": [
+        "site-assets",
+        "site-assets"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 159,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 267,
+          "content": "const { error } = await supabase.from(\"careers\").update(payload).eq(\"id\", editing.id);"
+        },
+        {
+          "lineNum": 270,
+          "content": "const { error } = await supabase.from(\"careers\").insert([payload as any]);"
+        },
+        {
+          "lineNum": 286,
+          "content": "const { error } = await supabase.from(\"careers\").update(patch).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 295,
+          "content": "const { error } = await supabase.from(\"careers\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 329,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 333,
+          "content": "const { data: pub } = supabase.storage.from(\"site-assets\").getPublicUrl(path);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminCoupons.tsx",
+      "tables": [
+        "coupons",
+        "coupons",
+        "coupons",
+        "coupons",
+        "coupons"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 199,
+          "content": "const { error } = await supabase.from(\"coupons\").update(payload).eq(\"id\", editing.id);"
+        },
+        {
+          "lineNum": 203,
+          "content": "const { error } = await supabase.from(\"coupons\").insert(payload);"
+        },
+        {
+          "lineNum": 218,
+          "content": "const { error } = await supabase.from(\"coupons\").delete().eq(\"id\", c.id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminCustomerServices.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 99,
+          "content": "const { error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminEmailPortal.tsx",
+      "tables": [
+        "email_send_log",
+        "suppressed_emails",
+        "notification_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 104,
+          "content": "supabase.from(\"suppressed_emails\").select(\"*\").order(\"created_at\", { ascending: false }).limit(500),"
+        },
+        {
+          "lineNum": 105,
+          "content": "supabase.from(\"notification_settings\").select(\"value\").eq(\"key\", \"smtp_config\").maybeSingle(),"
+        },
+        {
+          "lineNum": 161,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminFlexPay.tsx",
+      "tables": [
+        "flexpay_credit_accounts",
+        "flexpay_emi_installments",
+        "flexpay_emi_plans",
+        "flexpay_settings",
+        "flexpay_settings",
+        "flexpay_credit_applications",
+        "flexpay_credit_applications",
+        "flexpay_application_documents",
+        "flexpay_application_documents",
+        "flexpay_application_documents",
+        "flexpay_application_documents",
+        "flexpay_credit_accounts",
+        "flexpay_credit_accounts",
+        "flexpay_emi_plans",
+        "flexpay_credit_accounts",
+        "flexpay_emi_installments",
+        "flexpay_emi_plans",
+        "flexpay_virtual_cards",
+        "flexpay_virtual_cards"
+      ],
+      "storage": [
+        "flexpay-documents"
+      ],
+      "functions": [
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 60,
+          "content": "const { data } = await supabase.from(\"flexpay_credit_accounts\").select(\"*\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 67,
+          "content": "const { data } = await supabase.from(\"flexpay_emi_installments\").select(\"plan_id, amount, status, due_date\");"
+        },
+        {
+          "lineNum": 74,
+          "content": "const { data } = await supabase.from(\"flexpay_emi_plans\").select(\"id, user_id, status\");"
+        },
+        {
+          "lineNum": 183,
+          "content": "const { data } = await supabase.from(\"flexpay_settings\").select(\"*\").eq(\"id\", 1).maybeSingle();"
+        },
+        {
+          "lineNum": 203,
+          "content": "const { error } = await supabase.from(\"flexpay_settings\").update(payload).eq(\"id\", 1);"
+        },
+        {
+          "lineNum": 324,
+          "content": "const { data } = await supabase.from(\"flexpay_credit_applications\").select(\"*\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 338,
+          "content": "const { error } = await supabase.from(\"flexpay_credit_applications\")"
+        },
+        {
+          "lineNum": 347,
+          "content": "const { error } = await supabase.rpc(\"flexpay_approve_application\", {"
+        },
+        {
+          "lineNum": 472,
+          "content": "const { error } = await supabase.from(\"flexpay_application_documents\").insert(rows);"
+        },
+        {
+          "lineNum": 477,
+          "content": "await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 502,
+          "content": "const { error } = await supabase.from(\"flexpay_application_documents\")"
+        },
+        {
+          "lineNum": 512,
+          "content": "const { error } = await supabase.from(\"flexpay_application_documents\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 518,
+          "content": "const { data, error } = await supabase.storage.from(\"flexpay-documents\").createSignedUrl(path, 300);"
+        },
+        {
+          "lineNum": 630,
+          "content": "const { data } = await supabase.from(\"flexpay_credit_accounts\").select(\"*\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 636,
+          "content": "const { error } = await supabase.from(\"flexpay_credit_accounts\").update(patch).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 698,
+          "content": "const { data } = await supabase.from(\"flexpay_emi_plans\").select(\"*\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 705,
+          "content": "const { data } = await supabase.from(\"flexpay_credit_accounts\").select(\"id, user_id, email, total_limit, used_limit, currency, status\");"
+        },
+        {
+          "lineNum": 714,
+          "content": "const { data } = await supabase.from(\"flexpay_emi_installments\").select(\"*\").in(\"plan_id\", planIds).order(\"sequence\");"
+        },
+        {
+          "lineNum": 733,
+          "content": "const { error } = await supabase.rpc(\"flexpay_admin_set_used_limit\", { _account_id: usedEdit.accountId, _new_used_limit: v });"
+        },
+        {
+          "lineNum": 741,
+          "content": "const { error } = await supabase.rpc(\"flexpay_admin_update_installment\", { _installment_id: id, _status: status });"
+        },
+        {
+          "lineNum": 749,
+          "content": "const { error } = await supabase.rpc(\"flexpay_admin_update_installment\", {"
+        },
+        {
+          "lineNum": 766,
+          "content": "const { error: delErr } = await supabase.from(\"flexpay_emi_plans\").delete().eq(\"id\", planId);"
+        },
+        {
+          "lineNum": 770,
+          "content": "await supabase.rpc(\"flexpay_admin_set_used_limit\", { _account_id: acct.id, _new_used_limit: newUsed });"
+        },
+        {
+          "lineNum": 986,
+          "content": "const { error } = await supabase.rpc(\"flexpay_set_card_freeze\", { _card_id: id, _freeze: action === \"freeze\" });"
+        },
+        {
+          "lineNum": 989,
+          "content": "const { error } = await supabase.rpc(\"flexpay_reissue_card\", { _card_id: id });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminFxOrders.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 235,
+          "content": "const { error } = await supabase.from(\"fx_orders\" as any).update(payload).eq(\"id\", editing.id);"
+        },
+        {
+          "lineNum": 238,
+          "content": "const { error } = await supabase.from(\"fx_orders\" as any).insert(payload);"
+        },
+        {
+          "lineNum": 253,
+          "content": "const { error } = await supabase.from(\"fx_orders\" as any).delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 266,
+          "content": "const { error } = await supabase.from(\"fx_orders\" as any).update({ status }).eq(\"id\", id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminHRRequests.tsx",
+      "tables": [],
+      "storage": [
+        "hr-request-attachments",
+        "hr-request-attachments"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 245,
+          "content": "const { error: upErr } = await supabase.storage"
+        },
+        {
+          "lineNum": 291,
+          "content": "const { data, error } = await supabase.storage"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminIdCards.tsx",
+      "tables": [
+        "site_settings",
+        "invest_leads"
+      ],
+      "storage": [],
+      "functions": [
+        "manage-team"
+      ],
+      "lines": [
+        {
+          "lineNum": 506,
+          "content": "const { data, error } = await supabase.functions.invoke(\"manage-team\", { body: { action: \"list_users\" } });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminInvestLeads.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 176,
+          "content": "supabase.removeChannel(channel);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminInvestmentPlans.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 114,
+          "content": "? await supabase.from(\"investment_plans\" as any).update(payload).eq(\"id\", editing.id)"
+        },
+        {
+          "lineNum": 115,
+          "content": ": await supabase.from(\"investment_plans\" as any).insert(payload as any);"
+        },
+        {
+          "lineNum": 134,
+          "content": "const { error } = await supabase.from(\"investment_plans\" as any).delete().eq(\"id\", p.id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminInvestors.tsx",
+      "tables": [
+        "investments\" as any).select(\"*",
+        "investment_payouts\" as any).select(\"*",
+        "withdrawal_requests\" as any).select(\"*",
+        "profiles"
+      ],
+      "storage": [
+        "investor-documents"
+      ],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 95,
+          "content": "const { data, error } = await supabase.from(\"investments\" as any).select(\"*\").order(\"created_at\", { ascending: false });"
+        },
+        {
+          "lineNum": 103,
+          "content": "const { data, error } = await supabase.from(\"investment_payouts\" as any).select(\"*\").order(\"created_at\", { ascending: false }).limit(500);"
+        },
+        {
+          "lineNum": 111,
+          "content": "const { data, error } = await supabase.from(\"withdrawal_requests\" as any).select(\"*\").order(\"created_at\", { ascending: false }).limit(500);"
+        },
+        {
+          "lineNum": 129,
+          "content": "const { data, error } = await supabase.from(\"profiles\").select(\"id,email,full_name\").in(\"id\", investorIds);"
+        },
+        {
+          "lineNum": 154,
+          "content": "const { error } = await supabase.from(\"investments\" as any).update(patch).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 174,
+          "content": "const { error } = await supabase.from(\"investment_payouts\" as any).insert({"
+        },
+        {
+          "lineNum": 220,
+          "content": "const { data, error } = await supabase.storage.from(\"investor-documents\").createSignedUrl(path, 60 * 10);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminJobApplications.tsx",
+      "tables": [
+        "job_applications",
+        "job_applications",
+        "job_applications",
+        "job_applications",
+        "job_applications"
+      ],
+      "storage": [
+        "job-applications"
+      ],
+      "functions": [
+        "send-transactional-email",
+        "ats-scan-application",
+        "ats-scan-application"
+      ],
+      "lines": [
+        {
+          "lineNum": 153,
+          "content": "const { error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 266,
+          "content": "const { error } = await supabase.functions.invoke(\"ats-scan-application\", { body: { application_id: app.id } });"
+        },
+        {
+          "lineNum": 395,
+          "content": "const { error } = await supabase.from(\"job_applications\").update(rest).eq(\"id\", id);"
+        },
+        {
+          "lineNum": 429,
+          "content": "const { error } = await supabase.from(\"job_applications\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 447,
+          "content": "const { data, error } = await supabase.storage"
+        },
+        {
+          "lineNum": 473,
+          "content": "\"Couldn't preload the resume — a browser extension (ad blocker / privacy guard) may be blocking supabase.co. Disable it for this site or use an incognito window.\","
+        },
+        {
+          "lineNum": 481,
+          "content": "const { error } = await supabase.functions.invoke(\"ats-scan-application\", {"
+        },
+        {
+          "lineNum": 488,
+          "content": "const { data } = await supabase.from(\"job_applications\").select(\"*\").eq(\"id\", id).maybeSingle();"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminNotifications.tsx",
+      "tables": [
+        "notification_settings",
+        "notification_settings",
+        "notification_settings",
+        "notification_settings"
+      ],
+      "storage": [],
+      "functions": [
+        "send-transactional-email",
+        "send-transactional-email",
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 265,
+          "content": "supabase.removeChannel(channel);"
+        },
+        {
+          "lineNum": 352,
+          "content": "const { data, error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 369,
+          "content": "const { data, error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        },
+        {
+          "lineNum": 412,
+          "content": "const { data, error } = await supabase.functions.invoke(\"send-transactional-email\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminOrderDetail.tsx",
+      "tables": [
+        "orders",
+        "orders",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [
+        "send-transactional-email"
+      ],
+      "lines": [
+        {
+          "lineNum": 163,
+          "content": "await supabase.functions.invoke(\"send-transactional-email\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminOrderNew.tsx",
+      "tables": [
+        "profiles",
+        "orders",
+        "orders",
+        "orders",
+        "orders"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 121,
+          "content": "const { data, error } = await supabase.rpc("
+        },
+        {
+          "lineNum": 324,
+          "content": "const { data, error } = await supabase.from(\"orders\").select(\"*\").eq(\"id\", id).maybeSingle();"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminOrders.tsx",
+      "tables": [
+        "orders",
+        "customer_services",
+        "profiles"
+      ],
+      "storage": [],
+      "functions": [
+        "admin-delete-order",
+        "admin-delete-order"
+      ],
+      "lines": [
+        {
+          "lineNum": 138,
+          "content": "const { data, error } = await supabase.functions.invoke(\"admin-delete-order\", {"
+        },
+        {
+          "lineNum": 194,
+          "content": "const { data, error } = await supabase.functions.invoke(\"admin-delete-order\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminPageSEO.tsx",
+      "tables": [
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/superadmin/AdminPricing.tsx",
+      "tables": [
+        "service_pricing",
+        "service_pricing"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/superadmin/AdminProductUrls.tsx",
+      "tables": [
+        "product_urls",
+        "product_urls",
+        "product_urls"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 98,
+          "content": "const { error } = await supabase.from(\"product_urls\").insert({"
+        },
+        {
+          "lineNum": 121,
+          "content": "const { error } = await supabase.from(\"product_urls\").delete().eq(\"id\", id);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminSeoRules.tsx",
+      "tables": [
+        "site_settings",
+        "site_settings",
+        "site_settings",
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": []
+    },
+    {
+      "file": "src/pages/superadmin/AdminSocialLinks.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 35,
+          "content": "const { error } = await supabase.from(\"site_settings\").upsert(rows, { onConflict: \"key\" });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminSubscribers.tsx",
+      "tables": [
+        "newsletter_subscribers",
+        "newsletter_subscribers",
+        "newsletter_subscribers"
+      ],
+      "storage": [],
+      "functions": [
+        "sync-newsletter-subscribers"
+      ],
+      "lines": [
+        {
+          "lineNum": 117,
+          "content": "const { error } = await supabase.from(\"newsletter_subscribers\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 152,
+          "content": "const { data, error } = await supabase.functions.invoke(\"sync-newsletter-subscribers\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminTaxSettings.tsx",
+      "tables": [
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 54,
+          "content": "const { error } = await supabase.from(\"site_settings\").upsert(rows, { onConflict: \"key\" });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminTeam.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "manage-team"
+      ],
+      "lines": [
+        {
+          "lineNum": 58,
+          "content": "const { data, error } = await supabase.functions.invoke(\"manage-team\", { body });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminTeamSection.tsx",
+      "tables": [
+        "site_settings",
+        "site_settings",
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments",
+        "site_settings",
+        "id_card_assignments",
+        "id_card_assignments",
+        "id_card_assignments"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 497,
+          "content": "const { error } = await supabase.from(\"id_card_assignments\").insert({"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/AdminUSAStatePricing.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 130,
+          "content": "const { error } = await supabase.from(\"usa_state_pricing\" as any).insert(toAdd as any);"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/KeywordTracker.tsx",
+      "tables": [
+        "tracked_keywords",
+        "keyword_rank_history",
+        "tracked_keywords",
+        "tracked_keywords"
+      ],
+      "storage": [],
+      "functions": [
+        "track-keywords"
+      ],
+      "lines": [
+        {
+          "lineNum": 115,
+          "content": "const { error } = await supabase.from(\"tracked_keywords\").insert({"
+        },
+        {
+          "lineNum": 133,
+          "content": "const { error } = await supabase.from(\"tracked_keywords\").delete().eq(\"id\", id);"
+        },
+        {
+          "lineNum": 142,
+          "content": "const { data, error } = await supabase.functions.invoke(\"track-keywords\", {"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/OgValidator.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "validate-og"
+      ],
+      "lines": [
+        {
+          "lineNum": 40,
+          "content": "const { data, error } = await supabase.functions.invoke(\"validate-og\", { body: { url: u } });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/PaymentGateways.tsx",
+      "tables": [
+        "flexpay_settings",
+        "flexpay_settings",
+        "site_settings"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 151,
+          "content": "const { data } = await supabase.from(\"flexpay_settings\").select(\"*\").eq(\"id\", 1).maybeSingle();"
+        },
+        {
+          "lineNum": 218,
+          "content": "const { error } = await supabase.from(\"site_settings\").upsert(rows, { onConflict: \"key\" });"
+        },
+        {
+          "lineNum": 248,
+          "content": "const { data, error } = await supabase.functions.invoke<TestResult>("
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/SearchConsole.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "gsc-data"
+      ],
+      "lines": [
+        {
+          "lineNum": 53,
+          "content": "const { data, error } = await supabase.functions.invoke(\"gsc-data\", { body: payload });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/SeoDashboard.tsx",
+      "tables": [
+        "pages",
+        "blog_posts"
+      ],
+      "storage": [],
+      "functions": [
+        "gsc-data"
+      ],
+      "lines": [
+        {
+          "lineNum": 51,
+          "content": "const { data, error } = await supabase.functions.invoke(\"gsc-data\", { body: payload });"
+        },
+        {
+          "lineNum": 137,
+          "content": "supabase.from(\"pages\").select(\"id,title,slug,meta_title,meta_description,og_image,is_published\"),"
+        },
+        {
+          "lineNum": 138,
+          "content": "supabase.from(\"blog_posts\").select(\"id,title,slug,excerpt,cover_image_url,is_published\"),"
+        },
+        {
+          "lineNum": 170,
+          "content": "return () => { supabase.removeChannel(ch); };"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/SeoIntegrations.tsx",
+      "tables": [],
+      "storage": [],
+      "functions": [
+        "seo-integrations"
+      ],
+      "lines": [
+        {
+          "lineNum": 38,
+          "content": "const { data: res, error } = await supabase.functions.invoke(\"seo-integrations\", { body: { target } });"
+        }
+      ]
+    },
+    {
+      "file": "src/pages/superadmin/crm/AdminCrmAutomationEditor.tsx",
+      "tables": [
+        "crm_email_templates",
+        "crm_workflows",
+        "crm_workflows",
+        "crm_workflow_steps",
+        "crm_workflow_steps"
+      ],
+      "storage": [],
+      "functions": [],
+      "lines": [
+        {
+          "lineNum": 45,
+          "content": "queryFn: async () => (await supabase.from(\"crm_email_templates\").select(\"id,name\").order(\"name\")).data || [],"
+        },
+        {
+          "lineNum": 50,
+          "content": "const { data } = await supabase.from(\"crm_workflows\").select(\"*, crm_workflow_steps(*)\").eq(\"id\", id).single();"
+        },
+        {
+          "lineNum": 60,
+          "content": "const { error: e1 } = await supabase.from(\"crm_workflows\").update({"
+        },
+        {
+          "lineNum": 65,
+          "content": "await supabase.from(\"crm_workflow_steps\").delete().eq(\"workflow_id\", id);"
+        },
+        {
+          "lineNum": 70,
+          "content": "const { error: e2 } = await supabase.from(\"crm_workflow_steps\").insert(payload);"
+        }
+      ]
+    }
+  ]
+}

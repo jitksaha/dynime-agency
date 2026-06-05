@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,8 +35,7 @@ export default function SeoIntegrations() {
   async function run(target: "all" | "gsc" | "firecrawl" | "semrush" = "all") {
     setLoading(target);
     try {
-      const { data: res, error } = await supabase.functions.invoke("seo-integrations", { body: { target } });
-      if (error) throw error;
+      const res = await apiPost<any>("/seo/integrations", { target });
       setData(prev => {
         if (target === "all" || !prev) return res as Result;
         return { ...prev, checkedAt: res.checkedAt, integrations: { ...prev.integrations, ...res.integrations } };

@@ -15,6 +15,7 @@ import type { TeamMember } from "@/lib/home-sections-defaults";
 import TeamAvatarUploader from "@/components/admin/TeamAvatarUploader";
 import { useTeamCardIds, lookupTeamCardId, teamSectionSubjectKey, teamSectionSubjectKeys } from "@/hooks/use-team-card-ids";
 import { Pencil, Check } from "lucide-react";
+import { useUpsertSiteSetting } from "@/hooks/use-cms-data";
 
 const COLOR_PRESETS = [
   "from-blue-500/20 to-indigo-500/20",
@@ -80,6 +81,7 @@ const AdminTeamSection = () => {
   const [enabled, setEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState("");
+  const upsertSetting = useUpsertSiteSetting();
 
   const visibleIndices = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -145,10 +147,7 @@ const AdminTeamSection = () => {
           items: cleaned,
         },
       };
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert([{ key: HOME_SECTIONS_KEY, value: JSON.stringify(next) }], { onConflict: "key" });
-      if (error) throw error;
+      await upsertSetting.mutateAsync({ key: HOME_SECTIONS_KEY, value: JSON.stringify(next) });
       toast.success("Team section saved. Frontend will update automatically.");
       qc.invalidateQueries({ queryKey: ["home-sections"] });
       qc.invalidateQueries({ queryKey: ["site-settings"] });

@@ -1,11 +1,10 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useCareers } from "@/hooks/use-cms-data";
 import Layout from "@/components/layout/Layout";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { SEO_DEFAULTS } from "@/lib/seo-defaults";
 import ScrollReveal from "@/components/shared/ScrollReveal";
-import { supabase } from "@/integrations/supabase/client";
 import { Briefcase, MapPin, Clock, ArrowUpRight, Sparkles, Heart, Globe, Rocket, Users, UserPlus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,28 +38,7 @@ const perks = [
   { icon: Users, title: "Team retreats", desc: "Annual offsites with the team" },
 ];
 
-const useCareers = () =>
-  useQuery({
-    queryKey: ["careers", "active"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("careers")
-        .select("*, office_location:office_locations(name, city, country)")
-        .eq("is_active", true)
-        .order("is_featured", { ascending: false })
-        .order("sort_order");
-      if (error) throw error;
-      return (data ?? []).map((c: any) => ({
-        ...c,
-        responsibilities: Array.isArray(c.responsibilities) ? (c.responsibilities as string[]) : [],
-        requirements: Array.isArray(c.requirements) ? (c.requirements as string[]) : [],
-        posting_channels: Array.isArray(c.posting_channels) ? (c.posting_channels as PostingChannel[]) : [],
-      })) as Career[];
-    },
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
-  });
+
 
 const JobCard = ({ job }: { job: Career }) => (
   <Link
@@ -168,24 +146,7 @@ const Careers = () => {
       })),
     ],
   });
-  const qc = useQueryClient();
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("careers-public-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "careers" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["careers", "active"] });
-          qc.invalidateQueries({ queryKey: ["career"] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [qc]);
 
   const [search, setSearch] = useState("");
   const filteredJobs = useMemo(() => {

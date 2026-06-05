@@ -4,9 +4,9 @@ import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import RecurringHealthWidget from "@/components/admin/RecurringHealthWidget";
 import { useFormSubmissions, useChatSessions } from "@/hooks/use-data";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useOrdersRealtime } from "@/hooks/useOrdersRealtime";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
+import { apiGet } from "@/lib/api";
 import {
   Inbox, MessageSquare, FileText, TrendingUp, TrendingDown, Mail,
   ShoppingBag, ClipboardList, Users, ArrowUpRight, Activity, DollarSign,
@@ -30,92 +30,38 @@ const money = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDi
 const moneyCcy = (n: number, ccy: string) =>
   `${n.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${ccy}`;
 
-const useCount = (table: any, filter?: (q: any) => any) =>
-  useQuery({
-    queryKey: ["dash-count", table, filter?.toString()],
-    queryFn: async () => {
-      let q: any = supabase.from(table).select("*", { count: "exact", head: true });
-      if (filter) q = filter(q);
-      const { count } = await q;
-      return count || 0;
-    },
-    staleTime: 30000,
-  });
-
 const useOrders = () =>
   useQuery({
     queryKey: ["dash-orders"],
-    queryFn: async () => {
-      const pageSize = 1000;
-      const allOrders: any[] = [];
-
-      for (let from = 0; ; from += pageSize) {
-        const { data, error } = await supabase
-          .from("orders")
-          .select("id, total, status, customer_name, customer_email, created_at, tax_amount, tax_percent, tax_mode, tax_label, refunded_amount, refunded_tax_amount, refunded_at")
-          .order("created_at", { ascending: false })
-          .range(from, from + pageSize - 1);
-
-        if (error) throw error;
-        allOrders.push(...(data || []));
-        if (!data || data.length < pageSize) break;
-      }
-
-      return allOrders;
-    },
+    queryFn: () => apiGet<any[]>("/analytics/orders"),
     staleTime: 30000,
   });
 
 const useSubscribers = () =>
   useQuery({
     queryKey: ["dash-subs"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("newsletter_subscribers")
-        .select("id, email, status, created_at")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>("/analytics/subscribers"),
     staleTime: 30000,
   });
 
 const useFxOrders = () =>
   useQuery({
     queryKey: ["dash-fx-totals"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("fx_orders" as any)
-        .select("status, base_currency, base_amount, revenue_usd, cost_usd, profit_usd, fee_usd, order_date")
-        .order("order_date", { ascending: false })
-        .limit(2000);
-      return (data || []) as any[];
-    },
+    queryFn: () => apiGet<any[]>("/analytics/fx-orders"),
     staleTime: 30000,
   });
 
 const useEmployees = () =>
   useQuery({
     queryKey: ["dash-employees"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("dynime_employees")
-        .select("employee_id, full_name, department, designation, status, monthly_gross_usd, annual_salary_usd");
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>("/analytics/employees"),
     staleTime: 60000,
   });
 
 const useKpiMonthly = () =>
   useQuery({
     queryKey: ["dash-kpi"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("dynime_kpi_monthly")
-        .select("period, revenue_usd, net_income_usd, mrr_usd, headcount, churn_rate_pct, nps_score")
-        .order("period", { ascending: true });
-      return data || [];
-    },
+    queryFn: () => apiGet<any[]>("/analytics/kpi"),
     staleTime: 60000,
   });
 
@@ -183,7 +129,12 @@ const AdminDashboard = () => {
 
   useOrdersRealtime("admin-dashboard-orders", [["dash-orders"], ["dash-count", "orders"]]);
 
-  const { data: portfolioCount = 0 } = useCount("portfolio_projects");
+  const { data: counts = { portfolio: 0 } } = useQuery({
+    queryKey: ["dash-counts"],
+    queryFn: () => apiGet<{ portfolio: number }>("/analytics/counts"),
+    staleTime: 30000,
+  });
+  const portfolioCount = counts.portfolio;
 
   // ─── Date range filter ──────────────────────────────────────────────
   type Preset = "7d" | "30d" | "90d" | "12m" | "ytd" | "all" | "custom";

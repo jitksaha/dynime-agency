@@ -38,6 +38,8 @@ import { format } from "date-fns";
 import BookingStatusCard from "@/components/orders/BookingStatusCard";
 import OrderMilestones from "@/components/orders/OrderMilestones";
 import { useOrdersRealtime } from "@/hooks/useOrdersRealtime";
+import { apiGet, apiPatch } from "@/lib/api";
+import { formatCurrency } from "@/lib/currency";
 
 type VerificationMeta = {
   provider?: string;
@@ -77,7 +79,7 @@ const STATUS_OPTIONS = [
 ];
 
 const statusColor: Record<string, string> = {
-  pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold",
   confirmed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   processing: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   paid: "bg-green-500/10 text-green-600 border-green-500/20",
@@ -118,15 +120,10 @@ const AdminOrderDetail = () => {
   const { data: order, isLoading, error } = useQuery({
     queryKey: ["admin-order", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("id", id!)
-        .maybeSingle();
-      if (error) throw error;
-      return data as unknown as OrderRow | null;
+      return apiGet<OrderRow>(`/orders/${id}`);
     },
     enabled: !!id,
+    refetchInterval: 4000,
   });
 
   const verification = order?.payment_verification ?? null;
@@ -134,12 +131,10 @@ const AdminOrderDetail = () => {
   const updateStatus = async (newStatus: string) => {
     if (!order) return;
     const prevStatus = order.status;
-    const { error } = await supabase
-      .from("orders")
-      .update({ status: newStatus })
-      .eq("id", order.id);
-    if (error) {
-      toast.error("Failed to update status");
+    try {
+      await apiPatch(`/orders/${order.id}`, { status: newStatus });
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to update status");
       return;
     }
     toast.success(`Status set to ${newStatus}`);
@@ -157,7 +152,7 @@ const AdminOrderDetail = () => {
       const primaryService = items[0]?.name;
       const total =
         order.total != null
-          ? `USD ${Number(order.total).toFixed(2)}`
+          ? formatCurrency(Number(order.total), (order as any).currency || "USD")
           : undefined;
       try {
         await supabase.functions.invoke("send-transactional-email", {
@@ -214,19 +209,16 @@ const AdminOrderDetail = () => {
     const newRefundedTax = Math.round((Number(o.refunded_tax_amount || 0) + taxRefund) * 100) / 100;
     const isFull = newRefundedAmount >= totalPaid - 0.005;
 
-    const { error } = await supabase
-      .from("orders")
-      .update({
+    try {
+      await apiPatch(`/orders/${order.id}`, {
         refunded_amount: newRefundedAmount,
         refunded_tax_amount: newRefundedTax,
         refunded_at: new Date().toISOString(),
         refund_reason: reason,
         ...(isFull ? { status: "refunded" } : {}),
-      })
-      .eq("id", order.id);
-
-    if (error) {
-      toast.error(error.message || "Refund failed");
+      });
+    } catch (err: any) {
+      toast.error(err?.message || "Refund failed");
       return;
     }
     toast.success(
@@ -297,7 +289,7 @@ const AdminOrderDetail = () => {
               statusColor[order.status] || ""
             }`}
           >
-            {order.status}
+            {order.status === "pending" ? "Dont Miss It" : order.status}
           </span>
           <Select value={order.status} onValueChange={updateStatus}>
             <SelectTrigger className="h-9 w-40">
@@ -419,18 +411,18 @@ const AdminOrderDetail = () => {
                   <div>
                     <div className="text-foreground font-medium">{item.name}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
-                      ${Number(item.price).toFixed(2)} × {item.quantity}
+                      {formatCurrency(Number(item.price), (order as any).currency || "USD")} × {item.quantity}
                     </div>
                   </div>
                   <span className="font-medium text-foreground">
-                    ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                    {formatCurrency(Number(item.price) * Number(item.quantity), (order as any).currency || "USD")}
                   </span>
                 </div>
               ))}
               <div className="flex justify-between items-center p-4 bg-secondary/30">
                 <span className="font-bold text-foreground">Total</span>
                 <span className="font-heading font-bold text-lg text-foreground">
-                  ${Number(order.total).toFixed(2)}
+                  {formatCurrency(Number(order.total), (order as any).currency || "USD")}
                 </span>
               </div>
             </div>

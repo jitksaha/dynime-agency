@@ -11,10 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAllProductUrls, type ProductUrl, fetchProductUrls } from "@/hooks/use-product-urls";
+import { useAllProductUrls, type ProductUrl, fetchProductUrls, useUpsertProductUrl, useDeleteProductUrl } from "@/hooks/use-product-urls";
 import { Plus, Save, Trash2, ExternalLink, Link2, Globe } from "lucide-react";
 
 type Draft = Partial<ProductUrl> & { _isNew?: boolean };
@@ -33,6 +30,8 @@ const emptyDraft = (): Draft => ({
 
 const AdminProductUrls = () => {
   const { data: rows, isLoading, refetch } = useAllProductUrls();
+  const upsertMut = useUpsertProductUrl();
+  const deleteMut = useDeleteProductUrl();
   const qc = useQueryClient();
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [newDraft, setNewDraft] = useState<Draft>(emptyDraft());
@@ -64,20 +63,17 @@ const AdminProductUrls = () => {
     }
     setSavingId(id);
     try {
-      const { error } = await supabase
-        .from("product_urls")
-        .update({
-          key: d.key.trim(),
-          label: d.label.trim(),
-          description: d.description?.trim() || null,
-          internal_path: d.internal_path?.trim() || null,
-          external_url: d.external_url.trim(),
-          open_in_new_tab: !!d.open_in_new_tab,
-          is_active: !!d.is_active,
-          sort_order: Number(d.sort_order) || 0,
-        })
-        .eq("id", id);
-      if (error) throw error;
+      await upsertMut.mutateAsync({
+        id,
+        key: d.key.trim(),
+        label: d.label.trim(),
+        description: d.description?.trim() || null,
+        internal_path: d.internal_path?.trim() || null,
+        external_url: d.external_url.trim(),
+        open_in_new_tab: !!d.open_in_new_tab,
+        is_active: !!d.is_active,
+        sort_order: Number(d.sort_order) || 0,
+      });
       toast.success("Saved — links update site-wide on next page render.");
       await refreshAll();
     } catch (e: any) {
@@ -95,7 +91,7 @@ const AdminProductUrls = () => {
     }
     setSavingId("new");
     try {
-      const { error } = await supabase.from("product_urls").insert({
+      await upsertMut.mutateAsync({
         key: d.key.trim(),
         label: d.label.trim(),
         description: d.description?.trim() || null,
@@ -105,7 +101,6 @@ const AdminProductUrls = () => {
         is_active: !!d.is_active,
         sort_order: Number(d.sort_order) || 0,
       });
-      if (error) throw error;
       toast.success("Product URL added.");
       setNewDraft(emptyDraft());
       await refreshAll();
@@ -118,8 +113,7 @@ const AdminProductUrls = () => {
 
   const remove = async (id: string) => {
     try {
-      const { error } = await supabase.from("product_urls").delete().eq("id", id);
-      if (error) throw error;
+      await deleteMut.mutateAsync(id);
       toast.success("Removed");
       await refreshAll();
     } catch (e: any) {

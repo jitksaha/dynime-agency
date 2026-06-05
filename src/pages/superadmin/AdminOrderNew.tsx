@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import type { TeamMember } from "@/lib/home-sections-defaults";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 
 type IssuerMode = "company" | "employee";
 
@@ -49,6 +50,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const [discount, setDiscount] = useState(0);
   const [notes, setNotes] = useState("");
   const [included, setIncluded] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [items, setItems] = useState<LineItem[]>([
     { name: "", description: "", price: 0, quantity: 1 },
   ]);
@@ -98,14 +100,16 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     let cancelled = false;
     setEmailLookupBusy(true);
     const t = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .ilike("email", email)
-        .maybeSingle();
-      if (cancelled) return;
-      setEmailMatch(data?.id ? { user_id: data.id, name: (data.full_name as string) || null, email: (data.email as string) || null } : null);
-      setEmailLookupBusy(false);
+      try {
+        const data = await apiGet<any>(`/users/by-email/${encodeURIComponent(email)}`);
+        if (cancelled) return;
+        setEmailMatch(data?.id ? { user_id: data.id, name: data.full_name || null, email: data.email || null } : null);
+      } catch (err) {
+        if (cancelled) return;
+        setEmailMatch(null);
+      } finally {
+        if (!cancelled) setEmailLookupBusy(false);
+      }
     }, 400);
     return () => { cancelled = true; clearTimeout(t); };
   }, [customerEmail]);
@@ -118,15 +122,16 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     let cancelled = false;
     setPhoneLookupBusy(true);
     const t = setTimeout(async () => {
-      const { data, error } = await supabase.rpc(
-        "admin_lookup_account_by_phone" as never,
-        { _phone: phone } as never,
-      );
-      if (cancelled) return;
-      const list = (!error && Array.isArray(data) ? data : []) as any[];
-      const row = list.length ? list[0] : null;
-      setPhoneMatch(row?.user_id ? { user_id: row.user_id, name: row.full_name || null, email: row.email || null } : null);
-      setPhoneLookupBusy(false);
+      try {
+        const data = await apiGet<any>(`/users/by-phone/${encodeURIComponent(phone)}`);
+        if (cancelled) return;
+        setPhoneMatch(data?.user_id ? { user_id: data.user_id, name: data.name || null, email: data.email || null } : null);
+      } catch (err) {
+        if (cancelled) return;
+        setPhoneMatch(null);
+      } finally {
+        if (!cancelled) setPhoneLookupBusy(false);
+      }
     }, 500);
     return () => { cancelled = true; clearTimeout(t); };
   }, [phone]);
@@ -140,9 +145,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const snapshot = useMemo(
     () => JSON.stringify({
       customerName, customerEmail, phone, company, currency, status,
-      gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey,
+      gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode,
     }),
-    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey]
+    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode]
   );
   // --- autosave (new mode only) ---
   const AUTOSAVE_KEY = "admin:manual-invoice:draft:v1";
@@ -168,6 +173,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
       if (typeof d.notes === "string") setNotes(d.notes);
       if (typeof d.included === "string") setIncluded(d.included);
       if (Array.isArray(d.items) && d.items.length) setItems(d.items);
+      if (typeof d.referralCode === "string") setReferralCode(d.referralCode);
       if (d.savedAt) setAutosavedAt(new Date(d.savedAt));
       toast.info("Restored unsaved draft");
     } catch { /* ignore */ }
@@ -202,7 +208,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     clearDraft();
     setCustomerName(""); setCustomerEmail(""); setPhone(""); setCompany("");
     setCurrency("USD"); setStatus("pending"); setGateway("manual");
-    setDiscount(0); setNotes(""); setIncluded("");
+    setDiscount(0); setNotes(""); setIncluded(""); setReferralCode("");
     setItems([{ name: "", description: "", price: 0, quantity: 1 }]);
     skipGuardRef.current = true;
     requestAnimationFrame(() => { baselineRef.current = null; skipGuardRef.current = false; });
@@ -321,63 +327,72 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase.from("orders").select("*").eq("id", id).maybeSingle();
-      if (cancelled) return;
-      if (error || !data) {
-        toast.error("Failed to load order");
+      try {
+        const data = await apiGet<any>(`/orders/${id}`);
+        if (cancelled) return;
+        if (!data) {
+          toast.error("Failed to load order");
+          setLoading(false);
+          return;
+        }
+        const o: any = data;
+        setInvoiceNumber(o.invoice_number || null);
+        setCustomerName(o.customer_name || "");
+        setCustomerEmail(o.customer_email || "");
+        const ba = o.billing_address || {};
+        setPhone(ba.phone || "");
+        setCompany(ba.company || "");
+        setCurrency(o.currency || "USD");
+        setStatus(o.status || "pending");
+        setGateway(o.payment_gateway || "manual");
+        setDiscount(Number(o.discount_amount) || 0);
+        setNotes(o.notes || "");
+        const sb = (o.service_brief || {}) as any;
+        const inc = Array.isArray(sb.included_services) ? sb.included_services : [];
+        setIncluded(inc.join("\n"));
+        const sbIssuer = (sb.issuer || {}) as any;
+        if (sbIssuer.type === "employee") {
+          setIssuerMode("employee");
+          setIssuerEmployeeKey(String(sbIssuer.employee_key || sbIssuer.name || ""));
+        } else {
+          setIssuerMode("company");
+          setIssuerEmployeeKey("");
+        }
+        setReferralCode((o.referral_code as string) || "");
+        const its: LineItem[] = Array.isArray(o.items) && o.items.length
+          ? o.items.map((it: any) => ({
+              name: it.name || "",
+              description: it.description || "",
+              price: Number(it.price) || 0,
+              quantity: Number(it.quantity) || 1,
+            }))
+          : [{ name: "", description: "", price: 0, quantity: 1 }];
+        setItems(its);
         setLoading(false);
-        return;
-      }
-      const o: any = data;
-      setInvoiceNumber(o.invoice_number || null);
-      setCustomerName(o.customer_name || "");
-      setCustomerEmail(o.customer_email || "");
-      const ba = o.billing_address || {};
-      setPhone(ba.phone || "");
-      setCompany(ba.company || "");
-      setCurrency(o.currency || "USD");
-      setStatus(o.status || "pending");
-      setGateway(o.payment_gateway || "manual");
-      setDiscount(Number(o.discount_amount) || 0);
-      setNotes(o.notes || "");
-      const sb = (o.service_brief || {}) as any;
-      const inc = Array.isArray(sb.included_services) ? sb.included_services : [];
-      setIncluded(inc.join("\n"));
-      const sbIssuer = (sb.issuer || {}) as any;
-      if (sbIssuer.type === "employee") {
-        setIssuerMode("employee");
-        setIssuerEmployeeKey(String(sbIssuer.employee_key || sbIssuer.name || ""));
-      } else {
-        setIssuerMode("company");
-        setIssuerEmployeeKey("");
-      }
-      const its: LineItem[] = Array.isArray(o.items) && o.items.length
-        ? o.items.map((it: any) => ({
-            name: it.name || "",
-            description: it.description || "",
-            price: Number(it.price) || 0,
-            quantity: Number(it.quantity) || 1,
-          }))
-        : [{ name: "", description: "", price: 0, quantity: 1 }];
-      setItems(its);
-      setLoading(false);
-      requestAnimationFrame(() => {
-        baselineRef.current = JSON.stringify({
-          customerName: o.customer_name || "",
-          customerEmail: o.customer_email || "",
-          phone: ba.phone || "",
-          company: ba.company || "",
-          currency: o.currency || "USD",
-          status: o.status || "pending",
-          gateway: o.payment_gateway || "manual",
-          discount: Number(o.discount_amount) || 0,
-          notes: o.notes || "",
-          included: inc.join("\n"),
-          items: its,
-          issuerMode: sbIssuer.type === "employee" ? "employee" : "company",
-          issuerEmployeeKey: sbIssuer.type === "employee" ? String(sbIssuer.employee_key || sbIssuer.name || "") : "",
+        requestAnimationFrame(() => {
+          baselineRef.current = JSON.stringify({
+            customerName: o.customer_name || "",
+            customerEmail: o.customer_email || "",
+            phone: ba.phone || "",
+            company: ba.company || "",
+            currency: o.currency || "USD",
+            status: o.status || "pending",
+            gateway: o.payment_gateway || "manual",
+            discount: Number(o.discount_amount) || 0,
+            notes: o.notes || "",
+            included: inc.join("\n"),
+            items: its,
+            issuerMode: sbIssuer.type === "employee" ? "employee" : "company",
+            issuerEmployeeKey: sbIssuer.type === "employee" ? String(sbIssuer.employee_key || sbIssuer.name || "") : "",
+            referralCode: (o.referral_code as string) || "",
+          });
         });
-      });
+      } catch (err) {
+        if (!cancelled) {
+          toast.error("Failed to load order");
+          setLoading(false);
+        }
+      }
     })();
     return () => { cancelled = true; };
   }, [id, isEdit]);
@@ -418,11 +433,10 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     setSubmitting(true);
     try {
       if (isEdit && id) {
-        // Preserve existing billing_address / service_brief keys
-        const { data: existing } = await supabase
-          .from("orders").select("billing_address, service_brief").eq("id", id).maybeSingle();
-        const existingBA = (existing?.billing_address as Record<string, unknown>) || {};
-        const existingSB = (existing?.service_brief as Record<string, unknown>) || {};
+        // Preserve existing billing_address / service_brief keys by fetching via NestJS
+        const existing = await apiGet<any>(`/orders/${id}`);
+        const existingBA = existing?.billing_address || {};
+        const existingSB = existing?.service_brief || {};
         const billing_address = { ...existingBA, phone: phone || null, company: company || null };
         const service_brief: Record<string, unknown> = {
           ...existingSB,
@@ -443,25 +457,22 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           service_brief.issuer = { type: "company" };
         }
 
-        const { error } = await supabase
-          .from("orders")
-          .update({
-            customer_name: customerName.trim() || null,
-            customer_email: customerEmail.trim(),
-            user_id: linkedUserId, // re-link if email changed
-            items: cleanItems as never,
-            currency,
-            subtotal,
-            discount_amount: Number(discount) || 0,
-            total,
-            status,
-            payment_gateway: gateway,
-            notes: notes.trim() || null,
-            billing_address: billing_address as never,
-            service_brief: service_brief as never,
-          })
-          .eq("id", id);
-        if (error) throw error;
+        await apiPatch<any>(`/orders/${id}`, {
+          customer_name: customerName.trim() || null,
+          customer_email: customerEmail.trim(),
+          user_id: linkedUserId || null, // re-link if email changed
+          items: cleanItems,
+          currency,
+          subtotal,
+          discount_amount: Number(discount) || 0,
+          total,
+          status,
+          payment_gateway: gateway,
+          notes: notes.trim() || null,
+          billing_address,
+          service_brief,
+          referral_code: referralCode.trim().toUpperCase() || null,
+        });
         toast.success("Invoice updated");
         skipGuardRef.current = true;
         baselineRef.current = snapshot;
@@ -486,27 +497,23 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           service_brief.issuer = { type: "company" };
         }
 
-        const { data, error } = await supabase
-          .from("orders")
-          .insert([{
-            customer_name: customerName.trim() || null,
-            customer_email: customerEmail.trim(),
-            user_id: linkedUserId,
-            items: cleanItems,
-            currency,
-            subtotal,
-            discount_amount: Number(discount) || 0,
-            total,
-            status,
-            payment_gateway: gateway,
-            notes: notes.trim() || null,
-            billing_address: billing_address as never,
-            service_brief: service_brief as never,
-          }])
-          .select("id, invoice_number")
-          .single();
+        const data = await apiPost<any>("/orders", {
+          customer_name: customerName.trim() || null,
+          customer_email: customerEmail.trim(),
+          user_id: linkedUserId || null,
+          items: cleanItems,
+          currency,
+          subtotal,
+          discount_amount: Number(discount) || 0,
+          total,
+          status,
+          payment_gateway: gateway,
+          notes: notes.trim() || null,
+          billing_address,
+          service_brief,
+          referral_code: referralCode.trim().toUpperCase() || null,
+        });
 
-        if (error) throw error;
         toast.success(`Invoice ${data?.invoice_number || "created"}`);
         skipGuardRef.current = true;
         baselineRef.current = snapshot;
@@ -605,6 +612,14 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           <div>
             <Label>Company</Label>
             <Input value={company} onChange={(e) => setCompany(e.target.value)} />
+          </div>
+          <div>
+            <Label>Referral Code (Optional)</Label>
+            <Input
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+              placeholder="e.g. PARTNER123"
+            />
           </div>
         </section>
 

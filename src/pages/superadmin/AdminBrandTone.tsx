@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Sparkles, Check, Loader2, Wand2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSiteSettings } from "@/hooks/use-data";
 import { useHomeSections, HOME_SECTIONS_KEY } from "@/hooks/use-home-sections";
+import { apiPost } from "@/lib/api";
 import {
   BRAND_TONE_LABELS,
   BRAND_TONE_PRESETS,
@@ -32,16 +32,12 @@ const AdminBrandTone = () => {
     setApplying(tone);
     try {
       const next = applyBrandTone(tone, sections);
-      const { error } = await supabase
-        .from("site_settings")
-        .upsert(
-          [
-            { key: HOME_SECTIONS_KEY, value: JSON.stringify(next) },
-            { key: TONE_KEY, value: JSON.stringify(tone) },
-          ],
-          { onConflict: "key" }
-        );
-      if (error) throw error;
+      await apiPost("/cms/site-settings/bulk", {
+        settings: [
+          { key: HOME_SECTIONS_KEY, value: JSON.stringify(next) },
+          { key: TONE_KEY, value: JSON.stringify(tone) },
+        ],
+      });
       setActive(tone);
       toast.success(`${BRAND_TONE_LABELS[tone].label} tone applied site-wide.`);
       qc.invalidateQueries({ queryKey: ["home-sections"] });

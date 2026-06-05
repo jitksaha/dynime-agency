@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
 import { Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { InvestmentPlan, InvestmentTarget } from "@/hooks/use-invest";
-import { notifySubmission } from "@/lib/notify-submission";
 
 
 const Schema = z.object({
@@ -40,19 +39,38 @@ interface Props {
 const InvestLeadForm = ({ plans, targets = [], initialPlanSlug, initialTargetSlug, initialEmail, initialName }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  const [form, setForm] = useState({
-    full_name: initialName ?? "",
-    email: initialEmail ?? "",
-    phone: "",
-    country: "",
-    investment_amount: "" as any,
-    preferred_contact: "email" as const,
-    message: "",
-    plan_slug: initialPlanSlug ?? "",
-    target_slug: initialTargetSlug ?? targets[0]?.slug ?? "",
+  const [form, setForm] = useState(() => {
+    let base = {
+      full_name: initialName ?? "",
+      email: initialEmail ?? "",
+      phone: "",
+      country: "",
+      investment_amount: "" as any,
+      preferred_contact: "email" as const,
+      message: "",
+      plan_slug: initialPlanSlug ?? "",
+      target_slug: initialTargetSlug ?? targets[0]?.slug ?? "",
+    };
+    try {
+      const saved = localStorage.getItem("dynime_invest_lead_draft");
+      if (saved) {
+        base = { ...base, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.error("Failed to parse invest lead form draft", e);
+    }
+    return base;
   });
 
-  const set = (k: keyof typeof form, v: any) => setForm((p) => ({ ...p, [k]: v }));
+  const set = (k: keyof typeof form, v: any) => {
+    setForm((p) => {
+      const next = { ...p, [k]: v };
+      try {
+        localStorage.setItem("dynime_invest_lead_draft", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +85,7 @@ const InvestLeadForm = ({ plans, targets = [], initialPlanSlug, initialTargetSlu
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("invest_leads" as any).insert({
+      await apiPost("/public/forms/invest-lead", {
         full_name: parsed.data.full_name,
         email: parsed.data.email,
         phone: parsed.data.phone || null,
@@ -78,29 +96,10 @@ const InvestLeadForm = ({ plans, targets = [], initialPlanSlug, initialTargetSlu
         plan_slug: parsed.data.plan_slug || null,
         target_slug: parsed.data.target_slug || null,
       });
-      if (error) throw error;
-      // Notify IR team and send confirmation to investor (fire-and-forget)
-      notifySubmission({
-        formType: "Investor interest",
-        customerName: parsed.data.full_name,
-        customerEmail: parsed.data.email,
-        source: "invest-lead",
-        adminRecipient: "investors@dynime.com",
-        fields: {
-          name: parsed.data.full_name,
-          email: parsed.data.email,
-          phone: parsed.data.phone,
-          country: parsed.data.country,
-          investment_amount: parsed.data.investment_amount
-            ? `USD ${parsed.data.investment_amount}`
-            : undefined,
-          plan_of_interest: parsed.data.plan_slug,
-          investment_target: targets.find((t) => t.slug === parsed.data.target_slug)?.name || parsed.data.target_slug,
-          preferred_contact: parsed.data.preferred_contact,
-          message: parsed.data.message,
-        },
-      });
       setDone(true);
+      try {
+        localStorage.removeItem("dynime_invest_lead_draft");
+      } catch {}
       toast.success("Thanks! Our investor relations team will be in touch shortly.");
     } catch (err: any) {
       toast.error(err?.message ?? "Could not submit. Try again.");

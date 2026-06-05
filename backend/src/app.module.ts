@@ -7,6 +7,7 @@ import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { winstonConfig } from './config/logger.config';
 import { PrismaModule } from './prisma/prisma.module';
+import { ReferralModule } from './referral/referral.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -21,7 +22,12 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { CrmModule } from './crm/crm.module';
 import { HrmModule } from './hrm/hrm.module';
 import { PayrollModule } from './payroll/payroll.module';
+import { CmsModule } from './cms/cms.module';
+import { SeoModule } from './seo/seo.module';
+import { PublicFormsModule } from './public-forms/public-forms.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { MailModule } from './mail/mail.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
@@ -52,6 +58,12 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     CrmModule,
     HrmModule,
     PayrollModule,
+    CmsModule,
+    SeoModule,
+    PublicFormsModule,
+    MailModule,
+    ReferralModule,
+    RealtimeModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Plus, Sparkles, ArrowRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
@@ -36,23 +36,6 @@ const ServiceAddonsSection = ({ serviceSlug, serviceTitle }: Props) => {
   const { currency: ctxCurrency } = useGeoLocationContext();
   const [currency, setCurrency] = useState<CurrencyCode>(ctxCurrency);
 
-  // Realtime: admin add-on edits propagate to the public page instantly
-  useEffect(() => {
-    const channel = supabase
-      .channel(`service-addons-${serviceSlug}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "service_addons", filter: `service_slug=eq.${serviceSlug}` },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["service-addons", serviceSlug] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [serviceSlug, queryClient]);
-
   // Track global currency (geo auto + footer switcher)
   useEffect(() => {
     setCurrency(ctxCurrency);
@@ -61,14 +44,13 @@ const ServiceAddonsSection = ({ serviceSlug, serviceTitle }: Props) => {
   const { data: addons } = useQuery({
     queryKey: ["service-addons", serviceSlug],
     queryFn: async (): Promise<ServiceAddon[]> => {
-      const { data, error } = await supabase
-        .from("service_addons" as any)
-        .select("*")
-        .eq("service_slug", serviceSlug)
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data as unknown as ServiceAddon[]) ?? [];
+      try {
+        const allAddons = await apiGet<ServiceAddon[]>(`/cms/service-addons/${serviceSlug}`);
+        return (allAddons ?? []).filter((a) => a.is_active);
+      } catch (err) {
+        console.error("Failed to load service addons from NestJS:", err);
+        return [];
+      }
     },
   });
 

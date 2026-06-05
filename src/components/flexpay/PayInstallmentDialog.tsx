@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,31 +138,27 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
     }
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("process-payment", {
-        body: {
-          gateway,
-          customer_name: user.user_metadata?.full_name || user.email || "",
-          customer_email: user.email,
-          items: [{
-            id: `flexpay-installment-${installment.id}`,
-            name: `FlexPay installment #${installment.sequence}`,
-            price: amount,
-            quantity: 1,
-          }],
-          total: amount,
-          currency: "USD",
-          service_brief: {
-            flexpay_installment_id: installment.id,
-            flexpay_plan_id: installment.plan_id,
-            flexpay_repayment: true,
-            note: `FlexPay installment #${installment.sequence} repayment`,
-          },
-          success_url: `${window.location.origin}/account/flexpay/receipt/${installment.id}?payment=success`,
-          cancel_url: `${window.location.origin}/account/flexpay/receipt/${installment.id}?payment=cancelled`,
+      const r = await apiPost<any>("/orders/public/process-payment", {
+        gateway,
+        customer_name: user.user_metadata?.full_name || user.email || "",
+        customer_email: user.email,
+        items: [{
+          id: `flexpay-installment-${installment.id}`,
+          name: `FlexPay installment #${installment.sequence}`,
+          price: amount,
+          quantity: 1,
+        }],
+        total: amount,
+        currency: "USD",
+        service_brief: {
+          flexpay_installment_id: installment.id,
+          flexpay_plan_id: installment.plan_id,
+          flexpay_repayment: true,
+          note: `FlexPay installment #${installment.sequence} repayment`,
         },
+        success_url: `${window.location.origin}/account/flexpay/receipt/${installment.id}?payment=success`,
+        cancel_url: `${window.location.origin}/account/flexpay/receipt/${installment.id}?payment=cancelled`,
       });
-      if (error) throw error;
-      const r: any = data;
       const url = r?.url || r?.checkout_url;
       try {
         await supabase.rpc("flexpay_mark_installment_processing", {

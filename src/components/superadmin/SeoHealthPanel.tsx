@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -134,14 +134,10 @@ export default function SeoHealthPanel() {
   const run = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("seo-health", {
-        body: { origin: "https://dynime.com" },
-      });
-      if (error) throw error;
-      if ((data as any).error) throw new Error((data as any).error);
+      const data = await apiPost<any>("/seo/health", { origin: "https://dynime.com" });
       setReport(data as Report);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Health check failed");
+    } catch (e: any) {
+      toast.error(e.message || "Health check failed");
     } finally {
       setLoading(false);
     }

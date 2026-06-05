@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
+import { useSocket } from "@/hooks/useSocket";
 import AccountLayout from "@/components/account/AccountLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,23 @@ const openCenteredPopup = (url: string, name: string) => {
 const AccountVerification = () => {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const { socket } = useSocket();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const handleVerificationUpdated = (data: any) => {
+      console.log("[AccountVerification] Real-time verification update received:", data);
+      if (data?.userId === user?.id) {
+        qc.invalidateQueries({ queryKey: ["verification-status", user?.id] });
+      }
+    };
+
+    socket.on("verification-updated", handleVerificationUpdated);
+
+    return () => {
+      socket.off("verification-updated", handleVerificationUpdated);
+    };
+  }, [socket, user, qc]);
 
   const [creatingKyc, setCreatingKyc] = useState(false);
   const [creatingKyb, setCreatingKyb] = useState(false);
@@ -54,15 +70,25 @@ const AccountVerification = () => {
     industry: "", country: "", notes: "",
   });
 
+  const [hasPending, setHasPending] = useState(false);
+
   /* ── Queries ── */
   const { data: verificationStatus } = useQuery({
     enabled: !!user,
     queryKey: ["verification-status", user?.id],
     queryFn: () => apiGet<{ kyc: any; kyb: any[] }>("/verification/me"),
-    refetchInterval: 10_000,
+    refetchInterval: hasPending ? 3000 : 15000,
   });
   const kyc = verificationStatus?.kyc ?? null;
   const kybs: any[] = verificationStatus?.kyb ?? [];
+
+  useEffect(() => {
+    const pending = !!popupType ||
+                    kyc?.status === "pending" ||
+                    kyc?.status === "in_review" ||
+                    kybs.some((k: any) => k.status === "pending" || k.status === "in_review");
+    setHasPending(pending);
+  }, [verificationStatus, popupType, kyc, kybs]);
 
   const { data: creditApps = [] } = useQuery({
     enabled: !!user,
@@ -78,10 +104,16 @@ const AccountVerification = () => {
     const kyb_done = searchParams.get("kyb_done");
     if (kyc_done || kyb_done) {
       setSearchParams({}, { replace: true });
-      toast.success("Verification submitted! Status will update shortly.");
-      setTimeout(() => {
-        qc.invalidateQueries({ queryKey: ["verification-status"] });
-      }, 2000);
+      const syncMock = async () => {
+        try {
+          await apiGet("/verification/me?sync_mock=true");
+          toast.success("Verification submitted! Status will update shortly.");
+          qc.invalidateQueries({ queryKey: ["verification-status"] });
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      syncMock();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

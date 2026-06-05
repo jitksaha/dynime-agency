@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   LayoutDashboard, ShoppingBag, FileText, User as UserIcon, LogOut,
   Truck, RotateCw, Building2, Briefcase, Bell, Search, Home, ChevronRight,
-  CalendarDays, LifeBuoy, Layers, CreditCard, ShieldCheck,
+  CalendarDays, LifeBuoy, Layers, CreditCard, ShieldCheck, GitMerge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +17,7 @@ import {
   SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import SiteLogo from "@/components/shared/SiteLogo";
+import CustomerNotificationsBell from "@/components/account/CustomerNotificationsBell";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -40,7 +41,9 @@ const servicesItems = [
 ];
 
 const accountItems = [
+  { to: "/account/notifications", label: "Notifications", icon: Bell },
   { to: "/account/verification", label: "Verification", icon: ShieldCheck },
+  { to: "/partner", label: "Referral Program", icon: GitMerge },
   { to: "/account/tickets", label: "Support Tickets", icon: LifeBuoy },
   { to: "/account/profile", label: "Profile & Settings", icon: UserIcon },
 ];
@@ -186,43 +189,50 @@ const AccountLayout = ({ title, description, children, actions }: Props) => {
               </div>
             </div>
             <div className="flex-1 md:hidden" />
-            <div className="flex items-center gap-2 ml-auto md:ml-3 shrink-0">
-            <Button variant="ghost" size="icon" className="rounded-full" aria-label="Notifications">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full hover:bg-muted px-1.5 py-1 transition-colors">
-                  <Avatar className="w-8 h-8">
-                    {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName || user.email || "User"} />}
-                    <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
-                      {initialsOf(user.email, fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-xs font-semibold text-foreground leading-none">{fullName || "Account"}</p>
-                    <p className="text-[10px] text-muted-foreground leading-none mt-0.5 truncate max-w-[140px]">{user.email}</p>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/account/profile"><UserIcon className="w-4 h-4 mr-2" /> Profile & Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/services"><Home className="w-4 h-4 mr-2" /> Browse services</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => signOut().then(() => (window.location.href = "/"))}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <LogOut className="w-4 h-4 mr-2" /> Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-3 ml-auto shrink-0">
+              <CustomerNotificationsBell />
+
+              <div className="w-px h-5 bg-border/60 hidden sm:block" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2.5 rounded-full hover:bg-muted/80 active:scale-[0.98] px-2 py-1.5 transition-all duration-200 border border-transparent hover:border-border/30">
+                    <Avatar className="w-8 h-8 ring-2 ring-transparent hover:ring-primary/20 transition-all duration-200">
+                      {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName || user.email || "User"} />}
+                      <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
+                        {initialsOf(user.email, fullName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden sm:block text-left">
+                      <p className="text-xs font-semibold text-foreground leading-none">{fullName || "Account"}</p>
+                      <p className="text-[10px] text-muted-foreground leading-none mt-1 truncate max-w-[140px]">{user.email}</p>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 mt-1">
+                  <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/account/notifications"><Bell className="w-4 h-4 mr-2" /> Notifications</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/account/profile"><UserIcon className="w-4 h-4 mr-2" /> Profile & Settings</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/partner"><GitMerge className="w-4 h-4 mr-2" /> Referral Program</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/services"><Home className="w-4 h-4 mr-2" /> Browse services</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => signOut().then(() => (window.location.href = "/"))}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 

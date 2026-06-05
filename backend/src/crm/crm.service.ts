@@ -127,8 +127,39 @@ export class CrmService {
     });
   }
 
-  updateWorkflow(id: string, data: any) {
-    return this.prisma.crm_workflows.update({ where: { id }, data });
+  getWorkflow(id: string) {
+    return this.prisma.crm_workflows.findUnique({
+      where: { id },
+      include: { crm_workflow_steps: { orderBy: { position: 'asc' } } },
+    });
+  }
+
+  updateWorkflow(id: string, data: any, steps?: any[]) {
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.crm_workflows.update({
+        where: { id },
+        data,
+      });
+
+      if (steps) {
+        await tx.crm_workflow_steps.deleteMany({
+          where: { workflow_id: id },
+        });
+
+        if (steps.length > 0) {
+          const payload = steps.map((s, i) => ({
+            workflow_id: id,
+            position: i,
+            step_type: s.step_type,
+            config: s.config || {},
+          }));
+          await tx.crm_workflow_steps.createMany({
+            data: payload,
+          });
+        }
+      }
+      return updated;
+    });
   }
 
   deleteWorkflow(id: string) {

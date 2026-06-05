@@ -4,7 +4,7 @@ import { usePageSEO } from "@/hooks/use-page-seo";
 import { SEO_DEFAULTS } from "@/lib/seo-defaults";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import PageHero from "@/components/shared/PageHero";
-import { usePortfolioProjects, useSiteSettings } from "@/hooks/use-data";
+import { usePortfolioProjects, useSiteSettings } from "@/hooks/use-cms-data";
 import { Layers, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {

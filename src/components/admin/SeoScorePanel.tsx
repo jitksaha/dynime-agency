@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { analyzeSeo, type SeoInput, type SeoCheck } from "@/lib/seo-analyzer";
 import { useSeoRules } from "@/hooks/use-seo-rules";
 import { Button } from "@/components/ui/button";
@@ -44,16 +44,13 @@ const SeoScorePanel = ({ input, onApplyAi }: Props) => {
 
   const ai = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("seo-analyze", {
-        body: {
-          title: merged.title,
-          metaDescription: merged.metaDescription,
-          slug: merged.slug,
-          content: merged.content,
-          primaryKeyword: merged.primaryKeyword,
-        },
+      const data = await apiPost<any>("/seo/analyze", {
+        title: merged.title,
+        metaDescription: merged.metaDescription,
+        slug: merged.slug,
+        content: merged.content,
+        primaryKeyword: merged.primaryKeyword,
       });
-      if (error) throw error;
       return data as { primaryKeyword?: string; secondaryKeywords?: string[]; suggestions?: string[] };
     },
     onSuccess: (data) => {

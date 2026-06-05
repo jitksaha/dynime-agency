@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { apiPost } from "@/lib/api";
 
 const generalSettings = [
   { key: "site_name", label: "Site Name (Main brand — used everywhere)", type: "text" },
@@ -80,15 +81,25 @@ const AdminSettings = () => {
     setSaving(true);
     setSaveError(null);
     try {
-      const keysToSave = [...generalSettings.map((s) => s.key), "default_theme", "portfolio_per_page", "default_og_image", "live_chat_embed", "live_chat_enabled", "auto_currency_switcher_enabled", "auto_language_switcher_enabled"];
+      const keysToSave = [
+        ...generalSettings.map((s) => s.key),
+        "default_theme",
+        "portfolio_per_page",
+        "default_og_image",
+        "live_chat_embed",
+        "live_chat_enabled",
+        "auto_currency_switcher_enabled",
+        "auto_language_switcher_enabled",
+        "referral_cooling_period_days"
+      ];
       const rows: { key: string; value: any }[] = keysToSave
         .filter((k) => values[k] !== undefined)
         .map((key) => ({ key, value: JSON.stringify(values[key] ?? "") }));
       // Registered entities (stored as a real jsonb array) + mask toggle
       rows.push({ key: "registered_entities", value: entities });
       rows.push({ key: "registered_entities_mask", value: maskLicenses ? "true" : "false" });
-      const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
-      if (error) throw error;
+      
+      await apiPost("/cms/site-settings/bulk", { settings: rows });
       toast.success("Settings saved.");
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     } catch (err: any) {
@@ -401,6 +412,36 @@ const AdminSettings = () => {
               </label>
             );
           })}
+        </div>
+      </div>
+
+      {/* Referral Program settings */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Share2 className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Referral Program</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Configure the rules and payouts parameters for the Dynime Partner & Referral Program.
+        </p>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-muted-foreground block mb-1">
+              Commission Cooling-Off Period (Days)
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={90}
+              value={values.referral_cooling_period_days || "14"}
+              onChange={(e) => setValues({ ...values, referral_cooling_period_days: e.target.value })}
+              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              placeholder="14"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1.5">
+              Number of days after order payment before a pending referral commission is automatically approved and made available for partner payout request. Use 0 for instant approval.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -17,6 +17,7 @@ import DynamicFavicon from "@/components/shared/DynamicFavicon";
 import ProductUrlInterceptor from "@/components/shared/ProductUrlInterceptor";
 import LiveChatEmbed from "@/components/shared/LiveChatEmbed";
 import { useHashScroll } from "@/hooks/use-hash-scroll";
+import ReferralTracker from "@/components/shared/ReferralTracker";
 
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
@@ -40,6 +41,11 @@ const RealtimeSync = () => {
 const LegacyServiceRedirect = () => {
   const { slug } = useParams<{ slug: string }>();
   return <Navigate to={slug ? `/${slug}` : "/services"} replace />;
+};
+
+const ReferralRedirect = () => {
+  const { code } = useParams<{ code: string }>();
+  return <Navigate to={code ? `/?ref=${code}` : "/"} replace />;
 };
 
 // Eager: home page (LCP) only
@@ -74,6 +80,7 @@ const AccountFormation = lazy(() => import("./pages/account/AccountFormation.tsx
 const AccountCompliance = lazy(() => import("./pages/account/AccountCompliance.tsx"));
 const AccountTickets = lazy(() => import("./pages/account/AccountTickets.tsx"));
 const AccountTicketDetail = lazy(() => import("./pages/account/AccountTicketDetail.tsx"));
+const AccountNotifications = lazy(() => import("./pages/account/AccountNotifications.tsx"));
 const Checkout = lazy(() => import("./pages/Checkout.tsx"));
 const Invoice = lazy(() => import("./pages/Invoice.tsx"));
 const Agreement = lazy(() => import("./pages/Agreement.tsx"));
@@ -94,6 +101,8 @@ const FlexPayApply = lazy(() => import("./pages/FlexPayApply.tsx"));
 const AccountFlexPay = lazy(() => import("./pages/account/AccountFlexPay.tsx"));
 const FlexPayReceipt = lazy(() => import("./pages/account/FlexPayReceipt.tsx"));
 const AdminFlexPay = lazy(() => import("./pages/superadmin/AdminFlexPay.tsx"));
+const VerifyOrder = lazy(() => import("./pages/VerifyOrder.tsx"));
+const VerifyOrderMockFlow = lazy(() => import("./pages/VerifyOrderMockFlow.tsx"));
 
 // Investor Portal (lazy)
 const InvestorLogin = lazy(() => import("./pages/investor-portal/InvestorLogin.tsx"));
@@ -167,10 +176,21 @@ const AdminCrmEmailTemplates = lazy(() => import("./pages/superadmin/crm/AdminCr
 const AdminHRExtras = lazy(() => import("./pages/superadmin/AdminHRExtras.tsx"));
 const AdminPayroll = lazy(() => import("./pages/superadmin/AdminPayroll.tsx"));
 const AdminFxOrders = lazy(() => import("./pages/superadmin/AdminFxOrders.tsx"));
-const AdminKyc = lazy(() => import("./pages/superadmin/AdminKyc.tsx"));
-const AdminKyb = lazy(() => import("./pages/superadmin/AdminKyb.tsx"));
+const AdminVerifications = lazy(() => import("./pages/superadmin/AdminVerifications.tsx"));
+const VerificationDetails = lazy(() => import("./pages/superadmin/VerificationDetails.tsx"));
 const AdminCredit = lazy(() => import("./pages/superadmin/AdminCredit.tsx"));
 const AccountVerification = lazy(() => import("./pages/account/AccountVerification.tsx"));
+
+// Partner Portal
+const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard.tsx"));
+const PartnerCommissions = lazy(() => import("./pages/partner/PartnerCommissions.tsx"));
+const PartnerPayouts = lazy(() => import("./pages/partner/PartnerPayouts.tsx"));
+
+// Admin Referral Pages
+const AdminReferrals = lazy(() => import("./pages/superadmin/AdminReferrals.tsx"));
+const AdminPartnersList = lazy(() => import("./pages/superadmin/AdminPartnersList.tsx"));
+const AdminPayoutRequests = lazy(() => import("./pages/superadmin/AdminPayoutRequests.tsx"));
+
 
 // Employee Portal
 const EmployeeLogin = lazy(() => import("./pages/employee/EmployeeLogin.tsx"));
@@ -238,6 +258,7 @@ const App = () => (
               <BrowserRouter>
                   <ScrollToTop />
                   <HashScroll />
+                  <ReferralTracker />
                   
                   <Suspense fallback={<RouteFallback />}>
                   <RouteTransition>
@@ -274,6 +295,7 @@ const App = () => (
                   <Route path="/account/profile" element={<AccountProfile />} />
                   <Route path="/account/tickets" element={<AccountTickets />} />
                   <Route path="/account/tickets/:id" element={<AccountTicketDetail />} />
+                  <Route path="/account/notifications" element={<AccountNotifications />} />
                   <Route path="/account/verification" element={<AccountVerification />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/invoice/:id" element={<Invoice />} />
@@ -299,6 +321,8 @@ const App = () => (
                   <Route path="/flexpay/apply" element={<FlexPayApply />} />
                   <Route path="/account/flexpay" element={<AccountFlexPay />} />
                   <Route path="/account/flexpay/receipt/:id" element={<FlexPayReceipt />} />
+                  <Route path="/verify-order/:orderId" element={<VerifyOrder />} />
+                  <Route path="/verify-order/:orderId/mock-flow" element={<VerifyOrderMockFlow />} />
                   <Route path="/superadmin/flexpay" element={<ProtectedRoute><AdminFlexPay /></ProtectedRoute>} />
 
                   {/* Investor Portal */}
@@ -366,10 +390,16 @@ const App = () => (
                   <Route path="/superadmin/orders/:id" element={<ProtectedRoute><AdminOrderDetail /></ProtectedRoute>} />
                   <Route path="/superadmin/agreement-builder" element={<ProtectedRoute><AdminAgreementBuilder /></ProtectedRoute>} />
                   <Route path="/superadmin/fx-orders" element={<ProtectedRoute><AdminFxOrders /></ProtectedRoute>} />
-                  <Route path="/superadmin/kyc" element={<ProtectedRoute><AdminKyc /></ProtectedRoute>} />
-                  <Route path="/superadmin/kyb" element={<ProtectedRoute><AdminKyb /></ProtectedRoute>} />
-                  <Route path="/superadmin/credit" element={<ProtectedRoute><AdminCredit /></ProtectedRoute>} />
+                   <Route path="/superadmin/verifications" element={<ProtectedRoute><AdminVerifications /></ProtectedRoute>} />
+                  <Route path="/superadmin/verifications/:id" element={<ProtectedRoute><VerificationDetails /></ProtectedRoute>} />
+                  <Route path="/superadmin/credit" element={<Navigate to="/superadmin/flexpay" replace />} />
                   <Route path="/superadmin/customer-services" element={<ProtectedRoute><AdminCustomerServices /></ProtectedRoute>} />
+
+                  {/* Referral & Partner Admin */}
+                  <Route path="/superadmin/referrals" element={<ProtectedRoute><AdminReferrals /></ProtectedRoute>} />
+                  <Route path="/superadmin/referrals/partners" element={<ProtectedRoute><AdminPartnersList /></ProtectedRoute>} />
+                  <Route path="/superadmin/referrals/payouts" element={<ProtectedRoute><AdminPayoutRequests /></ProtectedRoute>} />
+
                   <Route path="/superadmin/team" element={<ProtectedRoute><AdminTeam /></ProtectedRoute>} />
                   <Route path="/superadmin/team-section" element={<ProtectedRoute><AdminTeamSection /></ProtectedRoute>} />
                   <Route path="/superadmin/id-cards" element={<ProtectedRoute><AdminIdCards /></ProtectedRoute>} />
@@ -412,7 +442,15 @@ const App = () => (
                   {/* Dynamic service pages */}
                   <Route path="/:slug" element={<ServiceDetail />} />
 
+                  {/* Partner Portal */}
+                  <Route path="/partner" element={<PartnerDashboard />} />
+                  <Route path="/partner/commissions" element={<PartnerCommissions />} />
+                  <Route path="/partner/payouts" element={<PartnerPayouts />} />
+                  <Route path="/ref/:code" element={<ReferralRedirect />} />
+                  <Route path="/invite/:code" element={<ReferralRedirect />} />
+
                   <Route path="*" element={<NotFound />} />
+
                   </Routes>
                   </RouteTransition>
                   </Suspense>

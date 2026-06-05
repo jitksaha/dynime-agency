@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Pencil, Trash2, Star, Eye, EyeOff, Upload, X, Search, GripVertical, CheckSquare, History, RotateCcw, Sparkles, Zap } from "lucide-react";
 import { generateAltText } from "@/lib/alt-text";
@@ -14,21 +14,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { usePortfolioProjectsAdmin, useUpsertPortfolioProject, useDeletePortfolioProject, useBulkUpdatePortfolioProjects, useBulkDeletePortfolioProjects } from "@/hooks/use-cms-data";
 
 const CATEGORIES = ["Web", "Marketing", "Consultancy"];
 
 const useAdminPortfolio = () => {
-  return useQuery({
-    queryKey: ["admin-portfolio"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("portfolio_projects")
-        .select("*")
-        .order("sort_order");
-      if (error) throw error;
-      return data;
-    },
-  });
+  return usePortfolioProjectsAdmin();
 };
 
 interface ProjectForm {
@@ -119,28 +110,27 @@ const AdminPortfolio = () => {
     }
   };
 
+  const bulkUpdate = useBulkUpdatePortfolioProjects();
+  const bulkDelete = useBulkDeletePortfolioProjects();
+  const upsertProject = useUpsertPortfolioProject();
+  const deleteProject = useDeletePortfolioProject();
+
   const bulkMutation = useMutation({
-    mutationFn: async ({ ids, updates }: { ids: string[]; updates: Record<string, any> }) => {
-      const { error } = await supabase.from("portfolio_projects").update(updates as any).in("id", ids);
-      if (error) throw error;
-    },
+    mutationFn: (payload: { ids: string[]; updates: Record<string, any> }) =>
+      bulkUpdate.mutateAsync({ ids: payload.ids, data: payload.updates }),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setSelected(new Set());
-      const action = Object.keys(vars.updates)[0];
       toast.success(`${vars.ids.length} projects updated`);
     },
     onError: (e) => toast.error(e.message),
   });
 
   const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("portfolio_projects").delete().in("id", ids);
-      if (error) throw error;
-    },
+    mutationFn: (ids: string[]) => bulkDelete.mutateAsync({ ids }),
     onSuccess: (_, ids) => {
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setSelected(new Set());
       setBulkDeleteConfirm(false);
@@ -168,6 +158,7 @@ const AdminPortfolio = () => {
         });
 
       const payload = {
+        id: data.id || undefined,
         title: data.title,
         slug: data.slug,
         category: data.category,
@@ -183,16 +174,10 @@ const AdminPortfolio = () => {
         alt_text: finalAlt,
       };
 
-      if (data.id) {
-        const { error } = await supabase.from("portfolio_projects").update(payload as any).eq("id", data.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("portfolio_projects").insert(payload as any);
-        if (error) throw error;
-      }
+      return upsertProject.mutateAsync(payload);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setDialogOpen(false);
       setEditId(null);
@@ -202,12 +187,9 @@ const AdminPortfolio = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("portfolio_projects").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) => deleteProject.mutateAsync(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setDeleteConfirm(null);
       toast.success("Project deleted");
@@ -216,12 +198,10 @@ const AdminPortfolio = () => {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ id, field, value }: { id: string; field: string; value: boolean }) => {
-      const { error } = await supabase.from("portfolio_projects").update({ [field]: value } as any).eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: ({ id, field, value }: { id: string; field: string; value: boolean }) =>
+      upsertProject.mutateAsync({ id, [field]: value }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
     },
     onError: (e) => toast.error(e.message),
@@ -479,10 +459,11 @@ const AdminPortfolio = () => {
         };
       });
 
-      const { error } = await supabase.from("portfolio_projects").insert(rows as any);
-      if (error) throw error;
+      await Promise.all(
+        rows.map((row) => upsertProject.mutateAsync(row))
+      );
 
-      qc.invalidateQueries({ queryKey: ["admin-portfolio"] });
+      qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       toast.success(`${rows.length} project${rows.length > 1 ? "s" : ""} published`);
       setQuickOpen(false);

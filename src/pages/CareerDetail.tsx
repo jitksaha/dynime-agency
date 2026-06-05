@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import DOMPurify from "isomorphic-dompurify";
 import Layout from "@/components/layout/Layout";
@@ -15,6 +15,7 @@ import {
 import { findChannel, type PostingChannel } from "@/lib/job-channels";
 import { toast } from "sonner";
 import JobApplicationForm from "@/components/careers/JobApplicationForm";
+import { useCareer, useCareerStats as useSharedCareerStats, useIncrementCareerViewBySlug } from "@/hooks/use-cms-data";
 
 interface JobPost {
   id: string;
@@ -39,27 +40,22 @@ interface JobPost {
   posted_at: string;
 }
 
-const useJob = (slug: string | undefined) =>
-  useQuery({
-    queryKey: ["career", slug],
-    enabled: !!slug,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("careers")
-        .select("*, office_location:office_locations(name, city, country, address)")
-        .eq("slug", slug!)
-        .eq("is_active", true)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) return null;
-      return {
-        ...data,
-        responsibilities: Array.isArray(data.responsibilities) ? (data.responsibilities as string[]) : [],
-        requirements: Array.isArray(data.requirements) ? (data.requirements as string[]) : [],
-        posting_channels: Array.isArray(data.posting_channels) ? (data.posting_channels as unknown as PostingChannel[]) : [],
-      } as JobPost;
-    },
-  });
+const useJob = (slug: string | undefined) => {
+  const query = useCareer(slug ?? "");
+  const data = query.data;
+  if (!data) return query;
+
+  return {
+    ...query,
+    data: {
+      ...data,
+      office_location: data.office_location || data.office_locations,
+      responsibilities: Array.isArray(data.responsibilities) ? data.responsibilities : [],
+      requirements: Array.isArray(data.requirements) ? data.requirements : [],
+      posting_channels: Array.isArray(data.posting_channels) ? data.posting_channels : [],
+    } as JobPost,
+  };
+};
 
 const Pill = ({ icon: Icon, children }: { icon: any; children: React.ReactNode }) => (
   <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-3 py-1 text-xs text-foreground/80">
@@ -69,24 +65,11 @@ const Pill = ({ icon: Icon, children }: { icon: any; children: React.ReactNode }
 
 const useCareerStats = (slug: string | undefined, careerId: string | undefined) => {
   const qc = useQueryClient();
-  const query = useQuery({
-    queryKey: ["career-stats", slug],
-    enabled: !!slug,
-    refetchInterval: 30000,
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_career_stats", { _slug: slug! });
-      if (error) throw error;
-      const row = Array.isArray(data) ? data[0] : data;
-      return {
-        view_count: Number(row?.view_count ?? 0),
-        applicant_count: Number(row?.applicant_count ?? 0),
-      };
-    },
-  });
+  const query = useSharedCareerStats(slug);
 
   // Realtime: refresh applicant count when new applications come in for this career
   useEffect(() => {
-    if (!careerId) return;
+    if (!careerId || !slug) return;
     const channel = supabase
       .channel(`career-apps-${careerId}`)
       .on(
@@ -110,6 +93,7 @@ const CareerDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: job, isLoading, isError } = useJob(slug);
   const { data: stats } = useCareerStats(slug, job?.id);
+  const incrementView = useIncrementCareerViewBySlug();
 
   // Increment view count once per slug per session
   useEffect(() => {
@@ -117,7 +101,7 @@ const CareerDetail = () => {
     const key = `career-viewed:${slug}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
-    supabase.rpc("increment_career_view", { _slug: slug }).then(() => {
+    incrementView.mutateAsync(slug).then(() => {
       // refresh stats after increment
       setTimeout(() => {
         // soft refetch via query key

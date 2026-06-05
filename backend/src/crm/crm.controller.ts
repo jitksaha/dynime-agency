@@ -100,10 +100,17 @@ export class CrmController {
     return this.svc.createWorkflow(body, userId);
   }
 
+  @Get('workflows/:id')
+  @Version('1')
+  getWorkflow(@Param('id') id: string) {
+    return this.svc.getWorkflow(id);
+  }
+
   @Patch('workflows/:id')
   @Version('1')
   updateWorkflow(@Param('id') id: string, @Body() body: any) {
-    return this.svc.updateWorkflow(id, body);
+    const { steps, ...wfData } = body;
+    return this.svc.updateWorkflow(id, wfData, steps);
   }
 
   @Delete('workflows/:id')

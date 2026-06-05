@@ -59,7 +59,7 @@ export class HrmService {
   async getTeamUsers() {
     return this.prisma.$queryRaw<any[]>`
       SELECT u.id, u.email, u.last_sign_in_at,
-             p.full_name, p.avatar_url, p.phone
+             p.full_name, p.avatar_url, u.phone
       FROM   auth.users u
       LEFT JOIN public.profiles p ON p.id = u.id
       ORDER  BY u.email

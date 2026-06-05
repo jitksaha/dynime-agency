@@ -27,6 +27,7 @@ import { useSiteSettings } from "@/hooks/use-data";
 import { inspectImage, formatBytes, formatAspect, type InspectResult } from "@/lib/image-inspect";
 import dynimeLogoLight from "@/assets/dynime-logo-light.webp";
 import dynimeLogoDark from "@/assets/dynime-logo-dark.webp";
+import { apiPost } from "@/lib/api";
 
 const BUCKET = "site-assets";
 const MAX_BYTES = 2 * 1024 * 1024; // 2MB
@@ -63,44 +64,11 @@ const withCacheBuster = (url: string) =>
   url ? `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}` : url;
 
 const upsertSetting = async (key: string, value: string) => {
-  const { data: existing } = await supabase
-    .from("site_settings")
-    .select("id")
-    .eq("key", key)
-    .maybeSingle();
-  if (existing) {
-    const { error } = await supabase
-      .from("site_settings")
-      .update({ value: JSON.stringify(value) })
-      .eq("key", key);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase
-      .from("site_settings")
-      .insert({ key, value: JSON.stringify(value) });
-    if (error) throw error;
-  }
+  await apiPost("/cms/site-settings", { key, value: JSON.stringify(value) });
 };
 
 const upsertSettingJson = async (key: string, value: unknown) => {
-  const { data: existing } = await supabase
-    .from("site_settings")
-    .select("id")
-    .eq("key", key)
-    .maybeSingle();
-  const payload = JSON.stringify(value);
-  if (existing) {
-    const { error } = await supabase
-      .from("site_settings")
-      .update({ value: payload })
-      .eq("key", key);
-    if (error) throw error;
-  } else {
-    const { error } = await supabase
-      .from("site_settings")
-      .insert({ key, value: payload });
-    if (error) throw error;
-  }
+  await apiPost("/cms/site-settings", { key, value: JSON.stringify(value) });
 };
 
 const parseMeta = (raw: unknown): LogoMeta => {

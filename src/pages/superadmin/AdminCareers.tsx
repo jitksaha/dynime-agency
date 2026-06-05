@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Plus, Briefcase, Star, Trash2, Edit2, Search, MapPin, Clock, ExternalLink, Copy, Link2, Globe2, Upload, Image as ImageIcon, X } from "lucide-react";
 import { JOB_CHANNELS, findChannel, type PostingChannel } from "@/lib/job-channels";
 import OfficeLocationsDialog, { useOfficeLocations } from "@/components/admin/OfficeLocationsDialog";
+import { useCareersAdmin, useUpsertCareer, useDeleteCareer } from "@/hooks/use-cms-data";
 
 interface JobPost {
   id: string;
@@ -120,26 +121,9 @@ const AdminCareers = () => {
   const [bulkMode, setBulkMode] = useState<"merge" | "replace">("merge");
   const [heroUploading, setHeroUploading] = useState(false);
 
-  const { data: jobs = [], isLoading } = useQuery<JobPost[]>({
-    queryKey: ["admin-careers"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("careers")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("posted_at", { ascending: false });
-      if (error) throw error;
-      return (data ?? []).map((c: any) => ({
-        ...c,
-        responsibilities: Array.isArray(c.responsibilities) ? c.responsibilities : [],
-        requirements: Array.isArray(c.requirements) ? c.requirements : [],
-        posting_channels: Array.isArray(c.posting_channels) ? c.posting_channels : [],
-      })) as JobPost[];
-    },
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
-  });
+  const { data: jobs = [], isLoading } = useCareersAdmin();
+  const upsertCareer = useUpsertCareer();
+  const deleteCareer = useDeleteCareer();
 
   // Realtime: keep admin list in sync with DB and the public /careers page
   useEffect(() => {
@@ -149,7 +133,7 @@ const AdminCareers = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "careers" },
         () => {
-          qc.invalidateQueries({ queryKey: ["admin-careers"] });
+          qc.invalidateQueries({ queryKey: ["careers-admin"] });
           qc.invalidateQueries({ queryKey: ["careers"] });
           qc.invalidateQueries({ queryKey: ["career"] });
         },
@@ -159,7 +143,6 @@ const AdminCareers = () => {
       supabase.removeChannel(channel);
     };
   }, [qc]);
-
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -241,6 +224,7 @@ const AdminCareers = () => {
       if (!finalSlug) throw new Error("Slug could not be generated");
 
       const payload = {
+        id: editing?.id || undefined,
         slug: finalSlug,
         title: form.title,
         department: form.department,
@@ -263,17 +247,11 @@ const AdminCareers = () => {
         vacancies: Math.max(0, Number(form.vacancies) || 0),
         office_location_id: (form.location === "On-site" || form.location === "Hybrid") ? (form.office_location_id || null) : null,
       };
-      if (editing) {
-        const { error } = await supabase.from("careers").update(payload).eq("id", editing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("careers").insert([payload as any]);
-        if (error) throw error;
-      }
+      return upsertCareer.mutateAsync(payload);
     },
     onSuccess: () => {
       toast.success(editing ? "Job updated" : "Job posted");
-      qc.invalidateQueries({ queryKey: ["admin-careers"] });
+      qc.invalidateQueries({ queryKey: ["careers-admin"] });
       setOpen(false);
       resetForm();
     },
@@ -283,21 +261,17 @@ const AdminCareers = () => {
   const toggleMutation = useMutation({
     mutationFn: async ({ id, field, value }: { id: string; field: "is_active" | "is_featured"; value: boolean }) => {
       const patch = field === "is_active" ? { is_active: value } : { is_featured: value };
-      const { error } = await supabase.from("careers").update(patch).eq("id", id);
-      if (error) throw error;
+      return upsertCareer.mutateAsync({ id, ...patch });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-careers"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["careers-admin"] }),
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("careers").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) => deleteCareer.mutateAsync(id),
     onSuccess: () => {
       toast.success("Job deleted");
-      qc.invalidateQueries({ queryKey: ["admin-careers"] });
+      qc.invalidateQueries({ queryKey: ["careers-admin"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -373,7 +347,7 @@ const AdminCareers = () => {
 
       const targets = jobs.filter((j) => bulkSelected.has(j.id));
       await Promise.all(
-        targets.map(async (j) => {
+        targets.map((j) => {
           let next: PostingChannel[];
           if (bulkMode === "replace") {
             next = incoming;
@@ -383,17 +357,16 @@ const AdminCareers = () => {
             incoming.forEach((c) => map.set(c.id, c));
             next = Array.from(map.values());
           }
-          const { error } = await supabase
-            .from("careers")
-            .update({ posting_channels: next as any })
-            .eq("id", j.id);
-          if (error) throw error;
-        }),
+          return upsertCareer.mutateAsync({
+            id: j.id,
+            posting_channels: next,
+          });
+        })
       );
     },
     onSuccess: () => {
       toast.success(`Updated ${bulkSelected.size} job${bulkSelected.size === 1 ? "" : "s"}`);
-      qc.invalidateQueries({ queryKey: ["admin-careers"] });
+      qc.invalidateQueries({ queryKey: ["careers-admin"] });
       setBulkOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),

@@ -13,6 +13,7 @@ import {
 import SiteLogo from "@/components/shared/SiteLogo";
 import { useSEO } from "@/hooks/use-seo";
 import BookingStatusCard from "@/components/orders/BookingStatusCard";
+import { apiGet } from "@/lib/api";
 import PayInvoicePanel from "@/components/invoice/PayInvoicePanel";
 import InvoiceCurrencyConverter from "@/components/invoice/InvoiceCurrencyConverter";
 import { toast } from "sonner";
@@ -94,21 +95,14 @@ const Invoice = () => {
     if (!invoiceParam) return;
     if (!opts?.silent) setLoading(true);
     try {
-      let row: InvoiceData | null = null;
-      const { data: r1 } = await supabase.rpc("get_invoice_by_number", { _invoice: invoiceParam });
-      if (r1 && Array.isArray(r1) && r1.length) row = r1[0] as unknown as InvoiceData;
-      if (!row) {
-        const { data: r2 } = await supabase.from("orders").select("*").eq("id", invoiceParam).maybeSingle();
-        if (r2) row = r2 as unknown as InvoiceData;
-      }
-      if (!row) { setError("Invoice not found"); return; }
+      const row = await apiGet<InvoiceData>(`/orders/public/invoice/${encodeURIComponent(invoiceParam)}`);
       setError(null);
       setData((prev) => {
         // avoid unnecessary state updates if nothing changed
-        if (prev && prev.status === row!.status && prev.updated_at === row!.updated_at && prev.payment_gateway === row!.payment_gateway) {
+        if (prev && prev.status === row.status && prev.updated_at === row.updated_at && prev.payment_gateway === row.payment_gateway) {
           return prev;
         }
-        return row!;
+        return row;
       });
     } catch (e: unknown) {
       if (!opts?.silent) setError(e instanceof Error ? e.message : "Failed to load invoice");

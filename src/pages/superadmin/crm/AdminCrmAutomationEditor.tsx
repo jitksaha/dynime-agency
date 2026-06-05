@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPatch } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,40 +42,39 @@ const AdminCrmAutomationEditor = () => {
 
   const { data: templates = [] } = useQuery({
     queryKey: ["crm-email-templates"],
-    queryFn: async () => (await supabase.from("crm_email_templates").select("id,name").order("name")).data || [],
+    queryFn: async () => (await apiGet<any[]>("/crm/email-templates")) ?? [],
   });
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("crm_workflows").select("*, crm_workflow_steps(*)").eq("id", id).single();
-      if (data) {
-        setWf(data);
-        setSteps((data.crm_workflow_steps || []).sort((a: any, b: any) => a.position - b.position));
+      try {
+        const data = await apiGet<any>(`/crm/workflows/${id}`);
+        if (data) {
+          setWf(data);
+          setSteps((data.crm_workflow_steps || []).sort((a: any, b: any) => a.position - b.position));
+        }
+      } catch (e: any) {
+        toast.error("Failed to load workflow details");
       }
     })();
   }, [id]);
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error: e1 } = await supabase.from("crm_workflows").update({
-        name: wf.name, description: wf.description, trigger_type: wf.trigger_type,
-        trigger_config: wf.trigger_config || {}, is_active: wf.is_active,
-      }).eq("id", id);
-      if (e1) throw e1;
-      await supabase.from("crm_workflow_steps").delete().eq("workflow_id", id);
-      if (steps.length > 0) {
-        const payload = steps.map((s, i) => ({
-          workflow_id: id, position: i, step_type: s.step_type, config: s.config || {},
-        }));
-        const { error: e2 } = await supabase.from("crm_workflow_steps").insert(payload);
-        if (e2) throw e2;
-      }
+      await apiPatch(`/crm/workflows/${id}`, {
+        name: wf.name,
+        description: wf.description,
+        trigger_type: wf.trigger_type,
+        trigger_config: wf.trigger_config || {},
+        is_active: wf.is_active,
+        steps,
+      });
     },
     onSuccess: () => {
       toast.success("Workflow saved");
       qc.invalidateQueries({ queryKey: ["crm-workflows"] });
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: any) => toast.error(e.message ?? "Failed to save workflow"),
   });
 
   const addStep = (step_type: string) => setSteps([...steps, { step_type, config: {} }]);

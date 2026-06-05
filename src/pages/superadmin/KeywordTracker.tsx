@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ interface TrackedKeyword {
   notes: string | null;
   is_active: boolean;
   created_at: string;
+  keyword_rank_history?: RankSnapshot[];
 }
 
 interface RankSnapshot {
@@ -81,78 +82,68 @@ export default function KeywordTracker() {
 
   async function load() {
     setLoading(true);
-    const { data: kws, error } = await supabase
-      .from("tracked_keywords")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-      return;
-    }
-    setKeywords((kws || []) as TrackedKeyword[]);
+    try {
+      const kws = await apiGet<TrackedKeyword[]>("/seo/keywords");
+      setKeywords(kws || []);
 
-    if (kws && kws.length > 0) {
-      const { data: hist } = await supabase
-        .from("keyword_rank_history")
-        .select("*")
-        .in("keyword_id", kws.map((k: any) => k.id))
-        .order("captured_for", { ascending: true });
       const byId: Record<string, RankSnapshot[]> = {};
-      for (const r of (hist || []) as RankSnapshot[]) {
-        (byId[r.keyword_id] ||= []).push(r);
+      for (const k of (kws || [])) {
+        byId[k.id] = k.keyword_rank_history || [];
       }
       setHistory(byId);
-    } else {
-      setHistory({});
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load keywords");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function addKeyword() {
     const value = kw.trim().toLowerCase();
     if (!value) { toast.error("Enter a keyword"); return; }
-    const { error } = await supabase.from("tracked_keywords").insert({
-      keyword: value,
-      site_url: "https://dynime.com/",
-      country: country || null,
-      device: device || null,
-      notes: notes || null,
-    });
-    if (error) { toast.error(error.message); return; }
-    toast.success(`Tracking "${value}"`);
-    setKw(""); setCountry(""); setDevice(""); setNotes("");
-    setAddOpen(false);
-    await load();
-    // Auto-refresh the new keyword
-    refresh();
+    try {
+      await apiPost("/seo/keywords", {
+        keyword: value,
+        site_url: "https://dynime.com/",
+        country: country || null,
+        device: device || null,
+        notes: notes || null,
+      });
+      toast.success(`Tracking "${value}"`);
+      setKw(""); setCountry(""); setDevice(""); setNotes("");
+      setAddOpen(false);
+      await load();
+      // Auto-refresh the new keyword
+      refresh();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to add keyword");
+    }
   }
 
   async function removeKeyword(id: string, label: string) {
     if (!confirm(`Stop tracking "${label}"? This deletes its rank history.`)) return;
-    const { error } = await supabase.from("tracked_keywords").delete().eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Removed");
-    await load();
+    try {
+      await apiDelete(`/seo/keywords/${id}`);
+      toast.success("Removed");
+      await load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to remove keyword");
+    }
   }
 
   async function refresh(keywordId?: string) {
     setRefreshing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("track-keywords", {
-        body: { action: "refresh", ...(keywordId ? { keywordId } : {}) },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      const failed = ((data as any)?.results || []).filter((r: any) => !r.ok);
+      const data = await apiPost<any>("/seo/keywords/refresh", { keywordId });
+      const failed = (data?.results || []).filter((r: any) => !r.ok);
       if (failed.length > 0) {
         toast.warning(`${failed.length} keyword(s) failed — check that GSC is connected and the site is verified.`);
       } else {
-        toast.success(`Refreshed ${(data as any)?.refreshed ?? 0} keyword${(data as any)?.refreshed === 1 ? "" : "s"}`);
+        toast.success(`Refreshed ${data?.refreshed ?? 0} keyword${data?.refreshed === 1 ? "" : "s"}`);
       }
       await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Refresh failed");
+    } catch (e: any) {
+      toast.error(e.message || "Refresh failed");
     } finally {
       setRefreshing(false);
     }

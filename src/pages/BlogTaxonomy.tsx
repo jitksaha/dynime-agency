@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useBlogPosts } from "@/hooks/use-cms-data";
 import Layout from "@/components/layout/Layout";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { usePageSEO } from "@/hooks/use-page-seo";
@@ -45,51 +44,10 @@ const BlogTaxonomy = ({ mode }: Props) => {
   const params = useParams<{ slug: string }>();
   const slug = decodeURIComponent(params.slug ?? "");
   const label = titleCase(slug);
-  const qc = useQueryClient();
-
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["blog-taxonomy", mode, slug],
-    enabled: !!slug,
-    queryFn: async (): Promise<BlogPost[]> => {
-      let q = supabase
-        .from("blog_posts" as any)
-        .select("id,slug,title,excerpt,cover_image_url,category,tags,author,read_minutes,is_featured,published_at")
-        .eq("is_published", true)
-        .order("is_featured", { ascending: false })
-        .order("published_at", { ascending: false });
-      if (mode === "category") {
-        // Match by exact category OR slug-equivalent (case-insensitive)
-        q = q.ilike("category", label);
-      } else {
-        q = q.contains("tags", [label]);
-      }
-      const { data, error } = await q;
-      if (error) throw error;
-      let result = (data as unknown as BlogPost[]) ?? [];
-      // Tag fallback: case-insensitive client filter if exact contains misses
-      if (mode === "tag" && result.length === 0) {
-        const { data: all } = await supabase
-          .from("blog_posts" as any)
-          .select("id,slug,title,excerpt,cover_image_url,category,tags,author,read_minutes,is_featured,published_at")
-          .eq("is_published", true);
-        const lower = slug.toLowerCase();
-        result = ((all as unknown as BlogPost[]) ?? []).filter((p) =>
-          p.tags.some((t) => t.toLowerCase() === lower),
-        );
-      }
-      return result;
-    },
-  });
-
-  useEffect(() => {
-    const channel = supabase
-      .channel(`blog_taxonomy:${mode}:${slug}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => {
-        qc.invalidateQueries({ queryKey: ["blog-taxonomy", mode, slug] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [mode, slug, qc]);
+  const { data: posts = [], isLoading } = useBlogPosts(
+    mode === "category" ? label : undefined,
+    mode === "tag" ? label : undefined
+  );
 
   usePageSEO(`blog/${mode}/${slug}`, {
     title: `${label} — ${mode === "category" ? "Category" : "Tag"} | Dynime Insights`,

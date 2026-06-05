@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,8 +50,7 @@ function rangeDates(days: number) {
 }
 
 async function callGsc(payload: Record<string, unknown>) {
-  const { data, error } = await supabase.functions.invoke("gsc-data", { body: payload });
-  if (error) throw new Error(error.message);
+  const data = await apiPost<any>("/seo/gsc-data", payload);
   if (!data?.ok) throw new Error(data?.error || "Request failed");
   return { data: data.data, cached: !!data.cached, fetchedAt: data.fetchedAt as string | undefined };
 }

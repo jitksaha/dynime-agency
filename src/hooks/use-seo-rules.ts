@@ -1,22 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { DEFAULT_SEO_RULES, mergeRules, type SeoRules } from "@/lib/seo-rules";
 
 export function useSeoRules(): SeoRules {
   const { data } = useQuery({
     queryKey: ["site-settings-row", "seo_rules"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "seo_rules")
-        .maybeSingle();
-      if (error && error.code !== "PGRST116") throw error;
-      let val: any = data?.value;
-      while (typeof val === "string") {
-        try { val = JSON.parse(val); } catch { break; }
+      try {
+        const res = await apiGet<any>("/cms/site-settings/seo_rules");
+        let val: any = res?.value;
+        while (typeof val === "string") {
+          try { val = JSON.parse(val); } catch { break; }
+        }
+        return mergeRules(val);
+      } catch {
+        return DEFAULT_SEO_RULES;
       }
-      return mergeRules(val);
     },
     staleTime: 60_000,
   });

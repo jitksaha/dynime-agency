@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,17 +32,6 @@ interface SEOAuditItem {
   topIssues: string[];
 }
 
-interface SEOAuditItem {
-  page: string;
-  slug: string;
-  score: number;
-  grade: string;
-  passes: number;
-  warns: number;
-  fails: number;
-  topIssues: string[];
-}
-
 const AdminSEO = () => {
   const qc = useQueryClient();
   const { data: settings } = useSiteSettings();
@@ -55,9 +44,7 @@ const AdminSEO = () => {
   const { data: pages, dataUpdatedAt: pagesUpdatedAt } = useQuery({
     queryKey: ["admin-pages"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("pages").select("*").order("updated_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      return apiGet<any[]>("/seo/pages");
     },
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -69,14 +56,7 @@ const AdminSEO = () => {
 
   const saveSetting = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      const { data: existing } = await supabase.from("site_settings").select("id").eq("key", key).maybeSingle();
-      if (existing) {
-        const { error } = await supabase.from("site_settings").update({ value: JSON.stringify(value) }).eq("key", key);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("site_settings").insert({ key, value: JSON.stringify(value) });
-        if (error) throw error;
-      }
+      await apiPost("/cms/site-settings", { key, value });
     },
     onSuccess: () => {
       toast.success("Setting saved");
@@ -84,25 +64,10 @@ const AdminSEO = () => {
     },
   });
 
-  // Live realtime: any edit to pages/blog/site_settings re-runs audit instantly
+  // Live realtime sync placeholder
   useEffect(() => {
     const bump = () => setLastSync(new Date());
-    const ch = supabase
-      .channel("admin-seo-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pages" },
-        () => { qc.invalidateQueries({ queryKey: ["admin-pages"] }); bump(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" },
-        () => { qc.invalidateQueries({ queryKey: ["admin-seo-blog"] }); bump(); })
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["site-settings-row", "seo_rules"] });
-          qc.invalidateQueries({ queryKey: ["site-settings-row", "page_seo"] });
-          qc.invalidateQueries({ queryKey: ["site-settings"] });
-          bump();
-        })
-      .subscribe();
 
-    // Refresh when tab regains focus or device wakes from background
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
         qc.invalidateQueries({ queryKey: ["admin-pages"] });
@@ -116,7 +81,6 @@ const AdminSEO = () => {
     window.addEventListener("focus", onVisibility);
 
     return () => {
-      supabase.removeChannel(ch);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("focus", onVisibility);
     };
@@ -125,11 +89,7 @@ const AdminSEO = () => {
   const { data: blogPosts } = useQuery({
     queryKey: ["admin-seo-blog"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("slug,title,excerpt,content,tags,is_published");
-      if (error) throw error;
-      return data;
+      return apiGet<any[]>("/cms/blog-posts/admin");
     },
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -140,9 +100,8 @@ const AdminSEO = () => {
   const { data: pageSeoOverrides } = useQuery({
     queryKey: ["site-settings-row", "page_seo"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("site_settings").select("value").eq("key", "page_seo").maybeSingle();
-      let val: any = data?.value;
+      const res = await apiGet<any>("/cms/site-settings/page_seo");
+      let val: any = res?.value;
       while (typeof val === "string") {
         try { val = JSON.parse(val); } catch { break; }
       }

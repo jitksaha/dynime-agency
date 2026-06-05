@@ -7,6 +7,7 @@ import {
   Req,
   UseGuards,
   Version,
+  Query,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -123,5 +124,11 @@ export class AuthController {
   @ApiBearerAuth()
   profile(@CurrentUser('id') id: string) {
     return this.auth.getProfile(id);
+  }
+
+  @Get('check-email')
+  @Version('1')
+  checkEmail(@Query('email') email: string) {
+    return this.auth.checkEmail(email);
   }
 }

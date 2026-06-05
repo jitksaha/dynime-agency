@@ -258,15 +258,18 @@ export const formatCurrency = (
   const meta = getCurrencyMeta(code);
   // For high-magnitude currencies (JPY, BDT, INR) round to whole units.
   const noDecimals = ["JPY", "BDT", "INR", "MYR", "SAR", "AED"].includes(code);
+  const hasDecimals = amount % 1 !== 0;
+  const digits = noDecimals ? 0 : (hasDecimals ? 2 : 0);
   try {
     return new Intl.NumberFormat(meta.locale, {
       style: "currency",
       currency: code,
-      maximumFractionDigits: noDecimals ? 0 : 0,
-      minimumFractionDigits: 0,
+      maximumFractionDigits: digits,
+      minimumFractionDigits: digits,
     }).format(amount);
   } catch {
-    return `${meta.symbol}${Math.round(amount).toLocaleString()}`;
+    const formattedVal = digits > 0 ? amount.toFixed(digits) : Math.round(amount).toLocaleString();
+    return `${meta.symbol}${formattedVal}`;
   }
 };
 

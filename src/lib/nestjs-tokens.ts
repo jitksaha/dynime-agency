@@ -35,22 +35,36 @@ export function clearNestTokens(): void {
   localStorage.removeItem(KEY_EXPIRY);
 }
 
+let activeRefreshPromise: Promise<boolean> | null = null;
+
 /** Silently refresh using the stored refresh token. Returns true on success. */
 export async function refreshNestTokens(): Promise<boolean> {
-  const refreshToken = getNestRefreshToken();
-  if (!refreshToken) return false;
-  try {
-    const res = await fetch('/api/v1/auth/refresh', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!res.ok) { clearNestTokens(); return false; }
-    const data = (await res.json()) as NestTokens;
-    setNestTokens(data);
-    return true;
-  } catch {
-    clearNestTokens();
-    return false;
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
   }
+
+  activeRefreshPromise = (async () => {
+    const refreshToken = getNestRefreshToken();
+    if (!refreshToken) return false;
+    try {
+      const res = await fetch('/api/v1/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+      if (!res.ok) { clearNestTokens(); return false; }
+      const data = (await res.json()) as NestTokens;
+      setNestTokens(data);
+      return true;
+    } catch {
+      clearNestTokens();
+      return false;
+    }
+  })();
+
+  activeRefreshPromise.finally(() => {
+    activeRefreshPromise = null;
+  });
+
+  return activeRefreshPromise;
 }

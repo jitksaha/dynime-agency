@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,8 +48,7 @@ function rangeDates(days: number) {
 }
 
 async function callGsc(payload: Record<string, unknown>) {
-  const { data, error } = await supabase.functions.invoke("gsc-data", { body: payload });
-  if (error) throw new Error(error.message);
+  const data = await apiPost<any>("/seo/gsc-data", payload);
   if (!data?.ok) throw new Error(data?.error || "Request failed");
   return { data: data.data, cached: !!data.cached, fetchedAt: data.fetchedAt as string | undefined };
 }
@@ -133,12 +132,16 @@ const SeoDashboard = () => {
   }, [siteUrl, days]);
 
   const loadContent = useCallback(async () => {
-    const [{ data: pageRows }, { data: blogRows }] = await Promise.all([
-      supabase.from("pages").select("id,title,slug,meta_title,meta_description,og_image,is_published"),
-      supabase.from("blog_posts").select("id,title,slug,excerpt,cover_image_url,is_published"),
-    ]);
-    setPages((pageRows || []) as any);
-    setBlogs((blogRows || []) as any);
+    try {
+      const [pageRows, blogRows] = await Promise.all([
+        apiGet<PageRow[]>("/seo/pages"),
+        apiGet<BlogRow[]>("/cms/blog-posts/admin"),
+      ]);
+      setPages(pageRows || []);
+      setBlogs(blogRows || []);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load pages and posts");
+    }
   }, []);
 
   useEffect(() => { loadSites(); loadContent(); }, [loadSites, loadContent]);
@@ -160,15 +163,10 @@ const SeoDashboard = () => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [loadGsc, loadContent]);
 
-  // Realtime: refresh content cards on page/blog edits
+  // Realtime state placeholder
   useEffect(() => {
-    const ch = supabase
-      .channel("seo-dashboard-content")
-      .on("postgres_changes", { event: "*", schema: "public", table: "pages" }, () => loadContent())
-      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => loadContent())
-      .subscribe((status) => setLive(status === "SUBSCRIBED"));
-    return () => { supabase.removeChannel(ch); };
-  }, [loadContent]);
+    setLive(true);
+  }, []);
 
   const totals = overview?.rows?.[0];
   const series = useMemo(

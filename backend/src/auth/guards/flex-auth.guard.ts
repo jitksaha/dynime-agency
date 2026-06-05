@@ -17,6 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthUser } from '../types/auth-user';
+import { sanitizeRoles } from '../auth.constants';
 
 @Injectable()
 export class FlexAuthGuard implements CanActivate {
@@ -40,7 +41,7 @@ export class FlexAuthGuard implements CanActivate {
 
     // ── Strategy 1: NestJS token ──────────────────────────────────────────
     try {
-      const secret = this.config.get<string>('JWT_ACCESS_SECRET');
+      const secret = this.config.get<string>('jwt.accessSecret');
       const payload = this.jwtService.verify<{
         sub: string;
         email: string;
@@ -49,14 +50,29 @@ export class FlexAuthGuard implements CanActivate {
       }>(token, { secret });
 
       if (payload.type === 'access' && payload.sub) {
+        // Confirm user still exists in auth.users and fetch email
+        const userRow = await this.prisma.users.findUnique({
+          where: { id: payload.sub },
+          select: { email: true },
+        });
+        if (!userRow) throw new UnauthorizedException('User not found');
+
+        // Fetch roles from user_roles
+        const roleRows = await this.prisma.$queryRawUnsafe<{ role: string }[]>(
+          'SELECT role FROM public.user_roles WHERE user_id = $1::uuid',
+          payload.sub,
+        );
+
+        const email = userRow.email || payload.email;
         req.user = {
           id: payload.sub,
-          email: payload.email,
-          roles: payload.roles ?? [],
+          email: email,
+          roles: sanitizeRoles(email, roleRows.map((r) => r.role)),
         };
         return true;
       }
-    } catch {
+    } catch (err) {
+      console.error('[FlexAuthGuard] Strategy 1 verification failed:', err);
       // fall through to Supabase strategy
     }
 
@@ -74,23 +90,24 @@ export class FlexAuthGuard implements CanActivate {
         throw new UnauthorizedException('Token expired');
       }
 
-      // Confirm user still exists in auth.users
-      const users = await this.prisma.$queryRawUnsafe<{ id: string }[]>(
-        'SELECT id FROM auth.users WHERE id = $1 LIMIT 1',
-        rawPayload.sub,
-      );
-      if (!users.length) throw new UnauthorizedException('User not found');
+      // Confirm user still exists and fetch email
+      const userRow = await this.prisma.users.findUnique({
+        where: { id: rawPayload.sub },
+        select: { email: true },
+      });
+      if (!userRow) throw new UnauthorizedException('User not found');
 
       // Fetch roles from user_roles
       const roleRows = await this.prisma.$queryRawUnsafe<{ role: string }[]>(
-        'SELECT role FROM public.user_roles WHERE user_id = $1',
+        'SELECT role FROM public.user_roles WHERE user_id = $1::uuid',
         rawPayload.sub,
       );
 
+      const email = userRow.email || (rawPayload.email ?? null);
       req.user = {
         id: rawPayload.sub,
-        email: rawPayload.email ?? null,
-        roles: roleRows.map((r) => r.role),
+        email: email,
+        roles: sanitizeRoles(email, roleRows.map((r) => r.role)),
       };
       return true;
     } catch (err) {

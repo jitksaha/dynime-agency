@@ -42,6 +42,7 @@ import {
 import { useSiteSettings } from "@/hooks/use-data";
 import { FOOTER_PLACEHOLDERS, renderPlaceholders } from "@/lib/footer-placeholders";
 import { sanitizeRichText } from "@/lib/sanitize-html";
+import { apiPost } from "@/lib/api";
 import {
   defaultFooterBlocks,
   parseFooterBlocks,
@@ -240,23 +241,11 @@ const AdminHeaderFooter = () => {
         { key: "footer_trademark", value: bottomBar.trademark },
       ];
 
-      for (const entry of entries) {
-        const { data: existing } = await supabase
-          .from("site_settings")
-          .select("id")
-          .eq("key", entry.key)
-          .maybeSingle();
-        if (existing) {
-          await supabase
-            .from("site_settings")
-            .update({ value: JSON.stringify(entry.value) })
-            .eq("key", entry.key);
-        } else {
-          await supabase
-            .from("site_settings")
-            .insert({ key: entry.key, value: JSON.stringify(entry.value) });
-        }
-      }
+      const rows = entries.map(entry => ({
+        key: entry.key,
+        value: JSON.stringify(entry.value),
+      }));
+      await apiPost("/cms/site-settings/bulk", { settings: rows });
     },
     onSuccess: async () => {
       toast.success("Saved! Footer will update automatically.");

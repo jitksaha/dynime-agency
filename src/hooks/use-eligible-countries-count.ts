@@ -17,6 +17,6 @@ export function useEligibleCountriesCount() {
       if (error) throw error;
       return count ?? 0;
     },
-    staleTime: 5 * 60_000,
+    staleTime: 5000,
   });
 }

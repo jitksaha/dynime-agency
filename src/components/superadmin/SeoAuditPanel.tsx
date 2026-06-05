@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import { AlertTriangle, AlertOctagon, Info, ShieldCheck, RefreshCw, ExternalLink } from "lucide-react";
 
@@ -42,8 +42,7 @@ export default function SeoAuditPanel() {
   async function runAudit() {
     setLoading(true);
     try {
-      const { data: res, error } = await supabase.functions.invoke("seo-audit", { body: { origin, maxPages } });
-      if (error) throw error;
+      const res = await apiPost<any>("/seo/audit", { origin, maxPages });
       setData(res as AuditResult);
       toast.success(`Scanned ${res.summary.pagesScanned} pages — ${res.issues.length} issues`);
     } catch (e: any) {

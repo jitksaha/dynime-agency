@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,13 +36,8 @@ const AdminPageSEO = () => {
   const { data: row } = useQuery({
     queryKey: ["site-settings-row", "page_seo"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "page_seo")
-        .maybeSingle();
-      if (error && error.code !== "PGRST116") throw error;
-      let val: any = data?.value;
+      const res = await apiGet<any>("/cms/site-settings/page_seo");
+      let val: any = res?.value;
       while (typeof val === "string") {
         try { val = JSON.parse(val); } catch { break; }
       }
@@ -70,23 +65,7 @@ const AdminPageSEO = () => {
 
   const save = useMutation({
     mutationFn: async (next: Record<string, OverrideRecord>) => {
-      const { data: existing } = await supabase
-        .from("site_settings")
-        .select("id")
-        .eq("key", "page_seo")
-        .maybeSingle();
-      if (existing) {
-        const { error } = await supabase
-          .from("site_settings")
-          .update({ value: next as any })
-          .eq("key", "page_seo");
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("site_settings")
-          .insert({ key: "page_seo", value: next as any });
-        if (error) throw error;
-      }
+      await apiPost("/cms/site-settings", { key: "page_seo", value: next });
     },
     onSuccess: () => {
       toast.success("Page SEO synced site-wide");

@@ -19,6 +19,8 @@ export interface CartItem {
   period?: string;
   /** Service category key (dws/dms/dcs/dss) — used for per-category intake fields and recurring categorization. */
   category?: string;
+  /** Key features of the purchased service tier to populate the invoice checklist. */
+  features?: string[];
 }
 
 interface CartContextValue {

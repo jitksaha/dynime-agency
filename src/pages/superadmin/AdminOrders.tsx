@@ -9,12 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Package, Eye, ExternalLink, Search, Filter, Plus, Download, Pencil,
   ShieldCheck, ShieldAlert, ShieldQuestion, ServerCog, RefreshCw, Clock, Trash2, X, Link2,
-  Receipt, Undo2, Send, Loader2, Copy,
+  Receipt, Undo2, Send, Loader2, Copy, Check,
 } from "lucide-react";
-import { apiPost, apiPatch } from "@/lib/api";
+import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
+import { formatCurrency } from "@/lib/currency";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
 const buildPublicInvoiceUrl = (ref: string) => `${PUBLIC_INVOICE_HOST}/invoice/${ref}`;
@@ -42,7 +44,9 @@ type VerificationMeta = {
 const STATUS_OPTIONS = ["pending", "confirmed", "processing", "completed", "cancelled", "refunded"];
 
 const statusColor: Record<string, string> = {
-  pending: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold",
+  paid: "bg-green-500/10 text-green-600 border-green-500/20",
+  failed: "bg-red-500/10 text-red-600 border-red-500/20",
   confirmed: "bg-blue-500/10 text-blue-600 border-blue-500/20",
   processing: "bg-purple-500/10 text-purple-600 border-purple-500/20",
   completed: "bg-green-500/10 text-green-600 border-green-500/20",
@@ -71,23 +75,55 @@ const toneClass = (tone: string) =>
         ? "text-destructive"
         : "text-muted-foreground";
 
-const fetchAllOrders = async () => {
-  const pageSize = 1000;
-  const allOrders: any[] = [];
+// Unified verification status (combining payment and identity verification)
+const getOrderVerificationStatus = (order: any) => {
+  const idVerify = order.service_brief?.identity_verification;
+  const payVerify = order.payment_verification as VerificationMeta | null;
 
-  for (let from = 0; ; from += pageSize) {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .range(from, from + pageSize - 1);
+  const isIdVerified = idVerify?.status === "verified";
+  const isPayVerified = payVerify?.server_query_used || payVerify?.signature_valid === true;
 
-    if (error) throw error;
-    allOrders.push(...(data || []));
-    if (!data || data.length < pageSize) break;
+  if (isIdVerified || isPayVerified) {
+    return {
+      status: "verified",
+      tone: "good",
+      label: isIdVerified ? (idVerify.type === "kyb" ? "KYB Verified" : "KYC Verified") : "Payment Verified",
+      icon: Check,
+    };
   }
 
-  return allOrders;
+  const isIdPending = idVerify?.status === "pending" || idVerify?.status === "in_review";
+  if (isIdPending) {
+    return {
+      status: "pending",
+      tone: "warn",
+      label: idVerify.status === "in_review" ? "ID In Review" : "ID Pending",
+      icon: Clock,
+    };
+  }
+
+  const isIdRejected = idVerify?.status === "rejected";
+  const isPayBad = payVerify && (payVerify.signature_valid === false || payVerify.invoice_mismatch === true);
+  if (isIdRejected || isPayBad) {
+    return {
+      status: "failed",
+      tone: "bad",
+      label: isIdRejected ? "ID Rejected" : "Payment Issue",
+      icon: ShieldAlert,
+    };
+  }
+
+  return {
+    status: "none",
+    tone: "neutral",
+    label: "No verification",
+    icon: ShieldQuestion,
+  };
+};
+
+const fetchAllOrders = async () => {
+  const res = await apiGet<{ data: any[] }>("/orders?limit=10000");
+  return res.data;
 };
 
 const AdminOrders = () => {
@@ -99,7 +135,7 @@ const AdminOrders = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
-  const [verifyType, setVerifyType] = useState<"kyc" | "kyb" | "aml">("kyc");
+  const [verifyType, setVerifyType] = useState<"kyc" | "kyb">("kyc");
   const [verifyBusy, setVerifyBusy] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ url: string; type: string } | null>(null);
   const qc = useQueryClient();
@@ -115,7 +151,10 @@ const AdminOrders = () => {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: fetchAllOrders,
+    refetchInterval: 4000,
   });
+
+  const currentOrder = orders?.find((o: any) => o.id === selectedOrder?.id) || selectedOrder;
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -135,16 +174,9 @@ const AdminOrders = () => {
     if (isDeleting) return;
     setIsDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("admin-delete-order", {
-        body: { orderId },
-      });
-      if (error) {
-        console.error("[adminDeleteOrder]", error);
-        toast.error(error.message || "Order delete service could not be reached");
-        return;
-      }
+      const data = await apiDelete<{ ok: boolean; alreadyDeleted?: boolean }>(`/orders/${orderId}`);
       if (!data?.ok) {
-        toast.error(data?.error || "Order could not be deleted");
+        toast.error("Order could not be deleted");
         return;
       }
 
@@ -191,12 +223,10 @@ const AdminOrders = () => {
     let failed = 0;
     for (const id of ids) {
       try {
-        const { data, error } = await supabase.functions.invoke("admin-delete-order", {
-          body: { orderId: id },
-        });
-        if (error || !data?.ok) {
+        const data = await apiDelete<{ ok: boolean }>(`/orders/${id}`);
+        if (!data?.ok) {
           failed++;
-          console.error("[bulkDelete]", id, error || data?.error);
+          console.error("[bulkDelete]", id);
         } else {
           ok++;
           const stripList = (old: any) =>
@@ -235,14 +265,11 @@ const AdminOrders = () => {
       );
     });
 
-  const { data: recurringCount = 0 } = useQuery({
+  const { data: recurringCount = 0, isLoading: loadingRecurring } = useQuery({
     queryKey: ["admin-orders-recurring-count"],
     queryFn: async () => {
-      const { count } = await supabase
-        .from("customer_services")
-        .select("*", { count: "exact", head: true })
-        .eq("type", "recurring");
-      return count || 0;
+      const res = await apiGet<any[]>("/subscriptions?type=recurring");
+      return res.length;
     },
     staleTime: 30000,
   });
@@ -272,11 +299,11 @@ const AdminOrders = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
-          { label: "Total Orders", value: stats.total, onClick: () => setStatusFilter("all") },
-          { label: "Pending", value: stats.pending, onClick: () => setStatusFilter("pending") },
-          { label: "Completed", value: stats.completed, onClick: () => setStatusFilter("completed") },
-          { label: "Revenue", value: `$${stats.revenue.toFixed(2)}`, onClick: () => setStatusFilter("completed") },
-          { label: "Recurring", value: recurringCount, onClick: scrollToRecurring, accent: true },
+          { label: "Total Orders", value: stats.total, onClick: () => setStatusFilter("all"), loading: isLoading },
+          { label: "Pending", value: stats.pending, onClick: () => setStatusFilter("pending"), loading: isLoading },
+          { label: "Completed", value: stats.completed, onClick: () => setStatusFilter("completed"), loading: isLoading },
+          { label: "Revenue", value: `$${stats.revenue.toFixed(2)}`, onClick: () => setStatusFilter("completed"), loading: isLoading },
+          { label: "Recurring", value: recurringCount, onClick: scrollToRecurring, accent: true, loading: loadingRecurring },
         ].map((s: any) => (
           <button
             key={s.label}
@@ -285,7 +312,11 @@ const AdminOrders = () => {
             className={`glass-card p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/40 ${s.accent ? "border-primary/30" : ""}`}
           >
             <p className="text-xs text-muted-foreground">{s.label}</p>
-            <p className={`text-xl font-heading font-bold mt-1 ${s.accent ? "text-primary" : "text-foreground"}`}>{s.value}</p>
+            {s.loading ? (
+              <Skeleton className="h-7 w-20 mt-1 bg-muted/40" />
+            ) : (
+              <p className={`text-xl font-heading font-bold mt-1 ${s.accent ? "text-primary" : "text-foreground"}`}>{s.value}</p>
+            )}
           </button>
         ))}
       </div>
@@ -318,7 +349,68 @@ const AdminOrders = () => {
 
       {/* Orders Table */}
       {isLoading ? (
-        <p className="text-muted-foreground">Loading orders...</p>
+        <div className="glass-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="p-3 w-10">
+                    <Checkbox disabled aria-label="Select all" />
+                  </th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Invoice / Order</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Customer</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Total</th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Status</th>
+                  <th className="text-center p-3 text-muted-foreground font-medium w-16">
+                    <div className="flex items-center justify-center">
+                      <ShieldCheck className="w-4 h-4 text-muted-foreground/80" />
+                    </div>
+                  </th>
+                  <th className="text-left p-3 text-muted-foreground font-medium">Date</th>
+                  <th className="text-right p-3 text-muted-foreground font-medium animate-pulse">Loading orders…</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="p-3">
+                      <Skeleton className="h-4 w-4 rounded bg-muted/20" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-4 w-24 mb-1.5 bg-muted/30" />
+                      <Skeleton className="h-3 w-16 bg-muted/20" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-4 w-28 mb-1.5 bg-muted/30" />
+                      <Skeleton className="h-3 w-36 bg-muted/20" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-4 w-16 bg-muted/30" />
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-5 w-16 rounded-full bg-muted/20" />
+                    </td>
+                    <td className="p-3">
+                      <div className="flex justify-center">
+                        <Skeleton className="h-4 w-4 rounded-full bg-muted/20" />
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Skeleton className="h-3.5 w-24 bg-muted/20" />
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Skeleton className="h-7 w-20 rounded bg-muted/20" />
+                        <Skeleton className="h-7 w-7 rounded bg-muted/20" />
+                        <Skeleton className="h-7 w-7 rounded bg-muted/20" />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : filtered?.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <Package className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -370,15 +462,17 @@ const AdminOrders = () => {
                   <th className="text-left p-3 text-muted-foreground font-medium">Customer</th>
                   <th className="text-left p-3 text-muted-foreground font-medium">Total</th>
                   <th className="text-left p-3 text-muted-foreground font-medium">Status</th>
-                  <th className="text-left p-3 text-muted-foreground font-medium">Verification</th>
+                  <th className="text-center p-3 text-muted-foreground font-medium w-16">
+                    <div className="flex items-center justify-center" title="Verification Status">
+                      <ShieldCheck className="w-4 h-4 text-muted-foreground/80" />
+                    </div>
+                  </th>
                   <th className="text-left p-3 text-muted-foreground font-medium">Date</th>
                   <th className="text-right p-3 text-muted-foreground font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered?.map((order: any) => {
-                  const v = verificationSummary(order.payment_verification as VerificationMeta | null);
-                  const VIcon = v.icon;
                   const checked = selectedIds.has(order.id);
                   return (
                   <tr key={order.id} className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${checked ? "bg-destructive/5" : ""}`}>
@@ -402,17 +496,43 @@ const AdminOrders = () => {
                       <div className="text-foreground font-medium">{order.customer_name || "—"}</div>
                       <div className="text-xs text-muted-foreground">{order.customer_email}</div>
                     </td>
-                    <td className="p-3 font-heading font-bold text-foreground">${Number(order.total).toFixed(2)}</td>
+                    <td className="p-3 font-heading font-bold text-foreground">{formatCurrency(Number(order.total), order.currency || "USD")}</td>
                     <td className="p-3">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusColor[order.status] || ""}`}>
-                        {order.status}
+                        {order.status === "pending" ? "Dont Miss It" : order.status}
                       </span>
                     </td>
                     <td className="p-3">
-                      <div className={`inline-flex items-center gap-1.5 text-xs ${toneClass(v.tone)}`} title={v.label}>
-                        <VIcon className="w-3.5 h-3.5" />
-                        <span className="hidden md:inline">{v.label}</span>
-                      </div>
+                      {(() => {
+                        const status = getOrderVerificationStatus(order);
+                        const Icon = status.icon;
+                        if (status.status === "verified") {
+                          return (
+                            <div className="flex justify-center" title={status.label}>
+                              <Check className="w-5 h-5 text-green-500 stroke-[3px] filter drop-shadow-[0_0_4px_rgba(34,197,94,0.3)]" />
+                            </div>
+                          );
+                        }
+                        if (status.status === "pending") {
+                          return (
+                            <div className="flex justify-center" title={status.label}>
+                              <Clock className="w-4 h-4 text-amber-500" />
+                            </div>
+                          );
+                        }
+                        if (status.status === "failed") {
+                          return (
+                            <div className="flex justify-center animate-pulse" title={status.label}>
+                              <ShieldAlert className="w-4 h-4 text-rose-500" />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="flex justify-center text-muted-foreground/30" title="No verification requested">
+                            <ShieldQuestion className="w-4 h-4 text-muted-foreground/20" />
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="p-3 text-muted-foreground text-xs">{format(new Date(order.created_at), "MMM d, yyyy h:mm a")}</td>
                     <td className="p-3 text-right">
@@ -492,138 +612,221 @@ const AdminOrders = () => {
           <DialogHeader>
             <DialogTitle>Order Details</DialogTitle>
           </DialogHeader>
-          {selectedOrder && (
+          {currentOrder && (
             <div className="space-y-4 mt-2">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Invoice</p>
-                  <p className="font-mono text-xs text-foreground">{selectedOrder.invoice_number || "—"}</p>
+                  <p className="font-mono text-xs text-foreground">{currentOrder.invoice_number || "—"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Order ID</p>
-                  <p className="font-mono text-xs text-foreground break-all">{selectedOrder.id}</p>
+                  <p className="font-mono text-xs text-foreground break-all">{currentOrder.id}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Status</p>
-                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusColor[selectedOrder.status] || ""}`}>
-                    {selectedOrder.status}
+                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${statusColor[currentOrder.status] || ""}`}>
+                    {currentOrder.status === "pending" ? "Dont Miss It" : currentOrder.status}
                   </span>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Customer</p>
-                  <p className="text-foreground font-medium">{selectedOrder.customer_name || "—"}</p>
+                  <p className="text-foreground font-medium">{currentOrder.customer_name || "—"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Email</p>
-                  <p className="text-foreground">{selectedOrder.customer_email}</p>
+                  <p className="text-foreground">{currentOrder.customer_email}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Date</p>
-                  <p className="text-foreground">{format(new Date(selectedOrder.created_at), "MMM d, yyyy h:mm a")}</p>
+                  <p className="text-foreground">{format(new Date(currentOrder.created_at), "MMM d, yyyy h:mm a")}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Payment Ref</p>
-                  <p className="text-foreground text-xs font-mono">{selectedOrder.stripe_session_id || "—"}</p>
+                  <p className="text-foreground text-xs font-mono">{currentOrder.stripe_session_id || "—"}</p>
                 </div>
               </div>
 
               <div>
                 <p className="text-muted-foreground text-sm mb-2">Items</p>
                 <div className="border border-border rounded-lg divide-y divide-border">
-                  {(Array.isArray(selectedOrder.items) ? selectedOrder.items : []).map((item: any, i: number) => (
+                  {(Array.isArray(currentOrder.items) ? currentOrder.items : []).map((item: any, i: number) => (
                     <div key={i} className="flex justify-between p-3 text-sm">
                       <span className="text-foreground">{item.name} <span className="text-muted-foreground">× {item.quantity}</span></span>
-                      <span className="font-medium text-foreground">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-medium text-foreground">{formatCurrency(item.price * item.quantity, currentOrder.currency || "USD")}</span>
                     </div>
                   ))}
                   <div className="flex justify-between p-3 font-bold text-sm bg-secondary/30">
                     <span>Total</span>
-                    <span>${Number(selectedOrder.total).toFixed(2)}</span>
+                    <span>{formatCurrency(Number(currentOrder.total), currentOrder.currency || "USD")}</span>
                   </div>
                 </div>
               </div>
 
               {/* VAT / Tax breakdown */}
-              <TaxBreakdownPanel order={selectedOrder} />
+              <TaxBreakdownPanel order={currentOrder} />
 
 
               {/* Payment verification (signature, server query, retries) */}
-              {selectedOrder.payment_verification && (
-                <VerificationDetails meta={selectedOrder.payment_verification as VerificationMeta} />
+              {currentOrder.payment_verification && (
+                <VerificationDetails meta={currentOrder.payment_verification as VerificationMeta} />
               )}
 
               {/* Identity / business verification request */}
-              <div className="border rounded-lg p-3 space-y-2">
-                <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                  <Send className="h-4 w-4 text-primary" />Request Verification
-                </p>
-                {verifyResult ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      {verifyResult.type.toUpperCase()} link created. Copy and send to the customer.
-                    </p>
-                    <div className="flex gap-2">
-                      <input
-                        readOnly
-                        value={verifyResult.url}
-                        className="flex-1 text-xs font-mono border rounded px-2 py-1 bg-muted/40 truncate"
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => { navigator.clipboard.writeText(verifyResult.url); toast.success("Link copied"); }}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
+              {(() => {
+                const identityVerification = currentOrder?.service_brief?.identity_verification;
+                const activeVerification = (identityVerification ? {
+                  url: identityVerification.verification_url || `${window.location.origin}/verify-order/${currentOrder.id}`,
+                  type: identityVerification.type,
+                  status: identityVerification.status,
+                  session_id: identityVerification.session_id,
+                } : null) || verifyResult;
+
+                const getStatusBadge = (status: string) => {
+                  const styles: Record<string, string> = {
+                    verified: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+                    pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+                    in_review: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+                    rejected: "bg-destructive/10 text-destructive border-destructive/20",
+                    expired: "bg-muted text-muted-foreground border-muted-foreground/20",
+                  };
+                  return (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border capitalize ${styles[status] || ""}`}>
+                      {status.replace("_", " ")}
+                    </span>
+                  );
+                };
+
+                const clearVerification = async () => {
+                  setVerifyResult(null);
+                  if (identityVerification) {
+                    try {
+                      const updatedBrief = { ...currentOrder.service_brief };
+                      delete updatedBrief.identity_verification;
+                      await apiPatch(`/orders/${currentOrder.id}`, { service_brief: updatedBrief });
+                      
+                      qc.setQueryData(["admin-orders"], (oldOrders: any[] | undefined) => {
+                        if (!oldOrders) return oldOrders;
+                        return oldOrders.map((o: any) => 
+                          o.id === currentOrder.id ? { ...o, service_brief: updatedBrief } : o
+                        );
+                      });
+
+                      setSelectedOrder((prev: any) => ({ ...prev, service_brief: updatedBrief }));
+                      toast.success("Verification cleared. You can create a new request.");
+                    } catch (e) {
+                      toast.error("Failed to reset verification request");
+                    }
+                  }
+                };
+
+                return (
+                  <div className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                        <Send className="h-4 w-4 text-primary" />Request Verification
+                      </p>
+                      {activeVerification?.status && getStatusBadge(activeVerification.status)}
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => setVerifyResult(null)}>
-                      New request
-                    </Button>
+                    {activeVerification ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">
+                          {activeVerification.type === "kyc" ? "KYC (includes AML)" : activeVerification.type.toUpperCase()} link created. Copy and send to the customer.
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            readOnly
+                            value={activeVerification.url}
+                            className="flex-1 text-xs font-mono border rounded px-2 py-1 bg-muted/40 truncate"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => { navigator.clipboard.writeText(activeVerification.url); toast.success("Link copied"); }}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {activeVerification?.session_id && (
+                          <div className="text-[10px] font-mono text-muted-foreground bg-muted/20 px-2 py-1 rounded truncate select-all">
+                            Session ID: {activeVerification.session_id}
+                          </div>
+                        )}
+                        <Button size="sm" variant="ghost" onClick={clearVerification}>
+                          New request
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 items-center">
+                        <Select value={verifyType} onValueChange={(v) => setVerifyType(v as typeof verifyType)}>
+                          <SelectTrigger className="w-28 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="kyc">KYC (includes AML)</SelectItem>
+                            <SelectItem value="kyb">KYB</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={verifyBusy}
+                          onClick={async () => {
+                            setVerifyBusy(true);
+                            try {
+                              const profileRow = await apiGet<{ id: string }>(`/users/by-email/${encodeURIComponent(currentOrder.customer_email)}`);
+                              if (!profileRow?.id) throw new Error("Could not find user account for this email");
+                              const result = await apiPost<{ verification_url?: string; session_id?: string }>("/verification/admin/request", {
+                                user_id: profileRow.id,
+                                type: verifyType,
+                                order_id: currentOrder.id,
+                                frontend_origin: window.location.origin,
+                              });
+                              if (!result?.verification_url) throw new Error("No verification URL returned");
+                              
+                              const newIV = {
+                                type: verifyType,
+                                session_id: result.session_id || "pending_refresh",
+                                status: "pending",
+                                verification_url: result.verification_url,
+                                updated_at: new Date().toISOString()
+                              };
+                              const updatedBrief = {
+                                ...currentOrder.service_brief,
+                                identity_verification: newIV
+                              };
+
+                              setVerifyResult({
+                                url: result.verification_url,
+                                type: verifyType,
+                                status: "pending",
+                                session_id: result.session_id
+                              });
+
+                              qc.setQueryData(["admin-orders"], (oldOrders: any[] | undefined) => {
+                                if (!oldOrders) return oldOrders;
+                                return oldOrders.map((o: any) => 
+                                  o.id === currentOrder.id ? { ...o, service_brief: updatedBrief } : o
+                                );
+                              });
+
+                              setSelectedOrder((prev: any) => ({
+                                ...prev,
+                                service_brief: updatedBrief
+                              }));
+                            } catch (e: any) {
+                              toast.error(e?.message ?? "Failed to create verification link");
+                            } finally { setVerifyBusy(false); }
+                          }}
+                        >
+                          {verifyBusy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                          Send
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="flex gap-2 items-center">
-                    <Select value={verifyType} onValueChange={(v) => setVerifyType(v as typeof verifyType)}>
-                      <SelectTrigger className="w-28 h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="kyc">KYC</SelectItem>
-                        <SelectItem value="kyb">KYB</SelectItem>
-                        <SelectItem value="aml">AML</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={verifyBusy}
-                      onClick={async () => {
-                        setVerifyBusy(true);
-                        try {
-                          const { data: profileRow } = await supabase
-                            .from("profiles")
-                            .select("id")
-                            .eq("email", selectedOrder.customer_email)
-                            .maybeSingle();
-                          if (!profileRow?.id) throw new Error("Could not find user account for this email");
-                          const result = await apiPost<{ verification_url?: string }>("/verification/admin/request", {
-                            user_id: profileRow.id,
-                            type: verifyType,
-                            order_id: selectedOrder.id,
-                            frontend_origin: window.location.origin,
-                          });
-                          if (!result?.verification_url) throw new Error("No verification URL returned");
-                          setVerifyResult({ url: result.verification_url, type: verifyType });
-                        } catch (e: any) {
-                          toast.error(e?.message ?? "Failed to create verification link");
-                        } finally { setVerifyBusy(false); }
-                      }}
-                    >
-                      {verifyBusy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
-                      Send
-                    </Button>
-                  </div>
-                )}
-              </div>
+                );
+              })()}
 
               <div className="flex gap-2">
                 <Select value={selectedOrder.status} onValueChange={(v) => updateStatus(selectedOrder.id, v)}>
@@ -855,17 +1058,17 @@ const TaxBreakdownPanel = ({ order }: { order: any }) => {
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Net (excl. {label})</span>
-            <span className="font-medium text-foreground">${net.toFixed(2)}</span>
+            <span className="font-medium text-foreground">{formatCurrency(net, order?.currency || "USD")}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {label} ({taxPercent}% {mode})
             </span>
-            <span className="font-medium text-foreground">${taxAmount.toFixed(2)}</span>
+            <span className="font-medium text-foreground">{formatCurrency(taxAmount, order?.currency || "USD")}</span>
           </div>
           <div className="flex justify-between border-t border-border pt-1.5">
             <span className="text-foreground font-semibold">Gross (charged)</span>
-            <span className="font-bold text-foreground">${gross.toFixed(2)}</span>
+            <span className="font-bold text-foreground">{formatCurrency(gross, order?.currency || "USD")}</span>
           </div>
           {mode === "inclusive" && (
             <p className="text-[11px] text-muted-foreground pt-1">
@@ -887,19 +1090,19 @@ const TaxBreakdownPanel = ({ order }: { order: any }) => {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Refunded total</span>
-            <span className="font-medium text-destructive">-${refundedAmount.toFixed(2)}</span>
+            <span className="font-medium text-destructive">-{formatCurrency(refundedAmount, order?.currency || "USD")}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Refunded {label}</span>
-            <span className="font-medium text-destructive">-${refundedTax.toFixed(2)}</span>
+            <span className="font-medium text-destructive">-{formatCurrency(refundedTax, order?.currency || "USD")}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Net refund (excl. {label})</span>
-            <span className="font-medium text-destructive">-${netRefund.toFixed(2)}</span>
+            <span className="font-medium text-destructive">-{formatCurrency(netRefund, order?.currency || "USD")}</span>
           </div>
           <div className="flex justify-between border-t border-border pt-1.5">
             <span className="text-foreground font-semibold">Net retained</span>
-            <span className="font-bold text-foreground">${(total - refundedAmount).toFixed(2)}</span>
+            <span className="font-bold text-foreground">{formatCurrency(total - refundedAmount, order?.currency || "USD")}</span>
           </div>
         </div>
       )}

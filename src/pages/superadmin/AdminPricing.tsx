@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import AddonsManager from "@/components/admin/AddonsManager";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -125,22 +125,37 @@ interface Row {
 
 export default function AdminPricing() {
   const { toast } = useToast();
+  const { session } = useAuth();
+  const token = session?.access_token;
   const [rows, setRows] = useState<Record<string, Row>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selectedSlug, setSelectedSlug] = useState<string>(ALL_SERVICES[0].slug);
+  const [selectedSlug, setSelectedSlug] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("admin:pricing:selectedSlug");
+      if (saved && ALL_SERVICES.some((s) => s.slug === saved)) return saved;
+    }
+    return ALL_SERVICES[0].slug;
+  });
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    sessionStorage.setItem("admin:pricing:selectedSlug", selectedSlug);
+  }, [selectedSlug]);
   
 
   // Load all rows from DB
   const reload = async () => {
+    if (!token) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("service_pricing")
-      .select("service_slug, service_title, is_enabled, tiers, quote_settings");
-    if (error) {
-      toast({ title: "Failed to load pricing", description: error.message, variant: "destructive" });
-    } else {
+    try {
+      const res = await fetch("/api/v1/cms/service-pricing", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch service pricing");
+      const data = await res.json();
       const map: Record<string, Row> = {};
       (data ?? []).forEach((r: any) => {
         map[r.service_slug] = {
@@ -152,13 +167,17 @@ export default function AdminPricing() {
         };
       });
       setRows(map);
+    } catch (error: any) {
+      toast({ title: "Failed to load pricing", description: error.message, variant: "destructive" });
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    reload();
-  }, []);
+    if (token) {
+      reload();
+    }
+  }, [token]);
 
 
   // Selected service helpers
@@ -193,25 +212,35 @@ export default function AdminPricing() {
 
 
   const save = async () => {
+    if (!token) {
+      toast({ title: "Save failed", description: "Not authenticated", variant: "destructive" });
+      return;
+    }
     setSaving(true);
-    const { error } = await supabase
-      .from("service_pricing")
-      .upsert(
-        {
+    try {
+      const res = await fetch("/api/v1/cms/service-pricing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           service_slug: current.service_slug,
           service_title: current.service_title,
           is_enabled: current.is_enabled,
-          tiers: current.tiers as any,
-          quote_settings: current.quote_settings as any,
-        },
-        { onConflict: "service_slug" }
-      );
-    setSaving(false);
-    if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    } else {
+          tiers: current.tiers,
+          quote_settings: current.quote_settings,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to save");
+      }
       toast({ title: "Saved", description: `${current.service_title} pricing updated.` });
+    } catch (error: any) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
     }
+    setSaving(false);
   };
 
   // Filtered service list
@@ -244,62 +273,64 @@ export default function AdminPricing() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6">
           {/* LEFT — service list */}
-          <Card className="h-fit lg:sticky lg:top-4">
-            <div className="p-3 border-b">
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search services…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9"
-                />
-              </div>
-            </div>
-            <div className="max-h-[calc(100vh-220px)] overflow-y-auto py-2">
-              {Object.entries(grouped).map(([catLabel, list]) => (
-                <div key={catLabel} className="mb-3">
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    {catLabel}
-                  </div>
-                  {list.map((s) => {
-                    const row = rows[s.slug];
-                    const tierCount = row?.tiers?.length ?? 0;
-                    const isActive = selectedSlug === s.slug;
-                    return (
-                      <button
-                        key={s.slug}
-                        onClick={() => setSelectedSlug(s.slug)}
-                        className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm transition-colors ${
-                          isActive
-                            ? "bg-primary/10 text-primary border-l-2 border-primary"
-                            : "hover:bg-muted/50 border-l-2 border-transparent"
-                        }`}
-                      >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${
-                            row?.is_enabled === false
-                              ? "bg-muted-foreground/40"
-                              : tierCount > 0
-                                ? "bg-emerald-500"
-                                : "bg-muted-foreground/30"
-                          }`}
-                        />
-                        <span className="flex-1 truncate">{s.title}</span>
-                        {tierCount > 0 ? (
-                          <Badge variant="secondary" className="h-5 text-[10px] px-1.5">
-                            {tierCount}
-                          </Badge>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground">—</span>
-                        )}
-                      </button>
-                    );
-                  })}
+          <div className="lg:sticky lg:top-[80px] h-fit">
+            <Card className="overflow-hidden">
+              <div className="p-3 border-b">
+                <div className="relative">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search services…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9 h-9"
+                  />
                 </div>
-              ))}
-            </div>
-          </Card>
+              </div>
+              <div className="max-h-[calc(100vh-240px)] overflow-y-auto py-2">
+                {Object.entries(grouped).map(([catLabel, list]) => (
+                  <div key={catLabel} className="mb-3">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {catLabel}
+                    </div>
+                    {list.map((s) => {
+                      const row = rows[s.slug];
+                      const tierCount = row?.tiers?.length ?? 0;
+                      const isActive = selectedSlug === s.slug;
+                      return (
+                        <button
+                          key={s.slug}
+                          onClick={() => setSelectedSlug(s.slug)}
+                          className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm transition-colors ${
+                            isActive
+                              ? "bg-primary/10 text-primary border-l-2 border-primary"
+                              : "hover:bg-muted/50 border-l-2 border-transparent"
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${
+                              row?.is_enabled === false
+                                ? "bg-muted-foreground/40"
+                                : tierCount > 0
+                                  ? "bg-emerald-500"
+                                  : "bg-muted-foreground/30"
+                            }`}
+                          />
+                          <span className="flex-1 truncate">{s.title}</span>
+                          {tierCount > 0 ? (
+                            <Badge variant="secondary" className="h-5 text-[10px] px-1.5">
+                              {tierCount}
+                            </Badge>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">—</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
 
           {/* RIGHT — editor */}
           <div className="space-y-4">

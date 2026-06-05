@@ -24,6 +24,7 @@ import { useLocation as useGeoCtx } from "@/contexts/LocationContext";
 import dynimeIcon from "@/assets/dynime-icon-light.svg";
 import { useSiteSettings, useContactInfo } from "@/hooks/use-data";
 import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import {
   parseFooterBlocks,
   type FooterBlock,
@@ -315,11 +316,10 @@ const Footer = () => {
     setSubmitting(true);
     setFeedback(null);
     try {
-      const { data, error } = await supabase.functions.invoke("subscribe-newsletter", {
-        body: { email: email.trim(), source: "footer" },
-      });
-      if (error) throw error;
-      const payload = data as { success?: boolean; message?: string; error?: string } | null;
+      const payload = await apiPost<{ success?: boolean; message?: string; error?: string }>(
+        "/public/forms/subscribe",
+        { email: email.trim(), source: "footer" }
+      );
       if (payload?.success) {
         setFeedback({ type: "ok", msg: payload.message || "Thanks for subscribing!" });
         setEmail("");

@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Download, FileText, Loader2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { apiGet } from "@/lib/api";
 
 interface Props {
   installment: any | null;
@@ -35,11 +36,9 @@ const InstallmentReceiptDialog = ({ installment, open, onOpenChange }: Props) =>
     const orderId = installment.paid_order_id || installment.last_attempt_order_id;
     if (!orderId) { setOrder(null); return; }
     setLoading(true);
-    supabase.from("orders")
-      .select("id, invoice_number, total, currency, payment_gateway, customer_name, customer_email, created_at, updated_at, status")
-      .eq("id", orderId)
-      .maybeSingle()
-      .then(({ data }) => { setOrder(data); setLoading(false); });
+    apiGet<any>(`/orders/${orderId}`)
+      .then((data) => { setOrder(data); setLoading(false); })
+      .catch(() => { setOrder(null); setLoading(false); });
   }, [open, installment]);
 
   if (!installment) return null;

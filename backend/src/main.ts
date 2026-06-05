@@ -5,6 +5,7 @@ import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import helmet from 'helmet';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { RedisIoAdapter } from './realtime/redis-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -64,6 +65,13 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('docs', app, document);
+  }
+
+  // Configure WebSocket scaling adapter with auto-fallback
+  const redisIoAdapter = new RedisIoAdapter(app);
+  const isRedisConnected = await redisIoAdapter.connectToRedis();
+  if (isRedisConnected) {
+    app.useWebSocketAdapter(redisIoAdapter);
   }
 
   const port = Number(process.env.PORT ?? 3001);

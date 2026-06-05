@@ -6,6 +6,7 @@ import { useSEO } from "@/hooks/use-seo";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { apiGet } from "@/lib/api";
 import { Package, ChevronDown, ChevronUp, CheckCircle, Clock, XCircle, Mail, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,15 +33,14 @@ const GuestOrderLookup = () => {
 
   const handleLookup = async () => {
     if (!email) { toast.error("Please enter your email"); return; }
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("customer_email", email)
-      .order("created_at", { ascending: false });
-    setLoading(false);
-    if (error) { toast.error("Could not fetch orders"); return; }
-    setOrders(data || []);
+    try {
+      const data = await apiGet<any[]>(`/orders/public/lookup?email=${encodeURIComponent(email)}`);
+      setOrders(data || []);
+    } catch (err: any) {
+      toast.error(err?.message || "Could not fetch orders");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -174,13 +174,7 @@ const AuthenticatedOrders = () => {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["my-orders", user?.email],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("customer_email", user!.email!)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      return apiGet<any[]>("/orders/mine");
     },
     enabled: !!user?.email,
   });

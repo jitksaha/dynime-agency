@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import BankDepositDialog, { type BankAccount } from "@/components/checkout/BankDepositDialog";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import type { CurrencyCode } from "@/lib/currency";
+import { apiPost } from "@/lib/api";
 
 const GATEWAYS: { id: string; label: string }[] = [
   { id: "stripe", label: "Credit / Debit Card (Stripe)" },
@@ -228,40 +229,33 @@ export default function PayInvoicePanel({
     setSubmitting(true);
     try {
       const itemPrice = conversion.chargeAmount; // single-line invoice charge
-      const { data, error } = await supabase.functions.invoke("process-payment", {
-        body: {
-          gateway,
-          existing_order_id: orderId,
-          customer_email: customerEmail,
-          customer_name: customerEmail,
-          items: [{
-            id: "invoice",
-            name: `Invoice ${invoiceNumber || orderId}${conversion.converted ? ` (${formatMoney(amount, invoiceCurrency)})` : ""}`,
-            price: itemPrice,
-            quantity: 1,
-          }],
-          total: conversion.chargeAmount,
-          currency: conversion.chargeCurrency,
-          // Audit trail so admins can reconcile FX-converted charges.
-          fx: conversion.converted ? {
-            invoice_currency: invoiceCurrency,
-            invoice_amount: amount,
-            charge_currency: conversion.chargeCurrency,
-            charge_amount: conversion.chargeAmount,
-            display_currency: conversion.displayCurrency,
-            display_amount: conversion.displayAmount,
-            rate_source: conversion.fxSource,
-            rate_cached_at: fxCachedAt,
-          } : null,
-          success_url: `${window.location.origin}/i/${invoiceNumber || orderId}?payment=success`,
-          cancel_url: `${window.location.origin}/i/${invoiceNumber || orderId}?payment=cancelled`,
-        },
+      const r = await apiPost<any>("/orders/public/process-payment", {
+        gateway,
+        existing_order_id: orderId,
+        customer_email: customerEmail,
+        customer_name: customerEmail,
+        items: [{
+          id: "invoice",
+          name: `Invoice ${invoiceNumber || orderId}${conversion.converted ? ` (${formatMoney(amount, invoiceCurrency)})` : ""}`,
+          price: itemPrice,
+          quantity: 1,
+        }],
+        total: conversion.chargeAmount,
+        currency: conversion.chargeCurrency,
+        // Audit trail so admins can reconcile FX-converted charges.
+        fx: conversion.converted ? {
+          invoice_currency: invoiceCurrency,
+          invoice_amount: amount,
+          charge_currency: conversion.chargeCurrency,
+          charge_amount: conversion.chargeAmount,
+          display_currency: conversion.displayCurrency,
+          display_amount: conversion.displayAmount,
+          rate_source: conversion.fxSource,
+          rate_cached_at: fxCachedAt,
+        } : null,
+        success_url: `${window.location.origin}/i/${invoiceNumber || orderId}?payment=success`,
+        cancel_url: `${window.location.origin}/i/${invoiceNumber || orderId}?payment=cancelled`,
       });
-      if (error) throw error;
-      const r = data as {
-        gateway?: string; session_id?: string; url?: string; checkout_url?: string;
-        accounts?: BankAccount[]; instructions?: string; display_name?: string; error?: string;
-      };
       if (r?.error) throw new Error(r.error);
       if (r?.gateway === "bank_transfer" && r?.session_id) {
         markStarted();

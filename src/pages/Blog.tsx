@@ -5,8 +5,7 @@ import { SEO_DEFAULTS } from "@/lib/seo-defaults";
 import ScrollReveal from "@/components/shared/ScrollReveal";
 import { Calendar, ArrowRight, Clock, Eye, Search, Sparkles, Tag, User } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useBlogPosts } from "@/hooks/use-cms-data";
 import { Input } from "@/components/ui/input";
 
 interface BlogPost {
@@ -62,31 +61,7 @@ const Blog = () => {
     },
   });
 
-  const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["blog-posts"],
-    queryFn: async (): Promise<BlogPost[]> => {
-      const { data, error } = await supabase
-        .from("blog_posts" as any)
-        .select("id,slug,title,excerpt,cover_image_url,category,tags,author,read_minutes,is_featured,published_at,view_count")
-        .eq("is_published", true)
-        .order("is_featured", { ascending: false })
-        .order("published_at", { ascending: false });
-      if (error) throw error;
-      return (data as unknown as BlogPost[]) ?? [];
-    },
-  });
-
-  // Realtime: auto-sync any admin change (insert/update/delete) to the public blog
-  const qc = useQueryClient();
-  useEffect(() => {
-    const channel = supabase
-      .channel("public:blog_posts")
-      .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => {
-        qc.invalidateQueries({ queryKey: ["blog-posts"] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [qc]);
+  const { data: posts = [], isLoading } = useBlogPosts();
 
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [query, setQuery] = useState("");

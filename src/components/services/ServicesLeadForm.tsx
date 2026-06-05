@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-import { notifySubmission } from "@/lib/notify-submission";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +40,6 @@ const schema = z.object({
 type FormState = z.infer<typeof schema>;
 
 const ServicesLeadForm = ({ defaultService }: { defaultService?: string }) => {
-  const [formId, setFormId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [values, setValues] = useState<FormState>({
@@ -52,16 +50,6 @@ const ServicesLeadForm = ({ defaultService }: { defaultService?: string }) => {
     message: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
-
-  useEffect(() => {
-    supabase
-      .from("form_templates")
-      .select("id")
-      .eq("slug", "services-lead")
-      .eq("is_active", true)
-      .maybeSingle()
-      .then(({ data }) => setFormId(data?.id ?? null));
-  }, []);
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) => {
     setValues((p) => ({ ...p, [k]: v }));
@@ -80,29 +68,19 @@ const ServicesLeadForm = ({ defaultService }: { defaultService?: string }) => {
       setErrors(fe);
       return;
     }
-    if (!formId) {
-      toast.error("Form is not available right now. Please try again.");
-      return;
-    }
     setSubmitting(true);
-    const { error } = await supabase.from("form_submissions").insert({
-      form_id: formId,
-      data: { ...parsed.data, source: "services-page" },
-    });
-    setSubmitting(false);
-    if (error) {
-      toast.error("Could not send. Please try again.");
-      return;
+    try {
+      await apiPost("/public/forms/submit", {
+        slug: "services-lead",
+        data: { ...parsed.data, source: "services-page" },
+      });
+      setDone(true);
+      toast.success("Thanks! We'll reply within one business day.");
+    } catch (err: any) {
+      toast.error(err?.message || "Could not send. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    void notifySubmission({
-      formType: "quote request",
-      customerName: parsed.data.name,
-      customerEmail: parsed.data.email,
-      fields: parsed.data,
-      source: "services-page",
-    });
-    setDone(true);
-    toast.success("Thanks! We'll reply within one business day.");
   };
 
   if (done) {

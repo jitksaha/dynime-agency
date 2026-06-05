@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { apiGet } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,8 @@ export function useServiceCatalog() {
     if (catalogCache) return;
     if (!catalogPromise) {
       catalogPromise = (async () => {
-        const { data } = await supabase
-          .from("service_pricing")
-          .select("service_slug, service_title, is_enabled, tiers")
-          .eq("is_enabled", true);
+        const pricing = await apiGet<any[]>("/cms/service-pricing");
+        const data = (pricing || []).filter((r) => r.is_enabled !== false);
         const flat: CatalogEntry[] = [];
         (data || []).forEach((row: any) => {
           const tiers = Array.isArray(row.tiers) ? row.tiers : [];

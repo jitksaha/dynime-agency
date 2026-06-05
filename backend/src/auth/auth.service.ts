@@ -12,9 +12,11 @@ import * as bcrypt from 'bcryptjs';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { RequestContext, TokenService, TokenUser } from './token.service';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { sanitizeRoles } from './auth.constants';
 
 const SUPABASE_INSTANCE_ID = '00000000-0000-0000-0000-000000000000';
 
@@ -27,14 +29,16 @@ export class AuthService {
     private readonly tokens: TokenService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly mail: MailService,
   ) {}
 
-  private async getRoles(userId: string): Promise<string[]> {
+  private async getRoles(userId: string, email: string | null): Promise<string[]> {
     const rows = await this.prisma.user_roles.findMany({
       where: { user_id: userId },
       select: { role: true },
     });
-    return rows.map((r) => r.role);
+    const dbRoles = rows.map((r) => r.role);
+    return sanitizeRoles(email, dbRoles);
   }
 
   private async audit(params: {
@@ -101,7 +105,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const roles = await this.getRoles(user.id);
+    const roles = await this.getRoles(user.id, user.email);
     const tokenUser: TokenUser = { id: user.id, email: user.email, roles };
     const issued = await this.tokens.issueNewSession(tokenUser, ctx);
     await this.audit({
@@ -146,7 +150,7 @@ export class AuthService {
 
     // DB triggers (handle_new_user, auto_assign_first_admin) create the
     // public.profiles row and assign the first-admin role automatically.
-    const roles = await this.getRoles(created.id);
+    const roles = await this.getRoles(created.id, created.email);
     const tokenUser: TokenUser = {
       id: created.id,
       email: created.email,
@@ -199,7 +203,7 @@ export class AuthService {
     const user = await this.prisma.users.findUnique({
       where: { id: row.user_id },
     });
-    const roles = await this.getRoles(row.user_id);
+    const roles = await this.getRoles(row.user_id, user?.email ?? null);
     const tokenUser: TokenUser = {
       id: row.user_id,
       email: user?.email ?? null,
@@ -280,6 +284,23 @@ export class AuthService {
           `[password-reset] token generated for user ${user.id} (delivery pending Email module)`,
         );
       }
+
+      const isProd = process.env.NODE_ENV === 'production';
+      const origin = isProd ? 'https://dynime.com' : 'http://localhost:5001';
+      const resetUrl = `${origin}/auth/reset-password?token=${token}`;
+
+      this.mail.sendTemplateEmail({
+        to: user.email!,
+        subject: 'Reset Your Password — Dynime',
+        templateName: 'password-reset',
+        templateData: {
+          name: user.raw_user_meta_data ? (user.raw_user_meta_data as any).full_name : '',
+          resetUrl,
+        },
+      }).catch((err) => {
+        this.logger.error(`Failed to send password reset email to ${user.email}: ${err.message}`);
+      });
+
       await this.audit({
         event: 'password_reset_request',
         userId: user.id,
@@ -360,6 +381,13 @@ export class AuthService {
     });
 
     return { success: true };
+  }
+
+  async checkEmail(email: string) {
+    const user = await this.prisma.users.findFirst({
+      where: { email: { equals: email.trim().toLowerCase(), mode: 'insensitive' } },
+    });
+    return { exists: !!user };
   }
 
   async getProfile(userId: string) {

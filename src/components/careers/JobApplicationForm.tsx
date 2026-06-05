@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,16 +32,63 @@ const ALLOWED = ["application/pdf", "application/msword", "application/vnd.openx
 const MAX_BYTES = 8 * 1024 * 1024;
 
 const JobApplicationForm = ({ careerId, careerSlug, careerTitle }: Props) => {
-  const [form, setForm] = useState({
-    full_name: "", email: "", phone: "", country: "", current_position: "",
-    experience_years: "", expected_salary: "", linkedin_url: "", portfolio_url: "", cover_letter: "",
+  const [form, setForm] = useState(() => {
+    let base = {
+      full_name: "", email: "", phone: "", country: "", current_position: "",
+      experience_years: "", expected_salary: "", linkedin_url: "", portfolio_url: "", cover_letter: "",
+    };
+    try {
+      const saved = localStorage.getItem("dynime_job_app_draft");
+      if (saved) {
+        base = { ...base, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.error("Failed to parse job app draft", e);
+    }
+    return base;
   });
-  const [salaryAmount, setSalaryAmount] = useState("");
-  const [salaryPeriod, setSalaryPeriod] = useState<"yearly" | "monthly">("yearly");
-  const [salaryNegotiable, setSalaryNegotiable] = useState(false);
+  const [salaryAmount, setSalaryAmount] = useState(() => {
+    try {
+      return localStorage.getItem("dynime_job_app_salary_amount") || "";
+    } catch { return ""; }
+  });
+  const [salaryPeriod, setSalaryPeriod] = useState<"yearly" | "monthly">((() => {
+    try {
+      return (localStorage.getItem("dynime_job_app_salary_period") as any) || "yearly";
+    } catch { return "yearly"; }
+  })());
+  const [salaryNegotiable, setSalaryNegotiable] = useState(() => {
+    try {
+      return localStorage.getItem("dynime_job_app_salary_negotiable") === "true";
+    } catch { return false; }
+  });
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dynime_job_app_draft", JSON.stringify(form));
+    } catch {}
+  }, [form]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dynime_job_app_salary_amount", salaryAmount);
+    } catch {}
+  }, [salaryAmount]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dynime_job_app_salary_period", salaryPeriod);
+    } catch {}
+  }, [salaryPeriod]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("dynime_job_app_salary_negotiable", String(salaryNegotiable));
+    } catch {}
+  }, [salaryNegotiable]);
 
   const setField = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -76,18 +123,21 @@ const JobApplicationForm = ({ careerId, careerSlug, careerTitle }: Props) => {
         const ext = file.name.split(".").pop()?.toLowerCase() || "pdf";
         const safeSlug = (careerSlug || "general").replace(/[^A-Za-z0-9_-]+/g, "-");
         const path = `public/${safeSlug}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("job-applications")
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (upErr) throw upErr;
-        resume_url = path; // store storage path, signed URL generated in admin
+        
+        const fd = new FormData();
+        fd.append("file", file);
+        
+        const uploadRes = await fetch(`/api/v1/public/forms/upload-resume?key=${encodeURIComponent(path)}`, {
+          method: "POST",
+          body: fd,
+        });
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload resume file");
+        }
+        resume_url = path;
       }
 
-      const expYears = parsed.data.experience_years ? parseInt(parsed.data.experience_years, 10) : null;
-
-      const applicationId = crypto.randomUUID();
-      const { error } = await supabase.from("job_applications").insert([{
-        id: applicationId,
+      await apiPost("/public/forms/apply", {
         career_id: careerId,
         career_slug: careerSlug,
         career_title: careerTitle,
@@ -96,34 +146,21 @@ const JobApplicationForm = ({ careerId, careerSlug, careerTitle }: Props) => {
         phone: parsed.data.phone || null,
         country: parsed.data.country || null,
         current_position: parsed.data.current_position || null,
-        experience_years: Number.isFinite(expYears as number) ? expYears : null,
+        experience_years: parsed.data.experience_years || null,
         expected_salary: parsed.data.expected_salary || null,
         linkedin_url: parsed.data.linkedin_url || null,
         portfolio_url: parsed.data.portfolio_url || null,
         cover_letter: parsed.data.cover_letter || null,
         resume_url,
-        source: "career-page",
-        user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
-      }]);
-      if (error) throw error;
-      const { error: emailError } = await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "job-application-received",
-          recipientEmail: parsed.data.email,
-          idempotencyKey: `job-application-${applicationId}-received`,
-          templateData: {
-            name: parsed.data.full_name,
-            role: careerTitle,
-            status: "new",
-          },
-        },
       });
-      if (emailError) console.warn("Job application confirmation email failed", emailError);
-      // Fire-and-forget ATS scan — function looks up the most recent matching row.
-      supabase.functions.invoke("ats-scan-application", {
-        body: { career_slug: careerSlug, email: parsed.data.email },
-      }).catch((err) => console.warn("ATS scan failed", err));
+
       setSubmitted(true);
+      try {
+        localStorage.removeItem("dynime_job_app_draft");
+        localStorage.removeItem("dynime_job_app_salary_amount");
+        localStorage.removeItem("dynime_job_app_salary_period");
+        localStorage.removeItem("dynime_job_app_salary_negotiable");
+      } catch {}
       toast.success("Application submitted! We'll be in touch.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit");

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-import { notifySubmission } from "@/lib/notify-submission";
+import { apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,42 +91,40 @@ const initial: FormState = {
 
 const ContactForm = ({ slug = "contact" }: { slug?: string }) => {
   const [params] = useSearchParams();
-  const [formId, setFormId] = useState<string | null>(null);
-  const [values, setValues] = useState<FormState>({
-    ...initial,
-    service: params.get("service") || params.get("subject") || "",
-    delivery: (params.get("delivery") === "express" ? "express" : "standard"),
-    message: params.get("message") || "",
+  const [values, setValues] = useState<FormState>(() => {
+    let base = { ...initial };
+    const saved = localStorage.getItem("dynime_contact_form_draft");
+    if (saved) {
+      try {
+        base = { ...base, ...JSON.parse(saved) };
+      } catch (e) {
+        console.error("Failed to parse saved contact form draft", e);
+      }
+    }
+
+    const serviceParam = params.get("service") || params.get("subject");
+    if (serviceParam) base.service = serviceParam;
+
+    const deliveryParam = params.get("delivery");
+    if (deliveryParam === "express" || deliveryParam === "standard") {
+      base.delivery = deliveryParam;
+    }
+
+    const messageParam = params.get("message");
+    if (messageParam) base.message = messageParam;
+
+    return base;
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase
-        .from("form_templates")
-        .select("id")
-        .eq("slug", slug)
-        .eq("is_active", true)
-        .maybeSingle();
-      if (cancelled) return;
-      if (data?.id) { setFormId(data.id); return; }
-      // fallback to services-lead template if "contact" missing
-      const fb = await supabase
-        .from("form_templates")
-        .select("id")
-        .eq("slug", "services-lead")
-        .eq("is_active", true)
-        .maybeSingle();
-      if (!cancelled) setFormId(fb.data?.id ?? null);
-    })();
-    return () => { cancelled = true; };
-  }, [slug]);
-
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) => {
-    setValues((p) => ({ ...p, [k]: v }));
+    setValues((p) => {
+      const next = { ...p, [k]: v };
+      localStorage.setItem("dynime_contact_form_draft", JSON.stringify(next));
+      return next;
+    });
     setErrors((p) => ({ ...p, [k]: undefined }));
   };
 
@@ -144,31 +141,24 @@ const ContactForm = ({ slug = "contact" }: { slug?: string }) => {
       toast.error("Please review the highlighted fields.");
       return;
     }
-    if (!formId) {
-      toast.error("Form is unavailable right now. Please email us.");
-      return;
-    }
     setSubmitting(true);
-    const { consent, ...payload } = parsed.data;
-    const { error } = await supabase.from("form_submissions").insert({
-      form_id: formId,
-      data: { ...payload, consent, source: "contact-page", submitted_at: new Date().toISOString() },
-    });
-    setSubmitting(false);
-    if (error) { toast.error("Could not send. Please try again."); return; }
-    // Fire-and-forget email notifications (admin alert + customer confirmation)
-    void notifySubmission({
-      formType: "contact message",
-      customerName: payload.name,
-      customerEmail: payload.email,
-      fields: payload,
-      source: "contact-page",
-    });
-    setDone(true);
-    toast.success("Thanks! We'll reply within one business day.");
-    setTimeout(() => {
-      document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+    try {
+      const { consent, ...payload } = parsed.data;
+      await apiPost("/public/forms/submit", {
+        slug,
+        data: { ...payload, consent, source: "contact-page", submitted_at: new Date().toISOString() },
+      });
+      setDone(true);
+      localStorage.removeItem("dynime_contact_form_draft");
+      toast.success("Thanks! We'll reply within one business day.");
+      setTimeout(() => {
+        document.getElementById("contact-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    } catch (err: any) {
+      toast.error(err?.message || "Could not send. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (done) {
@@ -236,7 +226,12 @@ const ContactForm = ({ slug = "contact" }: { slug?: string }) => {
           <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button
               variant="outline"
-              onClick={() => { setDone(false); setValues(initial); setErrors({}); }}
+              onClick={() => {
+                setDone(false);
+                setValues(initial);
+                setErrors({});
+                localStorage.removeItem("dynime_contact_form_draft");
+              }}
             >
               Send another message
             </Button>

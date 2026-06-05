@@ -1,7 +1,6 @@
 import { useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +19,7 @@ import {
 import { Plus, Pencil, Trash2, Tag, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useCouponsAdmin, useUpsertCoupon, useDeleteCoupon } from "@/hooks/use-cms-data";
 
 type MilestoneStage = { label: string; percent: number };
 
@@ -96,20 +96,9 @@ const AdminCoupons = () => {
   const [form, setForm] = useState<CouponForm>(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const { data: coupons, isLoading } = useQuery({
-    queryKey: ["admin-coupons"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("coupons")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return (data as any[]).map((d) => ({
-        ...d,
-        milestone_stages: Array.isArray(d.milestone_stages) ? d.milestone_stages : [],
-      })) as Coupon[];
-    },
-  });
+  const { data: coupons, isLoading } = useCouponsAdmin();
+  const upsertCoupon = useUpsertCoupon();
+  const deleteCoupon = useDeleteCoupon();
 
   const openCreate = () => {
     setEditing(null);
@@ -196,16 +185,15 @@ const AdminCoupons = () => {
     };
     try {
       if (editing) {
-        const { error } = await supabase.from("coupons").update(payload).eq("id", editing.id);
-        if (error) throw error;
+        await upsertCoupon.mutateAsync({ ...payload, id: editing.id });
         toast.success("Coupon updated");
       } else {
-        const { error } = await supabase.from("coupons").insert(payload);
-        if (error) throw error;
+        await upsertCoupon.mutateAsync(payload);
         toast.success("Coupon created");
       }
       setOpen(false);
-      qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
+      qc.invalidateQueries({ queryKey: ["coupons"] });
     } catch (err: any) {
       toast.error(err.message || "Failed to save coupon");
     } finally {
@@ -215,19 +203,24 @@ const AdminCoupons = () => {
 
   const handleDelete = async (c: Coupon) => {
     if (!confirm(`Delete coupon ${c.code}?`)) return;
-    const { error } = await supabase.from("coupons").delete().eq("id", c.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Coupon deleted");
-    qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+    try {
+      await deleteCoupon.mutateAsync(c.id);
+      toast.success("Coupon deleted");
+      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete coupon");
+    }
   };
 
   const toggleActive = async (c: Coupon) => {
-    const { error } = await supabase
-      .from("coupons")
-      .update({ is_active: !c.is_active })
-      .eq("id", c.id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["admin-coupons"] });
+    try {
+      await upsertCoupon.mutateAsync({ id: c.id, is_active: !c.is_active });
+      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update coupon status");
+    }
   };
 
   const copyCode = async (code: string) => {

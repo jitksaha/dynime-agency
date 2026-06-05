@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useSiteSettings } from "@/hooks/use-data";
 import { supabase } from "@/integrations/supabase/client";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
@@ -140,16 +141,43 @@ type TestResult = {
   details?: Record<string, unknown>;
 };
 
+const WebhookUrlInfo = ({ label, url }: { label: string; url: string }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast.success(`${label} copied to clipboard`);
+  };
+  return (
+    <div className="mt-3 p-3 rounded-lg border border-border bg-muted/20 space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="text-xs text-primary hover:underline focus:outline-none"
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+      <div className="text-xs font-mono break-all text-foreground select-all bg-secondary/50 p-1.5 rounded border border-border/40">
+        {url}
+      </div>
+    </div>
+  );
+};
+
 const PaymentGateways = () => {
   const { data: settings, isLoading } = useSiteSettings();
   const qc = useQueryClient();
+  const apiBaseUrl = (import.meta.env.VITE_API_URL as string) || `${window.location.origin}/api/v1`;
 
   // ---- FlexPay enable/disable (lives in flexpay_settings) ----
   const { data: flexpaySettings, refetch: refetchFlex } = useQuery({
     queryKey: ["flexpay-settings-admin-gateways"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
-      return data;
+      return apiGet<any>("/cms/flexpay-settings");
     },
   });
   const [flexSaving, setFlexSaving] = useState(false);
@@ -158,11 +186,7 @@ const PaymentGateways = () => {
     setFlexSaving(true);
     try {
       const next = !flexpaySettings.enabled;
-      const { error } = await supabase
-        .from("flexpay_settings")
-        .update({ enabled: next })
-        .eq("id", 1);
-      if (error) throw error;
+      await apiPatch("/cms/flexpay-settings", { enabled: next });
       toast.success(`FlexPay ${next ? "enabled" : "disabled"}.`);
       refetchFlex();
     } catch (e: any) {
@@ -215,15 +239,11 @@ const PaymentGateways = () => {
         toast.message("Nothing to save yet.");
         return;
       }
-      const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
-      if (error) throw error;
+      await apiPost("/cms/site-settings/bulk", { settings: rows });
       toast.success(`${gateway.label} saved.`);
       qc.invalidateQueries({ queryKey: ["site-settings"] });
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Save failed";
-      const code = typeof e === "object" && e !== null && "code" in e ? String((e as { code?: unknown }).code) : "";
-      const isRls = /row-level security|permission denied|policy/i.test(msg) || code === "42501";
-      toast.error(isRls ? "Permission denied — super_admin role required." : msg);
+    } catch (e: any) {
+      toast.error(e?.message || "Save failed");
     } finally {
       setSavingId(null);
     }
@@ -245,17 +265,16 @@ const PaymentGateways = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke<TestResult>(
-        "payment-gateway-test",
-        { body: { gateway: gateway.id, credentials } },
+      const data = await apiPost<TestResult>(
+        "/cms/site-settings/test-gateway",
+        { gateway: gateway.id, credentials },
       );
-      if (error) throw new Error(error.message);
       if (!data) throw new Error("No response from test endpoint");
       setResults((p) => ({ ...p, [gateway.id]: data }));
       if (data.ok) toast.success(`${gateway.label}: ${data.summary}`);
       else toast.error(`${gateway.label}: ${data.summary}`);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
+    } catch (e: any) {
+      const msg = e?.message || String(e);
       setResults((p) => ({ ...p, [gateway.id]: { ok: false, status: "fail", summary: msg, latency_ms: 0 } }));
       toast.error(`${gateway.label}: ${msg}`);
     } finally {
@@ -486,6 +505,31 @@ const PaymentGateways = () => {
                 {g.fields.map(renderField)}
                 {g.id === "bank_transfer" && renderBankAccounts()}
               </div>
+
+              {g.id === "stripe" && (
+                <WebhookUrlInfo
+                  label="Stripe Webhook URL"
+                  url={`${apiBaseUrl}/orders/public/stripe-webhook`}
+                />
+              )}
+              {g.id === "dodopayment" && (
+                <WebhookUrlInfo
+                  label="DodoPayments Webhook URL"
+                  url={`${apiBaseUrl}/orders/public/dodopayment-webhook`}
+                />
+              )}
+              {g.id === "sslcommerz" && (
+                <WebhookUrlInfo
+                  label="SSLCommerz Callback/IPN URL"
+                  url={`${apiBaseUrl}/orders/public/sslcommerz-callback?status=success&origin=${window.location.origin}`}
+                />
+              )}
+              {g.id === "bkash" && (
+                <WebhookUrlInfo
+                  label="bKash Callback URL"
+                  url={`${apiBaseUrl}/orders/public/bkash-callback?origin=${window.location.origin}`}
+                />
+              )}
 
               {result && (
                 <div
