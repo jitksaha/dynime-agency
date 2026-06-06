@@ -131,3 +131,72 @@ To add or remove features in the backend:
      ```bash
      npx prisma generate
      ```
+
+---
+
+## 6. Automated Backup and Restore System (Google Drive via Rclone)
+
+To prevent data loss, we have created automated backup and restore systems under the `scripts/` directory.
+
+### A. Rclone Setup for Google Drive Uploads
+To back up to Google Drive automatically:
+1. Install `rclone` on your server:
+   ```bash
+   sudo apt install -y rclone
+   ```
+2. Configure a remote named `gdrive`:
+   ```bash
+   rclone config
+   ```
+   - Choose `n` for a new remote.
+   - Name it `gdrive`.
+   - Select option for `Google Drive` (type `drive`).
+   - Leave client ID and secret blank.
+   - Select Full access scope (`1`).
+   - Follow the prompt to authorize via browser (or use remote auth if configuring on a headless VPS).
+3. Verify connection:
+   ```bash
+   rclone lsf gdrive:
+   ```
+
+### B. Automating Daily Backups (Cron Job)
+Add a cron job to automatically trigger backups at 2 AM every day:
+1. Open crontab editor:
+   ```bash
+   crontab -e
+   ```
+2. Add this line at the bottom:
+   ```bash
+   0 2 * * * /bin/bash /app/scripts/backup.sh >> /var/log/dynime-backup.log 2>&1
+   ```
+
+### C. Restoring Backups
+To restore the website files and/or database to a previous state:
+1. Run the interactive restore script:
+   ```bash
+   bash scripts/restore.sh
+   ```
+2. Select the backup number from the printed list.
+3. Confirm if you want to restore the database (will overwrite active tables).
+4. Confirm if you want to restore website files (will overwrite active files).
+
+---
+
+## 7. Staging Server Setup & Safe Release Flow
+
+Never test or deploy features directly to your live production website (`dynime.com`). Always use a staging environment:
+
+### A. Setting Up Staging
+1. Create a subdomain: `staging.dynime.com` (point it to your server).
+2. Create a separate directory on your server: `/app-staging`.
+3. Set up a separate configuration `.env` file for staging (e.g. staging PostgreSQL database).
+4. Spin up the staging stack on different host ports (edit `deploy/docker-compose.yml` ports if running on the same VPS, or run it on a separate development instance).
+
+### B. Safe Update Lifecycle
+1. Develop the feature locally on a feature branch (e.g. `feature/x`).
+2. Merge the feature branch into the `development` branch.
+3. Deploy to the staging server and run QA/testing.
+4. Run `bash scripts/backup.sh` on the production server to take a pre-release backup.
+5. Merge the tested `development` branch into `main` to trigger the production deploy.
+6. If any critical errors are found in production, immediately roll back by running `bash scripts/restore.sh` and selecting the backup you made in Step 4.
+
