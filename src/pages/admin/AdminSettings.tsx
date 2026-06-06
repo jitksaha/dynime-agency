@@ -51,15 +51,54 @@ const AdminSettings = () => {
   const [saveError, setSaveError] = useState<{ message: string; isRls: boolean } | null>(null);
   const [backupStatus, setBackupStatus] = useState<any>(null);
   const [backingUp, setBackingUp] = useState(false);
+  const [clientIdInput, setClientIdInput] = useState("");
+  const [clientSecretInput, setClientSecretInput] = useState("");
+  const [savingConfig, setSavingConfig] = useState(false);
   const qc = useQueryClient();
 
   const loadBackupStatus = async () => {
     try {
       const res = await apiGet<any>("/backup/google/status");
       setBackupStatus(res);
+      if (res.clientId) setClientIdInput(res.clientId);
+      if (res.clientSecret) setClientSecretInput(res.clientSecret);
     } catch (err) {
       console.error("Failed to load backup status:", err);
     }
+  };
+
+  const saveConfigOnly = async () => {
+    if (!clientIdInput.trim() || !clientSecretInput.trim()) {
+      toast.error("Please fill in both Client ID and Client Secret.");
+      return false;
+    }
+    setSavingConfig(true);
+    try {
+      await apiPost("/backup/google/configure", {
+        clientId: clientIdInput,
+        clientSecret: clientSecretInput,
+      });
+      toast.success("API credentials saved successfully.");
+      loadBackupStatus();
+      return true;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save credentials.");
+      return false;
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const handleConnectGoogle = async () => {
+    if (!clientIdInput.trim() || !clientSecretInput.trim()) {
+      toast.error("Please fill in both Client ID and Client Secret to connect.");
+      return;
+    }
+    const saved = await saveConfigOnly();
+    if (!saved) return;
+    
+    const apiBaseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+    window.location.href = apiBaseUrl.replace(/\/$/, '') + '/api/v1/backup/google/auth';
   };
 
   useEffect(() => {
@@ -479,23 +518,65 @@ const AdminSettings = () => {
           <h2 className="text-lg font-semibold text-foreground">Google Drive Backups</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
-          Connect your Google Drive once to automatically run daily backups of website files, database, and configurations.
+          Configure Google Cloud OAuth credentials and connect your Google Drive to automatically run daily backups.
         </p>
         
         {backupStatus && (
           <div className="space-y-4">
-            {!backupStatus.hasClientConfig && (
-              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs">
-                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                <div>
-                  <span className="font-semibold block mb-0.5">Missing Google OAuth Credentials</span>
-                  Please add <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">GOOGLE_BACKUP_CLIENT_ID</code> and <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">GOOGLE_BACKUP_CLIENT_SECRET</code> to your server's <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">.env</code> file to enable Google Drive backups.
-                </div>
+            {/* OAuth Credentials Form */}
+            <div className="space-y-3 p-4 rounded-lg border border-border bg-secondary/15">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Google Cloud API Credentials</h3>
+              
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Google OAuth Client ID</label>
+                <input
+                  type="text"
+                  value={clientIdInput}
+                  onChange={(e) => setClientIdInput(e.target.value)}
+                  placeholder="e.g. 123456-abcdef.apps.googleusercontent.com"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
               </div>
-            )}
 
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Google OAuth Client Secret</label>
+                <input
+                  type="password"
+                  value={clientSecretInput}
+                  onChange={(e) => setClientSecretInput(e.target.value)}
+                  placeholder="e.g. GOCSPX-abcdefghijklmnopqrstuvwxyz"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <a
+                  href="https://console.cloud.google.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-primary hover:underline flex items-center gap-1"
+                >
+                  Create credentials on Google Cloud Console <ExternalLink className="w-3 h-3" />
+                </a>
+                
+                {backupStatus.connected && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7 px-2.5"
+                    disabled={savingConfig}
+                    onClick={saveConfigOnly}
+                  >
+                    {savingConfig ? "Saving..." : "Save Credentials"}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Google Drive Status & Connection */}
             {backupStatus.connected ? (
-              <div className="rounded-lg border border-border bg-secondary/30 p-4 space-y-4">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />
@@ -505,9 +586,10 @@ const AdminSettings = () => {
                     </div>
                   </div>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
-                    className="text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40"
+                    className="text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40 h-8"
                     onClick={async () => {
                       if (confirm("Are you sure you want to disconnect Google Drive? Auto-backups to Drive will be disabled.")) {
                         try {
@@ -524,7 +606,7 @@ const AdminSettings = () => {
                   </Button>
                 </div>
 
-                <div className="border-t border-border pt-3 flex items-center justify-between text-xs text-muted-foreground">
+                <div className="border-t border-border/40 pt-3 flex items-center justify-between text-xs text-muted-foreground">
                   <div>
                     <span className="block">Last Backup Status: <strong className={backupStatus.lastBackupStatus === 'success' ? 'text-emerald-500 font-semibold' : backupStatus.lastBackupStatus === 'failed' ? 'text-destructive font-semibold' : 'font-semibold'}>{backupStatus.lastBackupStatus}</strong></span>
                     {backupStatus.lastBackupTime && (
@@ -532,6 +614,7 @@ const AdminSettings = () => {
                     )}
                   </div>
                   <Button
+                    type="button"
                     variant="hero"
                     size="sm"
                     className="text-xs h-8"
@@ -559,18 +642,29 @@ const AdminSettings = () => {
               <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20">
                 <span className="text-sm text-muted-foreground">No Google Account Connected</span>
                 <Button
+                  type="button"
                   variant="hero"
                   size="sm"
-                  disabled={!backupStatus.hasClientConfig}
-                  onClick={() => {
-                    const apiBaseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-                    window.location.href = apiBaseUrl.replace(/\/$/, '') + '/api/v1/backup/google/auth';
-                  }}
+                  onClick={handleConnectGoogle}
+                  disabled={savingConfig}
                 >
-                  Connect Google Drive
+                  Save & Connect Google Drive
                 </Button>
               </div>
             )}
+
+            {/* Quick Setup documentation helper */}
+            <div className="rounded-lg border border-border/40 bg-secondary/5 p-3.5 text-xs text-muted-foreground space-y-1.5">
+              <span className="font-semibold text-foreground block">Quick Setup Guide:</span>
+              <ol className="list-decimal pl-4 space-y-1">
+                <li>Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a> and create or select a project.</li>
+                <li>Go to **APIs & Services → Library**, search for **Google Drive API** and enable it.</li>
+                <li>Go to **OAuth consent screen**, set User Type to **External**, add your email, and add the scope <code className="bg-secondary px-1 py-0.2 rounded font-mono">.../auth/drive.file</code>. Under **Test Users**, add your backup Google Account.</li>
+                <li>Go to **Credentials → Create Credentials → OAuth client ID**. Set Application type to **Web application**.</li>
+                <li>Add the **Authorized redirect URI**: <code className="bg-secondary px-1 py-0.2 rounded font-mono font-semibold">{(import.meta.env.VITE_API_URL || window.location.origin).replace(/\/$/, '') + '/api/v1/backup/google/callback'}</code>.</li>
+                <li>Copy the Client ID and Client Secret, paste them above, and click **Save & Connect**.</li>
+              </ol>
+            </div>
           </div>
         )}
       </div>

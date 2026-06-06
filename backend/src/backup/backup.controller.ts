@@ -9,6 +9,7 @@ import {
   Version,
   HttpCode,
   HttpStatus,
+  Body,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { BackupService } from './backup.service';
@@ -22,6 +23,19 @@ const ADMIN = ['super_admin', 'admin'];
 @Controller('backup')
 export class BackupController {
   constructor(private readonly backupService: BackupService) {}
+
+  // Save custom Client ID & Client Secret credentials
+  @Post('google/configure')
+  @Version('1')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(FlexAuthGuard, RolesGuard)
+  @Roles(...ADMIN)
+  @ApiBearerAuth()
+  async saveConfiguration(
+    @Body() body: { clientId: string; clientSecret: string },
+  ) {
+    return this.backupService.saveConfiguration(body.clientId, body.clientSecret);
+  }
 
   // Google OAuth Authorization start endpoint
   @Get('google/auth')

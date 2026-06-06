@@ -17,12 +17,23 @@ export class BackupService {
     private readonly config: ConfigService,
   ) {}
 
-  private getClientCredentials() {
-    const clientId = process.env.GOOGLE_BACKUP_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_BACKUP_CLIENT_SECRET;
+  private async getClientCredentials() {
+    const setting = await this.prisma.site_settings.findUnique({
+      where: { key: 'google_backup_settings' },
+    });
+    
+    let clientId = process.env.GOOGLE_BACKUP_CLIENT_ID;
+    let clientSecret = process.env.GOOGLE_BACKUP_CLIENT_SECRET;
+    
+    if (setting && setting.value) {
+      const val = setting.value as any;
+      if (val.client_id) clientId = val.client_id;
+      if (val.client_secret) clientSecret = val.client_secret;
+    }
+    
     if (!clientId || !clientSecret) {
       throw new BadRequestException(
-        'Google Backup Client ID and Secret must be configured in environment variables (GOOGLE_BACKUP_CLIENT_ID & GOOGLE_BACKUP_CLIENT_SECRET).',
+        'Google Client ID and Client Secret are not configured. Please save them in the settings panel first.',
       );
     }
     return { clientId, clientSecret };
@@ -43,7 +54,7 @@ export class BackupService {
   }
 
   async getAuthUrl(hostname: string) {
-    const { clientId } = this.getClientCredentials();
+    const { clientId } = await this.getClientCredentials();
     const redirectUri = this.getRedirectUri(hostname);
     
     return (
@@ -59,7 +70,7 @@ export class BackupService {
 
   async handleCallback(code: string, hostname: string, res: any) {
     try {
-      const { clientId, clientSecret } = this.getClientCredentials();
+      const { clientId, clientSecret } = await this.getClientCredentials();
       const redirectUri = this.getRedirectUri(hostname);
 
       // 1. Exchange Auth Code for Tokens
@@ -98,8 +109,14 @@ export class BackupService {
         email = userInfo.email || email;
       }
 
-      // 3. Save Settings in Database
+      // 3. Save Settings in Database (merging with existing settings to keep client credentials)
+      const setting = await this.prisma.site_settings.findUnique({
+        where: { key: 'google_backup_settings' },
+      });
+      const existingVal = setting && setting.value ? (setting.value as any) : {};
+
       const settingsVal = {
+        ...existingVal,
         connected: true,
         refresh_token: refreshToken,
         email,
@@ -126,34 +143,96 @@ export class BackupService {
     }
   }
 
+  async saveConfiguration(clientId: string, clientSecret: string) {
+    const setting = await this.prisma.site_settings.findUnique({
+      where: { key: 'google_backup_settings' },
+    });
+    const existingVal = setting && setting.value ? (setting.value as any) : {};
+
+    const updatedVal = {
+      ...existingVal,
+      client_id: clientId.trim(),
+      client_secret: clientSecret.trim(),
+    };
+
+    await this.prisma.site_settings.upsert({
+      where: { key: 'google_backup_settings' },
+      create: {
+        key: 'google_backup_settings',
+        value: updatedVal as any,
+      },
+      update: {
+        value: updatedVal as any,
+      },
+    });
+
+    return { success: true };
+  }
+
   async getStatus() {
     const setting = await this.prisma.site_settings.findUnique({
       where: { key: 'google_backup_settings' },
     });
     
-    if (!setting || !setting.value) {
-      return { connected: false };
+    let connected = false;
+    let email = null;
+    let lastBackupTime = null;
+    let lastBackupStatus = null;
+    let clientId = '';
+    let clientSecret = '';
+    
+    if (setting && setting.value) {
+      const val = setting.value as any;
+      connected = val.connected === true;
+      email = val.email;
+      lastBackupTime = val.last_backup_time;
+      lastBackupStatus = val.last_backup_status;
+      clientId = val.client_id || '';
+      clientSecret = val.client_secret || '';
     }
 
-    const val = setting.value as any;
+    const effectiveClientId = clientId || process.env.GOOGLE_BACKUP_CLIENT_ID;
+    const effectiveClientSecret = clientSecret || process.env.GOOGLE_BACKUP_CLIENT_SECRET;
+
     return {
-      connected: val.connected === true,
-      email: val.email,
-      lastBackupTime: val.last_backup_time,
-      lastBackupStatus: val.last_backup_status,
-      hasClientConfig: !!(process.env.GOOGLE_BACKUP_CLIENT_ID && process.env.GOOGLE_BACKUP_CLIENT_SECRET),
+      connected,
+      email,
+      lastBackupTime,
+      lastBackupStatus,
+      hasClientConfig: !!(effectiveClientId && effectiveClientSecret),
+      clientId,
+      clientSecret,
     };
   }
 
   async disconnect() {
-    await this.prisma.site_settings.deleteMany({
+    const setting = await this.prisma.site_settings.findUnique({
       where: { key: 'google_backup_settings' },
     });
+
+    if (setting && setting.value) {
+      const val = setting.value as any;
+      const updatedVal = {
+        client_id: val.client_id,
+        client_secret: val.client_secret,
+        connected: false,
+        refresh_token: null,
+        email: null,
+        last_backup_status: val.last_backup_status,
+        last_backup_time: val.last_backup_time,
+      };
+
+      await this.prisma.site_settings.update({
+        where: { key: 'google_backup_settings' },
+        data: { value: updatedVal as any },
+      });
+    }
+
     return { success: true };
   }
 
   private async refreshAccessToken(refreshToken: string): Promise<string> {
-    const { clientId, clientSecret } = this.getClientCredentials();
+    const { clientId, clientSecret } = await this.getClientCredentials();
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
