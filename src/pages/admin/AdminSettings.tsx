@@ -6,10 +6,10 @@ import { useSiteSettings } from "@/hooks/use-data";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign } from "lucide-react";
+import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign, Cloud, CheckCircle2, AlertTriangle, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiGet } from "@/lib/api";
 
 const generalSettings = [
   { key: "site_name", label: "Site Name (Main brand — used everywhere)", type: "text" },
@@ -49,7 +49,34 @@ const AdminSettings = () => {
   const [maskLicenses, setMaskLicenses] = useState<boolean>(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<{ message: string; isRls: boolean } | null>(null);
+  const [backupStatus, setBackupStatus] = useState<any>(null);
+  const [backingUp, setBackingUp] = useState(false);
   const qc = useQueryClient();
+
+  const loadBackupStatus = async () => {
+    try {
+      const res = await apiGet<any>("/backup/google/status");
+      setBackupStatus(res);
+    } catch (err) {
+      console.error("Failed to load backup status:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadBackupStatus();
+    
+    const params = new URLSearchParams(window.location.search);
+    const conn = params.get("backup_connection");
+    if (conn) {
+      if (conn === "success") {
+        toast.success("Google Drive connected for automated backups!");
+      } else {
+        toast.error("Failed to connect Google Drive.");
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+      loadBackupStatus();
+    }
+  }, []);
 
   useEffect(() => {
     if (settings) {
@@ -443,6 +470,109 @@ const AdminSettings = () => {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Automated Google Drive Backups */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Cloud className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Google Drive Backups</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Connect your Google Drive once to automatically run daily backups of website files, database, and configurations.
+        </p>
+        
+        {backupStatus && (
+          <div className="space-y-4">
+            {!backupStatus.hasClientConfig && (
+              <div className="flex items-start gap-2.5 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <div>
+                  <span className="font-semibold block mb-0.5">Missing Google OAuth Credentials</span>
+                  Please add <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">GOOGLE_BACKUP_CLIENT_ID</code> and <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">GOOGLE_BACKUP_CLIENT_SECRET</code> to your server's <code className="bg-yellow-500/20 px-1 py-0.5 rounded font-mono text-[10px]">.env</code> file to enable Google Drive backups.
+                </div>
+              </div>
+            )}
+
+            {backupStatus.connected ? (
+              <div className="rounded-lg border border-border bg-secondary/30 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    <div>
+                      <span className="text-sm font-semibold text-foreground block">Google Drive Connected</span>
+                      <span className="text-xs text-muted-foreground">{backupStatus.email}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:border-destructive/40"
+                    onClick={async () => {
+                      if (confirm("Are you sure you want to disconnect Google Drive? Auto-backups to Drive will be disabled.")) {
+                        try {
+                          await apiPost("/backup/google/disconnect");
+                          toast.success("Google Drive disconnected.");
+                          loadBackupStatus();
+                        } catch (err: any) {
+                          toast.error(err.message || "Failed to disconnect");
+                        }
+                      }
+                    }}
+                  >
+                    Disconnect
+                  </Button>
+                </div>
+
+                <div className="border-t border-border pt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <div>
+                    <span className="block">Last Backup Status: <strong className={backupStatus.lastBackupStatus === 'success' ? 'text-emerald-500 font-semibold' : backupStatus.lastBackupStatus === 'failed' ? 'text-destructive font-semibold' : 'font-semibold'}>{backupStatus.lastBackupStatus}</strong></span>
+                    {backupStatus.lastBackupTime && (
+                      <span className="block mt-0.5">Last Run: {new Date(backupStatus.lastBackupTime).toLocaleString()}</span>
+                    )}
+                  </div>
+                  <Button
+                    variant="hero"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={backingUp}
+                    onClick={async () => {
+                      setBackingUp(true);
+                      const t = toast.loading("Running backup and uploading to Google Drive...");
+                      try {
+                        await apiPost("/backup/run");
+                        toast.success("Backup uploaded to Google Drive successfully!", { id: t });
+                        loadBackupStatus();
+                      } catch (err: any) {
+                        toast.error(err.message || "Backup failed.", { id: t });
+                      } finally {
+                        setBackingUp(false);
+                      }
+                    }}
+                  >
+                    <Database className="w-3.5 h-3.5 mr-1" />
+                    {backingUp ? "Backing up..." : "Backup Now"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20">
+                <span className="text-sm text-muted-foreground">No Google Account Connected</span>
+                <Button
+                  variant="hero"
+                  size="sm"
+                  disabled={!backupStatus.hasClientConfig}
+                  onClick={() => {
+                    const apiBaseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+                    window.location.href = apiBaseUrl.replace(/\/$/, '') + '/api/v1/backup/google/auth';
+                  }}
+                >
+                  Connect Google Drive
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Live Chat embed (LiveChat.com or any third-party widget snippet) */}

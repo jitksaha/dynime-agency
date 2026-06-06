@@ -28,6 +28,7 @@ import { PublicFormsModule } from './public-forms/public-forms.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { MailModule } from './mail/mail.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { RealtimeModule } from './realtime/realtime.module';
     MailModule,
     ReferralModule,
     RealtimeModule,
+    BackupModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
