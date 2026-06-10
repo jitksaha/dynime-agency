@@ -58,7 +58,10 @@ class MigrateSupabaseData extends Command
         // 3. Migrate Job Applications
         $this->migrateJobApplications($data['job_applications'] ?? []);
 
-        // 4. Migrate Employees
+        // 4. Migrate Site Settings (especially home_sections)
+        $this->migrateSiteSettings($data['site_settings'] ?? []);
+
+        // 5. Migrate Employees (must be after site settings to avoid auto-sync termination)
         $this->migrateEmployees($data['employees'] ?? []);
 
         $this->info("All migrations completed!");
@@ -90,7 +93,8 @@ class MigrateSupabaseData extends Command
             'office_locations' => 'public.office_locations',
             'careers' => 'public.careers',
             'job_applications' => 'public.job_applications',
-            'employees' => 'public.employees'
+            'employees' => 'public.employees',
+            'site_settings' => 'public.site_settings'
         ];
 
         $exportData = [];
@@ -391,6 +395,50 @@ class MigrateSupabaseData extends Command
         $this->info("Job Applications Migration completed: {$imported} imported, {$skipped} skipped.");
     }
 
+    private function migrateSiteSettings(array $rows)
+    {
+        $this->info("\n--- Migrating Site Settings ---");
+        $mysqlColumns = Schema::getColumnListing('site_settings');
+        $imported = 0;
+        $updated = 0;
+
+        foreach ($rows as $row) {
+            if ($row['key'] !== 'home_sections') {
+                continue;
+            }
+            try {
+                $existing = DB::table('site_settings')->where('key', $row['key'])->first();
+                
+                $data = [];
+                foreach ($mysqlColumns as $col) {
+                    if ($col === 'id') {
+                        continue;
+                    }
+                    if (array_key_exists($col, $row)) {
+                        $val = $row[$col];
+                        if ($col === 'value') {
+                            $data[$col] = is_string($val) ? $val : json_encode($val);
+                        } else {
+                            $data[$col] = $val;
+                        }
+                    }
+                }
+
+                if ($existing) {
+                    DB::table('site_settings')->where('key', $row['key'])->update($data);
+                    $updated++;
+                } else {
+                    DB::table('site_settings')->insert($data);
+                    $imported++;
+                }
+            } catch (Exception $e) {
+                $this->error("Failed to migrate site setting '{$row['key']}': " . $e->getMessage());
+            }
+        }
+
+        $this->info("Site Settings Migration completed: {$imported} imported, {$updated} updated.");
+    }
+
     private function migrateEmployees(array $rows)
     {
         $this->info("\n--- Migrating Employees ---");
@@ -438,6 +486,12 @@ class MigrateSupabaseData extends Command
                             $data[$col] = $val;
                         }
                     }
+                }
+
+                // FORCE imported status to 'active' if they are being updated/imported 
+                // to override any auto-sync terminations.
+                if (!empty($data['status'])) {
+                    $data['status'] = 'active';
                 }
 
                 if ($existing) {

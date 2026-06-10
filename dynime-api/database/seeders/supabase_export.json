@@ -11930,5 +11930,378 @@
             "created_by": null,
             "job_type": null
         }
+    ],
+    "site_settings": [
+        {
+            "id": "1b07df8a-0169-4991-b785-42ba3719c395",
+            "key": "site_description",
+            "value": "\"Full-service digital agency specializing in web development, e-commerce, digital marketing, and business formation.\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-04-24 13:40:14.061802+00"
+        },
+        {
+            "id": "acfbb84e-9f54-4c43-9c61-3bfb8d761c65",
+            "key": "contact_phone",
+            "value": "\"+1 (234) 567-890\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-04-24 13:40:14.061802+00"
+        },
+        {
+            "id": "191dc91c-856c-4031-8415-3a445e39bac4",
+            "key": "footer_text",
+            "value": "\"\u00a9 2026 Dynime. All rights reserved.\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-04-24 13:40:14.061802+00"
+        },
+        {
+            "id": "ff6a6686-0cde-4116-867b-9dd32f959eb1",
+            "key": "hero_subheadline",
+            "value": "\"\\\"Full-service digital agency specializing in web development, e-commerce, digital marketing, and business formation.\\\"\"",
+            "created_at": "2026-04-24 13:32:18.95099+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "007bf9e0-ba4d-402d-a4d1-937b000fd370",
+            "key": "default_og_image",
+            "value": "\"\\\"https:\/\/isweduliawwjqwhyvwhp.supabase.co\/storage\/v1\/object\/public\/site-assets\/og-default\/1779118832140-kp5z0j.png\\\"\"",
+            "created_at": "2026-05-18 15:40:39.166315+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "3e1617cc-a777-4c3b-bd35-6ba25936473f",
+            "key": "bkash_enabled",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-04-24 15:18:07.415147+00",
+            "updated_at": "2026-04-24 15:18:11.128737+00"
+        },
+        {
+            "id": "a4e4f214-a81f-49fe-9c3f-4c015f286a2e",
+            "key": "bkash_app_key",
+            "value": "\"\\\"axyPB4R7fMGmHtJhlP79FTwqtc\\\"\"",
+            "created_at": "2026-04-24 15:17:59.17519+00",
+            "updated_at": "2026-04-24 15:18:11.128737+00"
+        },
+        {
+            "id": "58f4ac1f-6477-467e-a0df-f013cb50eec0",
+            "key": "bkash_app_secret",
+            "value": "\"\\\"7ZgiIc5kRCeaP7RfwrWz00yH3Osq7YFHjnfDNMoeoCUo70y6msOL\\\"\"",
+            "created_at": "2026-04-24 15:17:59.17519+00",
+            "updated_at": "2026-04-24 15:18:11.128737+00"
+        },
+        {
+            "id": "ae10410d-5990-4abf-8f71-307057eb0aa6",
+            "key": "bkash_username",
+            "value": "\"\\\"01620775539\\\"\"",
+            "created_at": "2026-04-24 15:17:59.17519+00",
+            "updated_at": "2026-04-24 15:18:11.128737+00"
+        },
+        {
+            "id": "fe5ba1c1-e678-49e0-92dc-941bd812cdc4",
+            "key": "bkash_password",
+            "value": "\"\\\"KkFvUAYpi_7\\\"\"",
+            "created_at": "2026-04-24 15:17:59.17519+00",
+            "updated_at": "2026-04-24 15:18:11.128737+00"
+        },
+        {
+            "id": "475b15cf-e745-4f8a-bbc4-e21772f00561",
+            "key": "sslcommerz_enabled",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-04-24 15:18:49.526002+00",
+            "updated_at": "2026-04-24 15:18:49.526002+00"
+        },
+        {
+            "id": "010571af-e296-47aa-9f0e-7e9396eaa779",
+            "key": "sslcommerz_store_id",
+            "value": "\"\\\"pixeldigisolutions0live\\\"\"",
+            "created_at": "2026-04-24 15:18:49.526002+00",
+            "updated_at": "2026-04-24 15:18:49.526002+00"
+        },
+        {
+            "id": "e78cac48-6e35-451d-b1c1-1592f07416ef",
+            "key": "sslcommerz_store_password",
+            "value": "\"\\\"6739AC367912421949\\\"\"",
+            "created_at": "2026-04-24 15:18:49.526002+00",
+            "updated_at": "2026-04-24 15:18:49.526002+00"
+        },
+        {
+            "id": "1d9b108c-4698-456c-80e2-2d86e6be9fea",
+            "key": "dodopayment_enabled",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-04-24 15:21:05.32964+00",
+            "updated_at": "2026-04-24 15:21:05.32964+00"
+        },
+        {
+            "id": "e26c898e-537f-4db9-8ec4-491a19241851",
+            "key": "dodopayment_api_key",
+            "value": "\"\\\"x21x6ATu75NkoxhZ.v1x8YjZ-XhciZQh9prYzqnXccMm6glAar1OTRCWXJwIl_Vs1\\\"\"",
+            "created_at": "2026-04-24 15:21:05.32964+00",
+            "updated_at": "2026-04-24 15:21:05.32964+00"
+        },
+        {
+            "id": "e91391b5-291f-40d4-9e3f-d8e22a3b6c56",
+            "key": "social_whatsapp",
+            "value": "\"\\\"\\\"\"",
+            "created_at": "2026-05-05 18:13:57.657094+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "0c1490c7-cf7c-4810-8693-2ea99860b9cf",
+            "key": "logo_alt",
+            "value": "\"\\\"Dynime\\\"\"",
+            "created_at": "2026-05-03 09:42:10.676732+00",
+            "updated_at": "2026-05-03 09:42:10.676732+00"
+        },
+        {
+            "id": "05d99198-8bd2-47d9-ae63-5d3b0df46608",
+            "key": "bank_transfer_enabled",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-04-24 15:22:29.051188+00",
+            "updated_at": "2026-05-04 20:38:54.956125+00"
+        },
+        {
+            "id": "e78fcd5f-77e9-4a8b-b836-f24e566968a8",
+            "key": "bank_transfer_accounts",
+            "value": "\"[{\\\"id\\\":\\\"e04c96fc-0a33-4e93-9001-ee2ac5c27fff\\\",\\\"bank_name\\\":\\\"The City Bank Ltd\\\",\\\"account_name\\\":\\\"Pixel Digi Solution Inc\\\",\\\"account_number\\\":\\\"1504108471001\\\",\\\"branch\\\":\\\"Jashore Branch\\\",\\\"routing_number\\\":\\\"225410941\\\",\\\"swift_code\\\":\\\"CIBLBDDH\\\",\\\"notes\\\":\\\"Please add order number on reference\\\",\\\"country\\\":\\\"Bangladesh\\\"},{\\\"id\\\":\\\"ef0490c2-2566-4492-9968-2ad8832d9b8a\\\",\\\"country\\\":\\\"United Kingdom\\\",\\\"bank_name\\\":\\\"Ifat Global Bank Ltd\\\",\\\"account_name\\\":\\\"Jit Kumar Saha\\\",\\\"account_number\\\":\\\"00017317\\\",\\\"branch\\\":\\\"\\\",\\\"routing_number\\\":\\\"Sortcode : 04-00-01\\\",\\\"swift_code\\\":\\\"EZYRGB2LDPB\\\",\\\"iban\\\":\\\"GB15EZYR04000100017317\\\"}]\"",
+            "created_at": "2026-04-24 15:22:19.084676+00",
+            "updated_at": "2026-05-04 20:38:54.956125+00"
+        },
+        {
+            "id": "619b7163-4c52-49ab-b390-381265e14b2e",
+            "key": "social_facebook",
+            "value": "\"\\\"https:\/\/www.facebook.com\/thedynime\\\"\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "5a06fe44-a0b6-4975-8f70-6872a2030ca8",
+            "key": "social_instagram",
+            "value": "\"\\\"https:\/\/www.instagram.com\/thedynime\\\"\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "2c41bdba-1ab7-4975-99da-4f3ac2c5a503",
+            "key": "social_linkedin",
+            "value": "\"\\\"https:\/\/www.linkedin.com\/company\/thedynime\\\"\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "992d8395-c5a0-4309-8161-8df9ebc82450",
+            "key": "social_youtube",
+            "value": "\"\\\"\\\"\"",
+            "created_at": "2026-05-05 18:13:57.657094+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "a2f127f6-b1a7-47bc-816f-c45c147b83a2",
+            "key": "llms_txt",
+            "value": "\"\\\"\\\"\"",
+            "created_at": "2026-05-05 18:50:05.269378+00",
+            "updated_at": "2026-05-05 18:52:21.631391+00"
+        },
+        {
+            "id": "b0c6ce14-5437-4126-9617-1189f02cc607",
+            "key": "id_card_brand",
+            "value": "\"{\\\"companyName\\\":\\\"Dynime Technologies Limited\\\",\\\"siteUrl\\\":\\\"https:\/\/dynime.com\\\",\\\"logoUrl\\\":\\\"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFoAAAAoCAYAAAB+Qu3IAAAAtGVYSWZJSSoACAAAAAYAEgEDAAEAAAABAAAAGgEFAAEAAABWAAAAGwEFAAEAAABeAAAAKAEDAAEAAAACAAAAEwIDAAEAAAABAAAAaYcEAAEAAABmAAAAAAAAAGAAAAABAAAAYAAAAAEAAAAGAACQBwAEAAAAMDIxMAGRBwAEAAAAAQIDAACgBwAEAAAAMDEwMAGgAwABAAAA\/\/8AAAKgBAABAAAAWgAAAAOgBAABAAAAKAAAAAAAAABIM3C7AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFY2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLyc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpBdHRyaWI9J2h0dHA6Ly9ucy5hdHRyaWJ1dGlvbi5jb20vYWRzLzEuMC8nPgogIDxBdHRyaWI6QWRzPgogICA8cmRmOlNlcT4KICAgIDxyZGY6bGkgcmRmOnBhcnNlVHlwZT0nUmVzb3VyY2UnPgogICAgIDxBdHRyaWI6Q3JlYXRlZD4yMDI2LTA0LTI2PC9BdHRyaWI6Q3JlYXRlZD4KICAgICA8QXR0cmliOkRhdGE+eyZxdW90O2RvYyZxdW90OzomcXVvdDtEQUhER21oWlZYayZxdW90OywmcXVvdDt1c2VyJnF1b3Q7OiZxdW90O1VBR2hsWEZfaE9RJnF1b3Q7LCZxdW90O2JyYW5kJnF1b3Q7OiZxdW90O091dHNvdXJjaW5nIEluc3RpdHV0ZSBCRCA1LjUmcXVvdDt9PC9BdHRyaWI6RGF0YT4KICAgICA8QXR0cmliOkV4dElkPmVjMjEzNDAzLTZmOTYtNDJhOC04YWFjLTg1ZGJiNDNkMmI3MDwvQXR0cmliOkV4dElkPgogICAgIDxBdHRyaWI6RmJJZD41MjUyNjU5MTQxNzk1ODA8L0F0dHJpYjpGYklkPgogICAgIDxBdHRyaWI6VG91Y2hUeXBlPjI8L0F0dHJpYjpUb3VjaFR5cGU+CiAgICA8L3JkZjpsaT4KICAgPC9yZGY6U2VxPgogIDwvQXR0cmliOkFkcz4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6ZGM9J2h0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvJz4KICA8ZGM6dGl0bGU+CiAgIDxyZGY6QWx0PgogICAgPHJkZjpsaSB4bWw6bGFuZz0neC1kZWZhdWx0Jz5EeW5pbWUgTG9nbyAtIDM8L3JkZjpsaT4KICAgPC9yZGY6QWx0PgogIDwvZGM6dGl0bGU+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnBkZj0naHR0cDovL25zLmFkb2JlLmNvbS9wZGYvMS4zLyc+CiAgPHBkZjpBdXRob3I+Sml0IEt1bWFyIFNhaGE8L3BkZjpBdXRob3I+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOnhtcD0naHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyc+CiAgPHhtcDpDcmVhdG9yVG9vbD5DYW52YSBkb2M9REFIREdtaFpWWGsgdXNlcj1VQUdobFhGX2hPUSBicmFuZD1PdXRzb3VyY2luZyBJbnN0aXR1dGUgQkQgNS41PC94bXA6Q3JlYXRvclRvb2w+CiA8L3JkZjpEZXNjcmlwdGlvbj4KPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic\/PlDkp\/4AAAx5SURBVGiB7VoJdFTVGb7vvewLMaKsgSSTfSMkJGFxgWqjKBBZMoEgguJSBS0ulUo9NOLSuhQLWkWlrpxSS92wcFqgVrEWjqKCFAiE1SQQEqiGSTLJzLz3br9\/3n2ZN2EgYdGeY+c\/5567vPv\/97\/f\/9\/\/LjOMBSlIQQpSkIIUpCAFKUhB+h6IS750zrKU8yPntGPI3\/0Y5428wAYAxTsJ5X+j0w+OqmT\/ek04i98fx7J3hPnazsbDuTxkCL962DDe3yfj\/BPGyB0xgl\/4XY5xHoh7QY6L+zo+rm\/t7Pj+X78VN+jrvbFJ9Y1RKfXVYal1b4am1FewhNpI0b8HEzFk5ufznOHDOQfQC6k+ejQPOY96e1dZXh6\/rKSE84IC\/m7P9fveyQCkV5+a0vh++7ZdlNDEew\/6jx6X2Mh7pRzl0WlNPDKjmYenN\/GQtLq\/sJT6QQZf1xVgyCIg7XauIHlXQmEhH0ZAFxXxR6k+dqweTt8DaVJVZfD7l7lEuSnXbLPqnpvLMzFOw9ChfLFol0w+6mPyUSK5VvlmOpVxTN6Txz4LkGP77hoXN+Cgs3fCEd474aAKb\/bEJtV6Ymz1alTaMR6VCaCzW7XQfM7lrGPbWeLWC3wT8pfVtQ5PLiSgAYQXaJ9Hn4vXnesm3VXXQPp4xwjQL1Df05LhkeF9tyXHDN5\/+ILEWh43aJ8aN\/gQ75V4SI+xNelRqd\/yiOT6\/WHJ9auUpNqnleS6J+T0Ixvk9MO3+CtsDIw42QeA3o\/0Cpbxk\/Cw7IICPYuARv1X1Af5FHyv8FfYkEPej\/73UBm8+eh7LwwVV1ioX4\/8eXx\/gXhTU\/VwKz++haJ9HvqNMGeXkcFjIeNm6JSOfDpkvYR+i6gu5Bej7SmSifbyAI4iCX3HGn30FaQb6XNmYI\/+0OtZ0YN2PRWbXM9jE3d7YhP389ikg2qM7RiPTKrfG9GvZgbLashhV3WMZxNcs1i5ayar7LiWjWpMMcbCYPZVigC5AErUjxzpjcetSB1IGpR8vbjY69FPCFBepXiKuJrhbyzGEF4+QXKJchXJAt8ewe8Abzs2PCqvTUzkESYf2gdTX\/A8b2m7SvBBF10lfhHCjqD8BnId7U7kbULms12cR4GM14zVqB8E4NvRF3PTD6E9r6vupyBhjdSa8KiknZ\/H2Pbx6OTdWnTSXi3a1sQjEms\/YANrEtho9RZpjNogjwWik7kuT0c+U9PYre7d8lzXNMuk4qBEDVIrAJ8gYlkIlLuJJiMm4g0d5OWkMOq\/F7yhIr9EeP5SUX+Y+NB3G\/GQzgkJPBJ8L44a5TXmA+b42HCTSCZ4O4EGzzUCmMPkBKLtWvC5rMDS6kD5PTI+rSiTn\/QV499kkQnd9W\/Q9vlJWJ4S5PGOi1hG9YBw2\/adUal7eIRtlycirY6HJR\/40nusG9WcIo10PSmNcb8vTVCPyZUA+QaPKt3q0eW7UZ6PeD1fXUCiCor4DaQULVWqi81QEYDdR8AAhIcsk1hGIPi82tvvD+SBaMuzAg2+CVQ3YzuA6QUPa8T37eapg4AW3vuCRV6p4F9k5Uf7ZgIb\/XubfdGnTJyMbqc6hR1aPaSnOR8L\/ywaCzxFAs9AXi1AHuu4WBrfvJpdWjckLOWLz8LTd+FUsYOHpu5pZ7Z9poDQTiETO9LZDPUjaQ7nyl0eTf6ZR5Me1HT5Yc7ZcuclxVn8oSJ4BBQc4BvcAAGA5gpvedTUAh6WDIVpYstFPd3wPv4nizEeEUu9QMhULLF8PcB2on\/UaYC+Siz7u6mend15ClpPoQ1GiLTE4cvFhv0LUS9CHx31\/ShvRr4Fcj5D+VOUdxorQr\/eakB\/El4ml7XcK0\/UORvXVqLYNr0cll3NQ3MPcCWj+nX6Hjr4cGF0St0nUWlHjoalHcZyxKVlHr9AmqdukRfAkx9UNXmRqsqLAfTz6oYhw7XfFQOo\/BF8oAWUEKH0EAIB3v6A8MhwAcRvRPvFQ4fqvxQTvcwC1MOibZjpVRZg1iC5YaDongJthij02UBAW2O8BWjvCoVOo4ThN9EmiPa3UV6F\/M\/I36JxaEw\/5\/WRr0EqO7FOtgOkMuf9StK\/rlZyqrmSt4fL2Tsq6Xt0SsPW2Ewnj8487o7MdfPQnEbv8mPz20ulhR638qjO5cc9urKEPFr9ZuAs7dkRBQCtmN9ngmKGDvJksSwvsXoAJjeANiJ8XwkwaIPZZAWkG6DX9gDoUsE\/LwDQLYGANuM+GR+6uWkjF9h1t+kFAHpcc7w0sa06pBxxtqy1DnWblPXFSqmggbPsrSURSc7E6LSj7piMOi0qq6EjYkgzD8k9\/n6nkR5T18rPwKuXwqOXeXRpBcB+zj1neDbfWGzExLtKSvReiLXxUHgBhQ1M4B9WPSzxeyF9FzFvmjBEhAm0uO0VBQB6DUDoMIHGWLauQKN8dSCPBoDr6QRijmMAq4829NR\/bjHUQnGCWo7xEsVTQh+6FKF+ux+mAYGe1NJHmtS2Vyl3c4XAnuh8i7HFkVL+7m2saD9iVFVIZMaRA9G5LTwi95g7rJCTRxs3rsymdLbEfY+8HEC\/5FHl192a9A6Aftd1s53xi7Ep7hDHLBd5BJWh1D\/Je\/0VM3LyHHEMrLZsNqZHLyJ+Ok8LHsWM+\/j2PuR39O9vxOicHD5IeORzFqCvEEDd2UXuX8HrsHo0hQpxlLzf2hd6\/5bkwog6ysdpExWnm3uFTqfZCGkTmNz2pVKhc2VKm0euoKNbx\/Lwoj02pWDPZOoSln5wYnh23e7QnIbjSKsZ+zCCTXNMYhMcbyjLPNfJrwHoFaouv4lYvQblt13eC0zqWL0XHenoCEY7NhSr7Hq5IDI9Gkt+nHV5W6+4mHwa2m8zJ229qdHbRn6+sRmZfOh3i+V8K+GkEwv+OZZYar69jOl6YcJGGQO9f0KbtEUPWehRTF5MYYQMgb6Du87nZBL3fGlK2yt0XJOntKkAW6N4DS\/fyCpbr2WzDgpLV2GwDd5bUEjFN5dLFa3N7LrWd9hrHdfIfwTvKgD9nsqltR6NrfNcIeQH2IEDvRMbdVrGtDFRmOlOeVrqJ29AnW\/m5nW\/lFZJd7LIeHTj8znByUQ6oc+V3ckKTOZjjr29VJ4Kj7Y7NXmKU5cJbNSlCpdbsju+QlqMPnNZZcs8yd6yVq5wtkuzECLGfbuIreGV0loYZrXbI32Ito3qv9k6I1bSTdHyqHSKRxgDFLpEiLj6tFelLg9NlkelzldATHylOOOm0LWZwMjN5X0h48asLJ4Iwy3ANflB8kKSR+djlGfSzZFk0IWF2mw2Hkfna\/Jk6HEpeTjFe5JNZfQfjm8XkjGID23jUR5JD2JUhpzrTmckc6LeiUvl7SvppifbnR4kLpe3akpFiy5Xqly+nhtpBuUaV6a2aPI0J4B2XMbWuZ6RP0L73z0ueQuA3ixuTqt69sOAGYsBylIKGxQirAY4lb501qYjIQAfiM1rBSb+a7oEEbDkedQOEKpQnwyZP0X6MerPUKym0IR6JX2Dca5EeR6FHuhQBt7Z4C2B7DtQvpOMhPbZtDmTAfHtNpSfQ\/sylH+EfkvAezcZxarfKRVn9tZ+rNy52QtoRStitUNTpjp0I2\/xKBUOtLW45KknOuRZ3tDyKvuoI01arx6VP4b3f4W2LdqLhsgzWVqdJ4eRUHp6N8p2fqObHHkhnQDogQgTp\/g7jh56YIThtFGSR1M\/tE+imGs8UHEZ5fkiBk8AX6kJKvKZyG+gxyjwzKU9gS5YKN9Ilxeqo3wTeJ4E72wyNq0IejQDb2b3uotYzSY19UdoWKfAc5XpmqZMawPoJ3RlmsOb5Mp2jbxamuz4gI1ujGEfu1dLO1HfqnH2uetZVlMTfuZABwayJ31oydIFCKeMFDpGAhQb\/XJDXk0bIUAeSp4mbp6ZVBdAF1GMN95eOk8hY+g7XfHp\/Ew3x7w8fQStFAD5Mo1lgMkVczXQmw6FIjKOeSvtXn8THMQdudwxB4B\/JlW0tMmVLi5Nd3Npaqsu2U\/UsfITj7M7tsezT12PSZvURmmLuppt6xjvk3F2IFsf+c+eztuPx6Yhs8lzAeSMHsTgMyDybNO77bWRzH5iJLM3T0d+I1IZs7cZV+q\/NV\/INjpHse28b6eBiO+cPPnMiTY44xcS368v1l9S\/N\/H\/eqyyW8a1yLLb9M2jpP+7+S+m65vsz8L9elN+TSMXQGlMv+h\/iJuHkW\/078uQDCBSqCbqcriIdzi\/UEKUpCCFKQgBSlIQQrS\/wf9F4cQ+TEe9GBPAAAAAElFTkSuQmCC\\\",\\\"primaryColor\\\":\\\"#7c3aed\\\",\\\"secondaryColor\\\":\\\"#06b6d4\\\",\\\"accentColor\\\":\\\"#e879f9\\\",\\\"headerEmployee\\\":\\\"Employee Identification\\\",\\\"headerInvestor\\\":\\\"Investor Identification\\\",\\\"staffLabel\\\":\\\"STAFF\\\",\\\"investorLabel\\\":\\\"INVESTOR\\\",\\\"footerText\\\":\\\"dynime.com\\\",\\\"validityYears\\\":2,\\\"supportEmail\\\":\\\"support@dynime.com\\\",\\\"qrSize\\\":64,\\\"qrErrorCorrection\\\":\\\"Q\\\",\\\"qrMargin\\\":6,\\\"verifiedBadgeEnabled\\\":true,\\\"verifiedBadgeColor\\\":\\\"#1d9bf0\\\"}\"",
+            "created_at": "2026-05-15 08:18:46.249008+00",
+            "updated_at": "2026-05-15 08:18:46.249008+00"
+        },
+        {
+            "id": "a07b0d1f-b95c-4ee5-bec0-fab2ff589cb5",
+            "key": "social_tiktok",
+            "value": "\"\\\"\\\"\"",
+            "created_at": "2026-05-05 18:13:57.657094+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "c68100a0-1b8e-4da3-abd0-7689747c0543",
+            "key": "social_twitter",
+            "value": "\"\\\"\\\"\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-05-18 15:41:17.850453+00"
+        },
+        {
+            "id": "61925a1c-6098-4839-94d9-cacdae7278dd",
+            "key": "id_card_brand_v4",
+            "value": "\"{\\\"companyName\\\":\\\"Dynime Technologies Limited\\\",\\\"siteUrl\\\":\\\"https:\/\/dynime.com\\\",\\\"logoUrl\\\":\\\"data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPoAAABaCAYAAACR8EvTAAAAtGVYSWZJSSoACAAAAAYAEgEDAAEAAAABAAAAGgEFAAEAAABWAAAAGwEFAAEAAABeAAAAKAEDAAEAAAACAAAAEwIDAAEAAAABAAAAaYcEAAEAAABmAAAAAAAAAGAAAAABAAAAYAAAAAEAAAAGAACQBwAEAAAAMDIxMAGRBwAEAAAAAQIDAACgBwAEAAAAMDEwMAGgAwABAAAA\/\/8AAAKgBAABAAAA+gAAAAOgBAABAAAAWgAAAAAAAADXS\/ZxAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFWmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4KPHg6eG1wbWV0YSB4bWxuczp4PSdhZG9iZTpuczptZXRhLyc+CjxyZGY6UkRGIHhtbG5zOnJkZj0naHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyc+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpBdHRyaWI9J2h0dHA6Ly9ucy5hdHRyaWJ1dGlvbi5jb20vYWRzLzEuMC8nPgogIDxBdHRyaWI6QWRzPgogICA8cmRmOlNlcT4KICAgIDxyZGY6bGkgcmRmOnBhcnNlVHlwZT0nUmVzb3VyY2UnPgogICAgIDxBdHRyaWI6Q3JlYXRlZD4yMDI2LTA1LTE2PC9BdHRyaWI6Q3JlYXRlZD4KICAgICA8QXR0cmliOkRhdGE+eyZxdW90O2RvYyZxdW90OzomcXVvdDtEQUhKMTJzU1JrcyZxdW90OywmcXVvdDt1c2VyJnF1b3Q7OiZxdW90O1VBR2hsWEZfaE9RJnF1b3Q7LCZxdW90O2JyYW5kJnF1b3Q7OiZxdW90O0ppdCBLdW1hciBTYWhh4oCZcyB0ZWFtJnF1b3Q7fTwvQXR0cmliOkRhdGE+CiAgICAgPEF0dHJpYjpFeHRJZD5iNDQ4ZmE5My0zMjRjLTQ2YzQtYjRmOC04YzQ1MjFjNmU5OTc8L0F0dHJpYjpFeHRJZD4KICAgICA8QXR0cmliOkZiSWQ+NTI1MjY1OTE0MTc5NTgwPC9BdHRyaWI6RmJJZD4KICAgICA8QXR0cmliOlRvdWNoVHlwZT4yPC9BdHRyaWI6VG91Y2hUeXBlPgogICAgPC9yZGY6bGk+CiAgIDwvcmRmOlNlcT4KICA8L0F0dHJpYjpBZHM+CiA8L3JkZjpEZXNjcmlwdGlvbj4KCiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0nJwogIHhtbG5zOmRjPSdodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyc+CiAgPGRjOnRpdGxlPgogICA8cmRmOkFsdD4KICAgIDxyZGY6bGkgeG1sOmxhbmc9J3gtZGVmYXVsdCc+RHluaW1lIExvZ28gIC0gMjwvcmRmOmxpPgogICA8L3JkZjpBbHQ+CiAgPC9kYzp0aXRsZT4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6cGRmPSdodHRwOi8vbnMuYWRvYmUuY29tL3BkZi8xLjMvJz4KICA8cGRmOkF1dGhvcj5KaXQgS3VtYXIgU2FoYTwvcGRmOkF1dGhvcj4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6eG1wPSdodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvJz4KICA8eG1wOkNyZWF0b3JUb29sPkNhbnZhIGRvYz1EQUhKMTJzU1JrcyB1c2VyPVVBR2hsWEZfaE9RIGJyYW5kPUppdCBLdW1hciBTYWhh4oCZcyB0ZWFtPC94bXA6Q3JlYXRvclRvb2w+CiA8L3JkZjpEZXNjcmlwdGlvbj4KPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic\/Poj01ZMAACAASURBVHic7V0JnBxFua\/pnr2PZLO5NtnsMTObY0lCkoUEhJAEkCsSEIgEEAgKQZBDgkAIR0RBbpRLORQFD57x4j0RwYfG93yiCD4UeU8OJVwRcu+R3emuPup9X1fVdHVvz+7MJms2vv5+v0pmZ6qrq76qf31HfVVFSEwxxRRTTDHFFFNMMcUUU0wxxRRTTDHFFFNMMcUUU0wxxRRTTDHFFFNMMcUUU0wxxRRTTDHFFFNMMcW0DxHTFhGWxASfE3u7NjHFtA8QAGUd07y0T1AUsGOwF0\/Y33KiZDpPMf3zEQJ7+Xp90O9GFHFAp4g5s1Wjl7Vo5lmNhI1Rf4upEMrHq5iH\/0QkJLikm7rHkWvf349cs31K7vt160agdOd1S5PsuWndZhmdOW06YymNvgnfZdQ8MQ1EHMxtJJtqTZi3pDTzxyndeLglSQ9Tf49pXyYGncgEGK7JtpI1vQ+TNXQ7uZz2kotpD1nV9zQ5s+tgkXkEdTivS4a8XpbR7Dc8gOsmhWRMhc9p3boNf+c2e0z5ifd9ivQekNLpduRdG58w3Yw3afZ+Ss0X075Iqh2+tvtkssbcQtYyRi5yXLLKYYmVjptYCbPAqRYlx3adk3tmRBAHehNhDQDqHpToad10IdltHtDp4yLfCKnvyKa05jzLJ0vDRB7ipIlAT2v2tsmkt5HnGkkTfUwFEKrqG7iku+IvNWTtrvvIWtsmq11GVpl24mzqJlZAOsV09WWGVXIsYyVHWjtLDvpglnh+BIBHSnS3EUDdm9adANBBOq1X88UURZw3DYSNBXOnO5ObLCnjyXQyXDs6UeQfwb6amIKEEnm96LA1nQeSq43fk2tBil8CQF9FncRKiyVOpSxxAmX6sZQlj6Ss7FDDqjiYsbI5u+70nls+EjpcBbrZlx\/oI9G3MFKI83AMcWvTGt2cyfFQBbrDWnXrSJF\/BPR7TIPTevSee52bIFd2n0eutnrIVQDyT1sWOZe65GwA+QoA+YmQjgGQL6Gs9FAA+oGmU7k\/YxXTev9C2teX8sL2tqSMgb5niPOxNUG\/N5X7OUxIFqjw1DOBNOfNZrJxtJo3ppFK6HDLSfG368j12cfJ5wDgn3UccqHpAMgZORPSxyCBJNdAkusA8pKDEeSUVcw23eppLqtu7t1eV\/fiKFFoDPR\/CuJ8nEJ6J6U08\/k2zxnn2hz0dHszsRaLfDEfRzSpqvrNOxeTG+n\/khsB5FdYNrkIpPgqi4N8OUjxZVySS5CXdiDIKauaZjqjUoyNauz7IxQovNgx0P95KMfLWrDVLwCJfh\/8f20TYSnxe8zDEU0S4Hc\/VUZu7V5L7rB3eSD\/LKjqFwO4zweQny1scgT50RzkyQ9xkJfPBJBPtVhNi2nVNTJWP6H3c7zgkWCrxUDfs+RFw0VFGMb8G7GkquoP7mgiX84+Se4BgH\/escmVoKpfCgBHSX6WAPlHIQl1PXkISPMDQGWfhZLcYtWtpj16CmNjGqz3a2s3p8ULRkDnx0Df88QScr+A2DMQ827EEga\/SK\/4V7qWkfvp38l9APIbqE3WgKouQJ44C21y+P9ESMeBXX64APkCi5XtT1nldOpWp6hd28TY6ImWOWbczlPEC4ah8z1pom5K0ReRDckO8mIJyTvghgp0NY57OMyPQuPEMd+GZAH5MP5c7yBM8kJHHgne6Hu+P7z6F1CvvM9qA9cp2M\/EawsrKb4\/OJ+RD5IXwQlqb5uWw0kywm3dK6Xkod7bycOgoiPIbwSQrwVgX6ZIcnS8AcjJsRaA3GL6oRZLIsjnWayi3XSqMpZd28pY7aTsK+MadhwqXrCHmccHcYF5E0EpMxSgh+ufT10dKkWVFzlJRU0+idDfRQz8Yvg4WDnhehX8bLgNIbAV2p7BJq+ixsxwTuYyacG\/h5tkxNp3uqeTx8xfkm8BwO8FVf1m6pBrAdCrIV0gbXIpySEByLWFIM0PArscQF6+H7Urp7msssV2ayb1PVAzqateNE5lrr+7bciRcmonsJJWQuenNfO8jG7elNLNrwBg705rdHVKM09vJebsiEHjvbdwoMvNL2xUi24sa9WNjzQQVqn+tnvEy5hGWE1KN05K69YxzYSV58uHQSpQh5PTenYJ8SRaFF94+4AHp6WSxhrgy13wzAPw\/+2pJL2iVTeXT4bflWcHkaaD17+pLNsK71uB\/TGEMvQMMecCj2cqE7IK3ES6LJtJadmVKY1eBzy6H9uUgbZhWyYRJsdaxEQnv+PUSDrHtGjmx1KacQX0+S2CLzdB2RdA3RdiPyjP7QGtpzBNbbnQLIYH9BJsj21bQB63NpHHAeT3U4vcDqr6OgD35ZAuhHQOJA\/klKvrR4IkPwySB3LTLZtp2eXTGStP0feqmjtXiAZC2cruNXwXCzWChTbFDEgssVwwayJh41oT2S9Ap\/8lrVMvtlrEWnv\/Y+KRWdSGwfccDO6rlHBMz\/ufgb8HB7rc\/MIyMHm8nhHvgDL\/HX7bA3EB8tkNSSjzVzwE12Gtmvlqc5IeJPLk6tFM+g6GQfn3jGhfq2Y8XZ8bmF7eUihnJZYFaVdG4cdUhUc8Fp12QZ7vA2gW+3UpdmDz\/DChngH16uM8d3FN\/SsFP1vKpgLonhd94EK9ngbAjxd5dG\/y08xfQ7+YEe3hcfW6uQX6+hvwXJtattqmphJzHpTxdSjrA1GOq44ZznvLhbK2tibM25SdjEPUeKI0CJaYQFhVG2GTW4gxDerbVAcCJEIj2oOmVQ7k77eSH9C3yfcA5A8AyO8EUN8A6UoLA2I8kCdOg\/RR+LwUQQ5pEXrYLVbSYTqls22nfD8A+dTskxWN70xWKiqlbiJn+68Cm2jdlqnkjt4OcvvO1tzOtvAE0I\/8wY6SGtImMWBhcFiMx1hTygM2TAs6HZLhip1prgjo2NpC6CoJ9BTpaxokBNZ\/p259S5RBsWz83KIZl\/htHRotIjycGID9CT7QTBvTVB4r\/kcifheUSGvOb3k+w5b1gAnoavyxTbeWAvD\/LCYjV7TLSSt8QR6lPf4Y3u98A4qLE8sTmZyEL9wk4nzsGZ\/R7M0Zv16uAM2ygcvjz0Obvj9VTsq6ZU1DPiesm5pIZx1MAL\/y+9kLs3XEBiTZz9gf0EbHFRuSdqa9PvbK93jXTHaOTiXMO+A3c6qYSDlfJE9kWch7jOpz5Hj5a5qY84rjSa5tufEPE0YFTFZLcfKD9vwGJjKclPqgLwx4ZxbG8g6YfH4HmslXU5p9OmhzE33+eONvNyW8BNePzSfIEwDyr4Fdfo\/NyE0A6KshXQzpkwDw0yGdDOkjoKofhR52sMkPMd2SA6ldMo+x0lmWUTGj5xJ\/7zkLSnHpxb9y23xyvbGBfN7c5ZkFtxhd5JbsT8idmzO5vNEVFdKMlYOa9QjveMcVneOIkEtXdJ4tOg4Hgy0mAK8jM7rtCmn8qwzpHocMhWezAwOdEwzGX2R8IDpcIlp\/S5EduxEEJJ9ZpwGofyeAjm1wvdhxjW5uJ6xa5kb1FAZ7l5jY\/E04CedxmHSuQMCKnXiOrKecOJTk+KGq+L8HTEds5tncSrIf7teH+evv5QHpdFgGJCGfPKg3GXqASlifw9+5wyu67e1cA\/mLylvsD+DtRmj\/W6Jeat1tH5Sy73lb+Pc2b0vCvAHLbyF9zQCuP3KA2\/Asb69fFo0qy5sEeJ3s7maSPUbUuVDNU+zq6xmPMQXQvr+JvnG5JuaKycZmXBC5TGoYov+2tySM+6eSbKvP56FqjesFKH\/QfRj5AYD7W7ZLHgBg3wYJ7XLpfPs4qOoYEHMCAP0YAPoRAPKF1EkeZNsl8wHks+mLyenbpIoZVDckwHETzJU9q6HcTvJ5mFCucVyyFsq+znHIrZ5XfyO5Yus0njfaqYOAatXoU6LjrVDHeJ0n1eqwisqBwTsUB4M3WyfM55qI0Q5\/d3HGRwNdblVt0ehnfYnL39nmqc70Mr\/txRJ\/BqTYUjHQBVAMXo+E9Ziaj++2o7vSobhyDD3lEo+6CqDdtAC+mnx+yDw5HlqcD5aRIruOLaxNov7EOoIPWq8sVwId\/r8Rf4\/e7sv7tZlsLAcgvJnJTXJeXXAiZzx+3hCgxP51I9pCHb9PJEiBD5rlgnazGv5\/QfQblX0sTb1gWa6cIJVxZdgeMDVnczMxpssxMQhPBMiNk2AcvSuFkpyIFCFEpQASocOUa4veRMc1Io3ubNayK\/1yhwJ2CcIf995JngSwPQLS\/F4A\/I0hlV0635YCyD+MdrnpJA9xWXK+Zetz+u4lHS9Kp5Q\/66hr8deAer4m+28AYCjXdshnqJ24iLqJC0yXeIma5HL47YK+H+WejRgQAKh\/Feod9QeoJ0EcwUxgjPl6Wss+CQy7F9SgWwAw34PZ\/PcAJJPnsVHqOCnRgTAIXoa8Ajg+eEM2es5RBlL3dX9AGmLPtf0maAZDjOcWk5hm\/2toEvHaA\/U+HH9flFNBUQMxe8NAFxOZlFKuDwJzM0jGX4NU+X6rTh8F9fxHac142ZfgaI8agQlTSLHtLcTcX9RxIC+2BPrhUUCH8r+g1j+q7WAulHGJpwJdahu8TVITA23uXRgHT8D33wQQ\/ADa89eMMD+Cz\/J6iD5XJxBHjgN45\/9iPwNfvgmfn4TfPsj4YyQwAXLQ2b8ooD+5P0c3P58JaZ0pLmRyk9VUZZLx\/UlyAqZCoxAaqJ69K+ihL5QkmNY\/V0F+bPzVs80ftBzPNl8HYL8M0iqQ4h8HgJ8C6XhIoLJrS6irH8aYtsB8T+\/oOs5vXJ6lles7TyXXmTvI9VD+ZyybfIq6nilwJpR9OqTTIJ0KYF9BGTnVtMhHN\/PBlZPqfCBlNLqODxzPJpOzLaq3mBzoqCdgwB7nO8eChEdFpRPZ2wA4WxU72OESw2LqQM\/jdffq0azZn4qW6vblar4CO8ErewqhBwAYbV8dN8RJN\/avwnnzA13yw3J4fcyfAiiOn0VYXcR7k23EnAOq4b24F7+tH8CENqE5vyygDbsNdCHRI4DuAxPA\/Qa05xS0ddVncQ29WbeOgQn+9\/3bkTPlAiCHd\/2uma9W6GpZuKLSrJnnQF+8E1WW5\/jUrQHMGv4dTKRXi0nU8s0kbwIVZiPdCDz+Dnr74fP5oCleDJ9vg3ptkAJJAF1OXpYY+19Vx0JhJB1g699vJU9YWfJtl5H7LJfcLGzziwCM51CxG40vpWlHUkdfwljy0L6nKts3cmfB8qhlDILLdGPJHX2PkC86jKwFNf0SapNzLTFx8JBZ3PyC9r72YbD5P2y62lFQh8U7T1bKFYPbnANM6\/OBILdAopoJ9ioxTw28m0QtU0jpkU1DRz6vgj00sAZcXiPk9TJ0kIWlOmgGG4uX6mJgJMwH2gKTmByQ9go\/nwRFPqDjQET+2LSFZM\/vXw91zdb\/rZl0T4cB9suIgS3Abp+m1jVfG4YH6HLCs56fSLrHKe0IrT9LrYA+KZyUYcnulwX9inkHKgtt+qDm5plGFn\/eeVQ8G+Eh99T1j8qVHnWsco3AeAGXOsflfC79cdNK2NRWve9B9Hf4moUHeEv0xzkD90eYpMT8wdbpAHSDPAoguweA\/gWhtl+I0W8YGANpmYWgdPUjbUAP2OcHbuFngWWQYYFBnfuceCT7WOJbaHs7JrkUt7GChrACysWY+KO4x14\/CMo6gLKSDsrK5pluSYfL9Nn9gQ6z6HeFg8LyJZdnS36QAmnoNzyfw8KPnMO\/GsimShgU\/xaUzIMB3StHeMftM4LA4M+gDV94J0gp0tcEddmp+AiEk89+BScVpf4FAB0kDjE\/ifnEJJdUnw3xQ5fLlOjghAH464zeX1NBB2RU\/yplDRPQTd7HmtWJS1CYT0TA9WtLh4gj4E43c6vPy9ABGJr9Z+k4jV6rZol2oRGi5E7z+gTKQF+CH98QnDTR8QbvCLfDESbHPSSwFBsMF14U6qtmsusY1D7FKoabG\/Oa\/X4TyaaC7x+IpOr+7AcTyI+sbvINAOWXQK3GJbXPQvoUj4AjywHkJ0A6BmzzI0CiL4YHDzJ+QWZu4o4JBZCBl9\/993HkZrDfr7YpuZChZmAnloJdvhgAPt9iJbMtVjbDYuUZyqpSGC5rs+oW065s3jJXlCNsUncGqGVZxcvMpCMFZ0+RN2IA5G24GJgMO+W1CLuwgMg4loBnf+uDXUp1+y0MxCisE3j7wM68RhzBFDYFPAefD5ABge7N9q0J+sgQ+CH4bM6FCcdSjtQSy5J2tv+6dBQ\/9zjQRT+YN6n1HJSfCfPuoFAIaEinqXnzlJOLUsPYC79OpreEi0t\/IHVnB\/khNTPr1pBmJsZF9mI\/32DBML5AaiX0QJDsnbKvc1pFgj4UfP\/A5L\/sh8avvCCZL4ENfaOdk+gYBYcBMtqJKNEB6EeCBF5M3STY6PoC2q11ZD9FOsSyST4V\/oKupYmz6BuJk8CuX2TbIL2dUgB4RStl1ZMoqx1HWV09pePGMja23nhaPi0bm9KMa4MdJwZAwrxPvGcIhzcKRursyIjZf7BYd+EllyqadNpIVde4Ss2X5\/0yuq0SD6ZUBxP3\/NItMJgmBPiYF+gckDAoTTRxRN5iA17EQDW+HuV\/SGncFMgD1mEAugQVpY1elFwhbeL1wAg5dfVCgg0msfcKjWTMjb2E9cWpwbEnAnNyAkZZJ++dDBP91vDqTatO\/wV\/X17k8pjUUtIaWxXki4186Z1MjAEm3zBtEMz\/Ye+nyQ8B6PeAHQ02emItpEsA5J8QQTInAdCXAtCPsuT6OS6tuckFAN7Zfc+SGVvkS33pzpQAmbN3jiZLeh\/W5zusrB3DYy27dgK160dRe3ylZTWUMja51No+qXLnHL8cTmCf\/Ydvd4kBoJl0CjH3K7yhUZQL1PiPyMFdwO41kBAb\/GdzUv3tSaSrXn1Hf9ogJjH77NC7xYxt3hXmwwBAFyol\/QMJSf8ieCGW7oylaQUkchmyVXe+hL8vCgbuBJ7dw0DPqcmN5J2A822ANojoRdrB+RmKM9DoTwvljb+cap4X6h+vXnj2vygrqSy9Xqz4fVweB2DuatytY8O5yenHV3gYsISZeKVa14FJOuQe3dREvmd9QB4CsN8C6vW1Nkt8BoB+LqQzRKDM8WIN\/XBvDZ2VLECbmjoYLKPvR7cnp3ddlgPFIm9AcIYqkl5v71pW2mK+UT2JsTFjmDu+nLmTodKNCfpaI9myyGeIdLB0jwNm9WTCwSwafdJnxNDI1xhopBd9YKALCaizoxXpodZvjZovRLkAGQD6c23h2Rokc\/Qklhfo4p3mbvBEcULptH84sGb+JH\/Zwwr05xX1uCCgtxJjKq5J+yYIFU40+m013yBleW0CQJ+qmBPKpJH9NP6uBgFBX\/5MmfTFScJOEScJ+45B5NXynJqPwii7So2YFGbIL4PPDkbSKffd3svIdwHod1gWuR5s9VywDAAc7HQvWOZYHizjOeQOBjv7QIuVzqF22WzbLZ3JWElb31Olbdtm+MySu+GUra8Nr46tHN+9alR1971jS7rva9C6z8XwxCBDcrPzwVKKB2wUzfCAtHtnruc8+nNTERJgcIkuNQL7J+pMLhxp7wS9xIHnZIDMsSEVk6t6Ceu7QV4E35cP6LimHP2+gnghI9SqAVzblXpJoP9nOG+\/9gwP0H8XNl0GaIPYpJRN49n8EugpH+jfUvMNUlY+M0CaZ17Ys1SvMR4+rZmqQ1UsxRmnqOUF2+3FZ8iVoTx1Wqe1k1dK+eYl5AuPleBOOXN7U27ptOA+Fxm\/0fsd8giA\/Qtgq19BHVxiIyvRTheHS3yEMu1oEf66EIB+kOXtWCvdnzrl7dSumMFYWdrsLmna+Um\/cYF490G2DwYZndJ7T\/IZraqp5unRDCyGcmun41FrKP7gCSlB2EJ1gPvONLo2uo65CeJHUQEyaWIt6c8P\/7kBgP5DNd9QeJHxlg7N1\/sDzviDvzHp\/yPQacBBKJ1r0kPfQugCVSCJ4Ku+NGFT\/PIGB7W3I5H0LUSfCAZ84bInbr7hIbqB0FyPv02kt6PwNnn5JNA3lJMHeh8i93vLYiDVwWY\/H6S7OPgRd61puGvtCOrtWis5iB8ZBUBnZftRVjHddCrbbLcixVh5Y9\/PS8duURwGsjLrNF\/ay509\/QaPtJHOCjoiRLhnkh5SXAMjGy2lGMZZv6q8p4hz3QXYE3S9sKFUqf5uf6muaBGehztsRzoDRF4NP9CR73JDjAo4mLT+THJqagx0CXS5Hu87ZgPCaGs92apsdQ2Un2wgfU3NxDoGeHs5SOxvpjXreQB1J9Y7GCnnb77hdXByG7Rwu7Ra3wJJWW+9r+dj5GZjkxeTjue1f8J0vHh3L9AF1PejIS0GFf5DlCUPBHt9DsVNLay83WKVUw23KkXtqhbGKidZOyoaui4JMrCQgbhB2CZ9Z4Y9sV5jk\/RDorzdBjqqXxgKKd\/jDwyjgIEhtj4S2gFlqJFtUqpfI\/IFNvqkEub94QAZfH+zZq4I5u9f3+EHOs0D9HyOvv+\/QJfr6SCQzgzXHfrjZWwzCpKmUqO9Ve89BSb3dRiKDOl\/YHxlReiuErNve8KC+xi8zTlMjcfnIdFmL27QgXzfbSpl7YW3KdA+5sen3\/r2JPK5voe9G1guA8B\/AqT76aZLvHBYsU0V96IvoF7QS+kcAPpMi1VMo6wyQ93qFmrXTLHdmsmMVY03nq6e+HdZqQL22Epnl3FiSHV3udez72NqvqERHzho50CndEr7SomAkst3g23q4P6EBP2GD96cVH9vAukZr+bD\/e+4JTEcIAOq\/MsE7DG1blH1jYGetw17AegbPaBnNPPj\/ZdIza0goZ+C9DY6BNXNOKJMBLXczGJnBKj9PfE28hDPCnge8n6jNUlXN+nWkU1kV8NuCDi5FMZ8T7lU52\/YtZRcSV\/1Np180nbI6YZDTga7HVT4BKjweLoMgt2LbgMVHmx1VjHVYlUpi1U3UadmsumMbmBsVL3VNaq6+zx\/b\/VA0l3av\/RAzuRc6KtwxtHP4O97xhlnTMfDDPyBwYGeEZ7zwd8hB5jRDvXq9b29Ml6cXs9\/F2qeZqwRcQGhtWp66cDvi4E+SBv2muoeFEjcvMwIFdwXINTk9eJbcIOgtnCDzfa0ZvwXvPMB4PeFLcm+wzKe6TcQRorua\/GAetKLeszTFWBrrOm7i1xmmxjlRs6wbHKS6SaEva4t5OfFlcyzWNlsPDMOVPgMAL3FYrVTKBs1kdpj6h1n7CjGxlT1\/aysbGerUtmo5Ss5qEdzL3D+LaRFNjRHMvwzpWXPCS5xCa2BDHZgQqC+fGAkzHv84B4ZFWW\/j5cb4O8TyPtV8Perwdnfi5N\/P5PXS9+PJzHQo9uw15xxEQJJ0ULdAKhT3uk55gfoaIPy7wGJf24zoQdzD3revteDB2AW28e5pbWew8nXem8W699Bia5K+is6DyCrjd96qvzZtp042bTJcWLJDQ+HnG+x0rncVq9Qgd5gsdHjqFs\/mjrjaxkbW0V3jK3qkSezJAaySYPrk34gQpO\/IX+Ia+m58p8OLo955XdhpFPh5UszoDMFoN3hr\/vn9pTfKN61MrjpQgbIWHeIcgaNpouBnrcN\/3Cgy+U1BGkqsLzGtw17+8s1+q53LJZu3gF5zkZ\/TvDYryAtD3jnhwLq\/uQX8HXzWfIdAO9txq\/JGnGXuSrRMbBGroOvY5Vk9a615CK7h3wSnjnJdBLHgXQ\/QjjnOoRjDm31NEX1ndU2WiDVLVZXb7GxtdQeX+24EysYm1iSfXJs6ZapKnMl5eJ9NXpZyHElghH4ACKBgxELJREQ4S2LqDOxVKOdfxX5imCydLRZN\/mx675UR9sKgxzCATIYxw\/mg4w9GMjxFwN94DbsBaD7ATOZoMBQ6x+5bRppOEDdn6TT7dFdR5OvAWBvp7Z30st1lkEu7b6WLH+Fb6UL2+4S8BdvmUs+lf01OY\/hDjdQ4w0Hz3bXDwawzwOwz0RbnbKqVspqQKrXTqZs9ASL1Y+x2Lha02mosKzJJYw16HT7RL37JMFgpRP4+rW3I0nH3V1qbDcC06IpQuUx0kWA3T+SKhU4uikQ4ii3vRbh7OM8aiU9E1Ka9Z7qROTnsdFfpnSrSx5wkfKjp77Tv+35y4+BnrcN\/3Cg+7vOvM1Jq1VnLM9vM77vHfOi426DemZ8MUJEI0OzyYmvtj9kfIU8iLewANCvxkAZ2yFXwt+r+v5Azth6YO5FMr\/qmcf\/z9\/12cQnrB5yGjxzjGlrSwwXT4UtmcvX1j3JnrJYTTOo7yDZx4wHoAPYJ1RbbFIptafAgJ2SsN3JZMeZfqOCDE8lzHv55gIjsByV1pxXpQovbJgBJaI62KDjH44COYB\/gOCQwUja\/fSq0BZYlOwiTFYG1vCB0JKkh\/Vvd3T98d8Y6HnbsFeA7guObAs\/kiy4BwG0uReUeP0hrBKF9zsU1b8i8\/pXSslX6avkDgDpGuqQ1TYjF1M82skmF6CX3cqS03tuibTdVdV+1dbp5Ky+X5AzGB435WiLso7niRdgr5wK9noa1PcpFt7awsaCCj+hFoBebrEpSdNp0UCKJuhOAHvo6CL+Ln4QgPX3qH2+MJA2NZOeJX5+piHoQ\/t8c1rJdNJVj7Hb\/FkaOGeM70yylvZncHF8HUU2jgap\/ka4vuEdcjBR\/XuxZcdAz9uGvQR0JX+CPhQWSPzdeO4ff29hN8F44zh32w3GjaQS9AnUFgtvA5IE6H3vZMi9AObPu4xcDgDHM+LOF5tZVgLwzwLpvhIA\/zHjv8lJW5f4zyoSz7fdS8lZvRclVlg7Eicwpi007eR80ykVS25VGYvVgr2OQK8HoI+vsVhDGQAd1PBmjBJLMNZM+iI2ZvDym4l5eibglFNPmbH60ons3bjEFfG897mdsDG4gQUGzxshaYuJCo\/o\/cUxMopyUv2CiPcEJhW8QEB9ZpByY6APBXD+GQAAFXNJREFU3Ia9CXSvzCnwbhBIHwinnJzYRfCU+Wz4wIjlwpsuBVKUVtqi9Z0KWsFmPP66NWE+UTg\/kCTQvwZ29j2WRa51GLlEXIG8Es9z47vWyArTTZxK7cQKkNQn2yY5rutWcujbPJBetd3VTSuf2D6TnGI8Q45nTF9ku8kDDKdsNkp1yqqbwVafSNmYeopOOTYRJHpj0kJp7rYmLNzQ4TaTLuXCgiDj0wnzC+JwSCsIdkseOWR6Z8cljavwxg28uQXX3L24Yd18X0QXYefLNWwsg59Wqpk\/b9+DlzGgDwCDYIJSPXDayZ\/yh5UOWG4M9Og27EWgK89o5sd9bTG4GQY+dwJYb00Ttt9A9fCWlXULL6z4dz5mbeSJJ4xadetLhfHDyyMy3fnaZHIn7SFrQaJfCEA\/R2xLXcFPliEnU28veuJEw0mcYNvko2iH9\/2ZLNmh2JWsv3RHR8OJPZcmjqVdeCJNyTxql7cbbhWo7+iBHz0O1PdRAPQKKoCOIAfGgFRPk115jmMSQTS6eYvfeMP2BxZ+tvudrulHI7kiSCWgSvNjnzX6zNBPcY1kMJ+YAqGRYbWdRgyWAcsUS3i7Qsc970mgv1iSH+iDxrqrxz3nznUf2nHPuc00zxcL9DTJZoJAz8VeFA10jMCMArrcvda\/TVKbM64TZqUlzUM+9mxxqQW1IM9\/w\/8PppPG1S1adhWMwUsgzxfhu8flLTJtuXfLs\/nR12PbuFeiwLYoTLvd\/E\/vhNbzTce7PHEF7j8Xu9WW8R1rCbyZ5TjT1Y417cRxMEt82DITi7q\/TDo28RM7PICv6x9oc9KWtsSRxjN4amzpXNspn2o61U2W69npdRabWAkSvcRT3XH2ttoSeDxUz1dUpgXrLCPmsheiuq4wwpIebnlmtlzmUG7gyJ3GyW0nHsgAE8TXlZNHdkNl789fLBfaJX0LuWAcUO82DX44RXSZGcLGwaDtVo58kltJv19cef3LRqkNA+6l\/oCjLw0m0dPEWqxoSUyR6Dfg7x2RKyOyTW6eXXPmb4oFegthzfDO3vDWZvj7G2q+QcoSEt04WYl4U3Ym8v3oeSYvXg\/NuJKfS68KGDn+rFwQTfjIZyWazlHHsIiFN1uIKZ3WBfaz9Jzf0XsxuQnPVKe2vCUVQa4tEzvVjuantGJsu47pcMPRD7cc7XCwww\/J\/kmf33mU\/2LFiSal+\/JXSrXFPZ9OHkw7S+cwGPmGU9tgOmPQ815lscmllDXrPtBbyK4BZl4\/uAaPGAI16Sk8LdNnjryWKQd0eaOHmAjk9UPeIHot6kigPUNCIujGMiWIIhfCi3d6qfkKLFPU75VSmCj+InwKuPkhyy+jcG7HX4ceFixApzk\/FpLYwOTtotKcHwXr0P85vD8MBnY2wwNFvMsI2vTgaSwDvb1Nc34u4g9M+d60zgpcevTrgcdB4yk\/GYU\/0\/hktQ5\/L4w\/uSXYuWndlRKZ5iZV71hxL19U\/yWkDwvG44kpcdOMuMBBCiVHjlNlrMpLHXKXjIgYeHmz0FvNunGsWr\/CSKrvD\/5tFLnZ+hO5CsC+0rSIuKzBA\/lRAtxL+GWKuAcdT5dJHmq6yUNMO7kQ7PCDLSvRAdJ9VufAtvuSrdO0eX1PlbUzsNVtt26caY+vBaCXWawJGNk6qERXab3uDzB6KF6aB4x4N0p19y9bdJFZ3ZB+hruNlJM8h7g+OSBzvfLSmvNkMKovFyBT4I0f\/coV0iJ7vlDtHGF6bBp6mZL44MTrmKS2JCRhbxPJHq7miagXjyHQzS+L54RJZD4fvJU0\/3tbiLEM7FKqxH\/34K2mxbWJ50O\/jOCPLfizUYmkLIo\/eLlDqE3PkJx2knfc5AQSaCu1eGMr1kGU4\/rbT3P7y5Vt2I7csSavZkK7\/nMZsq1WvHMIq0HynrQbtx1ErrN2kEsB7KcDcD9KXTxzXcd953gsM4a3YiAMHs+Mu9UW8GuSSxaYTnKBZesHA+APyL5GOnYuFpWJsN05U5Kzei6tnGZ2jprCWH0dtSdWmm4TqO9gB9pTyUA2epiCcfJ4VnYToYfgpn0YcLdDBz3OL3Uw78crgjPEOH4KYZNCZezG7reB6oXSgB4Eklfa5r6KnbCKsBUjy\/f42AYgSCWNa3FQ4\/Kj+ttu1J0vZ5aY+8PgvBJTY4k5q\/Cy12m4RwDqdT32Q+EnoAj\/Q0lvB8YgpDX62XRJ7jitYmMZ+CRLrCVQj+vQ9vX7vXj+4Dl56JRDuxtvqG2PPJM9b11y4x4nPBBmZ+CRVlDORq5tcFDLBL85nialmW\/C58fSWvZc5fbfxNDHDJK0p6\/r7CCr6Z+99fPllpNYajqorifF3ecleP46RrzNxS2p4v95+J3pls4z7ZIDXJaca1n6zO67SONzSoBAzsbKAbN01tZpNS19vxzTwNiEWttpLKE2SFk8XYW1kR0FBpAEmFmMKiPXKIch3FDWx1tTVbatSkeczYqXUpHvyKtC7z7tTtn97PciAjz2ZJuGs6xig1ZUoZf7rhQmn3SLnj2qVbdOTmt9Z4GZdwKGZKOPwb9gIpe\/yDGejyTYrwI1\/oKem8k5lp04haHqbusLTbdkPgc2LpOVY9oPPrdDminSLPzedMrnWE4Z2OHJ\/bJ\/Ss7IAVYPRpqJRjdvLB89pefSceOtrslVuGzgndP+e0JWFbHkFGCGN+OFD8MPBc3sIWdb3jr4nl\/NjPCM2z\/367rb78qtwe75dgX4WKx5IXdaDWEyxWCnF\/dQm\/YUf\/iY5XHtUafgFlVOEXXxJohhEEiBSLcdh5JTjRdwOU1bbDnJ+YaDUrwcAF2BkW7TqXfARC7NsFglbk3dj7rwu10xi7GyGbSvJNNzE0n9TV4pHJbuHuDHTdo5Z0Kd8WxLJQKhZw8cKLE3KbixJR06QQZVQDXf\/1PCthcy2BOkuDvBE6LsPUV6ke8vgqQa7mFCFzHwuu97Gi5tM\/d+xVt+2TsV5MSeW8mHrV59IWMlcwy7bKbpVswQwS8Zi1WlKU8p\/rkaQ13x0ImpplM1zbarpjNWmcm+kJy8bYF4gWJXK9K94cXK8XU7Tsf92sPbwOEkuc7dWZfSrHfDZ4iBNH9JOXRjmDsyppgKIVW6H7PtoMTi7B+0QwDs+1tO+QzDqWwDUKcgtfBot5pc4ptXalogtVK3JmXatWnGqlqsbGVj9zrSnjsqKSzd\/wkGvjwn3g6FvubU9gHWXvcKIc81Ei1d5feJPPlVaRf+W+YLlyN\/PwLSAiWvlMRqPfBzkvSXquF3EeUzetU\/pvwe9Wy+v8N1wL9PhCSdt\/nKVJ+N0iaitBctT161vCj+F\/JsASR3pa2DgbgOJA\/+LzezLNpcrX1o17rkfMss3Z+x8jbTrmo1XAS3d7AE7jefbLHaSfD\/JPwbUpPFRnvJcEY32ZAYq20wflM5Tr2NJSzd91XAy3pvSKY0578jTpB5D8\/+DubdqxQefAklRQ3MYsrJ91lOcM9AekB8Du\/VVsvDtXtxrDfxLwTpn1cOfNxa\/D6k8tD7BzMTouqMzrA3IJ0Qekc4XxSvokyOqO+j8uV7NqqeQxhH6\/I4CPD7RYoDYUH3ofrc7PNlYINXpm2nutl0EOh1AO66iZAmUDYGU4PFEwC\/HtNk062fZNr1eEPLeLuzbmzP6tydbfs0wCUJ21y3TgqGvJoiQMa6Rc23l0nyGkGGh4zgibrJ0G+4OQjXzkcpz6F0w+OucCkPg6RENCHBjRp4Z7iYyLzv8fZTHDN4b9piSKpJ9hQkESvh5cEyMQBltvIdvv9NSBgEVK\/UD991PKTJSl7JU\/R\/\/I1woGOIKB4Jrnqv8dmxyt9NxJfYeAU4Hh3WpvDhQNH+CaKOjeLdE5V3I1WINi4kQSmMz34E0iylTCLqhu2tDX0vCcuYB+kwUXYxzw5AEuTf3DaZ3NXzaXKbeRtZZ36RXNqznHxc2MwI9kVC5Vy0sVyf3fuF0hlWb1WGsZpG0x7dYLoI8LHjLTZ2nMXGYRor\/oc0Hr4fPwE+TzAd+B8Sg9\/7np04JnCryz4Odu9Shmf6H3tl9OE1QTzHcHv9ByX5fgT3eyJthvRXSLhujfH+\/wVpB+ESrRuSuGud4HFXXZD+AGkXpD9Cwg0rGyHthPQO4SCYLZ5\/TpT\/NqTtkI4W5eDKw4PiMx6I2QfpLUgOJNywUSbqY4vvfizyPizyvgvJgHSO+F6G1uJ121vEezHPJpHEJinyIqTLFV48Kd6HYMdJ5TeivfJ4cvwOrwm7TrTvD6JdmA5R+PiBeA\/W7deQqgUfkD+\/FfnvFPnXinJfEnwT4z83keEE+WfC+wR\/30b4ZIF0TZ5nCxhTEuQP7lxCHjI3eQdQfIm55AZIl8DnU7O\/Iodva8\/lVaR7cmbnAWVp44WqVlDJJ1tOHYB47DjKxtVTNn4MJotNkKmOsonwXUO9xRrGmu6ksdSeNJaxhtG0Z2JdNw6kxD\/G2zgcJOLvk3RhcFMHlVfcPqbm24skeYtS4i1IGF6KAwwlD2oceM\/81yG9RjBMnxNuvEHAoUT7IuEAQ0mIg\/lPhA9IlHQoEBDQeMUx3k7CIOFxXDXivSiZccAjiPGyQ7xEEm1qSrg2gDRD5BGn+3j1uFp8xgsFcSKRkhyvP0bwtSjt+4h4L5oFqK3gBPA9wicNJATqVUp+PAsAJ6q1oi1ICOBvC57gJIX+BDzF1yIY5MbpP0TbiKjTdeIzahIviTJXEj7ZIKEmsV7wCYH6afH954k\/8cixgZPUfxLOXyTkG04kqFVsHOTZPJQD+Y5Z5DF7G3lYHCd1HbXIZyCdYzqJU8FwP9rsJIeCqi0JwS498x0vVpanutdVNVvOKFTLAcDjxpju+NEA9FEAbC9ZbFItZZNqKGustVgj\/DalzmJTRpvOlNG22zSascbq3n\/B64D4C\/Y1sIuwS936un8CrDxBxnJTZE\/cKrNHSKq4qHZ3El\/VlvXCwYUSe1ko\/8uQLiJ8cP1cKQ+l8k+Uv\/FudrxUELWXLPGBgYQTCk4EKHVx8w1OCDiJIDAfEs89KOr1sHjmf4gvXTcQrpYjiPFuum+KZz+pvAPLRs1BNRNQVcfJA48cQ4CuUX7DK7pR0qKajBPOS8SfqJAnKKUXEz4JPqM8h2X8l\/jNEnX\/tmjHK4RLcrwqCbULnKxQa5DqO7bRJFybOJv4\/gQklOY9kPaP4NsKUQ874tlB8CKB\/oj5VfIogtyi5HMWI5fj5YqUJfC+teNMO3GE5eqLGNPm9\/2MzNwk46nlOqBXRnnT9kOqJxsv1DUwVl9v2+NGGc5EAPakakhVAO5KADakpgrKmiG1wHetNRZrqTXd1hpqZWoZa6npe9gve18hv64pzf5NJgd0eTa883Q4314kCWhUR1Ea1oe+R9saVcUTxd8S6CjtEJQ3QHpWKQ\/766fK398kPtBR8k9TfsMB+xYkPBsQgY7aAWpyOLGcC+kz4h0fJ9xvgCQnGCSUvs9Dwp1bl4tnTwu942RRfxXo2EYJdFSrr1Z+w755SHxGc+Na8U6sJ2otKEEXEw4w9SSgK0VZB4t2YpkXQroMEm7gWSra2yLq+hvRTnHPu2fno4+iV3k\/Ekp+BPoc5bukqMdK8feyiGcHEiBy08mLleQB801yNwB9HXUlyMlp4kLFI0ym413o8\/G0GMaSc43tJbO6z81tTw2shW+qrG7YdUfdeDs7fgxjE2pMe3Kl6U4pp6wJd6iVArAhtcLnFPyfLrdYpoqytmrTbauibqaC0tZkp39G3T5DuX3yN4jNMzbuVPJ2bg3tbqzhIjnZYF3+Qrg6iQMJ+xIHMzp67ob0OvGdVDh4cVCh7f5lEhzwX4P0M+XvRwlXlVElR2mLkwCqwJp49n3xvqfE3yht0dY\/WTyP5gLaoSI+3pPo94jP5xFuJkgtAcfJFUp7kI4nQdUdNUTco\/+q+B2l7guES8JFIi+q3WcKXiBJqYpaGGoQhwveqBMcvvcl8Rkl+F3Kb2ga4ESHYMeJBHmOvEP1G5f+0FwSu\/k87eElEiS8ChknhmrxLGoDaB6g9vUE4RNh1LN5BIncuYbXLt1r7SI3Ooyspg45D8COp8oshbTIcJMLDLdkruGWzjLcsvYsrZhpu2WzXVY2q3OVKEjz\/+eDefTYHYvqx2RfmTCKsUmVltNYZjpNJabbkgTpzfcHu+kkALuEutPKqTu9woT\/Tdpezlh7KTcRRtBac1GEt7CAuv4+2OfbUwl+4MIIIzmBot8FBz1KCxzQOGARRAgQBCuC8jXxm1TlcRL4kVLWvZB+oPyNAEP1HcGCTi0EGU4aaJfixCLuy\/MG7N3iMy6f9Yh8KI3R8SbtUzQVEIz\/Iv6+lXAV+xVR\/jrxvRwruBT2V1E+\/v+OaKM4XsxbLUBJjBMXgh9tcOwjHLcILnQ+vgXpPvEdth81AdRkpE2OhJrHcwofkYebxPuwbsLx6vHqLVGudCh+RLz3ZfGcXL6TbcAJ9uciD7YBHXMy5gDzvhvx7ABCMXfA4+u15Ba6mVyLB084LjnDZeR4l+mLHZbscFjZDJdVZhxW1WK7NU2MVU8xtlW3di7Pv2mAA7++fmvN2Npdd0ystpzJFQwkOl4Oh\/uyXVRnvYQHP8xIMrZfqQuJ0bmljM0q6cHO3UeBznnSQTZVduQOshiuEMrdIlWyozqJqmJp6DeUymhnqjYkfq5U\/q4I\/S1VZpS2qC6jNEd7dx4JrpdXhsodLZ5Jh+qpiTJqlXqhQwsHvlziUvlbotRhmmhbeA0a\/0cgjhX55fIV5sOltRalPHQk4jgsC7WzVLxHloltQbt6NvFXACQ1i\/epYMSy0GYfQ\/qTLHOqKLMk9P1Az+YjAdZrso+SSyy8LXUHWWZ2JRabXcl5Zld5m9lV1Wh21Y43O0fXWX1jRvX9tKbm3bbAs9Hl5iLdGmo7j26oMF5uLKW9zUnaCZKuK6XRrnSCdrVBmg6f90uaXTNL6M7ZJdTaX9vhqSbLR4aqWySFtxGOaPMjKuptKAEzUflwOQultPTc5ys3quxwtNpgeaMoKppPrUdU\/nyBPoNRviCYcHsL5W3Uc1qevEWOLzy9ddWOUeSYbbVkPk9jMpDGiER48sG3voA178BpM6V1ZMco3DifL80XaYSDo0DaZ5YJBwu1zDcZDPQ3Ei7F4YQtpWVUyGoUGKP6Pl\/ewQCbr11E+T5cdrgO+cA\/UP3z8TFcz3x1Cz8XFTk32LO7S8GDHgp\/JqaYYhoBJCVQIWm4y98nJGFMAxP24T7oY4kppphiiimmmGKKKaaYYooppphiiimmmGKKKaaYYooppphiiimmmGKKKaaYYooppphiiimmmGKKKaaYYoopppiGTP8HRR090\/RKSV8AAAAASUVORK5CYII=\\\",\\\"primaryColor\\\":\\\"#1919F5\\\",\\\"secondaryColor\\\":\\\"#1919F5\\\",\\\"accentColor\\\":\\\"#e879f9\\\",\\\"headerEmployee\\\":\\\"Employee Identification\\\",\\\"headerInvestor\\\":\\\"Investor Identification\\\",\\\"staffLabel\\\":\\\"STAFF\\\",\\\"investorLabel\\\":\\\"INVESTOR\\\",\\\"footerText\\\":\\\"dynime.com\\\",\\\"validityYears\\\":2,\\\"supportEmail\\\":\\\"support@dynime.com\\\",\\\"qrSize\\\":64,\\\"qrErrorCorrection\\\":\\\"Q\\\",\\\"qrMargin\\\":6,\\\"verifiedBadgeEnabled\\\":true,\\\"verifiedBadgeColor\\\":\\\"#1919F5\\\",\\\"idDigits\\\":6}\"",
+            "created_at": "2026-05-15 12:28:59.198409+00",
+            "updated_at": "2026-05-16 18:15:42.610188+00"
+        },
+        {
+            "id": "2cceae5d-fb16-465d-8c81-303eab47e061",
+            "key": "contact_email",
+            "value": "\"support@dynime.com\"",
+            "created_at": "2026-04-24 13:40:14.061802+00",
+            "updated_at": "2026-05-17 14:29:23.671151+00"
+        },
+        {
+            "id": "6b32dfe0-879c-4542-b778-078786a5982a",
+            "key": "home_sections",
+            "value": "\"{\\\"hero\\\":{\\\"enabled\\\":true,\\\"eyebrow\\\":\\\"Best-in-class digital services trusted by brands worldwide\\\",\\\"headline\\\":\\\"Where Ambitious Brands Become Iconic \u2014 {{Engineered, Designed, Delivered.}}\\\",\\\"subheadline\\\":\\\"We partner with founders and enterprises to design, build, and scale category-defining digital experiences. From bespoke web platforms to global growth \u2014 every detail, considered.\\\",\\\"primary_cta_label\\\":\\\"Begin Your Project\\\",\\\"primary_cta_href\\\":\\\"\/contact\\\",\\\"secondary_cta_label\\\":\\\"Explore Our Work\\\",\\\"secondary_cta_href\\\":\\\"\/portfolio\\\",\\\"badges\\\":[{\\\"icon\\\":\\\"Award\\\",\\\"label\\\":\\\"500+ brands trust Dynime\\\"},{\\\"icon\\\":\\\"Globe\\\",\\\"label\\\":\\\"Studios across 3 continents\\\"},{\\\"icon\\\":\\\"Sparkles\\\",\\\"label\\\":\\\"Crafted since 2020\\\"}]},\\\"stats\\\":{\\\"enabled\\\":true,\\\"items\\\":[{\\\"value\\\":500,\\\"suffix\\\":\\\"+\\\",\\\"label\\\":\\\"Projects Delivered\\\"},{\\\"value\\\":98,\\\"suffix\\\":\\\"%\\\",\\\"label\\\":\\\"Client Satisfaction\\\"},{\\\"value\\\":50,\\\"suffix\\\":\\\"+\\\",\\\"label\\\":\\\"Team Members\\\"},{\\\"value\\\":15,\\\"suffix\\\":\\\"+\\\",\\\"label\\\":\\\"Countries Served\\\"}]},\\\"services\\\":{\\\"enabled\\\":true,\\\"eyebrow\\\":\\\"Our Craft\\\",\\\"heading\\\":\\\"A Studio of Specialists. A Spectrum of Excellence.\\\",\\\"description\\\":\\\"Eight disciplines, one obsession \u2014 building digital experiences that move markets and elevate brands.\\\",\\\"items\\\":[{\\\"icon\\\":\\\"Code\\\",\\\"title\\\":\\\"Web Development\\\",\\\"desc\\\":\\\"Custom web apps, SaaS platforms, and enterprise solutions built with modern frameworks.\\\",\\\"to\\\":\\\"\/wordpress-design\\\"},{\\\"icon\\\":\\\"Cpu\\\",\\\"title\\\":\\\"AI & Software Development\\\",\\\"desc\\\":\\\"AI-powered apps, ML models, intelligent agents, and AI SaaS platforms built to scale.\\\",\\\"to\\\":\\\"\/ai-software-development\\\"},{\\\"icon\\\":\\\"Megaphone\\\",\\\"title\\\":\\\"Digital Marketing\\\",\\\"desc\\\":\\\"SEO, PPC, social media, and content strategies that drive measurable growth.\\\",\\\"to\\\":\\\"\/seo\\\"},{\\\"icon\\\":\\\"ShoppingBag\\\",\\\"title\\\":\\\"E-Commerce\\\",\\\"desc\\\":\\\"Scalable online stores with payment integration, inventory, and analytics.\\\",\\\"to\\\":\\\"\/woocommerce\\\"},{\\\"icon\\\":\\\"Building2\\\",\\\"title\\\":\\\"Business Formation\\\",\\\"desc\\\":\\\"US\/UK company setup services including LLC formation, EIN registration, and more.\\\",\\\"to\\\":\\\"\/us-company\\\"},{\\\"icon\\\":\\\"Palette\\\",\\\"title\\\":\\\"UI\/UX Design\\\",\\\"desc\\\":\\\"User-centered design that converts visitors into loyal customers.\\\",\\\"to\\\":\\\"\/ui-ux-design\\\"},{\\\"icon\\\":\\\"BarChart3\\\",\\\"title\\\":\\\"Analytics & Growth\\\",\\\"desc\\\":\\\"Data-driven optimization, A\/B testing, and conversion rate improvement.\\\",\\\"to\\\":\\\"\/analytics\\\"}]},\\\"testimonials\\\":{\\\"enabled\\\":true,\\\"eyebrow\\\":\\\"In Their Words\\\",\\\"heading\\\":\\\"The World's Most Discerning Brands Choose Dynime\\\",\\\"description\\\":\\\"From early-stage founders to global enterprises \u2014 hear why category leaders entrust their digital future to our studio.\\\",\\\"items\\\":[{\\\"name\\\":\\\"Sarah Chen\\\",\\\"role\\\":\\\"CEO, TechFlow\\\",\\\"text\\\":\\\"Dynime transformed our entire digital presence. Revenue increased 340% within 6 months of launching our new platform.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Marcus Johnson\\\",\\\"role\\\":\\\"Founder, GreenLeaf\\\",\\\"text\\\":\\\"The e-commerce solution they built handles 10K+ orders daily without breaking a sweat. Truly enterprise-grade work.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Elena Rodriguez\\\",\\\"role\\\":\\\"CMO, StyleVault\\\",\\\"text\\\":\\\"Their marketing strategy and SEO work doubled our organic traffic. The ROI speaks for itself.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"David Park\\\",\\\"role\\\":\\\"CTO, DataSync\\\",\\\"text\\\":\\\"Clean architecture, excellent documentation, and a team that truly understands scalability. Highly recommend.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Amina Okafor\\\",\\\"role\\\":\\\"CEO, NovaBrand\\\",\\\"text\\\":\\\"From brand strategy to Facebook Ads, Dynime helped us go from zero to 50K followers in just 3 months.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"James Wright\\\",\\\"role\\\":\\\"Founder, CloudBase\\\",\\\"text\\\":\\\"They set up our US LLC, payment gateways, and website in under 2 weeks. Incredible speed and professionalism.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Sophia Lee\\\",\\\"role\\\":\\\"Director, PixelCraft\\\",\\\"text\\\":\\\"The UI\/UX redesign they delivered increased our conversion rate by 180%. Worth every penny.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Rahul Mehta\\\",\\\"role\\\":\\\"COO, FastShip\\\",\\\"text\\\":\\\"Our Shopify store went from 2s load time to under 0.8s. Page speed optimization was a game changer.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Lisa Tanaka\\\",\\\"role\\\":\\\"VP, BrightEdge\\\",\\\"text\\\":\\\"Dynime's SEO strategies got us to page 1 for 15+ competitive keywords within 4 months.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Carlos Diaz\\\",\\\"role\\\":\\\"Founder, Vendora\\\",\\\"text\\\":\\\"Their WooCommerce solution is rock solid. We process thousands of transactions daily without a hitch.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Nina Petrova\\\",\\\"role\\\":\\\"CMO, UrbanStyle\\\",\\\"text\\\":\\\"The Google Ads campaigns they manage consistently deliver 5x ROAS. Exceptional paid media team.\\\",\\\"rating\\\":5},{\\\"name\\\":\\\"Tom Harris\\\",\\\"role\\\":\\\"CTO, ScaleUp\\\",\\\"text\\\":\\\"Migrated our entire platform with zero downtime. Their technical expertise is truly next level.\\\",\\\"rating\\\":5}]},\\\"team\\\":{\\\"enabled\\\":true,\\\"eyebrow\\\":\\\"20+ specialists, one studio\\\",\\\"heading_prefix\\\":\\\"The Minds Behind the\\\",\\\"heading_highlight\\\":\\\"Magic\\\",\\\"description\\\":\\\"Award-winning designers, engineers, strategists, and storytellers \u2014 collaborating across continents to shape brands that endure.\\\",\\\"items\\\":[{\\\"name\\\":\\\"Jit Kumar Saha\\\",\\\"role\\\":\\\"Head Of Product\\\",\\\"initials\\\":\\\"JK\\\",\\\"specialty\\\":\\\"Product Strategy Blueprint\\\",\\\"color\\\":\\\"from-violet-500\/20 to-purple-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"photoUrl\\\":\\\"\\\",\\\"email\\\":\\\"jit@dynime.com\\\",\\\"phone\\\":\\\"+8801601111994\\\",\\\"country\\\":\\\"Bangladesh\\\",\\\"joinedAt\\\":\\\"2020-01-01\\\",\\\"employeeKey\\\":\\\"cms-jit-kumar-saha-chief-executive-officer-planning-and-making-decision-for-growth\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Priya Sharma\\\",\\\"role\\\":\\\"Head of Design\\\",\\\"initials\\\":\\\"PS\\\",\\\"specialty\\\":\\\"UI\/UX & Branding\\\",\\\"color\\\":\\\"from-pink-500\/20 to-rose-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"statusNote\\\":\\\"12 May 2025\\\",\\\"country\\\":\\\"India\\\",\\\"joinedAt\\\":\\\"2024-01-16\\\",\\\"statusChangedAt\\\":\\\"2026-05-17T05:57:58.158Z\\\",\\\"employeeKey\\\":\\\"cms-priya-sharma-head-of-design-ui-ux-branding\\\",\\\"email\\\":\\\"priya@dynime.com\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Marcus Chen\\\",\\\"role\\\":\\\"VP Marketing\\\",\\\"initials\\\":\\\"MC\\\",\\\"specialty\\\":\\\"Growth & SEO\\\",\\\"color\\\":\\\"from-amber-500\/20 to-orange-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-marcus-chen-vp-marketing-growth-seo\\\",\\\"email\\\":\\\"chen@dynime.com\\\",\\\"country\\\":\\\"UK\\\",\\\"joinedAt\\\":\\\"2024-10-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Jordan Kim\\\",\\\"role\\\":\\\"Lead Developer\\\",\\\"initials\\\":\\\"JK\\\",\\\"specialty\\\":\\\"React & Node.js\\\",\\\"color\\\":\\\"from-cyan-500\/20 to-sky-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-jordan-kim-lead-developer-react-node-js\\\",\\\"email\\\":\\\"jordan@dynime.com\\\",\\\"country\\\":\\\"UK\\\",\\\"joinedAt\\\":\\\"2025-06-16\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Amina Okafor\\\",\\\"role\\\":\\\"Project Manager\\\",\\\"initials\\\":\\\"AO\\\",\\\"specialty\\\":\\\"Agile & Delivery\\\",\\\"color\\\":\\\"from-emerald-500\/20 to-teal-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-amina-okafor-project-manager-agile-delivery\\\",\\\"email\\\":\\\"amina@dynime.com\\\",\\\"country\\\":\\\"USA\\\",\\\"joinedAt\\\":\\\"2024-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"David Park\\\",\\\"role\\\":\\\"DevOps Engineer\\\",\\\"initials\\\":\\\"DP\\\",\\\"specialty\\\":\\\"Cloud Infrastructure\\\",\\\"color\\\":\\\"from-slate-500\/20 to-gray-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-david-park-devops-engineer-cloud-infrastructure\\\",\\\"email\\\":\\\"david@dynime.com\\\",\\\"joinedAt\\\":\\\"2025-10-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Sophia Lee\\\",\\\"role\\\":\\\"Content Strategist\\\",\\\"initials\\\":\\\"SL\\\",\\\"specialty\\\":\\\"Copywriting & SEO\\\",\\\"color\\\":\\\"from-rose-500\/20 to-pink-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-sophia-lee-content-strategist-copywriting-seo\\\",\\\"email\\\":\\\"lee@dynime.com\\\",\\\"country\\\":\\\"USA\\\",\\\"joinedAt\\\":\\\"2024-11-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Rahul Mehta\\\",\\\"role\\\":\\\"E-Commerce Lead\\\",\\\"initials\\\":\\\"RM\\\",\\\"specialty\\\":\\\"Shopify & WooCommerce\\\",\\\"color\\\":\\\"from-yellow-500\/20 to-amber-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-rahul-mehta-e-commerce-lead-shopify-woocommerce\\\",\\\"email\\\":\\\"rahul@dynime.com\\\",\\\"country\\\":\\\"India\\\",\\\"joinedAt\\\":\\\"2024-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Elena Rodriguez\\\",\\\"role\\\":\\\"Social Media Manager\\\",\\\"initials\\\":\\\"ER\\\",\\\"specialty\\\":\\\"Meta & Google Ads\\\",\\\"color\\\":\\\"from-fuchsia-500\/20 to-pink-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-elena-rodriguez-social-media-manager-meta-google-ads\\\",\\\"email\\\":\\\"elena@dynime.com\\\",\\\"joinedAt\\\":\\\"2025-01-01\\\",\\\"country\\\":\\\"USA\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Tom Harris\\\",\\\"role\\\":\\\"QA Engineer\\\",\\\"initials\\\":\\\"TH\\\",\\\"specialty\\\":\\\"Testing & Automation\\\",\\\"color\\\":\\\"from-green-500\/20 to-emerald-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-tom-harris-qa-engineer-testing-automation\\\",\\\"email\\\":\\\"harris@dynime.com\\\",\\\"country\\\":\\\"Denmark\\\",\\\"joinedAt\\\":\\\"2023-06-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Sabiha Nishi\\\",\\\"role\\\":\\\"Business Consultant\\\",\\\"initials\\\":\\\"SN\\\",\\\"specialty\\\":\\\"Company Formation\\\",\\\"color\\\":\\\"from-indigo-500\/20 to-blue-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-nina-petrova-business-consultant-company-formation\\\",\\\"email\\\":\\\"sabiha@dynime.com\\\",\\\"country\\\":\\\"Bangladesh\\\",\\\"joinedAt\\\":\\\"2026-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Liam O'Connor\\\",\\\"role\\\":\\\"AI Engineer\\\",\\\"initials\\\":\\\"LO\\\",\\\"specialty\\\":\\\"LLMs & ML Pipelines\\\",\\\"color\\\":\\\"from-violet-500\/20 to-fuchsia-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-liam-o-connor-ai-engineer-llms-ml-pipelines\\\",\\\"email\\\":\\\"liam@dynime.com\\\",\\\"country\\\":\\\"Spain\\\",\\\"joinedAt\\\":\\\"2024-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Yuki Tanaka\\\",\\\"role\\\":\\\"Product Designer\\\",\\\"initials\\\":\\\"YT\\\",\\\"specialty\\\":\\\"Design Systems & Prototyping\\\",\\\"color\\\":\\\"from-rose-500\/20 to-pink-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-yuki-tanaka-product-designer-design-systems-prototyping\\\",\\\"email\\\":\\\"tanaka@dynime.com\\\",\\\"country\\\":\\\"Australia\\\",\\\"joinedAt\\\":\\\"2026-01-15\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Sara Ahmed\\\",\\\"role\\\":\\\"Brand Strategist\\\",\\\"initials\\\":\\\"SA\\\",\\\"specialty\\\":\\\"Positioning & Identity\\\",\\\"color\\\":\\\"from-rose-500\/20 to-orange-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-sara-ahmed-brand-strategist-positioning-identity\\\",\\\"email\\\":\\\"sara@dynime.com\\\",\\\"country\\\":\\\"India\\\",\\\"joinedAt\\\":\\\"2024-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Diego Fernandez\\\",\\\"role\\\":\\\"Backend Engineer\\\",\\\"initials\\\":\\\"DF\\\",\\\"specialty\\\":\\\"APIs & Databases\\\",\\\"color\\\":\\\"from-blue-500\/20 to-cyan-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-diego-fernandez-backend-engineer-apis-databases\\\",\\\"email\\\":\\\"diego@dynime.com\\\",\\\"country\\\":\\\"USA\\\",\\\"joinedAt\\\":\\\"2023-02-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Hana Park\\\",\\\"role\\\":\\\"SEO Specialist\\\",\\\"initials\\\":\\\"HP\\\",\\\"specialty\\\":\\\"Technical & On-Page SEO\\\",\\\"color\\\":\\\"from-emerald-500\/20 to-green-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-hana-park-seo-specialist-technical-on-page-seo\\\",\\\"email\\\":\\\"hana@dynime.com\\\",\\\"country\\\":\\\"Spain\\\",\\\"joinedAt\\\":\\\"2022-05-15\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Omar Khalid\\\",\\\"role\\\":\\\"Solutions Architect\\\",\\\"initials\\\":\\\"OK\\\",\\\"specialty\\\":\\\"SaaS & Enterprise Systems\\\",\\\"color\\\":\\\"from-purple-500\/20 to-indigo-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-omar-khalid-solutions-architect-saas-enterprise-systems\\\",\\\"email\\\":\\\"omarneo@dynime.com\\\",\\\"country\\\":\\\"UK\\\",\\\"joinedAt\\\":\\\"2021-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Isabella Rossi\\\",\\\"role\\\":\\\"Customer Success Lead\\\",\\\"initials\\\":\\\"IR\\\",\\\"specialty\\\":\\\"Onboarding & Retention\\\",\\\"color\\\":\\\"from-pink-500\/20 to-fuchsia-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-isabella-rossi-customer-success-lead-onboarding-retention\\\",\\\"email\\\":\\\"Isabella@dynime.com\\\",\\\"joinedAt\\\":\\\"2024-01-01\\\",\\\"country\\\":\\\"USA\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Kenji Watanabe\\\",\\\"role\\\":\\\"Mobile Developer\\\",\\\"initials\\\":\\\"KW\\\",\\\"specialty\\\":\\\"React Native & iOS\\\",\\\"color\\\":\\\"from-pink-500\/20 to-rose-500\/20\\\",\\\"status\\\":\\\"active\\\",\\\"employeeKey\\\":\\\"cms-kenji-watanabe-mobile-developer-react-native-ios\\\",\\\"email\\\":\\\"kenji@dynime.com\\\",\\\"country\\\":\\\"UK\\\",\\\"joinedAt\\\":\\\"2020-01-01\\\",\\\"paused\\\":false},{\\\"name\\\":\\\"Jit Kumar Saha\\\",\\\"role\\\":\\\"Head Of Product\\\",\\\"initials\\\":\\\"JK\\\",\\\"specialty\\\":\\\"Product Strategy Blueprint\\\",\\\"color\\\":\\\"from-blue-500\/20 to-indigo-500\/20\\\",\\\"employeeKey\\\":\\\"cms-mp80hobj-0mp90\\\",\\\"photoUrl\\\":\\\"\\\",\\\"email\\\":\\\"jit@dynime.com\\\",\\\"phone\\\":\\\"+8801601111994\\\",\\\"country\\\":\\\"Bangladesh\\\",\\\"joinedAt\\\":\\\"2020-01-01\\\",\\\"status\\\":\\\"active\\\"}]},\\\"countries\\\":{\\\"enabled\\\":true,\\\"eyebrow\\\":\\\"Global coverage\\\",\\\"heading_prefix\\\":\\\"We Serve Clients\\\",\\\"heading_highlight\\\":\\\"Worldwide\\\",\\\"description\\\":\\\"Dynime operates as a global studio. We work with founders, businesses, and teams across every continent \u2014 excluding only jurisdictions restricted by international sanctions, FATF blacklists, active conflict zones, or severe restrictions on digital services and cross-border payments.\\\",\\\"stats\\\":[{\\\"label\\\":\\\"Continents\\\",\\\"value\\\":\\\"6\\\"},{\\\"label\\\":\\\"Countries served\\\",\\\"value\\\":\\\"190+\\\"},{\\\"label\\\":\\\"Time zones\\\",\\\"value\\\":\\\"24\\\"},{\\\"label\\\":\\\"Avg. response\\\",\\\"value\\\":\\\"< 4h\\\"}],\\\"items\\\":[{\\\"flag\\\":\\\"\ud83c\udf0e\\\",\\\"name\\\":\\\"Americas\\\"},{\\\"flag\\\":\\\"\ud83c\uddfa\ud83c\uddf8\\\",\\\"name\\\":\\\"United States\\\"},{\\\"flag\\\":\\\"\ud83c\udde8\ud83c\udde6\\\",\\\"name\\\":\\\"Canada\\\"},{\\\"flag\\\":\\\"\ud83c\uddf2\ud83c\uddfd\\\",\\\"name\\\":\\\"Mexico\\\"},{\\\"flag\\\":\\\"\ud83c\udde7\ud83c\uddf7\\\",\\\"name\\\":\\\"Brazil\\\"},{\\\"flag\\\":\\\"\ud83c\udde6\ud83c\uddf7\\\",\\\"name\\\":\\\"Argentina\\\"},{\\\"flag\\\":\\\"\ud83c\udf0d\\\",\\\"name\\\":\\\"Europe\\\"},{\\\"flag\\\":\\\"\ud83c\uddec\ud83c\udde7\\\",\\\"name\\\":\\\"United Kingdom\\\"},{\\\"flag\\\":\\\"\ud83c\udde9\ud83c\uddea\\\",\\\"name\\\":\\\"Germany\\\"},{\\\"flag\\\":\\\"\ud83c\uddeb\ud83c\uddf7\\\",\\\"name\\\":\\\"France\\\"},{\\\"flag\\\":\\\"\ud83c\uddea\ud83c\uddf8\\\",\\\"name\\\":\\\"Spain\\\"},{\\\"flag\\\":\\\"\ud83c\uddee\ud83c\uddf9\\\",\\\"name\\\":\\\"Italy\\\"},{\\\"flag\\\":\\\"\ud83c\uddf3\ud83c\uddf1\\\",\\\"name\\\":\\\"Netherlands\\\"},{\\\"flag\\\":\\\"\ud83c\uddee\ud83c\uddea\\\",\\\"name\\\":\\\"Ireland\\\"},{\\\"flag\\\":\\\"\ud83c\uddf8\ud83c\uddea\\\",\\\"name\\\":\\\"Sweden\\\"},{\\\"flag\\\":\\\"\ud83c\udde8\ud83c\udded\\\",\\\"name\\\":\\\"Switzerland\\\"},{\\\"flag\\\":\\\"\ud83c\uddea\ud83c\uddea\\\",\\\"name\\\":\\\"Estonia\\\"},{\\\"flag\\\":\\\"\ud83c\uddf1\ud83c\uddfa\\\",\\\"name\\\":\\\"Luxembourg\\\"},{\\\"flag\\\":\\\"\ud83c\udde9\ud83c\uddf0\\\",\\\"name\\\":\\\"Denmark\\\"},{\\\"flag\\\":\\\"\ud83c\uddf5\ud83c\uddf1\\\",\\\"name\\\":\\\"Poland\\\"},{\\\"flag\\\":\\\"\ud83c\udf0f\\\",\\\"name\\\":\\\"Asia-Pacific\\\"},{\\\"flag\\\":\\\"\ud83c\uddee\ud83c\uddf3\\\",\\\"name\\\":\\\"India\\\"},{\\\"flag\\\":\\\"\ud83c\udde7\ud83c\udde9\\\",\\\"name\\\":\\\"Bangladesh\\\"},{\\\"flag\\\":\\\"\ud83c\uddf8\ud83c\uddec\\\",\\\"name\\\":\\\"Singapore\\\"},{\\\"flag\\\":\\\"\ud83c\udded\ud83c\uddf0\\\",\\\"name\\\":\\\"Hong Kong\\\"},{\\\"flag\\\":\\\"\ud83c\uddef\ud83c\uddf5\\\",\\\"name\\\":\\\"Japan\\\"},{\\\"flag\\\":\\\"\ud83c\uddf0\ud83c\uddf7\\\",\\\"name\\\":\\\"South Korea\\\"},{\\\"flag\\\":\\\"\ud83c\uddf9\ud83c\udded\\\",\\\"name\\\":\\\"Thailand\\\"},{\\\"flag\\\":\\\"\ud83c\uddf5\ud83c\udded\\\",\\\"name\\\":\\\"Philippines\\\"},{\\\"flag\\\":\\\"\ud83c\uddee\ud83c\udde9\\\",\\\"name\\\":\\\"Indonesia\\\"},{\\\"flag\\\":\\\"\ud83c\uddf2\ud83c\uddfe\\\",\\\"name\\\":\\\"Malaysia\\\"},{\\\"flag\\\":\\\"\ud83c\uddfb\ud83c\uddf3\\\",\\\"name\\\":\\\"Vietnam\\\"},{\\\"flag\\\":\\\"\ud83c\udde6\ud83c\uddfa\\\",\\\"name\\\":\\\"Australia\\\"},{\\\"flag\\\":\\\"\ud83c\uddf3\ud83c\uddff\\\",\\\"name\\\":\\\"New Zealand\\\"},{\\\"flag\\\":\\\"\ud83c\udf0d\\\",\\\"name\\\":\\\"Middle East & Africa\\\"},{\\\"flag\\\":\\\"\ud83c\udde6\ud83c\uddea\\\",\\\"name\\\":\\\"United Arab Emirates\\\"},{\\\"flag\\\":\\\"\ud83c\uddf8\ud83c\udde6\\\",\\\"name\\\":\\\"Saudi Arabia\\\"},{\\\"flag\\\":\\\"\ud83c\uddf6\ud83c\udde6\\\",\\\"name\\\":\\\"Qatar\\\"},{\\\"flag\\\":\\\"\ud83c\uddee\ud83c\uddf1\\\",\\\"name\\\":\\\"Israel\\\"},{\\\"flag\\\":\\\"\ud83c\uddf9\ud83c\uddf7\\\",\\\"name\\\":\\\"Turkey\\\"},{\\\"flag\\\":\\\"\ud83c\uddff\ud83c\udde6\\\",\\\"name\\\":\\\"South Africa\\\"},{\\\"flag\\\":\\\"\ud83c\uddf0\ud83c\uddea\\\",\\\"name\\\":\\\"Kenya\\\"},{\\\"flag\\\":\\\"\ud83c\uddf3\ud83c\uddec\\\",\\\"name\\\":\\\"Nigeria\\\"},{\\\"flag\\\":\\\"\ud83c\uddea\ud83c\uddec\\\",\\\"name\\\":\\\"Egypt\\\"}]},\\\"founder\\\":{\\\"enabled\\\":true,\\\"headline\\\":\\\"Excellence Is Not a Standard. It's the Starting Point.\\\",\\\"name\\\":\\\"Jit Kumar Saha\\\",\\\"role\\\":\\\"Founder & CEO\\\",\\\"company\\\":\\\"Dynime Technologies Limited\\\",\\\"bio\\\":\\\"Every brand has a story worth telling beautifully. At Dynime, we blend strategic clarity with creative craft to build digital experiences that don't just perform \u2014 they resonate. Let's create something timeless together.\\\",\\\"badge\\\":\\\"CEO\\\",\\\"cta_label\\\":\\\"Discover Our Story\\\",\\\"cta_href\\\":\\\"\/about\\\"},\\\"cta\\\":{\\\"enabled\\\":true,\\\"heading_prefix\\\":\\\"Your Next Chapter Begins With\\\",\\\"heading_highlight\\\":\\\"One Conversation\\\",\\\"heading_suffix\\\":\\\".\\\",\\\"description\\\":\\\"Tell us about your vision. We'll respond within 24 hours with a tailored strategy and a clear path forward.\\\",\\\"primary_cta_label\\\":\\\"Start the Conversation\\\",\\\"primary_cta_href\\\":\\\"\/contact\\\",\\\"secondary_cta_label\\\":\\\"View Selected Work\\\",\\\"secondary_cta_href\\\":\\\"\/portfolio\\\"}}\"",
+            "created_at": "2026-05-14 16:33:24.954829+00",
+            "updated_at": "2026-05-17 14:57:32.594673+00"
+        },
+        {
+            "id": "8ae203c3-e957-41be-a2a5-85bf7ae9597f",
+            "key": "favicon_url",
+            "value": "\"\"",
+            "created_at": "2026-05-03 09:43:36.456403+00",
+            "updated_at": "2026-05-30 15:40:53.644371+00"
+        },
+        {
+            "id": "6c3ec437-6069-452a-90b5-1a735ac3f4d0",
+            "key": "site_name",
+            "value": "\"\\\"Dynime Inc.\\\"\"",
+            "created_at": "2026-04-24 13:32:18.95099+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "a52e7383-e849-4a5e-8860-bfd589789f81",
+            "key": "site_tagline",
+            "value": "\"\\\"We Build Digital Experiences That Convert\\\"\"",
+            "created_at": "2026-04-24 13:32:18.95099+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "cdd125d2-1e24-42e8-98ec-ef5749ff0f61",
+            "key": "social_threads",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "edc1b0d8-7956-492f-b2e9-facc34810e7c",
+            "key": "social_pinterest",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "fcf8c6f2-fbd3-4890-95eb-66a29aabd660",
+            "key": "social_github",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "5c94ccf3-bab3-415c-b48e-88c147cceeef",
+            "key": "social_dribbble",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "a840ec05-a139-4778-a47d-92d62ad5e92f",
+            "key": "social_behance",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "a2d97f37-b214-4ce0-bb91-d24836e0e09e",
+            "key": "social_telegram",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "7e36a725-2a2c-4dad-9b8f-5e28b786d17e",
+            "key": "social_discord",
+            "value": "\"\"",
+            "created_at": "2026-05-18 15:05:47.163849+00",
+            "updated_at": "2026-05-18 15:05:47.163849+00"
+        },
+        {
+            "id": "e21d091b-1240-42c3-816a-faa30485a3bd",
+            "key": "hero_headline",
+            "value": "\"\\\"We Build Digital Experiences That Convert\\\"\"",
+            "created_at": "2026-04-24 13:32:18.95099+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "3674394e-b4c3-4f5c-af87-899b649f68d6",
+            "key": "default_theme",
+            "value": "\"\\\"light\\\"\"",
+            "created_at": "2026-05-24 07:50:07.416354+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "3d6726ee-d2a1-4d07-81fc-7271439dcdf5",
+            "key": "live_chat_embed",
+            "value": "\"\\\"<script type=\\\\\\\"text\/javascript\\\\\\\">window.$crisp=[];window.CRISP_WEBSITE_ID=\\\\\\\"1ee0062b-1c4c-4d4a-a9b4-18ac27a54d31\\\\\\\";(function(){d=document;s=d.createElement(\\\\\\\"script\\\\\\\");s.src=\\\\\\\"https:\/\/client.crisp.chat\/l.js\\\\\\\";s.async=1;d.getElementsByTagName(\\\\\\\"head\\\\\\\")[0].appendChild(s);})();<\/script>\\\"\"",
+            "created_at": "2026-05-20 12:20:34.53044+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "e62288d4-aff4-48b2-88a0-d927abd06001",
+            "key": "auto_language_switcher_enabled",
+            "value": "\"\\\"false\\\"\"",
+            "created_at": "2026-05-31 12:13:56.171983+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "72f358de-d976-40e0-bce0-e50bd35f3ccd",
+            "key": "registered_entities",
+            "value": "[{\"name\": \"Dynime Inc.\", \"label\": \"Main\", \"country\": \"United States\", \"license_number\": \"DYN-INC-00000000\"}, {\"name\": \"Dynime UK Ltd.\", \"label\": \"UK\", \"country\": \"United Kingdom\", \"license_number\": \"UK-00000000\"}, {\"name\": \"Dynime BD Ltd.\", \"label\": \"BD\", \"country\": \"Bangladesh\", \"license_number\": \"BD-00000000\"}]",
+            "created_at": "2026-05-27 09:14:39.376291+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "86b7071a-e9bf-4318-9739-8f478e5ec081",
+            "key": "registered_entities_mask",
+            "value": "\"true\"",
+            "created_at": "2026-05-27 09:14:39.376291+00",
+            "updated_at": "2026-05-31 12:13:56.171983+00"
+        },
+        {
+            "id": "ef99ca41-4b41-4941-849e-0d2e39604bcb",
+            "key": "tax_enabled",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-05-23 11:21:09.709503+00",
+            "updated_at": "2026-05-23 21:01:17.114089+00"
+        },
+        {
+            "id": "314847d6-d6a8-4711-83d2-43eebf454cbf",
+            "key": "tax_label",
+            "value": "\"\\\"VAT\\\"\"",
+            "created_at": "2026-05-23 11:21:09.709503+00",
+            "updated_at": "2026-05-23 21:01:17.114089+00"
+        },
+        {
+            "id": "780f7af1-3e9a-44a2-91fe-239de83bba7e",
+            "key": "tax_percent",
+            "value": "\"\\\"8.5\\\"\"",
+            "created_at": "2026-05-23 11:21:09.709503+00",
+            "updated_at": "2026-05-23 21:01:17.114089+00"
+        },
+        {
+            "id": "21101eb3-3180-4177-8679-8693be424257",
+            "key": "tax_mode",
+            "value": "\"\\\"inclusive\\\"\"",
+            "created_at": "2026-05-23 11:21:09.709503+00",
+            "updated_at": "2026-05-23 21:01:17.114089+00"
+        },
+        {
+            "id": "e3c0abbc-a9cf-461b-a4bc-7e3486799b31",
+            "key": "tax_show_breakdown",
+            "value": "\"\\\"true\\\"\"",
+            "created_at": "2026-05-23 11:21:09.709503+00",
+            "updated_at": "2026-05-23 21:01:17.114089+00"
+        },
+        {
+            "id": "f5e3fa6f-3ad1-41e6-8359-455ee0769ab8",
+            "key": "fx_payment_in_options",
+            "value": "\"\\\"bKash,Nagad,Rocket,Bank,Cash,Redotapay\\\"\"",
+            "created_at": "2026-05-30 08:50:54.942991+00",
+            "updated_at": "2026-05-30 08:50:54.942991+00"
+        },
+        {
+            "id": "a9e22547-d131-48d8-a7d7-a67dc63322e5",
+            "key": "fx_payment_out_options",
+            "value": "\"\\\"Binance,Wallet,Redotpay,Bank,Bank UK\\\"\"",
+            "created_at": "2026-05-30 08:51:01.823928+00",
+            "updated_at": "2026-05-30 08:51:14.291807+00"
+        }
     ]
 }
