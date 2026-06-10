@@ -28,32 +28,37 @@ echo "Laravel Bootstrapped successfully.\n";
 $email = 'mail.dynime@gmail.com';
 $password = 'Dynime123!';
 
-$user = AdminUser::where('email', $email)->first();
+try {
+    $user = AdminUser::where('email', $email)->first();
 
-if ($user) {
-    echo "User found in database!\n";
-    echo "User ID: " . $user->id . "\n";
-    echo "User Name: " . $user->name . "\n";
-    echo "User Email: " . $user->email . "\n";
-    echo "User Role: " . $user->role . "\n";
-    echo "Is Active: " . ($user->is_active ? 'Yes' : 'No') . "\n";
-    echo "DB Password Hash: " . $user->password . "\n";
-    
-    // Check manual verify
-    $manualVerify = password_verify($password, $user->password);
-    echo "password_verify check: " . ($manualVerify ? "SUCCESS" : "FAILED") . "\n";
-    
-    // Check Laravel Hash::check
-    $hashCheck = Hash::check($password, $user->password);
-    echo "Hash::check check: " . ($hashCheck ? "SUCCESS" : "FAILED") . "\n";
-    
-    // Test re-hashing and verifying
-    $newHashed = Hash::make($password);
-    echo "New generated hash: " . $newHashed . "\n";
-    echo "Verifying new generated hash: " . (Hash::check($password, $newHashed) ? "SUCCESS" : "FAILED") . "\n";
-    
-} else {
-    echo "ERROR: User mail.dynime@gmail.com NOT found in admin_users table!\n";
+    if ($user) {
+        echo "User found in database!\n";
+        echo "User ID: " . $user->id . "\n";
+        echo "User Name: " . $user->name . "\n";
+        echo "User Email: " . $user->email . "\n";
+        echo "User Role: " . $user->role . "\n";
+        echo "Is Active: " . ($user->is_active ? 'Yes' : 'No') . "\n";
+        echo "DB Password Hash: " . $user->password . "\n";
+        
+        // Check manual verify
+        $manualVerify = password_verify($password, $user->password);
+        echo "password_verify check: " . ($manualVerify ? "SUCCESS" : "FAILED") . "\n";
+        
+        // Check Laravel Hash::check
+        $hashCheck = Hash::check($password, $user->password);
+        echo "Hash::check check: " . ($hashCheck ? "SUCCESS" : "FAILED") . "\n";
+        
+        // Test re-hashing and verifying
+        $newHashed = Hash::make($password);
+        echo "New generated hash: " . $newHashed . "\n";
+        echo "Verifying new generated hash: " . (Hash::check($password, $newHashed) ? "SUCCESS" : "FAILED") . "\n";
+        
+    } else {
+        echo "ERROR: User mail.dynime@gmail.com NOT found in admin_users table!\n";
+    }
+} catch (\Exception $e) {
+    echo "EXCEPTION: " . $e->getMessage() . "\n";
+    echo "TRACE:\n" . $e->getTraceAsString() . "\n";
 }
 
 // Check what connection we are using
