@@ -418,6 +418,8 @@ class MigrateSupabaseData extends Command
                         $val = $row[$col];
                         if ($col === 'value') {
                             $data[$col] = is_string($val) ? $val : json_encode($val);
+                        } elseif (in_array($col, ['created_at', 'updated_at'])) {
+                            $data[$col] = $this->formatTimestamp($val);
                         } else {
                             $data[$col] = $val;
                         }
