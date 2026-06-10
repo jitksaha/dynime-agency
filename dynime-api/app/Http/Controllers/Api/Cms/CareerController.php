@@ -190,7 +190,7 @@ class CareerController extends Controller
             ->orderByDesc('created_at')
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->career_id, fn($q) => $q->where('career_id', $request->career_id))
-            ->paginate(50);
+            ->get();
         return response()->json($apps);
     }
 
