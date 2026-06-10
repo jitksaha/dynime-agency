@@ -23,6 +23,7 @@
     "noFallthroughCasesInSwitch": false,
 
     "paths": {
+      "@/integrations/supabase/client": ["./src/lib/supabase-shim.ts"],
       "@/*": ["./src/*"]
     }
   },

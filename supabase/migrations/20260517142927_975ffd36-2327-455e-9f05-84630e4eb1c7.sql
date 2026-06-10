@@ -1,1 +1,0 @@
-UPDATE public.site_settings SET value = '"support@dynime.com"'::jsonb WHERE key = 'contact_email';

@@ -1,2 +1,0 @@
-UPDATE public.contact_info SET value = '+16468840271', label = 'Phone' WHERE id = '213c0e28-e915-49ab-91d4-1df1b6f7012a';
-UPDATE public.contact_info SET value = '+16468840271', label = 'WhatsApp' WHERE id = '7a348ef1-2d48-4c48-92a8-1046ec8deb80';

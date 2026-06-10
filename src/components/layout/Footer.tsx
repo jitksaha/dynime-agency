@@ -282,7 +282,7 @@ const Footer = () => {
       "Tactical playbooks on design, growth & engineering — straight to your inbox. No spam, unsubscribe anytime.",
   );
 
-  // Build 4 contact chips (Email, Call, WhatsApp, Address) — link to /contact, except WhatsApp → wa.me
+  // Build exactly 4 contact chips (Email, Phone, WhatsApp, Office Locator) to prevent layout blank space
   const contactChips = useMemo(() => {
     const items = contactInfo ?? [];
     const findByType = (...types: string[]) =>
@@ -293,15 +293,41 @@ const Footer = () => {
     const whatsapp = findByType("whatsapp");
     const address = findByType("address", "location", "office");
 
-    const chips: { id: string; icon: typeof Shield; title: string; subtitle: string; to?: string; href?: string }[] = [];
-    if (email) chips.push({ id: email.id, icon: Mail, title: email.label || "Email us", subtitle: email.value, to: "/contact" });
-    if (phone) chips.push({ id: phone.id, icon: Phone, title: phone.label || "Call us", subtitle: phone.value, to: "/contact" });
-    if (whatsapp) {
-      const digits = whatsapp.value.replace(/[^\d]/g, "");
-      chips.push({ id: whatsapp.id, icon: MessageCircle, title: whatsapp.label || "WhatsApp", subtitle: whatsapp.value, href: `https://wa.me/${digits}` });
-    }
-    if (address) chips.push({ id: address.id, icon: MapPin, title: "Office Locator", subtitle: "Find all our global offices", to: "/contact" });
-    return chips;
+    const emailVal = email?.value || "contact@dynime.com";
+    const phoneVal = phone?.value || "+16468840271";
+    const whatsappVal = whatsapp?.value || "+16468840271";
+    const whatsappDigits = whatsappVal.replace(/[^\d]/g, "");
+
+    return [
+      {
+        id: email?.id || "footer-email",
+        icon: Mail,
+        title: "Email",
+        subtitle: emailVal,
+        to: "/contact",
+      },
+      {
+        id: phone?.id || "footer-phone",
+        icon: Phone,
+        title: "Phone",
+        subtitle: phoneVal,
+        to: "/contact",
+      },
+      {
+        id: whatsapp?.id || "footer-whatsapp",
+        icon: MessageCircle,
+        title: "WhatsApp",
+        subtitle: whatsappVal,
+        href: `https://wa.me/${whatsappDigits}`,
+      },
+      {
+        id: address?.id || "footer-address",
+        icon: MapPin,
+        title: "Office Locator",
+        subtitle: "Find all our global offices",
+        to: "/contact",
+      },
+    ];
   }, [contactInfo]);
 
   useEffect(() => {

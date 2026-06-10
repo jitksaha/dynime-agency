@@ -2,7 +2,6 @@ import { ReactNode, useEffect, useRef } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import GoogleTranslate from "@/components/shared/GoogleTranslate";
-import HeaderOffsetDebug from "./HeaderOffsetDebug";
 
 /**
  * Global layout. The floating navbar is an overlay, so we measure its real
@@ -64,7 +63,6 @@ const Layout = ({ children, hideFooter = false }: { children: ReactNode; hideFoo
       </main>
       {!hideFooter && <Footer />}
       <GoogleTranslate />
-      <HeaderOffsetDebug />
     </div>
   );
 };

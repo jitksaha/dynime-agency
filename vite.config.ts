@@ -13,14 +13,10 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
+      // Proxy /api/* to Laravel backend during development
       "/api": {
-        target: "http://localhost:3001",
+        target: "http://localhost:8000",
         changeOrigin: true,
-      },
-      "/storage-proxy": {
-        target: "http://localhost:9000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/storage-proxy/, ""),
       },
     },
   },
@@ -32,6 +28,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
+      "@/integrations/supabase/client": path.resolve(__dirname, "./src/lib/supabase-shim.ts"),
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
@@ -44,9 +41,9 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "query-vendor": ["@tanstack/react-query"],
-          "supabase-vendor": ["@supabase/supabase-js"],
+          "react-vendor":  ["react", "react-dom", "react-router-dom"],
+          "query-vendor":  ["@tanstack/react-query"],
+          "axios-vendor":  ["axios"],
           "motion-vendor": ["framer-motion"],
         },
       },

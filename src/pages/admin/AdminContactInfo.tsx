@@ -94,6 +94,7 @@ const AdminContactInfo = () => {
                 <select value={item.type} onChange={(e) => updateItem(i, "type", e.target.value)} className="w-full px-3 py-2 bg-secondary border border-border rounded-lg text-sm text-foreground">
                   <option value="email">Email</option>
                   <option value="phone">Phone</option>
+                  <option value="whatsapp">WhatsApp</option>
                   <option value="address">Address</option>
                   <option value="social">Social</option>
                 </select>

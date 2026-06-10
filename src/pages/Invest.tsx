@@ -622,7 +622,7 @@ const Invest = () => {
               {hero?.eyebrow ?? "Dynime Investment Portal"}
             </Badge>
             <h1 className="font-heading text-4xl md:text-6xl font-bold leading-tight">
-              {hero?.title ?? "Invest in Dynime Inc.. Share the upside."}
+              {hero?.title ?? "Invest in Dynime Inc. Share the upside."}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {hero?.subtitle ??

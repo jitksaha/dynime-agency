@@ -1,1 +1,0 @@
-UPDATE public.careers SET location = 'Hybrid', updated_at = now();

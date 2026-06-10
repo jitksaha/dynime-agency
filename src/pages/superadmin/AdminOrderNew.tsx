@@ -699,7 +699,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
               {selectedEmployee && (
                 <div className="text-xs text-muted-foreground bg-background border border-border rounded p-2 space-y-0.5">
                   <p>
-                    Invoice will show <span className="font-semibold text-foreground">{selectedEmployee.name}</span> in the "From" section instead of Dynime Inc..
+                    Invoice will show <span className="font-semibold text-foreground">{selectedEmployee.name}</span> in the "From" section instead of Dynime Inc.
                   </p>
                   {selectedEmployee.email && <p>Contact: {selectedEmployee.email}</p>}
                 </div>

@@ -29,6 +29,31 @@ const SuperAdminLogin = () => {
     }
   };
 
+  const sendPasswordReset = async () => {
+    if (!email) {
+      toast.error("Please enter your email address first.");
+      return;
+    }
+    
+    const t = toast.loading("Sending password reset email...");
+    try {
+      const res = await fetch("/api/v1/auth/password/reset-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.message || "Could not send reset email.");
+      }
+      
+      toast.success("If your email is registered, a password reset link has been sent.", { id: t });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send password reset request.", { id: t });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -58,7 +83,16 @@ const SuperAdminLogin = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <button
+                  type="button"
+                  onClick={sendPasswordReset}
+                  className="text-[11px] text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <div className="relative">
                 <Input
                   id="password"

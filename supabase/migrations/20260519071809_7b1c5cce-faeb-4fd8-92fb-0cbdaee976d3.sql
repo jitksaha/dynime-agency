@@ -1,1 +1,0 @@
-ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS job_type text;

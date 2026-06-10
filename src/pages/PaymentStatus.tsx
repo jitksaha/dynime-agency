@@ -33,8 +33,11 @@ const destinationFor = (status: string, orderId?: string) => {
       ? `/flexpay/apply?payment=success&order_id=${orderId || ""}`
       : `/flexpay/apply?payment=${status}`;
   }
+  if (status === "success") {
+    localStorage.removeItem("checkout_cart_v1");
+  }
   return status === "success"
-    ? `/checkout?payment=success&order_id=${orderId || ""}`
+    ? `/invoice/${orderId || ""}`
     : `/checkout?payment=${status}`;
 };
 

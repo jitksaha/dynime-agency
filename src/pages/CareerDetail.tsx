@@ -114,10 +114,10 @@ const CareerDetail = () => {
 
   // Build a clean text description from description or stripped HTML (max ~160 chars)
   const buildDescription = (j?: JobPost | null): string => {
-    if (!j) return "Open position at Dynime Inc.. Apply now and join our remote-first global team.";
+    if (!j) return "Open position at Dynime Inc. Apply now and join our remote-first global team.";
     const raw = (j.description && j.description.trim())
       || (j.content_html ? j.content_html.replace(/<[^>]+>/g, " ") : "")
-      || `${j.title} — ${j.employment_type} role in ${j.department}, ${j.location}. Apply now at Dynime Inc..`;
+      || `${j.title} — ${j.employment_type} role in ${j.department}, ${j.location}. Apply now at Dynime Inc.`;
     const clean = raw.replace(/\s+/g, " ").trim();
     return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
   };

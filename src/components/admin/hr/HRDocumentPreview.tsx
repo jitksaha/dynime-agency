@@ -63,7 +63,7 @@ const EmployeeAcceptanceBlock = ({
   );
 };
 
-export type HRDocKind = "offer" | "agreement" | "payslip" | "experience" | "relieving";
+export type HRDocKind = "offer" | "agreement" | "payslip" | "experience" | "relieving" | "promotion" | "termination";
 
 export interface HRDocPreviewProps {
   kind: HRDocKind;
@@ -106,6 +106,12 @@ export interface HRDocPreviewProps {
   signatureImageUrl?: string;
   // Payslip
   payslip?: PayslipBreakdown;
+  // Promotion / Termination Details
+  revisedDesignation?: string;
+  revisedGrossSalary?: number;
+  noticePeriodDays?: number;
+  severanceAmount?: number;
+  reason?: string;
 }
 
 const fmtDate = (s?: string | null) => {
@@ -127,6 +133,8 @@ const TITLES: Record<HRDocKind, string> = {
   payslip: "Payslip",
   experience: "Experience Letter",
   relieving: "Relieving Letter",
+  promotion: "Promotion Letter",
+  termination: "Termination Letter",
 };
 
 const computeTenure = (joining?: string | null, last?: string | null) => {
@@ -157,6 +165,11 @@ const HRDocumentPreview = ({
   signatureTypedName,
   signatureImageUrl,
   payslip,
+  revisedDesignation,
+  revisedGrossSalary,
+  noticePeriodDays,
+  severanceAmount,
+  reason,
 }: HRDocPreviewProps) => {
   const { data: settings } = useSiteSettings();
   const companyName = settings?.company_name || "Dynime Inc.";
@@ -359,6 +372,50 @@ const HRDocumentPreview = ({
           )}
           {bodyText && <p className="text-sm leading-relaxed whitespace-pre-line mb-4">{bodyText}</p>}
           <p className="text-sm leading-relaxed mb-4">We wish them the very best in their future endeavours.</p>
+        </>
+      )}
+
+      {/* === PROMOTION === */}
+      {kind === "promotion" && (
+        <>
+          <h1 className="text-xl font-bold mb-3">Dear {employee.full_name.split(" ")[0]},</h1>
+          <p className="text-sm leading-relaxed mb-4">
+            We are pleased to inform you that you have been promoted to the position of <strong>{revisedDesignation || "—"}</strong>
+            {employee.department ? ` in the ${employee.department} department` : ""} at {companyName}.
+            This promotion is effective from <strong>{fmtDate(effectiveDate || issueDate)}</strong>.
+          </p>
+          <p className="text-sm leading-relaxed mb-4">
+            With this promotion, your revised gross compensation will be <strong>{fmtMoney(Number(revisedGrossSalary || 0), currency)} / month</strong>.
+            All other terms and conditions of your employment contract remain in full force and effect.
+          </p>
+          {bodyText && <p className="text-sm leading-relaxed whitespace-pre-line mb-4">{bodyText}</p>}
+          <p className="text-sm leading-relaxed mb-4">
+            We would like to take this opportunity to thank you for your hard work, dedication, and valuable contributions to the company, and we look forward to your continued success in your new role.
+          </p>
+        </>
+      )}
+
+      {/* === TERMINATION === */}
+      {kind === "termination" && (
+        <>
+          <h1 className="text-xl font-bold mb-3">Dear {employee.full_name.split(" ")[0]},</h1>
+          <p className="text-sm leading-relaxed mb-4">
+            This letter is to formally notify you that your employment with {companyName} is terminated,
+            effective from <strong>{fmtDate(effectiveDate || issueDate)}</strong>. Your final working day will be <strong>{fmtDate(employee.last_working_day || effectiveDate || issueDate)}</strong>.
+          </p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm bg-neutral-50 border border-neutral-200 rounded-md p-4 mb-4">
+            <div><span className="text-neutral-500">Effective Date:</span> <strong>{fmtDate(effectiveDate || issueDate)}</strong></div>
+            <div><span className="text-neutral-500">Last Working Day:</span> <strong>{fmtDate(employee.last_working_day || effectiveDate || issueDate)}</strong></div>
+            <div><span className="text-neutral-500">Notice Period:</span> <strong>{noticePeriodDays ? `${noticePeriodDays} days` : "—"}</strong></div>
+            <div><span className="text-neutral-500">Severance Pay:</span> <strong>{severanceAmount ? fmtMoney(Number(severanceAmount), currency) : "N/A"}</strong></div>
+            {reason && <div className="col-span-2"><span className="text-neutral-500">Reason for Termination:</span> <strong className="capitalize">{reason.replace(/_/g, " ")}</strong></div>}
+          </div>
+          {bodyText && <p className="text-sm leading-relaxed whitespace-pre-line mb-4">{bodyText}</p>}
+          <p className="text-sm leading-relaxed mb-4">
+            Please ensure that all company property, including keys, access cards, and devices, are returned to the HR department on or before your last working day.
+            Your final settlement, including any accrued benefits and severance pay, will be processed and disbursed in accordance with company policy and legal regulations.
+          </p>
+          <p className="text-sm leading-relaxed mb-4">We thank you for your service and wish you the best in your future career.</p>
         </>
       )}
 

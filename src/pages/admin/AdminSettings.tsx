@@ -6,7 +6,7 @@ import { useSiteSettings } from "@/hooks/use-data";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign, Cloud, CheckCircle2, AlertTriangle, Database } from "lucide-react";
+import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign, Cloud, CheckCircle2, AlertTriangle, Database, Mail, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiPost, apiGet } from "@/lib/api";
@@ -54,6 +54,10 @@ const AdminSettings = () => {
   const [clientIdInput, setClientIdInput] = useState("");
   const [clientSecretInput, setClientSecretInput] = useState("");
   const [savingConfig, setSavingConfig] = useState(false);
+  const [smtpTab, setSmtpTab] = useState<"general" | "careers" | "orders">("general");
+  const [showSmtpPass, setShowSmtpPass] = useState(false);
+  const [showSmtpCareersPass, setShowSmtpCareersPass] = useState(false);
+  const [showSmtpOrdersPass, setShowSmtpOrdersPass] = useState(false);
   const qc = useQueryClient();
 
   const loadBackupStatus = async () => {
@@ -156,7 +160,29 @@ const AdminSettings = () => {
         "live_chat_enabled",
         "auto_currency_switcher_enabled",
         "auto_language_switcher_enabled",
-        "referral_cooling_period_days"
+        "referral_cooling_period_days",
+        "maintenance_mode",
+        "smtp_host",
+        "smtp_port",
+        "smtp_username",
+        "smtp_password",
+        "smtp_encryption",
+        "smtp_from_address",
+        "smtp_from_name",
+        "smtp_careers_host",
+        "smtp_careers_port",
+        "smtp_careers_username",
+        "smtp_careers_password",
+        "smtp_careers_encryption",
+        "smtp_careers_from_address",
+        "smtp_careers_from_name",
+        "smtp_orders_host",
+        "smtp_orders_port",
+        "smtp_orders_username",
+        "smtp_orders_password",
+        "smtp_orders_encryption",
+        "smtp_orders_from_address",
+        "smtp_orders_from_name"
       ];
       const rows: { key: string; value: any }[] = keysToSave
         .filter((k) => values[k] !== undefined)
@@ -667,6 +693,343 @@ const AdminSettings = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* SMTP Configuration */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Mail className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">SMTP Configuration</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Configure outgoing SMTP email settings. You can set up different credentials/accounts for general forms, job applications (careers), and orders.
+        </p>
+
+        {/* Tab switcher */}
+        <div className="flex border-b border-border/60 mb-6">
+          {(["general", "careers", "orders"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setSmtpTab(tab)}
+              className={`px-4 py-2 text-sm font-semibold capitalize border-b-2 transition-colors ${
+                smtpTab === tab
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab} Mailer
+            </button>
+          ))}
+        </div>
+
+        {/* Form Fields for Active Tab */}
+        <div className="space-y-4">
+          {smtpTab === "general" && (
+            <>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Host</label>
+                <input
+                  type="text"
+                  value={values.smtp_host || ""}
+                  onChange={(e) => setValues({ ...values, smtp_host: e.target.value })}
+                  placeholder="e.g. smtp.hostinger.com"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">SMTP Port</label>
+                  <input
+                    type="number"
+                    value={values.smtp_port || ""}
+                    onChange={(e) => setValues({ ...values, smtp_port: e.target.value })}
+                    placeholder="e.g. 465 or 587"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Encryption</label>
+                  <select
+                    value={values.smtp_encryption || "tls"}
+                    onChange={(e) => setValues({ ...values, smtp_encryption: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="tls">TLS (port 587)</option>
+                    <option value="ssl">SSL (port 465)</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Username</label>
+                <input
+                  type="email"
+                  value={values.smtp_username || ""}
+                  onChange={(e) => setValues({ ...values, smtp_username: e.target.value })}
+                  placeholder="e.g. contact@dynime.com"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Password</label>
+                <div className="relative">
+                  <input
+                    type={showSmtpPass ? "text" : "password"}
+                    value={values.smtp_password || ""}
+                    onChange={(e) => setValues({ ...values, smtp_password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpPass(!showSmtpPass)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showSmtpPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">From Email Address</label>
+                  <input
+                    type="email"
+                    value={values.smtp_from_address || ""}
+                    onChange={(e) => setValues({ ...values, smtp_from_address: e.target.value })}
+                    placeholder="e.g. contact@dynime.com"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">From Name</label>
+                  <input
+                    type="text"
+                    value={values.smtp_from_name || ""}
+                    onChange={(e) => setValues({ ...values, smtp_from_name: e.target.value })}
+                    placeholder="e.g. Dynime"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {smtpTab === "careers" && (
+            <>
+              <p className="text-xs text-amber-500 font-semibold mb-2">
+                Note: Optional. If host is left blank, the system will use General SMTP credentials with Careers From Address/Name to send.
+              </p>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Host (Optional)</label>
+                <input
+                  type="text"
+                  value={values.smtp_careers_host || ""}
+                  onChange={(e) => setValues({ ...values, smtp_careers_host: e.target.value })}
+                  placeholder="Leave blank to fallback to General Host"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">SMTP Port (Optional)</label>
+                  <input
+                    type="number"
+                    value={values.smtp_careers_port || ""}
+                    onChange={(e) => setValues({ ...values, smtp_careers_port: e.target.value })}
+                    placeholder="e.g. 465 or 587"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Encryption</label>
+                  <select
+                    value={values.smtp_careers_encryption || "tls"}
+                    onChange={(e) => setValues({ ...values, smtp_careers_encryption: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="tls">TLS (port 587)</option>
+                    <option value="ssl">SSL (port 465)</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Username (Optional)</label>
+                <input
+                  type="email"
+                  value={values.smtp_careers_username || ""}
+                  onChange={(e) => setValues({ ...values, smtp_careers_username: e.target.value })}
+                  placeholder="e.g. careers@dynime.com"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Password (Optional)</label>
+                <div className="relative">
+                  <input
+                    type={showSmtpCareersPass ? "text" : "password"}
+                    value={values.smtp_careers_password || ""}
+                    onChange={(e) => setValues({ ...values, smtp_careers_password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpCareersPass(!showSmtpCareersPass)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showSmtpCareersPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Careers From Email Address</label>
+                  <input
+                    type="email"
+                    value={values.smtp_careers_from_address || ""}
+                    onChange={(e) => setValues({ ...values, smtp_careers_from_address: e.target.value })}
+                    placeholder="e.g. careers@dynime.com"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Careers From Name</label>
+                  <input
+                    type="text"
+                    value={values.smtp_careers_from_name || ""}
+                    onChange={(e) => setValues({ ...values, smtp_careers_from_name: e.target.value })}
+                    placeholder="e.g. Dynime Careers"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {smtpTab === "orders" && (
+            <>
+              <p className="text-xs text-amber-500 font-semibold mb-2">
+                Note: Optional. If host is left blank, the system will use General SMTP credentials with Orders From Address/Name to send.
+              </p>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Host (Optional)</label>
+                <input
+                  type="text"
+                  value={values.smtp_orders_host || ""}
+                  onChange={(e) => setValues({ ...values, smtp_orders_host: e.target.value })}
+                  placeholder="Leave blank to fallback to General Host"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">SMTP Port (Optional)</label>
+                  <input
+                    type="number"
+                    value={values.smtp_orders_port || ""}
+                    onChange={(e) => setValues({ ...values, smtp_orders_port: e.target.value })}
+                    placeholder="e.g. 465 or 587"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Encryption</label>
+                  <select
+                    value={values.smtp_orders_encryption || "tls"}
+                    onChange={(e) => setValues({ ...values, smtp_orders_encryption: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  >
+                    <option value="tls">TLS (port 587)</option>
+                    <option value="ssl">SSL (port 465)</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Username (Optional)</label>
+                <input
+                  type="email"
+                  value={values.smtp_orders_username || ""}
+                  onChange={(e) => setValues({ ...values, smtp_orders_username: e.target.value })}
+                  placeholder="e.g. notifications@dynime.com"
+                  className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">SMTP Password (Optional)</label>
+                <div className="relative">
+                  <input
+                    type={showSmtpOrdersPass ? "text" : "password"}
+                    value={values.smtp_orders_password || ""}
+                    onChange={(e) => setValues({ ...values, smtp_orders_password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSmtpOrdersPass(!showSmtpOrdersPass)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                  >
+                    {showSmtpOrdersPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Orders From Email Address</label>
+                  <input
+                    type="email"
+                    value={values.smtp_orders_from_address || ""}
+                    onChange={(e) => setValues({ ...values, smtp_orders_from_address: e.target.value })}
+                    placeholder="e.g. notifications@dynime.com"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground block mb-1">Orders From Name</label>
+                  <input
+                    type="text"
+                    value={values.smtp_orders_from_name || ""}
+                    onChange={(e) => setValues({ ...values, smtp_orders_from_name: e.target.value })}
+                    placeholder="e.g. Dynime Orders"
+                    className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Maintenance Mode toggle */}
+      <div className="glass-card p-6 max-w-2xl mb-6 border-red-500/25 bg-red-950/5">
+        <div className="flex items-center gap-2 mb-1">
+          <ShieldAlert className="w-5 h-5 text-red-500" />
+          <h2 className="text-lg font-semibold text-foreground">Maintenance Mode</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Enable this to put the website under maintenance. Public visitors will be redirected to the
+          Maintenance page. Admins, managers, employees, and investors can still access their dashboards.
+        </p>
+        <label
+          className="flex items-start gap-3 rounded-lg border border-red-500/20 bg-red-950/10 p-3 cursor-pointer hover:border-red-500/40 transition-colors"
+        >
+          <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${(values.maintenance_mode === "true") ? "bg-red-500/20 text-red-400" : "bg-secondary text-muted-foreground"}`}>
+            <AlertTriangle className="w-4 h-4" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-medium text-foreground">Enable Maintenance Mode</span>
+            <span className="block text-xs text-muted-foreground">Redirect all public pages to the maintenance page.</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={values.maintenance_mode === "true"}
+            onChange={(e) => setValues({ ...values, maintenance_mode: e.target.checked ? "true" : "false" })}
+            className="mt-1 w-4 h-4 accent-red-500"
+          />
+        </label>
       </div>
 
       {/* Live Chat embed (LiveChat.com or any third-party widget snippet) */}

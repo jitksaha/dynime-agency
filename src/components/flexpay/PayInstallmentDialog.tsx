@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,6 +43,12 @@ const GATEWAY_CAPS: Record<string, GatewayCap> = {
   stripe: {
     label: "Stripe",
     desc: "Global cards in USD.",
+    minUsd: 0.5,
+    maxUsd: 999999,
+  },
+  keeal: {
+    label: "Keeal",
+    desc: "Cards & alternative payment methods via Keeal.",
     minUsd: 0.5,
     maxUsd: 999999,
   },
@@ -92,16 +98,12 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
   const { data: enabledGateways } = useQuery({
     queryKey: ["installment-pay-gateways"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("key, value");
-      const map: Record<string, string> = {};
-      (data || []).forEach((r: any) => {
-        const v = typeof r.value === "string" ? r.value.replace(/^"|"$/g, "") : String(r.value);
-        map[r.key] = v;
-      });
+      const settings = await apiGet<Record<string, any>>("/site-settings");
+      const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
       // NOTE: FlexPay is intentionally excluded — an installment cannot be
       // repaid using FlexPay credit itself.
-      const ids = ["stripe", "dodopayment", "sslcommerz", "bkash", "bank_transfer"];
-      return ids.filter((id) => map[`${id}_enabled`] === "true");
+      const ids = ["stripe", "keeal", "dodopayment", "sslcommerz", "bkash", "bank_transfer"];
+      return ids.filter((id) => cleanValue(settings[`${id}_enabled`]) === "true");
     },
   });
 

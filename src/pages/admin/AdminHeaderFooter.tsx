@@ -714,7 +714,7 @@ const AdminHeaderFooter = () => {
                 <Input
                   value={bottomBar.copyright}
                   onChange={(e) => { setBottomBar({ ...bottomBar, copyright: e.target.value }); markChanged(); }}
-                  placeholder="© 2019-{year} Dynime Inc.. All rights reserved."
+                  placeholder="© 2019-{year} Dynime Inc. All rights reserved."
                 />
                 <p className="text-[11px] text-muted-foreground mt-1">
                   Supports <code className="bg-secondary px-1 rounded">{"{year}"}</code>, HTML tags like

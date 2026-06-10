@@ -7,10 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import BankDepositDialog, { type BankAccount } from "@/components/checkout/BankDepositDialog";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import type { CurrencyCode } from "@/lib/currency";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 
 const GATEWAYS: { id: string; label: string }[] = [
   { id: "stripe", label: "Credit / Debit Card (Stripe)" },
+  { id: "keeal", label: "Keeal" },
   { id: "sslcommerz", label: "SSLCommerz" },
   { id: "dodopayment", label: "DodoPayment" },
   { id: "bkash", label: "bKash" },
@@ -23,6 +24,7 @@ const GATEWAYS: { id: string; label: string }[] = [
 // `INVOICE` means: keep the invoice's own currency (manual settlement).
 const GATEWAY_SETTLE_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
   stripe: "USD",
+  keeal: "USD",
   dodopayment: "USD",
   bank_transfer: "USD",
   sslcommerz: "BDT",
@@ -32,6 +34,7 @@ const GATEWAY_SETTLE_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
 // What the customer's card/wallet will actually be billed in (display only).
 const GATEWAY_DISPLAY_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
   stripe: "USD",
+  keeal: "USD",
   dodopayment: "USD",
   bank_transfer: "USD",
   sslcommerz: "BDT",
@@ -109,14 +112,11 @@ export default function PayInvoicePanel({
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase
-          .from("site_settings")
-          .select("key, value")
-          .like("key", "%_enabled");
-        const on = (data || [])
-          .filter((r: { value: unknown }) =>
-            (typeof r.value === "string" ? r.value.replace(/^"|"$/g, "") : String(r.value)) === "true")
-          .map((r: { key: string }) => r.key.replace(/_enabled$/, ""))
+        const settings = await apiGet<Record<string, any>>("/site-settings");
+        const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
+        const on = Object.keys(settings)
+          .filter((key) => key.endsWith("_enabled") && cleanValue(settings[key]) === "true")
+          .map((key) => key.replace(/_enabled$/, ""))
           .filter((g: string) => GATEWAYS.some((x) => x.id === g));
         setEnabled(on);
         if (on.length) {
@@ -128,6 +128,8 @@ export default function PayInvoicePanel({
             on[0];
           if (pick !== gateway) setGateway(pick);
         }
+      } catch (e) {
+        console.error("Failed to load gateways", e);
       } finally {
         setLoadingGateways(false);
       }

@@ -67,7 +67,7 @@ const GuestOrderLookup = () => {
       )}
       <p className="text-center text-xs text-muted-foreground">
         Have an account?{" "}
-        <button onClick={() => navigate("/superadmin/login")} className="text-primary hover:underline">Sign in</button>
+        <button onClick={() => navigate("/account/login")} className="text-primary hover:underline">Sign in</button>
         {" "}to see orders automatically.
       </p>
     </div>

@@ -106,7 +106,7 @@ const NotificationsBell = () => {
 
   useEffect(() => {
     fetchAll();
-    const interval = setInterval(fetchAll, 30000);
+    const interval = setInterval(fetchAll, 4000);
 
     const channel = supabase
       .channel("admin-notifications")

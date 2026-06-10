@@ -1,1 +1,0 @@
-UPDATE public.product_urls SET external_url = 'https://os.dynime.com', label = 'Dynime OS', internal_path = '/products/os' WHERE key = 'dbm';

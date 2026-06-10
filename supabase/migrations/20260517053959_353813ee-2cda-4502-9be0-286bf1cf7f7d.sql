@@ -1,3 +1,0 @@
-UPDATE public.contact_info SET label = 'London HQ', value = 'Suite Bd1724 Skyport Drive, Harmondsworth, West Drayton, Middx, England, UB7 0LB, United Kingdom', sort_order = 1, updated_at = now() WHERE id = 'b2475e40-d145-4945-87f9-a0040b12e0e0';
-
-UPDATE public.contact_info SET is_active = false, updated_at = now() WHERE id IN ('5df3a50e-1cf8-4f3c-8f47-2db0fa4fbe5a', 'a20e03b5-d6fa-4ce8-85de-4976246e65e1');

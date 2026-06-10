@@ -25,6 +25,7 @@ import {
   Users, FileText, Printer, Mail, Trash2, Plus, Pencil, Send,
   Loader2, Briefcase, Banknote, ScrollText, ReceiptText, FileSignature,
   Check, ChevronsUpDown, RefreshCw, IdCard, UserCircle2, AlertTriangle, Download,
+  FileUp, FileWarning, Eye,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HRDocumentPreview, { type HRDocKind } from "@/components/admin/hr/HRDocumentPreview";
@@ -250,6 +251,8 @@ const KIND_META: Record<HRDocKind, { label: string; icon: any }> = {
   payslip: { label: "Payslip", icon: ReceiptText },
   experience: { label: "Experience Letter", icon: FileText },
   relieving: { label: "Relieving Letter", icon: FileText },
+  promotion: { label: "Promotion Letter", icon: FileUp },
+  termination: { label: "Termination Letter", icon: FileWarning },
 };
 
 const DEFAULT_AGREEMENT_CLAUSES = [
@@ -280,9 +283,7 @@ const toHrStatus = (status?: string | null) => {
 
 // Roles that represent platform owners/super admins — they manage HR but are
 // not themselves employees to be issued payslips / offer letters.
-const EXCLUDED_TEAM_ROLES = new Set([
-  "super_admin", "superadmin", "owner", "platform_owner",
-]);
+const EXCLUDED_TEAM_ROLES = new Set<string>([]);
 
 const sourceRowsFromTeam = (teamUsers: TeamUser[], publicMembers: TeamMember[]): TeamSourceEmployee[] => {
   const accountRows = teamUsers
@@ -1423,6 +1424,12 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+  const [revisedDesignation, setRevisedDesignation] = useState("");
+  const [revisedGrossSalary, setRevisedGrossSalary] = useState("");
+  const [noticePeriodDays, setNoticePeriodDays] = useState("");
+  const [severanceAmount, setSeveranceAmount] = useState("");
+  const [reason, setReason] = useState("");
+
   // Per-document overrides for fields that may be missing on the employee
   // record. These only affect the rendered preview / exported PDF — the
   // employee row is not modified. When the picker switches, we reset overrides
@@ -1533,6 +1540,11 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
         extra_earnings: kind === "payslip" ? extraEarnings : null,
         extra_deductions: kind === "payslip" ? extraDeductions : null,
         send_email: sendEmail,
+        revised_designation: kind === "promotion" ? revisedDesignation : null,
+        revised_gross_salary: kind === "promotion" ? Number(revisedGrossSalary) || null : null,
+        notice_period_days: kind === "termination" ? Number(noticePeriodDays) || null : null,
+        severance_amount: kind === "termination" ? Number(severanceAmount) || null : null,
+        reason: kind === "termination" ? reason : null,
       });
       toast.success(sendEmail
         ? `Document ${data?.doc_number || ""} issued and emailed`
@@ -1646,6 +1658,65 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
                 <Label>Offer valid until</Label>
                 <Input type="date" value={validityDate} onChange={(e) => setValidityDate(e.target.value)} />
               </div>
+            )}
+            {kind === "promotion" && (
+              <>
+                <div>
+                  <Label>Revised Designation</Label>
+                  <Input
+                    placeholder="e.g. Senior Software Engineer"
+                    value={revisedDesignation}
+                    onChange={(e) => setRevisedDesignation(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Revised Gross Salary</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 5000"
+                    value={revisedGrossSalary}
+                    onChange={(e) => setRevisedGrossSalary(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+            {kind === "termination" && (
+              <>
+                <div>
+                  <Label>Notice Period (Days)</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 30"
+                    value={noticePeriodDays}
+                    onChange={(e) => setNoticePeriodDays(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Severance Amount</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 1500"
+                    value={severanceAmount}
+                    onChange={(e) => setSeveranceAmount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Reason for Termination</Label>
+                  <Select value={reason} onValueChange={setReason}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select reason…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="redundancy">Redundancy</SelectItem>
+                      <SelectItem value="performance">Performance Issues</SelectItem>
+                      <SelectItem value="misconduct">Misconduct</SelectItem>
+                      <SelectItem value="mutual_agreement">Mutual Agreement</SelectItem>
+                      <SelectItem value="resignation">Resignation</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
           </div>
         </section>
@@ -1859,6 +1930,11 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
             payslip={kind === "payslip" ? payslip : undefined}
             signatureTypedName={signatureTypedName || undefined}
             signatureImageUrl={signatureImageUrl || undefined}
+            revisedDesignation={kind === "promotion" ? revisedDesignation : undefined}
+            revisedGrossSalary={kind === "promotion" ? Number(revisedGrossSalary) || undefined : undefined}
+            noticePeriodDays={kind === "termination" ? Number(noticePeriodDays) || undefined : undefined}
+            severanceAmount={kind === "termination" ? Number(severanceAmount) || undefined : undefined}
+            reason={kind === "termination" ? reason : undefined}
           />
         ) : (
           <div className="border border-dashed border-border rounded-lg p-10 text-center text-muted-foreground">
@@ -1928,6 +2004,56 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
                   {d.sent_at && <div className="text-[10px] text-muted-foreground mt-0.5">{new Date(d.sent_at).toLocaleString()}</div>}
                 </td>
                 <td className="px-3 py-2 text-right space-x-1">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-3.5 h-3.5 mr-1" /> View
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[225mm] max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Document Preview: {d.doc_number}</DialogTitle>
+                      </DialogHeader>
+                      <div className="bg-white p-4 rounded-md border border-neutral-200 overflow-x-auto">
+                        <HRDocumentPreview
+                          kind={d.kind}
+                          docNumber={d.doc_number || undefined}
+                          issueDate={d.issue_date}
+                          effectiveDate={d.effective_date || undefined}
+                          periodMonth={d.period_month || undefined}
+                          employee={d.snapshot as any}
+                          bodyText={d.computed?.body_text as string}
+                          clauses={d.computed?.clauses as any}
+                          validityDate={d.computed?.validity_date as string}
+                          payslip={
+                            d.kind === "payslip"
+                              ? computePayslip(
+                                  Number(d.snapshot?.gross_salary || 0),
+                                  (d.snapshot?.allowances || []) as any,
+                                  (d.snapshot?.deductions || []) as any,
+                                  (d.computed?.extra_earnings || []) as any,
+                                  (d.computed?.extra_deductions || []) as any
+                                )
+                              : undefined
+                          }
+                          revisedDesignation={d.computed?.revised_designation as string}
+                          revisedGrossSalary={d.computed?.revised_gross_salary as number}
+                          noticePeriodDays={d.computed?.notice_period_days as number}
+                          severanceAmount={d.computed?.severance_amount as number}
+                          reason={d.computed?.reason as string}
+                        />
+                      </div>
+                      <DialogFooter className="print:hidden">
+                        <Button
+                          onClick={() => {
+                            window.print();
+                          }}
+                        >
+                          <Printer className="w-4 h-4 mr-1.5" /> Print
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   {emp?.email && d.status !== "void" && (
                     <Button variant="ghost" size="sm" onClick={() => resend(d)}><Mail className="w-3.5 h-3.5 mr-1" /> Resend</Button>
                   )}

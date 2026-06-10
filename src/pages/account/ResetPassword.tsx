@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,37 +8,58 @@ import { toast } from "sonner";
 import { Loader2, KeyRound } from "lucide-react";
 import { usePageTitle } from "@/hooks/use-page-title";
 import { useSEO } from "@/hooks/use-seo";
+import { apiPost } from "@/lib/api";
 
 const ResetPassword = () => {
   usePageTitle("Reset password");
   useSEO({ title: "Reset password", noIndex: true });
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  const token = searchParams.get("token") || "";
+  const email = searchParams.get("email") || "";
+
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase will set a recovery session from the link's hash
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    if (token && email) {
+      setReady(true);
+    } else {
+      setReady(false);
+      toast.error("Invalid password reset link. Missing token or email.");
+    }
+  }, [token, email]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) return toast.error("Password must be at least 6 characters");
     if (password !== confirm) return toast.error("Passwords don't match");
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Password updated");
-    navigate("/account", { replace: true });
+    
+    try {
+      await apiPost("/auth/password/reset", {
+        email: email.trim(),
+        token,
+        password,
+      });
+      toast.success("Password updated successfully");
+      
+      // Direct user to correct login portal
+      const isSystemAdmin = email.toLowerCase().includes("admin") || email.toLowerCase() === "mail.dynime@gmail.com";
+      if (isSystemAdmin) {
+        navigate("/superadmin/login", { replace: true });
+      } else {
+        navigate("/account/login", { replace: true });
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to reset password";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

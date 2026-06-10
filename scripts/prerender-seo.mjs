@@ -91,7 +91,7 @@ const STATIC_ROUTES = [
   { path: "/products/os", key: "product-dbm", title: "Dynime OS — The AI-Powered Business Operating System", description: "Dynime OS unifies CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support into one intelligent platform — built for growing companies." },
   { path: "/services/dss", key: "services-dss", title: "DSS — Custom Software, AI Apps & QA Engineering", description: "Dynime Software Services: senior-engineered custom software, AI applications and QA — built with discipline, shipped with precision." },
   { path: "/usa-business-formation", key: "usa-formation", title: "USA Company Formation — All 50 States Compared", description: "Compare LLC and Corporation formation fees, annual costs and taxes across all 50 US states. Curated guidance from the Dynime team." },
-  { path: "/track", key: "track", title: "Track Your Order", description: "Track the live status of your order, invoice or company formation with Dynime Inc.." },
+  { path: "/track", key: "track", title: "Track Your Order", description: "Track the live status of your order, invoice or company formation with Dynime Inc." },
 ];
 
 // ── Service detail pages — extract slug + meta from src/data/services.ts ──

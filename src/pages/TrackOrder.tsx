@@ -191,7 +191,7 @@ const TrackOrder = () => {
       } catch (e) {
         // ignore background errors
       }
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [order?.id, order?.status, isFailed]);
 

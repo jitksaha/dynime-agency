@@ -1,1 +1,0 @@
-ALTER FUNCTION public._fmt_money(numeric, text) SET search_path = public;

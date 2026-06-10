@@ -1,1 +1,0 @@
-ALTER TABLE public.careers ADD COLUMN IF NOT EXISTS hero_image_url text;

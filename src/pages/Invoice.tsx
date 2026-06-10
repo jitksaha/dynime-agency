@@ -132,7 +132,7 @@ const Invoice = () => {
   useEffect(() => {
     if (!needsLiveUpdates) return;
     const tick = () => fetchInvoice({ silent: true });
-    pollRef.current = window.setInterval(tick, 8000);
+    pollRef.current = window.setInterval(tick, 4000);
     const onVis = () => { if (document.visibilityState === "visible") tick(); };
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("focus", tick);

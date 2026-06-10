@@ -147,7 +147,7 @@ const CustomerNotificationsBell = () => {
   const { data: notifications = [] } = useQuery({
     queryKey: ["customer-notifications", user?.id],
     enabled: !!user?.id,
-    refetchInterval: 30_000,
+    refetchInterval: 4000,
     queryFn: () => fetchCustomerNotifications(user!.email!, fullName),
   });
 

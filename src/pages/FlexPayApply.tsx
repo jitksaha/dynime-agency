@@ -165,22 +165,19 @@ const FlexPayApply = () => {
   const { data: gateways } = useQuery({
     queryKey: ["enabled-gateways-flexpay"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("key, value");
-      const map: Record<string, string> = {};
-      (data || []).forEach((r: any) => {
-        const v = typeof r.value === "string" ? r.value.replace(/^"|"$/g, "") : String(r.value);
-        map[r.key] = v;
-      });
-      const ids = ["stripe", "bkash", "sslcommerz", "dodopayment", "bank_transfer"];
+      const settings = await apiGet<Record<string, any>>("/site-settings");
+      const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
+      const ids = ["stripe", "keeal", "bkash", "sslcommerz", "dodopayment", "bank_transfer"];
       const meta: Record<string, { label: string; logo: any }> = {
         stripe: { label: "Credit/Debit Card (Stripe)", logo: CreditCard },
+        keeal: { label: "Keeal Checkout", logo: CreditCard },
         bkash: { label: "bKash Checkout", logo: Wallet },
         sslcommerz: { label: "SSLCommerz Checkout", logo: CreditCard },
         dodopayment: { label: "DodoPayment (Apple/Google Pay)", logo: CreditCard },
         bank_transfer: { label: "Bank Transfer", logo: Building2 },
       };
       return ids
-        .filter((id) => map[`${id}_enabled`] === "true")
+        .filter((id) => cleanValue(settings[`${id}_enabled`]) === "true")
         .map((id) => ({ id, ...meta[id] }));
     },
   });

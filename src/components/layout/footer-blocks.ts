@@ -153,7 +153,7 @@ export const defaultFooterBlocks: FooterBlock[] = [
     type: "copyright",
     visible: true,
     width: "default",
-    text: "© 2019-{year} Dynime Inc.. All rights reserved.",
+    text: "© 2019-{year} Dynime Inc. All rights reserved.",
   },
   {
     id: "blk-payments",

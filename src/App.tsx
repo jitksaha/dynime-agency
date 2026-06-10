@@ -12,6 +12,7 @@ import { CartProvider } from "@/hooks/use-cart";
 import { LocationProvider } from "@/contexts/LocationContext";
 import "@/i18n";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
+import MaintenanceGuard from "@/components/shared/MaintenanceGuard";
 import { useRealtimeSync } from "@/hooks/use-realtime-sync";
 import DynamicFavicon from "@/components/shared/DynamicFavicon";
 import ProductUrlInterceptor from "@/components/shared/ProductUrlInterceptor";
@@ -103,6 +104,7 @@ const FlexPayReceipt = lazy(() => import("./pages/account/FlexPayReceipt.tsx"));
 const AdminFlexPay = lazy(() => import("./pages/superadmin/AdminFlexPay.tsx"));
 const VerifyOrder = lazy(() => import("./pages/VerifyOrder.tsx"));
 const VerifyOrderMockFlow = lazy(() => import("./pages/VerifyOrderMockFlow.tsx"));
+const Maintenance = lazy(() => import("./pages/Maintenance.tsx"));
 
 // Investor Portal (lazy)
 const InvestorLogin = lazy(() => import("./pages/investor-portal/InvestorLogin.tsx"));
@@ -262,7 +264,10 @@ const App = () => (
                   
                   <Suspense fallback={<RouteFallback />}>
                   <RouteTransition>
+                  <MaintenanceGuard>
                   <Routes>
+                    {/* Maintenance */}
+                    <Route path="/maintenance" element={<Maintenance />} />
                     {/* Public */}
                     <Route path="/" element={<Index />} />
                   <Route path="/about" element={<About />} />
@@ -283,6 +288,7 @@ const App = () => (
                   {/* Customer Account Portal */}
                   <Route path="/account/login" element={<AccountLogin />} />
                   <Route path="/account/reset-password" element={<ResetPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/account" element={<AccountDashboard />} />
                   <Route path="/account/orders" element={<AccountOrders />} />
                   <Route path="/account/tracking" element={<AccountTracking />} />
@@ -424,8 +430,10 @@ const App = () => (
                   <Route path="/superadmin/email-portal" element={<ProtectedRoute><AdminEmailPortal /></ProtectedRoute>} />
                   <Route path="/superadmin/country-eligibility" element={<ProtectedRoute><AdminCountryEligibility /></ProtectedRoute>} />
 
-                  {/* Legacy admin redirects */}
-                  <Route path="/admin/*" element={<NotFound />} />
+                  {/* Legacy /admin/* redirects → all go to superadmin */}
+                  <Route path="/admin/login" element={<Navigate to="/superadmin/login" replace />} />
+                  <Route path="/admin" element={<Navigate to="/superadmin" replace />} />
+                  <Route path="/admin/*" element={<Navigate to="/superadmin" replace />} />
 
                   {/* Dynamic service pages */}
                   <Route path="/superadmin/crm" element={<ProtectedRoute><AdminCrmDashboard /></ProtectedRoute>} />
@@ -452,6 +460,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
 
                   </Routes>
+                  </MaintenanceGuard>
                   </RouteTransition>
                   </Suspense>
               </BrowserRouter>

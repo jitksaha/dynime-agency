@@ -1,14 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
-import { readCachedSiteSettings, writeCachedSiteSettings } from "@/lib/site-settings-cache";
+import { api } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
+
+// Thin wrappers so existing pages keep working
+const apiGet = <T,>(path: string) => api.get<T>(path).then((r) => r.data);
+const apiPost = <T,>(path: string, body?: unknown) => api.post<T>(path, body).then((r) => r.data);
+const apiPatch = <T,>(path: string, body?: unknown) => api.patch<T>(path, body).then((r) => r.data);
+const apiDelete = <T,>(path: string) => api.delete<T>(path).then((r) => r.data);
 
 // ── Portfolio Projects ─────────────────────────────────────────────────
 export const usePortfolioProjects = (category?: string) => {
   return useQuery({
     queryKey: ["portfolio-projects", category],
     queryFn: () => {
-      const queryStr = category && category !== "All" ? `?category=${category}` : "";
-      return apiGet<any[]>(`/cms/portfolio-projects${queryStr}`);
+      const params = category && category !== "All" ? `?category=${encodeURIComponent(category)}` : "";
+      return apiGet<any[]>(`/portfolio${params}`);
     },
   });
 };
@@ -16,7 +22,7 @@ export const usePortfolioProjects = (category?: string) => {
 export const usePortfolioProjectsAdmin = () => {
   return useQuery({
     queryKey: ["portfolio-projects-admin"],
-    queryFn: () => apiGet<any[]>("/cms/portfolio-projects/admin"),
+    queryFn: () => apiGet<any[]>("/admin/portfolio"),
   });
 };
 
@@ -24,10 +30,8 @@ export const useUpsertPortfolioProject = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (project: any) => {
-      if (project.id) {
-        return apiPatch<any>(`/cms/portfolio-projects/${project.id}`, project);
-      }
-      return apiPost<any>("/cms/portfolio-projects", project);
+      if (project.id) return apiPatch<any>(`/admin/portfolio/${project.id}`, project);
+      return apiPost<any>("/admin/portfolio", project);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
@@ -39,7 +43,7 @@ export const useUpsertPortfolioProject = () => {
 export const useDeletePortfolioProject = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/portfolio-projects/${id}`),
+    mutationFn: (id: string) => apiDelete<any>(`/admin/portfolio/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
@@ -51,7 +55,7 @@ export const useBulkUpdatePortfolioProjects = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: { ids: string[]; data: any }) =>
-      apiPost<any>("/cms/portfolio-projects/bulk-update", payload),
+      apiPost<any>("/admin/portfolio/bulk-update", payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
@@ -63,7 +67,7 @@ export const useBulkDeletePortfolioProjects = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: { ids: string[] }) =>
-      apiPost<any>("/cms/portfolio-projects/bulk-delete", payload),
+      apiPost<any>("/admin/portfolio/bulk-delete", payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portfolio-projects"] });
       qc.invalidateQueries({ queryKey: ["portfolio-projects-admin"] });
@@ -71,7 +75,7 @@ export const useBulkDeletePortfolioProjects = () => {
   });
 };
 
-// ── Blog Posts ─────────────────────────────────────────────────────────
+// ── Blog Posts ──────────────────────────────────────────────────────────
 export const useBlogPosts = (category?: string, tag?: string, isFeatured?: boolean) => {
   return useQuery({
     queryKey: ["blog-posts", category, tag, isFeatured],
@@ -79,9 +83,9 @@ export const useBlogPosts = (category?: string, tag?: string, isFeatured?: boole
       const params = new URLSearchParams();
       if (category) params.append("category", category);
       if (tag) params.append("tag", tag);
-      if (isFeatured !== undefined) params.append("is_featured", String(isFeatured));
+      if (isFeatured !== undefined) params.append("featured", String(isFeatured));
       const queryStr = params.toString() ? `?${params.toString()}` : "";
-      return apiGet<any[]>(`/cms/blog-posts${queryStr}`);
+      return apiGet<any[]>(`/blog-posts${queryStr}`);
     },
   });
 };
@@ -89,14 +93,14 @@ export const useBlogPosts = (category?: string, tag?: string, isFeatured?: boole
 export const useBlogPostsAdmin = () => {
   return useQuery({
     queryKey: ["blog-posts-admin"],
-    queryFn: () => apiGet<any[]>("/cms/blog-posts/admin"),
+    queryFn: () => apiGet<any[]>("/admin/blog-posts"),
   });
 };
 
 export const useBlogPost = (slug: string) => {
   return useQuery({
     queryKey: ["blog-post", slug],
-    queryFn: () => apiGet<any>(`/cms/blog-posts/slug/${slug}`),
+    queryFn: () => apiGet<any>(`/blog-posts/${slug}`),
     enabled: !!slug,
   });
 };
@@ -104,7 +108,7 @@ export const useBlogPost = (slug: string) => {
 export const useBlogPostById = (id: string) => {
   return useQuery({
     queryKey: ["blog-post-id", id],
-    queryFn: () => apiGet<any>(`/cms/blog-posts/id/${id}`),
+    queryFn: () => apiGet<any>(`/admin/blog-posts/${id}`),
     enabled: !!id,
   });
 };
@@ -113,10 +117,8 @@ export const useUpsertBlogPost = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (post: any) => {
-      if (post.id) {
-        return apiPatch<any>(`/cms/blog-posts/${post.id}`, post);
-      }
-      return apiPost<any>("/cms/blog-posts", post);
+      if (post.id) return apiPatch<any>(`/admin/blog-posts/${post.id}`, post);
+      return apiPost<any>("/admin/blog-posts", post);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["blog-posts"] });
@@ -129,7 +131,7 @@ export const useUpsertBlogPost = () => {
 export const useDeleteBlogPost = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/blog-posts/${id}`),
+    mutationFn: (id: string) => apiDelete<any>(`/admin/blog-posts/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["blog-posts"] });
       qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
@@ -139,17 +141,17 @@ export const useDeleteBlogPost = () => {
 
 export const useIncrementBlogPostView = () => {
   return useMutation({
-    mutationFn: (id: string) => apiPost<any>(`/cms/blog-posts/${id}/view`),
+    mutationFn: (id: string) => apiPost<any>(`/blog-posts/${id}/view`),
   });
 };
 
-// ── Careers ────────────────────────────────────────────────────────────
+// ── Careers ─────────────────────────────────────────────────────────────
 export const useCareers = (department?: string) => {
   return useQuery({
     queryKey: ["careers", department],
     queryFn: () => {
-      const queryStr = department ? `?department=${department}` : "";
-      return apiGet<any[]>(`/cms/careers${queryStr}`);
+      const queryStr = department ? `?department=${encodeURIComponent(department)}` : "";
+      return apiGet<any[]>(`/careers${queryStr}`);
     },
   });
 };
@@ -157,14 +159,14 @@ export const useCareers = (department?: string) => {
 export const useCareersAdmin = () => {
   return useQuery({
     queryKey: ["careers-admin"],
-    queryFn: () => apiGet<any[]>("/cms/careers/admin"),
+    queryFn: () => apiGet<any[]>("/admin/careers"),
   });
 };
 
 export const useCareer = (slug: string) => {
   return useQuery({
     queryKey: ["career", slug],
-    queryFn: () => apiGet<any>(`/cms/careers/slug/${slug}`),
+    queryFn: () => apiGet<any>(`/careers/${slug}`),
     enabled: !!slug,
   });
 };
@@ -172,7 +174,7 @@ export const useCareer = (slug: string) => {
 export const useCareerById = (id: string) => {
   return useQuery({
     queryKey: ["career-id", id],
-    queryFn: () => apiGet<any>(`/cms/careers/id/${id}`),
+    queryFn: () => apiGet<any>(`/admin/careers/${id}`),
     enabled: !!id,
   });
 };
@@ -181,10 +183,8 @@ export const useUpsertCareer = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (career: any) => {
-      if (career.id) {
-        return apiPatch<any>(`/cms/careers/${career.id}`, career);
-      }
-      return apiPost<any>("/cms/careers", career);
+      if (career.id) return apiPatch<any>(`/admin/careers/${career.id}`, career);
+      return apiPost<any>("/admin/careers", career);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["careers"] });
@@ -197,7 +197,7 @@ export const useUpsertCareer = () => {
 export const useDeleteCareer = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/careers/${id}`),
+    mutationFn: (id: string) => apiDelete<any>(`/admin/careers/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["careers"] });
       qc.invalidateQueries({ queryKey: ["careers-admin"] });
@@ -208,77 +208,39 @@ export const useDeleteCareer = () => {
 export const useCareerStats = (slug: string | undefined) => {
   return useQuery({
     queryKey: ["career-stats", slug],
-    queryFn: () => apiGet<{ view_count: number; applicant_count: number }>(`/cms/careers/slug/${slug}/stats`),
+    queryFn: () => apiGet<{ view_count: number; applicant_count: number }>(`/careers/${slug}`),
     enabled: !!slug,
-    refetchInterval: 30000,
+    refetchInterval: 60000,
   });
 };
 
 export const useIncrementCareerViewBySlug = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (slug: string) => apiPost<any>(`/cms/careers/slug/${slug}/view`),
+    mutationFn: (slug: string) => apiPost<any>(`/careers/${slug}/view`),
     onSuccess: (_, slug) => {
       qc.invalidateQueries({ queryKey: ["career-stats", slug] });
     },
   });
 };
 
-// ── Coupons ────────────────────────────────────────────────────────────
-export const useCoupons = () => {
-  return useQuery({
-    queryKey: ["coupons"],
-    queryFn: () => apiGet<any[]>("/cms/coupons"),
-  });
-};
+// ── Coupons (stub — not in Laravel v1) ─────────────────────────────────
+export const useCoupons = () =>
+  useQuery({ queryKey: ["coupons"], queryFn: () => Promise.resolve([] as any[]) });
+export const useCouponsAdmin = () =>
+  useQuery({ queryKey: ["coupons-admin"], queryFn: () => Promise.resolve([] as any[]) });
+export const useCouponByCode = (_code: string) =>
+  useQuery({ queryKey: ["coupon-code", _code], queryFn: () => Promise.resolve(null as any), enabled: false });
+export const useUpsertCoupon = () =>
+  useMutation({ mutationFn: (_c: any) => Promise.resolve({} as any) });
+export const useDeleteCoupon = () =>
+  useMutation({ mutationFn: (_id: string) => Promise.resolve({} as any) });
 
-export const useCouponsAdmin = () => {
-  return useQuery({
-    queryKey: ["coupons-admin"],
-    queryFn: () => apiGet<any[]>("/cms/coupons/admin"),
-  });
-};
-
-export const useCouponByCode = (code: string) => {
-  return useQuery({
-    queryKey: ["coupon-code", code],
-    queryFn: () => apiGet<any>(`/cms/coupons/code/${code}`),
-    enabled: !!code,
-  });
-};
-
-export const useUpsertCoupon = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (coupon: any) => {
-      if (coupon.id) {
-        return apiPatch<any>(`/cms/coupons/${coupon.id}`, coupon);
-      }
-      return apiPost<any>("/cms/coupons", coupon);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["coupons"] });
-      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
-    },
-  });
-};
-
-export const useDeleteCoupon = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/coupons/${id}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["coupons"] });
-      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
-    },
-  });
-};
-
-// ── Office Locations ───────────────────────────────────────────────────
+// ── Office Locations ────────────────────────────────────────────────────
 export const useOfficeLocations = () => {
   return useQuery({
     queryKey: ["office-locations"],
-    queryFn: () => apiGet<any[]>("/cms/office-locations"),
+    queryFn: () => apiGet<any[]>("/office-locations"),
   });
 };
 
@@ -286,10 +248,8 @@ export const useUpsertOfficeLocation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (loc: any) => {
-      if (loc.id) {
-        return apiPatch<any>(`/cms/office-locations/${loc.id}`, loc);
-      }
-      return apiPost<any>("/cms/office-locations", loc);
+      if (loc.id) return apiPatch<any>(`/admin/office-locations/${loc.id}`, loc);
+      return apiPost<any>("/admin/office-locations", loc);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["office-locations"] });
@@ -300,14 +260,14 @@ export const useUpsertOfficeLocation = () => {
 export const useDeleteOfficeLocation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/office-locations/${id}`),
+    mutationFn: (id: string) => apiDelete<any>(`/admin/office-locations/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["office-locations"] });
     },
   });
 };
 
-// ── USA State Pricing ──────────────────────────────────────────────────
+// ── USA State Pricing ───────────────────────────────────────────────────
 export const useUsaStatePricing = () => {
   return useQuery({
     queryKey: ["usa-state-pricing"],
@@ -325,11 +285,9 @@ export const useUsaStatePricingAdmin = () => {
 export const useUpsertUsaStatePricing = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (item: any) => {
-      if (item.id) {
-        return apiPatch<any>(`/cms/usa-state-pricing/${item.id}`, item);
-      }
-      return apiPost<any>("/cms/usa-state-pricing", item);
+    mutationFn: (row: any) => {
+      if (row.id) return apiPatch<any>(`/cms/usa-state-pricing/${row.id}`, row);
+      return apiPost<any>("/cms/usa-state-pricing", row);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["usa-state-pricing"] });
@@ -349,29 +307,63 @@ export const useDeleteUsaStatePricing = () => {
   });
 };
 
-// ── Country Eligibility ────────────────────────────────────────────────
+// ── Country Eligibility ──────────────────────────────────────────────────
 export const useCountryEligibility = () => {
   return useQuery({
     queryKey: ["country-eligibility"],
-    queryFn: () => apiGet<any[]>("/cms/country-eligibility"),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("country_eligibility")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
   });
 };
 
 export const useCountryEligibilityAdmin = () => {
   return useQuery({
     queryKey: ["country-eligibility-admin"],
-    queryFn: () => apiGet<any[]>("/cms/country-eligibility/admin"),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("country_eligibility")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
   });
 };
 
 export const useUpsertCountryEligibility = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (item: any) => {
-      if (item.id) {
-        return apiPatch<any>(`/cms/country-eligibility/${item.id}`, item);
+    mutationFn: async (row: any) => {
+      const payload = {
+        name: row.name,
+        aliases: row.aliases || [],
+        status: row.status,
+        category: row.category,
+        reason: row.reason,
+        is_active: row.is_active,
+        sort_order: row.sort_order,
+      };
+      if (row.id) {
+        const { data, error } = await supabase
+          .from("country_eligibility")
+          .update(payload)
+          .eq("id", row.id);
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from("country_eligibility")
+          .insert(payload);
+        if (error) throw error;
+        return data;
       }
-      return apiPost<any>("/cms/country-eligibility", item);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["country-eligibility"] });
@@ -383,7 +375,14 @@ export const useUpsertCountryEligibility = () => {
 export const useDeleteCountryEligibility = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiDelete<any>(`/cms/country-eligibility/${id}`),
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("country_eligibility")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["country-eligibility"] });
       qc.invalidateQueries({ queryKey: ["country-eligibility-admin"] });
@@ -391,35 +390,29 @@ export const useDeleteCountryEligibility = () => {
   });
 };
 
-// ── Site Settings ──────────────────────────────────────────────────────
+// ── Site Settings ───────────────────────────────────────────────────────
 export const useSiteSettings = () => {
   return useQuery({
     queryKey: ["site-settings"],
-    initialData: readCachedSiteSettings,
     queryFn: async () => {
-      const data = await apiGet<any[]>("/cms/site-settings");
+      const data = await apiGet<Record<string, unknown>>("/site-settings");
       const map: Record<string, string> = {};
-      data?.forEach((s) => {
-        let val = s.value;
-        while (typeof val === "string") {
-          try { val = JSON.parse(val); } catch { break; }
-        }
-        map[s.key] = typeof val === "string" ? val : JSON.stringify(val);
+      Object.entries(data ?? {}).forEach(([key, val]) => {
+        map[key] = typeof val === "string" ? val : JSON.stringify(val ?? "");
       });
-      writeCachedSiteSettings(map);
       return map;
     },
-    staleTime: 5000,
+    staleTime: 60000,
   });
 };
 
 export const useUpsertSiteSetting = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { key: string; value: any }) => apiPost<any>("/cms/site-settings", payload),
+    mutationFn: (payload: { key: string; value: any; group?: string }) =>
+      apiPost<any>("/admin/site-settings", payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     },
   });
 };
-

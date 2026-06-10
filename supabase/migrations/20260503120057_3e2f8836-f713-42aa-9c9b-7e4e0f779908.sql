@@ -1,1 +1,0 @@
-INSERT INTO public.contact_info (label, type, value, icon, sort_order, is_active) VALUES ('Dhaka HQ', 'address', 'Plot – 3 & 5, bti Celebration Point, Rd No 113/A, Gulshan, Dhaka-1212, Bangladesh', 'MapPin', 3, true);

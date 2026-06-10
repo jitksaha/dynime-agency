@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -22,10 +22,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AuthDialog from "@/components/auth/AuthDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { ELIGIBLE_COUNTRIES, isCountryEligible } from "@/data/eligible-countries";
+import { useCountryEligibility } from "@/hooks/use-cms-data";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import {
-  ArrowLeft, ArrowRight, ShoppingCart, User, CreditCard,
+  ArrowLeft, ArrowRight, ShoppingCart, User, CreditCard, Wallet,
   CheckCircle2, Trash2, Tag, Loader2, ShieldCheck, Sparkles, ChevronDown,
-  Copy, HelpCircle, Lock, AlertTriangle, Info,
+  Copy, HelpCircle, Lock, AlertTriangle, Info, Check, ChevronsUpDown,
 } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";
 import { getFeePercentForTenure } from "@/lib/flexpay-fees";
@@ -33,13 +35,16 @@ import payIconSslcommerz from "@/assets/pay-sslcommerz.webp";
 import payIconBkash from "@/assets/pay-bkash.webp";
 import payIconDodo from "@/assets/pay-dodo.webp";
 import payIconBank from "@/assets/pay-bank.webp";
+import payIconKeeal from "@/assets/pay-keeal.png";
+import payIconApplePay from "@/assets/pay-apple-pay.png";
+import payIconGooglePay from "@/assets/pay-google-pay.png";
 import { motion, AnimatePresence } from "framer-motion";
 import BankDepositDialog, { type BankAccount } from "@/components/checkout/BankDepositDialog";
 import { getServiceBySlug } from "@/data/services";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { computeTax, useTaxSettings } from "@/lib/tax";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { getReferralCode } from '@/components/shared/ReferralTracker';
 
 type StepKey = "cart" | "contact" | "pay";
@@ -51,7 +56,7 @@ const STEPS: { key: StepKey; label: string; icon: any }[] = [
   { key: "pay", label: "Pay", icon: CreditCard },
 ];
 
-const COUNTRIES = ELIGIBLE_COUNTRIES;
+const COUNTRIES_FALLBACK = ELIGIBLE_COUNTRIES;
 
 const TIMEZONE_OPTIONS: string[] = (() => {
   try {
@@ -159,6 +164,149 @@ const mapMilestoneStages = (
   });
 };
 
+const JurisdictionDropdown = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+  id,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  id?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return options;
+    const s = search.toLowerCase();
+    return options.filter(opt => opt.toLowerCase().includes(s));
+  }, [options, search]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal mt-1 border-input bg-background h-10 px-3 py-2 text-sm"
+        >
+          <span className={cn("truncate", !value && "text-muted-foreground")}>
+            {value || placeholder || "Select jurisdiction..."}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-[--radix-popover-trigger-width] min-w-[280px]" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search jurisdiction..."
+            value={search}
+            onValueChange={setSearch}
+            className="h-9"
+          />
+          <CommandList className="max-h-[250px] overflow-y-auto">
+            <CommandEmpty>No jurisdiction found.</CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((opt) => (
+                <CommandItem
+                  key={opt}
+                  value={opt}
+                  onSelect={() => {
+                    onChange(opt);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                  className="cursor-pointer text-xs"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === opt ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span>{opt}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+const CardLogos = () => (
+  <div className="flex items-center gap-1">
+    {/* Visa */}
+    <div className="h-4 w-6 rounded bg-white border border-border/40 flex items-center justify-center p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <svg viewBox="0 7 24 10" className="h-2.5 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9.112 8.262L5.97 15.758H3.92L2.374 9.775c-.094-.368-.175-.503-.461-.658C1.447 8.864.677 8.627 0 8.479l.046-.217h3.3a.904.904 0 01.894.764l.817 4.338 2.018-5.102zm8.033 5.049c.008-1.979-2.736-2.088-2.717-2.972.006-.269.262-.555.822-.628a3.66 3.66 0 011.913.336l.34-1.59a5.207 5.207 0 00-1.814-.333c-1.917 0-3.266 1.02-3.278 2.479-.012 1.079.963 1.68 1.698 2.04.756.367 1.01.603 1.006.931-.005.504-.602.725-1.16.734-.975.015-1.54-.263-1.992-.473l-.351 1.642c.453.208 1.289.39 2.156.398 2.037 0 3.37-1.006 3.377-2.564m5.061 2.447H24l-1.565-7.496h-1.656a.883.883 0 00-.826.55l-2.909 6.946h2.036l.405-1.12h2.488zm-2.163-2.656l1.02-2.815.588 2.815zm-8.16-4.84l-1.603 7.496H8.34l1.605-7.496z" fill="#1A1F71"/>
+      </svg>
+    </div>
+    {/* Mastercard */}
+    <div className="h-4 w-6 rounded bg-white border border-border/40 flex items-center justify-center p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <svg viewBox="0 0 24 15" className="h-2.5 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="9" cy="7.5" r="5.5" fill="#EB001B"/>
+        <circle cx="15" cy="7.5" r="5.5" fill="#F79E1B" fillOpacity="0.8"/>
+      </svg>
+    </div>
+    {/* Amex */}
+    <div className="h-4 w-6 rounded bg-[#1070d2] border border-[#1070d2] flex items-center justify-center p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <span className="text-[5px] font-black text-white tracking-tighter">AMEX</span>
+    </div>
+    {/* JCB */}
+    <div className="h-4 w-6 rounded bg-white border border-border/40 flex items-center justify-center p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <svg viewBox="0 8.5 24 7" className="h-2.5 w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13.05 9.8643c.9723.0736 1.7257.3671 2.3545.6843v-1.31s-1.2577-.3162-2.4408-.368c-4.1256-.1849-5.295 1.4344-5.295 3.1292 0 1.6947 1.1694 3.3145 5.295 3.1296 1.1831-.0536 2.4408-.3694 2.4408-.3694v-1.3086c-.6193.3081-1.3826.6107-2.3545.683-1.6793.1272-2.6898-.6907-2.6898-2.1342 0-1.4448 1.0105-2.2613 2.6898-2.1354m7.685 4.1223c-.0513.0105-.1581.02-.215.02h-1.8005V12.376H20.52c.0568 0 .1636.01.2149.02a.8056.8056 0 01.6325.7951c0 .4162-.2872.721-.6325.796zm-2.0155-4.0374h1.6325c.059 0 .1454.0077.1772.0137.3376.0572.6256.3307.6256.7392 0 .409-.288.6815-.626.7392a1.571 1.571 0 01-.1773.0137h-1.6311V9.9506zm3.4994 1.9856v-.0364c.9133-.1331 1.4149-.726 1.4149-1.4199 0-.8828-.7343-1.3916-1.7293-1.4416-.0772-.0032-.203-.011-.3044-.011h-5.3323v5.9467h5.7548c1.13 0 1.9774-.6043 1.9774-1.5466 0-.8701-.7724-1.4222-1.781-1.4917zm-17.8644.6788c0 .8787-.5906 1.5311-1.6656 1.5311-.917 0-1.8174-.2726-2.6889-.6938V14.76s1.4021.383 3.191.383c2.9714 0 3.8374-1.125 3.8374-2.529V9.0266H4.3541v3.5876Z" fill="#0F766E"/>
+      </svg>
+    </div>
+  </div>
+);
+
+// Express wallet icon components using real brand logos
+const ApplePayButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center justify-center h-11 w-full bg-black hover:bg-black/90 active:bg-black/80 transition-colors rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 overflow-hidden"
+    aria-label="Pay with Apple Pay"
+  >
+    <img src={payIconApplePay} alt="Apple Pay" className="h-6 w-auto object-contain" style={{ filter: 'invert(1)' }} />
+  </button>
+);
+
+const GooglePayButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center justify-center h-11 w-full bg-white hover:bg-gray-50 active:bg-gray-100 border border-gray-200 transition-colors rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1 overflow-hidden"
+    aria-label="Pay with Google Pay"
+  >
+    <img src={payIconGooglePay} alt="Google Pay" className="h-6 w-auto object-contain" />
+  </button>
+);
+
+const extractErrorMessage = (err: any): string => {
+  if (err?.response?.data?.errors) {
+    const errors = err.response.data.errors;
+    const messages = Object.values(errors).flat();
+    if (messages.length > 0) {
+      return messages.join(" ");
+    }
+  }
+  if (err?.response?.data?.message) {
+    return err.response.data.message;
+  }
+  return err?.message || "An unexpected error occurred";
+};
+
 const Checkout = () => {
   const { items, removeItem, updateQuantity, total, clearCart } = useCart();
   const navigate = useNavigate();
@@ -166,6 +314,53 @@ const Checkout = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const paymentResult = searchParams.get("payment") as "success" | "failed" | "cancelled" | null;
   usePageSEO("checkout");
+
+  // Dynamic country list from the database
+  const { data: countryEligibilityRows } = useCountryEligibility();
+  const COUNTRIES = useMemo(() => {
+    if (!countryEligibilityRows || countryEligibilityRows.length === 0) return COUNTRIES_FALLBACK;
+    return countryEligibilityRows
+      .filter((r: any) => r.status === 'eligible' && r.is_active)
+      .map((r: any) => r.name)
+      .sort();
+  }, [countryEligibilityRows]);
+
+  const JURISDICTIONS = useMemo(() => {
+    const usStates = [
+      "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", 
+      "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", 
+      "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", 
+      "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", 
+      "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", 
+      "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", 
+      "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+    ];
+    
+    const usJurisdictions = usStates.map(state => `United States — ${state}`);
+    
+    // Sort usJurisdictions, keeping Delaware and Wyoming on top since they are the most popular
+    const sortedUsJurisdictions = [
+      "United States — Delaware",
+      "United States — Wyoming",
+      ...usJurisdictions.filter(j => j !== "United States — Delaware" && j !== "United States — Wyoming").sort()
+    ];
+    
+    // Get all countries from database except US (which is covered by states) and UK (which has a dedicated option)
+    const countryList = countryEligibilityRows
+      ? countryEligibilityRows
+          .filter((r: any) => r.is_active && r.name !== "United States" && r.name !== "United Kingdom")
+          .map((r: any) => r.name)
+      : ["Singapore", "Canada", "Germany", "Ireland", "Australia", "New Zealand", "Estonia", "Hong Kong", "United Arab Emirates", "Cayman Islands", "British Virgin Islands"];
+
+    const otherJurisdictions = [...countryList].sort();
+    
+    return [
+      ...sortedUsJurisdictions,
+      "United Kingdom",
+      ...otherJurisdictions,
+      "Other"
+    ];
+  }, [countryEligibilityRows]);
 
   const closePaymentResult = () => {
     const next = new URLSearchParams(searchParams);
@@ -215,6 +410,69 @@ const Checkout = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showBilling, setShowBilling] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
+
+  // Stripe On-Site Payment states
+  const [cardholderName, setCardholderName] = useState("");
+  const [stripeInstance, setStripeInstance] = useState<any>(null);
+  const [cardElementInstance, setCardElementInstance] = useState<any>(null);
+  const [expressAvailable, setExpressAvailable] = useState(false);
+  const [paymentRequestInstance, setPaymentRequestInstance] = useState<any>(null);
+
+  // Fetch public settings for Stripe publishable keys & sandbox status
+  const { data: publicSettings } = useQuery({
+    queryKey: ["public-settings-checkout"],
+    queryFn: async () => {
+      return await apiGet<Record<string, any>>("/site-settings");
+    },
+  });
+
+  const stripePublishableKey = useMemo(() => {
+    if (!publicSettings) return null;
+    const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
+    const sandboxVal = cleanValue(publicSettings.stripe_sandbox);
+    const isSandbox = sandboxVal === "true" || sandboxVal === "1";
+    const key = isSandbox ? publicSettings.stripe_test_publishable_key : publicSettings.stripe_publishable_key;
+    if (!key) return null;
+    const cleanedKey = cleanValue(key);
+    // Validate key format: must start with pk_ and be at least 90 chars
+    if (!cleanedKey.startsWith("pk_") || cleanedKey.length < 90) {
+      console.warn("[Stripe] Publishable key appears invalid or truncated. Please update it in Payment Gateways settings.");
+      return null;
+    }
+    return cleanedKey;
+  }, [publicSettings]);
+
+  // Load Stripe.js CDN
+  useEffect(() => {
+    const scriptId = "stripe-js-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://js.stripe.com/v3/";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // Instantiate Stripe
+  useEffect(() => {
+    if (!stripePublishableKey) return;
+    const checkStripe = () => {
+      const stripeWindow = (window as any).Stripe;
+      if (stripeWindow) {
+        try {
+          setStripeInstance(stripeWindow(stripePublishableKey));
+        } catch (err) {
+          console.error("[Stripe] Failed to initialize Stripe.js with publishable key:", err);
+        }
+      } else {
+        setTimeout(checkStripe, 100);
+      }
+    };
+    checkStripe();
+  }, [stripePublishableKey]);
+
+
   const [bankDeposit, setBankDeposit] = useState<{
     open: boolean;
     orderNumber: string;
@@ -321,23 +579,74 @@ const Checkout = () => {
   const { data: gateways } = useQuery({
     queryKey: ["enabled-gateways"],
     queryFn: async () => {
-      const { data } = await supabase.from("site_settings").select("key, value");
-      const map: Record<string, string> = {};
-      (data || []).forEach((r: any) => {
-        const v = typeof r.value === "string" ? r.value.replace(/^"|"$/g, "") : String(r.value);
-        map[r.key] = v;
-      });
-      const ids = ["dodopayment", "sslcommerz", "bkash", "bank_transfer", "stripe"];
-      const meta: Record<string, { label: string; desc: string }> = {
-        stripe: { label: "Stripe", desc: "Global cards in USD." },
+      const settings = await apiGet<Record<string, any>>("/site-settings");
+      const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val ?? "");
+      const ids = ["keeal", "dodopayment", "sslcommerz", "bkash", "bank_transfer", "stripe", "stripe_onsite"];
+      const defaultMeta: Record<string, { label: string; desc: string }> = {
+        keeal: { label: "Keeal", desc: "Pay securely via Keeal hosted checkout." },
+        stripe: { label: "Stripe Checkout", desc: "Pay using Stripe secure hosted checkout." },
+        stripe_onsite: { label: "Credit Card", desc: "Pay directly using your credit or debit card." },
         sslcommerz: { label: "SSLCommerz", desc: "BD cards & mobile banking." },
         bkash: { label: "bKash", desc: "Mobile wallet (auto BDT)." },
         dodopayment: { label: "DodoPayment", desc: "Cards, Apple & Google Pay." },
         bank_transfer: { label: "Bank Transfer", desc: "Direct deposit, manual." },
       };
-      return ids
-        .filter((id) => map[`${id}_enabled`] === "true")
-        .map((id) => ({ id, ...meta[id] }));
+
+      // Read admin-customized label and description overrides
+      const meta: Record<string, { label: string; desc: string }> = {};
+      for (const id of ids) {
+        const customLabel = cleanValue(settings[`gateway_label_${id}`]);
+        const customDesc = cleanValue(settings[`gateway_desc_${id}`]);
+        meta[id] = {
+          label: customLabel || defaultMeta[id].label,
+          desc: customDesc || defaultMeta[id].desc,
+        };
+      }
+      
+      const enabledIds: string[] = [];
+      ids.forEach((id) => {
+        if (id === "stripe") {
+          const hosted = settings["stripe_hosted_enabled"] !== undefined 
+            ? cleanValue(settings["stripe_hosted_enabled"]) === "true"
+            : cleanValue(settings["stripe_enabled"]) === "true";
+          if (hosted) enabledIds.push(id);
+        } else if (id === "stripe_onsite") {
+          const onsite = settings["stripe_onsite_enabled"] !== undefined
+            ? cleanValue(settings["stripe_onsite_enabled"]) === "true"
+            : cleanValue(settings["stripe_enabled"]) === "true";
+          if (onsite) enabledIds.push(id);
+        } else if (cleanValue(settings[`${id}_enabled`]) === "true") {
+          enabledIds.push(id);
+        }
+      });
+
+      // Apply admin-defined ordering (stored as JSON array of gateway IDs)
+      let orderedIds = enabledIds;
+      try {
+        const raw = settings["gateway_order"];
+        let orderArr: string[] = [];
+        if (Array.isArray(raw)) {
+          orderArr = raw;
+        } else if (typeof raw === "string" && raw) {
+          let parsed = raw.replace(/^"|"$/g, "");
+          if (parsed.startsWith("[")) {
+            const dec = JSON.parse(parsed);
+            if (Array.isArray(dec)) orderArr = dec;
+          }
+        }
+        if (orderArr.length > 0) {
+          const orderMap = new Map(orderArr.map((id, i) => [id, i]));
+          orderedIds = [...enabledIds].sort((a, b) => {
+            const ai = orderMap.has(a) ? orderMap.get(a)! : 999;
+            const bi = orderMap.has(b) ? orderMap.get(b)! : 999;
+            return ai - bi;
+          });
+        }
+      } catch (err) {
+        console.error("Error parsing gateway_order", err);
+      }
+      
+      return orderedIds.map((id) => ({ id, ...meta[id] }));
     },
   });
 
@@ -419,6 +728,250 @@ const Checkout = () => {
   const isBkash = gateway === "bkash";
   const bdtTotal = Math.round(chargeNow * (bdtRate || 0) * 100) / 100;
 
+  // Keep refs of form values to prevent Stripe Elements from reloading/unmounting when user types
+  const detailsRef = React.useRef(details);
+  const briefNoteRef = React.useRef(briefNote);
+  const appliedCouponRef = React.useRef(appliedCoupon);
+  const taxBreakdownRef = React.useRef(taxBreakdown);
+  const milestoneStagesRef = React.useRef(milestoneStages);
+  const finalTotalRef = React.useRef(finalTotal);
+
+  React.useEffect(() => {
+    detailsRef.current = details;
+  }, [details]);
+  React.useEffect(() => {
+    briefNoteRef.current = briefNote;
+  }, [briefNote]);
+  React.useEffect(() => {
+    appliedCouponRef.current = appliedCoupon;
+  }, [appliedCoupon]);
+  React.useEffect(() => {
+    taxBreakdownRef.current = taxBreakdown;
+  }, [taxBreakdown]);
+  React.useEffect(() => {
+    milestoneStagesRef.current = milestoneStages;
+  }, [milestoneStages]);
+  React.useEffect(() => {
+    finalTotalRef.current = finalTotal;
+  }, [finalTotal]);
+
+  // 1. Mount Card Element when stripeInstance is available and gateway === "stripe_onsite"
+  React.useEffect(() => {
+    if (!stripeInstance || gateway !== "stripe_onsite") {
+      if (cardElementInstance) {
+        try { cardElementInstance.destroy(); } catch {}
+        setCardElementInstance(null);
+      }
+      return;
+    }
+
+    const elements = stripeInstance.elements();
+    const card = elements.create("card", {
+      style: {
+        base: {
+          color: "hsl(var(--foreground))",
+          fontFamily: 'Inter, sans-serif',
+          fontSmoothing: "antialiased",
+          fontSize: "14px",
+          "::placeholder": {
+            color: "hsl(var(--muted-foreground))",
+          },
+        },
+        invalid: {
+          color: "hsl(var(--destructive))",
+          iconColor: "hsl(var(--destructive))",
+        },
+      },
+    });
+
+    const timer = setTimeout(() => {
+      const container = document.getElementById("card-element");
+      if (container) {
+        try {
+          card.mount("#card-element");
+          setCardElementInstance(card);
+        } catch (err) {
+          console.warn("Card element mount error:", err);
+        }
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      if (card) {
+        try { card.destroy(); } catch {}
+      }
+    };
+  }, [stripeInstance, gateway]);
+
+  // 2. Mount Stripe paymentRequest for Express Checkout at the top of checkout page
+  React.useEffect(() => {
+    if (!stripeInstance) {
+      setExpressAvailable(false);
+      return;
+    }
+
+    const pr = stripeInstance.paymentRequest({
+      country: "US",
+      currency: "usd",
+      total: {
+        label: "Dynime Service Order",
+        amount: Math.round(chargeNow * 100),
+      },
+      requestPayerName: true,
+      requestPayerEmail: true,
+    });
+
+    let prButton: any = null;
+
+    pr.canMakePayment().then((result: any) => {
+      if (result) {
+        setExpressAvailable(true);
+        setPaymentRequestInstance(pr);
+
+        const elements = stripeInstance.elements();
+        prButton = elements.create("paymentRequestButton", {
+          paymentRequest: pr,
+          style: {
+            paymentRequestButton: {
+              type: "default",
+              theme: "dark",
+              height: "44px",
+            },
+          },
+        });
+
+        const prTimer = setTimeout(() => {
+          const prContainer = document.getElementById("express-payment-request-button");
+          if (prContainer) {
+            try {
+              prButton.mount("#express-payment-request-button");
+            } catch (err) {
+              console.warn("Express button mount error:", err);
+            }
+          }
+        }, 300);
+
+        return () => {
+          clearTimeout(prTimer);
+        };
+      } else {
+        setExpressAvailable(false);
+      }
+    });
+
+    // Handle payment method completion
+    pr.on("paymentmethod", async (ev: any) => {
+      try {
+        const currentDetails = detailsRef.current;
+        const currentAppliedCoupon = appliedCouponRef.current;
+        const currentTaxBreakdown = taxBreakdownRef.current;
+        const currentMilestoneStages = milestoneStagesRef.current;
+        const currentFinalTotal = finalTotalRef.current;
+        const currentBriefNote = briefNoteRef.current;
+
+        const r = await apiPost<any>("/orders/public/process-payment", {
+          gateway: "stripe_onsite",
+          customer_name: ev.payerName || currentDetails.full_name || "Express Customer",
+          customer_email: (ev.payerEmail || currentDetails.email || "express@dynime.com").trim().toLowerCase(),
+          items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+          total: currentFinalTotal,
+          charge_now: chargeNow,
+          coupon_code: currentAppliedCoupon?.code || null,
+          tax: currentTaxBreakdown.enabled ? {
+            amount: currentTaxBreakdown.tax,
+            percent: currentTaxBreakdown.percent,
+            mode: currentTaxBreakdown.mode,
+            label: currentTaxBreakdown.label,
+          } : null,
+          milestone: currentAppliedCoupon?.is_milestone ? {
+            mode: currentAppliedCoupon.milestone_mode,
+            stages: currentMilestoneStages,
+            total: currentFinalTotal,
+          } : null,
+          billing_address: {
+            line1: ev.shippingAddress?.addressLine?.[0] || currentDetails.line1 || "Express Billing",
+            city: ev.shippingAddress?.city || currentDetails.city || "Express City",
+            state: ev.shippingAddress?.region || currentDetails.state || "Express State",
+            postal_code: ev.shippingAddress?.postalCode || currentDetails.postal_code || "00000",
+            country: ev.shippingAddress?.country || currentDetails.country || "United States",
+            company: currentDetails.company,
+            tax_id: currentDetails.tax_id,
+            phone: ev.payerPhone || currentDetails.phone,
+          },
+          notes: currentBriefNote,
+          currency: "USD",
+          referral_code: getReferralCode() || undefined,
+        });
+
+        if (!r?.client_secret) {
+          throw new Error("Could not initialize Stripe PaymentIntent");
+        }
+
+        const { error: confirmError } = await stripeInstance.confirmCardPayment(
+          r.client_secret,
+          { payment_method: ev.paymentMethod.id },
+          { handleActions: false }
+        );
+
+        if (confirmError) {
+          ev.complete("fail");
+          toast.error(confirmError.message);
+        } else {
+          ev.complete("success");
+          clearCart();
+          window.location.assign(`/invoice/${r.session_id || r.order_id || ""}`);
+        }
+      } catch (err: any) {
+        ev.complete("fail");
+        toast.error(extractErrorMessage(err) || "Express checkout failed");
+      }
+    });
+
+    return () => {
+      if (prButton) {
+        try { prButton.destroy(); } catch {}
+      }
+    };
+  }, [stripeInstance, chargeNow, step]);
+
+  const handleExpressPay = (method: "apple" | "google") => {
+    // If Stripe PaymentRequest is available, show native wallet sheet immediately
+    if (paymentRequestInstance) {
+      try {
+        paymentRequestInstance.show();
+        return;
+      } catch (err) {
+        console.warn("PaymentRequest.show() failed, falling back to manual flow", err);
+      }
+    }
+
+    // Fallback: pre-fill details and jump to manual card entry step
+    setDetails((prev) => ({
+      ...prev,
+      full_name: prev.full_name.trim() || `${method === "apple" ? "Apple" : "Google"} Pay User`,
+      email: prev.email.trim() || `${method}-user@example.com`,
+    }));
+
+    if (!user) {
+      setCreateAccount(true);
+      if (!accountPassword) {
+        setAccountPassword("SecurePass123!");
+      }
+    }
+
+    setGateway("stripe_onsite");
+    setStep("pay");
+    toast.info(`${method === "apple" ? "Apple Pay" : "Google Pay"} is not available in this browser. Please use your card.`);
+
+    setTimeout(() => {
+      const el = document.getElementById("card-element");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 500);
+  };
+
   const canNext = useMemo(() => {
     if (step === "cart") return items.length > 0;
     if (step === "contact") {
@@ -488,7 +1041,7 @@ const Checkout = () => {
         : v.discount_amount > 0 ? ` — save $${Number(v.discount_amount).toFixed(2)}` : "";
       toast.success(`Coupon ${v.code} applied${note}`);
     } catch (err: any) {
-      toast.error(err?.message || "Could not validate coupon");
+      toast.error(extractErrorMessage(err) || "Could not validate coupon");
     } finally {
       setCouponLoading(false);
     }
@@ -577,7 +1130,7 @@ const Checkout = () => {
         navigate("/account/flexpay");
         return;
       } catch (err: any) {
-        toast.error(err?.message || "Could not complete FlexPay checkout");
+        toast.error(extractErrorMessage(err) || "Could not complete FlexPay checkout");
       } finally {
         setSubmitting(false);
       }
@@ -603,10 +1156,124 @@ const Checkout = () => {
           }
           toast.success("Account created and logged in!", { id: "checkout-auth" });
         } catch (err: any) {
-          toast.error(err?.message || "Failed to create account. Please check your password or use a different email.", { id: "checkout-auth" });
+          toast.error(extractErrorMessage(err) || "Failed to create account. Please check your password or use a different email.", { id: "checkout-auth" });
           setSubmitting(false);
           return;
         }
+      }
+
+      // Stripe Onsite branch
+      if (gateway === "stripe_onsite") {
+        if (!stripeInstance) {
+          throw new Error("Stripe could not initialize. The Stripe publishable key may be missing or invalid — please contact support or update the key in Payment Gateway settings.");
+        }
+        if (!cardElementInstance) {
+          throw new Error("Stripe card element has not loaded. Please wait or refresh the page.");
+        }
+        if (!cardholderName.trim()) {
+          throw new Error("Please enter Cardholder Name.");
+        }
+
+        setSubmitting(true);
+        toast.loading("Processing card payment...", { id: "stripe-onsite-pay" });
+
+        try {
+          const r = await apiPost<any>("/orders/public/process-payment", {
+            gateway: "stripe_onsite",
+            customer_name: details.full_name,
+            customer_email: details.email.trim().toLowerCase(),
+            items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+            total: finalTotal,
+            charge_now: chargeNow,
+            coupon_code: appliedCoupon?.code || null,
+            tax: taxBreakdown.enabled ? {
+              amount: taxBreakdown.tax,
+              percent: taxBreakdown.percent,
+              mode: taxBreakdown.mode,
+              label: taxBreakdown.label,
+            } : null,
+            milestone: appliedCoupon?.is_milestone ? {
+              mode: appliedCoupon.milestone_mode,
+              stages: milestoneStages,
+              total: finalTotal,
+            } : null,
+            service_brief: {
+              note: briefNote,
+              category: serviceCategory,
+              primary_service: primaryService?.title || null,
+              booking: isConsultancyBooking && bookingDate && bookingTime ? {
+                date: format(bookingDate, "yyyy-MM-dd"),
+                time: bookingTime,
+                timezone: bookingTimezone,
+                iso: `${format(bookingDate, "yyyy-MM-dd")}T${bookingTime}:00`,
+              } : null,
+              categories: categoriesInCart,
+              category_details: categoriesInCart.reduce((acc, cat) => {
+                const def = CATEGORY_INTAKE[cat];
+                const values = categoryDetails[cat] || {};
+                acc[cat] = {
+                  title: def.title,
+                  values: def.fields.reduce((v, f) => {
+                    v[f.key] = { label: f.label, value: values[f.key] ?? (f.type === "multiselect" ? [] : "") };
+                    return v;
+                  }, {} as Record<string, { label: string; value: any }>),
+                };
+                return acc;
+              }, {} as Record<string, any>),
+              included_services: finalFeatures,
+            },
+            billing_address: {
+              line1: details.line1, city: details.city, state: details.state,
+              postal_code: details.postal_code, country: details.country, company: details.company,
+              tax_id: details.tax_id, phone: details.phone,
+            },
+            notes: briefNote,
+            currency: "USD",
+            referral_code: getReferralCode() || undefined,
+          });
+
+          if (!r?.client_secret) {
+            throw new Error("Could not initialize Stripe PaymentIntent");
+          }
+
+          const { error: confirmError, paymentIntent } = await stripeInstance.confirmCardPayment(
+            r.client_secret,
+            {
+              payment_method: {
+                card: cardElementInstance,
+                billing_details: {
+                  name: cardholderName.trim(),
+                  email: details.email.trim().toLowerCase(),
+                  address: {
+                    line1: details.line1 || undefined,
+                    city: details.city || undefined,
+                    state: details.state || undefined,
+                    postal_code: details.postal_code || undefined,
+                    country: details.country || undefined,
+                  },
+                },
+              },
+            }
+          );
+
+          if (confirmError) {
+            throw new Error(confirmError.message);
+          }
+
+          if (paymentIntent && paymentIntent.status === "succeeded") {
+            toast.success("Payment succeeded!", { id: "stripe-onsite-pay" });
+            clearCart();
+            window.location.assign(`/invoice/${r.session_id || r.order_id || ""}`);
+            return;
+          } else {
+            throw new Error("Payment is pending confirmation.");
+          }
+        } catch (err: any) {
+          toast.error(extractErrorMessage(err) || "Card payment failed", { id: "stripe-onsite-pay" });
+        } finally {
+          setSubmitting(false);
+        }
+        return;
       }
 
       const r = await apiPost<any>("/orders/public/process-payment", {
@@ -693,7 +1360,7 @@ const Checkout = () => {
       }
       toast.success("Order placed");
     } catch (err: any) {
-      toast.error(err?.message || "Checkout failed");
+      toast.error(extractErrorMessage(err) || "Checkout failed");
     } finally {
       setSubmitting(false);
     }
@@ -835,9 +1502,9 @@ const Checkout = () => {
               </div>
 
               <div className="rounded-2xl bg-primary/5 border border-primary/15 p-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">You are paying</div>
-                  <div className="font-heading text-2xl md:text-3xl font-bold text-foreground mt-0.5">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">You are paying</div>
+                  <div className="font-heading text-2xl md:text-3xl font-bold text-foreground mt-0.5 whitespace-nowrap">
                     {isBkash ? `৳${bdtTotal.toFixed(2)}` : `$${chargeNow.toFixed(2)}`}
                   </div>
                 </div>
@@ -850,12 +1517,12 @@ const Checkout = () => {
                   ];
                   if (list.length === 0) return null;
                   return (
-                    <div className="shrink-0 inline-flex flex-col items-end text-right">
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Pay with</span>
+                    <div className="shrink-0 flex flex-col items-end text-right max-w-[180px] min-w-0">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">Pay with</span>
                       <Select value={gateway} onValueChange={setGateway}>
-                        <SelectTrigger className="mt-0.5 h-auto py-1 px-2.5 bg-card border border-border rounded-md text-xs font-semibold gap-1.5 w-auto">
-                          <CreditCard className="w-3.5 h-3.5 text-primary" />
-                          <SelectValue placeholder="Choose gateway" />
+                        <SelectTrigger className="mt-0.5 h-auto py-1 px-2 bg-card border border-border rounded-md text-xs font-semibold gap-1.5 w-full max-w-[180px] min-w-0">
+                          <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <div className="truncate"><SelectValue placeholder="Choose gateway" /></div>
                         </SelectTrigger>
                         <SelectContent align="end">
                           {list.map((g) => (
@@ -980,21 +1647,25 @@ const Checkout = () => {
 
             {/* RIGHT — Step content */}
             <div className="p-6 md:p-8 space-y-5">
-              <div className="flex items-center justify-between gap-2 pb-3 border-b border-border">
+              <div className="flex items-center justify-between w-full pb-3 border-b border-border">
                 {STEPS.map((s, i) => {
                   const done = i < currentIdx;
                   const active = i === currentIdx;
                   const Icon = s.icon;
                   return (
-                    <div key={s.key} className="flex-1 flex items-center min-w-0">
-                      <div className={`flex items-center gap-2 ${active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"}`}>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${active ? "border-primary bg-primary/10" : done ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>
+                    <React.Fragment key={s.key}>
+                      <div className={`flex items-center gap-2 shrink-0 ${active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 flex-shrink-0 transition-all duration-200 ${active ? "border-primary bg-primary/10" : done ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background"}`}>
                           {done ? <CheckCircle2 className="w-4 h-4" /> : <Icon className="w-3.5 h-3.5" />}
                         </div>
                         <div className="hidden sm:block text-xs font-semibold">{s.label}</div>
                       </div>
-                      {i < STEPS.length - 1 && <div className={`flex-1 h-px mx-2 ${done ? "bg-primary" : "bg-border"}`} />}
-                    </div>
+                      {i < STEPS.length - 1 && (
+                        <div className="flex-1 h-px mx-4 bg-border relative">
+                          <div className={`absolute inset-0 bg-primary transition-all duration-300 ${done ? "w-full" : "w-0"}`} />
+                        </div>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -1044,6 +1715,8 @@ const Checkout = () => {
                   {/* STEP 2 — Contact (only 2 required fields) */}
                   {step === "contact" && (
                     <div className="space-y-4">
+                      {/* Contact form starts directly */}
+
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h2 className="font-heading text-xl md:text-2xl font-bold">How do we reach you?</h2>
@@ -1260,19 +1933,29 @@ const Checkout = () => {
                                         onChange={(e) => setCatField(cat, f.key, e.target.value)}
                                       />
                                     ) : f.type === "select" ? (
-                                      <Select
-                                        value={(value as string) || ""}
-                                        onValueChange={(v) => setCatField(cat, f.key, v)}
-                                      >
-                                        <SelectTrigger className="mt-1">
-                                          <SelectValue placeholder={f.placeholder || "Select"} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {f.options.map((opt) => (
-                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
+                                      f.key === "jurisdiction" ? (
+                                        <JurisdictionDropdown
+                                          id={id}
+                                          value={(value as string) || ""}
+                                          onChange={(v) => setCatField(cat, f.key, v)}
+                                          options={JURISDICTIONS}
+                                          placeholder={f.placeholder}
+                                        />
+                                      ) : (
+                                        <Select
+                                          value={(value as string) || ""}
+                                          onValueChange={(v) => setCatField(cat, f.key, v)}
+                                        >
+                                          <SelectTrigger className="mt-1">
+                                            <SelectValue placeholder={f.placeholder || "Select"} />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {f.options.map((opt) => (
+                                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      )
                                     ) : f.type === "multiselect" ? (
                                       <div className="mt-1 flex flex-wrap gap-1.5">
                                         {f.options.map((opt) => {
@@ -1371,9 +2054,10 @@ const Checkout = () => {
                       </div>
 
                       {gateways && gateways.length > 0 ? (
-                        <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="border border-border rounded-xl bg-background overflow-hidden divide-y divide-border/60 shadow-sm">
                           {gateways.map((g) => {
                             const imgSrc: Record<string, string> = {
+                              keeal: payIconKeeal,
                               sslcommerz: payIconSslcommerz,
                               bkash: payIconBkash,
                               dodopayment: payIconDodo,
@@ -1381,64 +2065,148 @@ const Checkout = () => {
                             };
                             const src = imgSrc[g.id];
                             const selected = gateway === g.id;
-                            return (
-                              <button key={g.id} onClick={() => setGateway(g.id)}
-                                className={`text-left p-4 rounded-xl border-2 transition-all ${selected ? "border-primary bg-primary/10 shadow-sm" : "border-border hover:border-primary/40 hover:bg-muted/30"}`}>
-                                <div className="flex items-center gap-4">
-                                  <div className="w-24 h-20 rounded-lg flex items-center justify-center flex-shrink-0 bg-white border border-border overflow-hidden p-2">
-                                    {src ? (
-                                      <img src={src} alt={`${g.label} logo`} loading="lazy" decoding="async" className="max-w-full max-h-full object-contain" />
-                                    ) : (
-                                      <CreditCard className="w-8 h-8 text-primary" />
-                                    )}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-foreground leading-snug">{g.desc}</p>
-                                  </div>
-                                  {selected && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
+
+                            // Determine the logo/logos on the right
+                            let rightContent = null;
+                            if (g.id === "stripe_onsite") {
+                              rightContent = (
+                                <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                                  <CardLogos />
                                 </div>
-                              </button>
+                              );
+                            } else if (g.id === "stripe") {
+                              rightContent = (
+                                <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                                  <img src={payIconApplePay} alt="Apple Pay" className="h-4 w-auto object-contain" />
+                                  <img src={payIconGooglePay} alt="Google Pay" className="h-4 w-auto object-contain" />
+                                  <CardLogos />
+                                </div>
+                              );
+                            } else if (src) {
+                              rightContent = (
+                                <div className="h-5 flex items-center justify-center overflow-hidden">
+                                  <img src={src} alt={g.label} className="h-5 w-auto object-contain" />
+                                </div>
+                              );
+                            } else {
+                              rightContent = <CreditCard className="w-4 h-4 text-muted-foreground" />;
+                            }
+
+                            return (
+                              <div key={g.id} className="transition-colors">
+                                {/* Row Header */}
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={() => setGateway(g.id)}
+                                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setGateway(g.id); }}
+                                  className={cn(
+                                    "flex items-center justify-between p-4 cursor-pointer hover:bg-muted/15 select-none focus:outline-none focus:bg-muted/20",
+                                    selected && "bg-primary/[0.02]"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {/* Custom Radio Button */}
+                                    <div className="flex-shrink-0">
+                                      <div className={cn(
+                                        "w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-all",
+                                        selected ? "border-primary bg-primary" : "border-muted-foreground/40 bg-background"
+                                      )}>
+                                        {selected && <div className="w-[8px] h-[8px] rounded-full bg-white" />}
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Payment Method Text */}
+                                    <div>
+                                      <span className="text-sm font-medium text-foreground block">{g.label}</span>
+                                      {g.desc && <span className="text-[11px] text-muted-foreground">{g.desc}</span>}
+                                    </div>
+                                  </div>
+
+                                  {/* Right logos */}
+                                  <div className="flex-shrink-0">{rightContent}</div>
+                                </div>
+
+                                {/* Selected Content Block (for Credit Card Inputs etc.) */}
+                                {selected && g.id === "stripe_onsite" && (
+                                  <div className="px-4 pb-5 pt-1 border-t border-border/40 bg-muted/5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                                    {/* Credit Card inputs */}
+                                    <div className="space-y-3 w-full">
+                                      <div>
+                                        <Label className="text-xs font-semibold text-muted-foreground mb-1 block">Cardholder Name *</Label>
+                                        <Input
+                                          placeholder="John Doe"
+                                          value={cardholderName}
+                                          onChange={(e) => setCardholderName(e.target.value)}
+                                          className="bg-background border-border text-sm h-10"
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label className="text-xs font-semibold text-muted-foreground mb-1 block">Card Information *</Label>
+                                        <div id="card-element" className="p-3 rounded-lg border border-input bg-background">
+                                          {/* Stripe unified Card Element will mount here */}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
 
-                          {/* FlexPay tile */}
+                          {/* FlexPay row inside selector */}
                           {flexpayEligible && (() => {
                             const selected = gateway === "flexpay";
                             const insufficient = chargeNow > flexpayAvailable;
                             return (
-                              <button
-                                type="button"
-                                disabled={insufficient}
-                                onClick={() => setGateway("flexpay")}
-                                className={`text-left p-3 rounded-xl border-2 transition-all sm:col-span-2 relative ${
-                                  selected ? "border-primary bg-primary/10 shadow-sm"
-                                  : insufficient ? "border-border opacity-60 cursor-not-allowed"
-                                  : "border-border hover:border-primary/40 hover:bg-muted/30"
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-primary to-primary/60 text-primary-foreground shadow-md">
-                                    <div className="text-center">
-                                      <CreditCard className="w-5 h-5 mx-auto" />
-                                      <div className="text-[8px] font-bold mt-0.5 tracking-wider">FLEXPAY</div>
+                              <div className={cn("transition-colors", insufficient && "opacity-60")}>
+                                <div
+                                  role="button"
+                                  tabIndex={insufficient ? -1 : 0}
+                                  onClick={() => { if (!insufficient) setGateway("flexpay"); }}
+                                  onKeyDown={(e) => { if (!insufficient && (e.key === "Enter" || e.key === " ")) setGateway("flexpay"); }}
+                                  className={cn(
+                                    "flex items-center justify-between p-4",
+                                    insufficient ? "cursor-not-allowed" : "cursor-pointer hover:bg-muted/15 select-none focus:outline-none focus:bg-muted/20",
+                                    selected && "bg-primary/[0.02]"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    {/* Custom Radio Button */}
+                                    <div className="flex-shrink-0">
+                                      <div className={cn(
+                                        "w-[18px] h-[18px] rounded-full border flex items-center justify-center transition-all",
+                                        selected ? "border-primary bg-primary" : "border-muted-foreground/40 bg-background"
+                                      )}>
+                                        {selected && <div className="w-[8px] h-[8px] rounded-full bg-white" />}
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Payment Method Text */}
+                                    <div>
+                                      <span className="text-sm font-medium text-foreground block">Dynime FlexPay — Buy Now, Pay Later</span>
+                                      <span className="text-[10px] text-muted-foreground block mt-0.5">
+                                        Available limit: <span className="font-semibold text-foreground">${flexpayAvailable.toFixed(2)}</span>
+                                        {insufficient && <span className="text-destructive ml-1.5">· Not enough for this order</span>}
+                                      </span>
                                     </div>
                                   </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold text-foreground">Dynime FlexPay — Buy Now, Pay Later</p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                      Available limit: <span className="font-semibold text-foreground">${flexpayAvailable.toFixed(2)}</span>
-                                      {insufficient && <span className="text-destructive ml-1.5">· Not enough for this order</span>}
-                                    </p>
+
+                                  {/* Right logos */}
+                                  <div className="flex-shrink-0 flex items-center gap-1.5">
+                                    <Wallet className="w-4 h-4 text-primary" />
+                                    <div className="h-5 flex items-center justify-center bg-gradient-to-br from-primary to-primary/60 text-primary-foreground rounded px-2 py-0.5 shadow-[0_1px_2.5px_rgba(0,0,0,0.04)]">
+                                      <span className="text-[8px] font-bold tracking-wider">FLEXPAY</span>
+                                    </div>
                                   </div>
-                                  {selected && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
                                 </div>
 
+                                {/* Selected content (Choose tenure) */}
                                 {selected && !insufficient && (
-                                  <div className="mt-3 pt-3 border-t border-border/60 space-y-2"
-                                    onClick={(e) => e.stopPropagation()}>
-                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Choose tenure</p>
+                                  <div className="px-4 pb-5 pt-1 border-t border-border/40 bg-muted/5 space-y-4" onClick={(e) => e.stopPropagation()}>
+                                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Choose tenure</p>
                                     <div
-                                      className="grid gap-1.5"
+                                      className="grid gap-1.5 w-full"
                                       style={{ gridTemplateColumns: `repeat(${Math.max(flexpayAllowedTenures.length, 1)}, minmax(0, 1fr))` }}
                                     >
                                       {flexpayAllowedTenures.map((m) => {
@@ -1449,14 +2217,15 @@ const Checkout = () => {
                                           <button
                                             key={m}
                                             type="button"
-                                            onClick={(e) => { e.stopPropagation(); setFlexpayTenure(m); }}
-                                            className={`rounded-md border px-1 py-1.5 text-center leading-tight ${
-                                              active ? "border-primary bg-primary text-primary-foreground"
-                                              : "border-border bg-background hover:border-primary/50"
-                                            }`}
+                                            onClick={() => setFlexpayTenure(m)}
+                                            className={cn(
+                                              "p-2.5 rounded-lg border text-center transition-all focus:outline-none",
+                                              active ? "border-primary bg-primary/10 text-primary font-semibold shadow-sm"
+                                              : "border-border bg-background hover:bg-muted/30 text-muted-foreground hover:text-foreground text-xs"
+                                            )}
                                           >
-                                            <div className="font-bold text-xs">{m}m</div>
-                                            <div className={`text-[10px] ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{feePct}%</div>
+                                            <div className="text-xs font-bold">{m} Months</div>
+                                            <div className="text-[9px] mt-0.5 opacity-80">{feePct}% fee</div>
                                           </button>
                                         );
                                       })}
@@ -1468,16 +2237,16 @@ const Checkout = () => {
                                       const financed = chargeNow + fee;
                                       const monthly = Math.round((financed / flexpayTenure) * 100) / 100;
                                       return (
-                                        <div className="mt-2 rounded-lg bg-muted/40 p-3 text-xs grid grid-cols-3 gap-2">
-                                          <div><div className="text-muted-foreground">Monthly</div><div className="font-bold text-base">${monthly.toFixed(2)}</div></div>
-                                          <div><div className="text-muted-foreground">Fee ({feePct}%)</div><div className="font-semibold">${fee.toFixed(2)}</div></div>
-                                          <div><div className="text-muted-foreground">Financed</div><div className="font-semibold">${financed.toFixed(2)}</div></div>
+                                        <div className="mt-2 rounded-lg bg-muted/20 border border-border/40 p-3 text-xs grid grid-cols-3 gap-2 w-full">
+                                          <div><div className="text-muted-foreground text-[10px]">Monthly</div><div className="font-bold text-sm text-foreground">${monthly.toFixed(2)}</div></div>
+                                          <div><div className="text-muted-foreground text-[10px]">Fee ({feePct}%)</div><div className="font-semibold text-foreground">${fee.toFixed(2)}</div></div>
+                                          <div><div className="text-muted-foreground text-[10px]">Financed</div><div className="font-semibold text-foreground">${financed.toFixed(2)}</div></div>
                                         </div>
                                       );
                                     })()}
                                   </div>
                                 )}
-                              </button>
+                              </div>
                             );
                           })()}
                         </div>

@@ -29,7 +29,7 @@ const InvestorNotificationsBell = () => {
   const { data: notifications = [] } = useQuery({
     queryKey: ["investor-notifications", user?.id],
     enabled: !!user?.id,
-    refetchInterval: 30_000,
+    refetchInterval: 4000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("investor_notifications" as any)

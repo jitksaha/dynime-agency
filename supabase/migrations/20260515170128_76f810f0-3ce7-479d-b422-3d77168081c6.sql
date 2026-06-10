@@ -1,1 +1,0 @@
-UPDATE public.imap_poll_state SET last_uid = 0 WHERE id = 1;

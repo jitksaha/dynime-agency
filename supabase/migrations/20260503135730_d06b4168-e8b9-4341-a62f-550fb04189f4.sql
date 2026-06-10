@@ -1,2 +1,0 @@
-UPDATE public.contact_info SET value='Suite Bd1724 Skyport Drive, Harmondsworth, West Drayton, Middx, England, UB7 0LB, UK' WHERE id='b2475e40-d145-4945-87f9-a0040b12e0e0';
-UPDATE public.contact_info SET value='418 Broadway, St 7660, Albany, New York, USA' WHERE id='a20e03b5-d6fa-4ce8-85de-4976246e65e1';

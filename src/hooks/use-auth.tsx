@@ -1,15 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
-import {
-  setNestTokens,
-  clearNestTokens,
-  getNestAccessToken,
-  getNestRefreshToken,
-  refreshNestTokens,
-} from "@/lib/nestjs-tokens";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { authApi, tokenStorage, type AdminUser } from "@/lib/api";
 
 export interface AppUser {
   id: string;
   email: string | null;
+  name: string;
   roles: string[];
   user_metadata?: { full_name?: string; avatar_url?: string; [key: string]: unknown };
 }
@@ -36,106 +31,62 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
-function decodeJwtPayload(token: string): { sub: string; email?: string | null; roles?: string[] } | null {
-  try {
-    const [, payload] = token.split('.');
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    return decoded;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchProfile(token: string): Promise<{ full_name?: string | null; avatar_url?: string | null } | null> {
-  try {
-    const res = await fetch('/api/v1/auth/profile', { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
+const toAppUser = (u: AdminUser): AppUser => ({
+  id: String(u.id),
+  email: u.email,
+  name: u.name,
+  roles: [u.role],
+  user_metadata: { full_name: u.name },
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const hydrateUser = useCallback(async (token: string) => {
-    const payload = decodeJwtPayload(token);
-    if (!payload?.sub) return;
-    const profile = await fetchProfile(token);
-    setUser({
-      id: payload.sub,
-      email: payload.email ?? null,
-      roles: payload.roles ?? [],
-      user_metadata: {
-        full_name: profile?.full_name ?? undefined,
-        avatar_url: profile?.avatar_url ?? undefined,
-      },
-    });
-  }, []);
-
+  // On mount — restore session from stored token
   useEffect(() => {
-    (async () => {
-      let token = getNestAccessToken();
-      if (!token) {
-        const ok = await refreshNestTokens();
-        if (ok) token = getNestAccessToken();
-      }
-      if (token) {
-        await hydrateUser(token);
-      }
+    const token = tokenStorage.get();
+    if (!token) {
       setLoading(false);
-    })();
-  }, [hydrateUser]);
+      return;
+    }
+    authApi.me()
+      .then((res) => setUser(toAppUser(res.data)))
+      .catch(() => tokenStorage.remove())
+      .finally(() => setLoading(false));
+  }, []);
 
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
     try {
-      const res = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({})) as { message?: string };
-        return { error: err.message ?? 'Invalid email or password' };
-      }
-      const data = await res.json() as { accessToken: string; refreshToken: string; expiresIn: number };
-      setNestTokens(data);
-      await hydrateUser(data.accessToken);
+      const res = await authApi.login(email, password);
+      tokenStorage.set(res.data.token);
+      setUser(toAppUser(res.data.user));
       return { error: null };
-    } catch {
-      return { error: 'Network error — please try again' };
+    } catch (err: any) {
+      const msg = err?.response?.data?.errors?.email?.[0]
+        ?? err?.response?.data?.message
+        ?? "Invalid email or password";
+      return { error: msg };
     }
   };
 
   const signOut = async () => {
-    const refreshToken = getNestRefreshToken();
-    const token = getNestAccessToken();
-    if (token) {
-      try {
-        await fetch('/api/v1/auth/logout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ refreshToken }),
-        });
-      } catch { /* best-effort */ }
-    }
-    clearNestTokens();
+    try { await authApi.logout(); } catch { /* best-effort */ }
+    tokenStorage.remove();
     setUser(null);
   };
 
+  const token = tokenStorage.get();
   const userRole = user?.roles?.[0] ?? null;
-  const currentToken = getNestAccessToken();
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        session: user ? { access_token: currentToken ?? '' } : null,
+        session: user ? { access_token: token ?? "" } : null,
         loading,
         userRole,
-        isAdmin: !!userRole && ["super_admin", "manager", "editor", "support", "hr", "sales"].includes(userRole),
+        isAdmin: !!userRole && ["super_admin", "admin", "manager", "editor"].includes(userRole),
         isMock: false,
         signIn,
         signOut,

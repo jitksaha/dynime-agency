@@ -164,7 +164,7 @@ const InvestorAgreements = () => {
             <DialogTitle>Sign agreement</DialogTitle>
             <DialogDescription>
               By signing you confirm you have read the {activeInv?.plan_name} terms and accept them as a binding
-              contract with Dynime Inc..
+              contract with Dynime Inc.
             </DialogDescription>
           </DialogHeader>
 

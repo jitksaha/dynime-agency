@@ -1,1 +1,0 @@
-UPDATE public.contact_info SET value = '+8809658003831', updated_at = now() WHERE id = '213c0e28-e915-49ab-91d4-1df1b6f7012a';
