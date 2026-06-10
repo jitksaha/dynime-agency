@@ -64,9 +64,14 @@ try {
 // Check what connection we are using
 echo "\n--- DB Configuration ---\n";
 echo "DB Default Connection Name: " . DB::getDefaultConnection() . "\n";
+echo "Config DB Host: " . config('database.connections.mysql.host') . "\n";
+echo "Config DB Database: " . config('database.connections.mysql.database') . "\n";
+echo "Config DB Username: " . config('database.connections.mysql.username') . "\n";
+echo "Config DB Password Length: " . strlen(config('database.connections.mysql.password')) . "\n";
 try {
     $dbName = DB::connection()->getDatabaseName();
-    echo "DB Database Name in Laravel: " . $dbName . "\n";
+    echo "DB Database Name in Laravel: $dbName\n";
 } catch (\Exception $e) {
     echo "DB name error: " . $e->getMessage() . "\n";
 }
+
