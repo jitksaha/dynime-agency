@@ -18,8 +18,9 @@ use Illuminate\Support\Facades\Request;
 header('Content-Type: text/plain');
 
 try {
-    $request = Request::create('/api/v1/cms/job-applications', 'GET');
-    $response = $app->handle($request);
+    $controller = new \App\Http\Controllers\Api\Cms\CareerController();
+    $request = Request::create('/', 'GET');
+    $response = $controller->applications($request);
     $content = $response->getContent();
     
     echo "Response preview:\n";
@@ -36,5 +37,5 @@ try {
         echo "Format: Unknown / Error\n";
     }
 } catch (\Exception $e) {
-    echo "Error: " . $e->getMessage();
+    echo "Error: " . $e->getMessage() . "\n" . $e->getTraceAsString();
 }
