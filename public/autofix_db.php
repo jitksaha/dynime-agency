@@ -50,9 +50,9 @@ LOG_LEVEL=error
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE={$dbName}
-DB_USERNAME={$successUser}
-DB_PASSWORD={$password}
+DB_DATABASE="{$dbName}"
+DB_USERNAME="{$successUser}"
+DB_PASSWORD="{$password}"
 
 SESSION_DRIVER=file
 SESSION_LIFETIME=120
