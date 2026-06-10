@@ -10,7 +10,7 @@ export const HOME_SECTIONS_KEY = "home_sections";
 
 /** Fetch the homepage sections JSON from `site_settings`, merged on defaults. */
 export const useHomeSections = () => {
-  return useQuery<HomeSections>({
+  const query = useQuery<HomeSections>({
     queryKey: ["home-sections"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,4 +29,9 @@ export const useHomeSections = () => {
     staleTime: 1000 * 60,
     placeholderData: DEFAULT_HOME_SECTIONS,
   });
+
+  return {
+    ...query,
+    data: query.data ?? DEFAULT_HOME_SECTIONS
+  };
 };
