@@ -26,6 +26,26 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Setup PHP & Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, mysql, gd, zip
+          tools: composer:v2
+
+      - name: Install backend dependencies
+        run: |
+          cd dynime-api
+          composer install --no-dev --optimize-autoloader
+
+      - name: Package backend ZIP
+        run: |
+          cd dynime-api
+          zip -r ../dynime-api.zip . -x ".git*" -x "node_modules/*" -x "tests/*" -x "storage/logs/*" -x "storage/framework/cache/data/*" -x ".env*" -x ".phpunit.result.cache"
+
+      - name: Copy backend package to dist for FTP upload
+        run: cp dynime-api.zip dist/
+
       - name: 📂 Sync files to Spaceship
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -35,3 +55,9 @@ jobs:
           port: 21
           local-dir: ./dist/
           server-dir: ./
+
+      - name: 🚀 Trigger Backend Deployment Webhook
+        run: |
+          echo "Triggering Spaceship API extraction..."
+          curl -s "https://dynime.com/deploy-api.php?token=deploy_token_7782"
+

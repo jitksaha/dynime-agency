@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
+dynime-api/vendor
+dynime-api/.env
+dynime-api/storage/logs/*.log
+dynime-api/storage/framework/cache/data/*
