@@ -15,22 +15,58 @@ class MigrateSupabaseData extends Command
      *
      * @var string
      */
-    protected $signature = 'data:migrate-supabase';
+    protected $signature = 'data:migrate-supabase {--export : Export data from Supabase to local JSON}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Migrate employees, careers, and job applications from Supabase PostgreSQL to local MySQL';
+    protected $description = 'Migrate employees, careers, and job applications from Supabase PostgreSQL or local JSON export to MySQL';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info("Starting Supabase -> MySQL Data Migration...");
+        $exportPath = database_path('seeders/supabase_export.json');
 
+        if ($this->option('export')) {
+            $this->info("Exporting Supabase data to JSON...");
+            return $this->exportToJson($exportPath);
+        }
+
+        $this->info("Starting MySQL Data Import from JSON...");
+        if (!file_exists($exportPath)) {
+            $this->error("JSON export file not found at: {$exportPath}");
+            return Command::FAILURE;
+        }
+
+        try {
+            $data = json_decode(file_get_contents($exportPath), true);
+        } catch (Exception $e) {
+            $this->error("Failed to parse JSON export file: " . $e->getMessage());
+            return Command::FAILURE;
+        }
+
+        // 1. Migrate Office Locations first to resolve foreign keys
+        $officeLocationsMap = $this->migrateOfficeLocations($data['office_locations'] ?? []);
+
+        // 2. Migrate Careers passing the office location mapping
+        $this->migrateCareers($data['careers'] ?? [], $officeLocationsMap);
+
+        // 3. Migrate Job Applications
+        $this->migrateJobApplications($data['job_applications'] ?? []);
+
+        // 4. Migrate Employees
+        $this->migrateEmployees($data['employees'] ?? []);
+
+        $this->info("All migrations completed!");
+        return Command::SUCCESS;
+    }
+
+    private function exportToJson($exportPath)
+    {
         $host = 'aws-1-ap-southeast-2.pooler.supabase.com';
         $port = 5432;
         $db = 'postgres';
@@ -40,7 +76,7 @@ class MigrateSupabaseData extends Command
         try {
             $this->info("Connecting to Supabase PostgreSQL...");
             $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
-            $supabasePdo = new PDO($dsn, $user, $pass, [
+            $pdo = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_TIMEOUT => 30
             ]);
@@ -50,35 +86,45 @@ class MigrateSupabaseData extends Command
             return Command::FAILURE;
         }
 
-        // 1. Migrate Office Locations first to resolve foreign keys
-        $officeLocationsMap = $this->migrateOfficeLocations($supabasePdo);
+        $tables = [
+            'office_locations' => 'public.office_locations',
+            'careers' => 'public.careers',
+            'job_applications' => 'public.job_applications',
+            'employees' => 'public.employees'
+        ];
 
-        // 2. Migrate Careers passing the office location mapping
-        $this->migrateCareers($supabasePdo, $officeLocationsMap);
+        $exportData = [];
 
-        // 3. Migrate Job Applications
-        $this->migrateJobApplications($supabasePdo);
+        foreach ($tables as $key => $table) {
+            $this->info("Fetching table: {$table}...");
+            try {
+                $stmt = $pdo->query("SELECT * FROM {$table}");
+                $exportData[$key] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $this->info("Fetched " . count($exportData[$key]) . " rows.");
+            } catch (Exception $e) {
+                $this->error("Failed to fetch table {$table}: " . $e->getMessage());
+                return Command::FAILURE;
+            }
+        }
 
-        // 4. Migrate Employees
-        $this->migrateEmployees($supabasePdo);
+        try {
+            if (!is_dir(dirname($exportPath))) {
+                mkdir(dirname($exportPath), 0755, true);
+            }
+            file_put_contents($exportPath, json_encode($exportData, JSON_PRETTY_PRINT));
+            $this->info("Data successfully exported to: {$exportPath}");
+        } catch (Exception $e) {
+            $this->error("Failed to write JSON export file: " . $e->getMessage());
+            return Command::FAILURE;
+        }
 
-        $this->info("All migrations completed!");
         return Command::SUCCESS;
     }
 
-    private function migrateOfficeLocations($pdo)
+    private function migrateOfficeLocations(array $rows)
     {
         $this->info("\n--- Migrating Office Locations ---");
         $map = [];
-
-        try {
-            $stmt = $pdo->query("SELECT * FROM public.office_locations ORDER BY created_at ASC");
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $this->info("Found " . count($rows) . " office locations on Supabase.");
-        } catch (Exception $e) {
-            $this->error("Failed to fetch office locations: " . $e->getMessage());
-            return $map;
-        }
 
         $mysqlColumns = Schema::getColumnListing('office_locations');
         
@@ -156,17 +202,9 @@ class MigrateSupabaseData extends Command
         return $map;
     }
 
-    private function migrateCareers($pdo, $officeLocationsMap = [])
+    private function migrateCareers(array $rows, array $officeLocationsMap = [])
     {
         $this->info("\n--- Migrating Careers ---");
-        try {
-            $stmt = $pdo->query("SELECT * FROM public.careers ORDER BY created_at ASC");
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $this->info("Found " . count($rows) . " careers on Supabase.");
-        } catch (Exception $e) {
-            $this->error("Failed to fetch careers: " . $e->getMessage());
-            return;
-        }
 
         $mysqlColumns = Schema::getColumnListing('careers');
         
@@ -254,17 +292,9 @@ class MigrateSupabaseData extends Command
         $this->info("Careers Migration completed: {$imported} imported, {$updated} updated.");
     }
 
-    private function migrateJobApplications($pdo)
+    private function migrateJobApplications(array $rows)
     {
         $this->info("\n--- Migrating Job Applications ---");
-        try {
-            $stmt = $pdo->query("SELECT * FROM public.job_applications ORDER BY created_at ASC");
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $this->info("Found " . count($rows) . " job applications on Supabase.");
-        } catch (Exception $e) {
-            $this->error("Failed to fetch job applications: " . $e->getMessage());
-            return;
-        }
 
         $mysqlColumns = Schema::getColumnListing('job_applications');
 
@@ -361,17 +391,9 @@ class MigrateSupabaseData extends Command
         $this->info("Job Applications Migration completed: {$imported} imported, {$skipped} skipped.");
     }
 
-    private function migrateEmployees($pdo)
+    private function migrateEmployees(array $rows)
     {
         $this->info("\n--- Migrating Employees ---");
-        try {
-            $stmt = $pdo->query("SELECT * FROM public.employees ORDER BY created_at ASC");
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $this->info("Found " . count($rows) . " employees on Supabase.");
-        } catch (Exception $e) {
-            $this->error("Failed to fetch employees: " . $e->getMessage());
-            return;
-        }
 
         $mysqlColumns = Schema::getColumnListing('employees');
         $imported = 0;
