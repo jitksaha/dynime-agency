@@ -13,8 +13,16 @@ if (!file_exists($bootstrap) || !file_exists($autoload)) {
     exit;
 }
 
+// Clear persistent server environment variables (like those cached in FPM process)
+// to force Laravel's Dotenv to load the double-quoted password correctly.
+foreach (['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'] as $var) {
+    putenv($var);
+    unset($_ENV[$var], $_SERVER[$var]);
+}
+
 require $autoload;
 $app = require_once $bootstrap;
+
 
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
