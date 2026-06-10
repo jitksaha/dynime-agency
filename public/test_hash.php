@@ -28,8 +28,25 @@ echo "Laravel Bootstrapped successfully.\n";
 $email = 'mail.dynime@gmail.com';
 $password = 'Dynime123!';
 
+echo "--- Raw Environment Variables ---\n";
+foreach (['$_ENV' => $_ENV, '$_SERVER' => $_SERVER, 'getenv' => []] as $source => $array) {
+    echo "Source: $source\n";
+    if ($source === 'getenv') {
+        foreach (['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'] as $var) {
+            echo "  $var: " . getenv($var) . " (len: " . strlen(getenv($var)) . ")\n";
+        }
+    } else {
+        foreach ($array as $key => $val) {
+            if (strpos($key, 'DB_') === 0) {
+                echo "  $key: " . (is_string($val) ? $val : json_encode($val)) . " (len: " . (is_string($val) ? strlen($val) : 0) . ")\n";
+            }
+        }
+    }
+}
+
 try {
     $user = AdminUser::where('email', $email)->first();
+
 
     if ($user) {
         echo "User found in database!\n";
