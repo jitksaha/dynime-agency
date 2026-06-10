@@ -29,15 +29,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    Route::get('migrate-supabase-data-key-7782', function () {
-        try {
-            $exitCode = \Illuminate\Support\Facades\Artisan::call('data:migrate-supabase');
-            return '<pre>Exit Code: ' . $exitCode . "\n\n" . \Illuminate\Support\Facades\Artisan::output() . '</pre>';
-        } catch (\Throwable $e) {
-            return '<pre>Exception: ' . $e->getMessage() . "\n\n" . $e->getTraceAsString() . '</pre>';
-        }
-    });
-
     // ── PUBLIC ROUTES ──────────────────────────────────────────────────────
 
         // Auth
