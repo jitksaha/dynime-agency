@@ -28,7 +28,7 @@ export interface ServiceTab {
 
 export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
   dws: {
-    label: "DWS - Dynime Web Services", sublabel: "Websites, React apps & speed optimization",
+    label: "DWS - Dynime Web Services", sublabel: "High-performance websites & custom web apps",
     color: "from-blue-500/15 to-indigo-500/15", icon: Code,
     items: [
       { label: "Web Design & Development", desc: "WordPress, React, Laravel & more", to: "/web-design-development", icon: Globe },
@@ -44,7 +44,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   des: {
-    label: "DES - Dynime Ecommerce Solution", sublabel: "Shopify, WooCommerce, Laravel & MERN",
+    label: "DES - Dynime Ecommerce Solution", sublabel: "Scalable e-commerce stores & custom integrations",
     color: "from-amber-500/15 to-orange-500/15", icon: ShoppingBag,
     items: [
       { label: "Shopify Ecommerce", desc: "Store build, design, redesign & custom apps", to: "/shopify-ecommerce", icon: ShoppingBag },
@@ -54,7 +54,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dms: {
-    label: "DMS - Dynime Marketing Services", sublabel: "Social media, SEO & Meta/Google Ads",
+    label: "DMS - Dynime Marketing Services", sublabel: "Data-driven marketing, SEO & high-ROAS ads",
     color: "from-violet-500/15 to-purple-500/15", icon: Megaphone,
     items: [
       { label: "Social Media Management", desc: "Grow online presence", to: "/social-media", icon: Users },
@@ -68,7 +68,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dss: {
-    label: "DSS - Dynime Software & AI", sublabel: "AI software, custom backend dev & QA testing",
+    label: "DSS - Dynime Software & AI", sublabel: "AI-augmented engineering & custom software",
     color: "from-cyan-500/15 to-sky-500/15", icon: Cpu,
     items: [
       { label: "AI Software Development", desc: "AI-first scalable apps", to: "/ai-software-development", icon: Brain },
@@ -80,7 +80,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dcs: {
-    label: "DCS - Dynime Consultancy Services", sublabel: "US/UK company formation & business banking",
+    label: "DCS - Dynime Consultancy Services", sublabel: "US & UK corporate formation, banking & compliance",
     color: "from-emerald-500/15 to-teal-500/15", icon: Briefcase,
     items: [
       { label: "US Company Formation", desc: "LLC, C-Corp, EIN & compliance", to: "/us-company", icon: Building2 },
