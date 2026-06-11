@@ -204,7 +204,7 @@ const ServiceDetailPage = () => {
         </div>
         <div className="container-custom relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-7">
               <ScrollReveal>
                 <div>
                   {(() => {
@@ -258,7 +258,7 @@ const ServiceDetailPage = () => {
               </ScrollReveal>
             </div>
             
-            <div className="lg:col-span-6 w-full flex items-center justify-center">
+            <div className="lg:col-span-5 w-full flex items-center justify-center">
               <ScrollReveal>
                 <InteractiveHeroVisual slug={service.slug} />
               </ScrollReveal>

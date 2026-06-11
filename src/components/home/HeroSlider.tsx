@@ -155,7 +155,7 @@ const HeroSlider = () => {
             <SwiperSlide key={idx}>
               <div className="container-custom relative py-12 md:py-16 lg:py-20">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
-                  <div className="lg:col-span-6">
+                  <div className="lg:col-span-7">
                     <motion.div
                       key={`eb-${idx}`}
                       initial={{ opacity: 0, y: 8 }}
@@ -224,7 +224,7 @@ const HeroSlider = () => {
                     </motion.div>
                   </div>
                   
-                  <div className="lg:col-span-6 w-full flex items-center justify-center">
+                  <div className="lg:col-span-5 w-full flex items-center justify-center">
                     <InteractiveHeroVisual category={s.categoryKey} />
                   </div>
                 </div>
