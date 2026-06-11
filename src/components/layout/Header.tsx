@@ -336,7 +336,7 @@ const Header = () => {
               {(() => {
                 const spotlight = megaMenuSpotlights[activeTab] || megaMenuSpotlights.dws;
                 return (
-                  <div className="col-span-3 bg-slate-50/70 dark:bg-zinc-900/40 border-l border-border/30 p-5 md:p-6 flex flex-col justify-between">
+                  <div className="col-span-3 bg-[#f6f9fc] dark:bg-zinc-950/50 border-l border-border/30 p-5 md:p-6 flex flex-col justify-between">
                     {/* Section 1 - Spotlight links */}
                     <div className="space-y-2.5">
                       <div className="text-[10px] font-heading font-bold text-foreground/50 dark:text-white/60 uppercase tracking-[0.18em] flex items-center gap-1.5">
