@@ -189,7 +189,7 @@ const Header = () => {
           >
             <div className="grid grid-cols-12 gap-4">
               {/* Vertical tabs */}
-              <div className="col-span-3 space-y-1 border-r border-border/30 pr-3">
+              <div className="col-span-4 space-y-1 border-r border-border/30 pr-3">
                 {serviceTabOrder.map((key) => {
                   const t = serviceTabs[key];
                   const Icon = t.icon;
@@ -212,8 +212,8 @@ const Header = () => {
                         <Icon className="w-[18px] h-[18px] text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[15px] font-bold text-foreground leading-tight truncate">{t.label}</div>
-                        <div className="text-[12px] text-muted-foreground leading-snug mt-0.5 truncate">{t.sublabel}</div>
+                        <div className="text-[15px] font-bold text-foreground leading-tight">{t.label}</div>
+                        <div className="text-[12px] text-muted-foreground leading-snug mt-0.5">{t.sublabel}</div>
                       </div>
                     </button>
                   );
@@ -221,7 +221,7 @@ const Header = () => {
               </div>
 
               {/* Items */}
-              <div className="col-span-9">
+              <div className="col-span-8">
                 <motion.div
                   key={activeTab}
                   initial={{ opacity: 0, y: 4 }}
