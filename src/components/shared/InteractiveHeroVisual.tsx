@@ -1577,7 +1577,7 @@ function renderVisualContent(key: string, transforms: any) {
           {/* Layout 1: Admin Order Notification (Far) */}
           <motion.div 
             style={{ x: depthFarX, y: depthFarY, translateZ: -30 }}
-            className="absolute top-2 left-2 w-[270px] p-4.5 rounded-xl border border-white/10 bg-background/50 backdrop-blur-xl shadow-lg space-y-1.5"
+            className="absolute top-2 left-2 w-[270px] p-5 rounded-xl border border-white/10 bg-background/50 backdrop-blur-xl shadow-lg space-y-1.5"
           >
             <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest font-mono">Store Backend Log</span>
             <div className="text-xs font-bold text-foreground">Webhook order event dispatched</div>
@@ -1589,7 +1589,7 @@ function renderVisualContent(key: string, transforms: any) {
           {/* Layout 2: Ecommerce database analytics grid (Mid) */}
           <motion.div 
             style={{ x: depthMidX, y: depthMidY, translateZ: 40 }}
-            className="absolute top-20 right-2 w-[310px] md:w-[330px] p-5.5 rounded-2xl border border-white/25 bg-background/80 shadow-2xl space-y-3.5"
+            className="absolute top-20 right-2 w-[310px] md:w-[330px] p-6 rounded-2xl border border-white/25 bg-background/80 shadow-2xl space-y-3.5"
           >
             <div className="flex justify-between items-center">
               <div>
