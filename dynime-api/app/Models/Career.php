@@ -11,13 +11,14 @@ class Career extends Model
         'experience_level', 'salary_range', 'description', 'content_html',
         'responsibilities', 'requirements', 'hero_image_url', 'vacancies',
         'is_active', 'is_featured', 'sort_order', 'view_count', 'posted_at',
-        'meta_title', 'meta_desc',
+        'meta_title', 'meta_desc', 'posting_channels',
     ];
 
     protected function casts(): array {
         return [
             'responsibilities' => 'array',
             'requirements' => 'array',
+            'posting_channels' => 'array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'posted_at' => 'datetime',

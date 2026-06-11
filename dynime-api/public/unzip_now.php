@@ -2,57 +2,59 @@
 
 header('Content-Type: text/plain');
 
-$possiblePaths = [
-    '/home/ssamokxvqc/dynime.com/dynime-api.zip',
-    '/home/ssamokxvqc/public_html/dynime-api.zip',
-    __DIR__ . '/dynime-api.zip',
-    __DIR__ . '/../dynime-api.zip',
-    __DIR__ . '/../../dynime-api.zip',
-    __DIR__ . '/../../dynime.com/dynime-api.zip',
-    __DIR__ . '/../../public_html/dynime-api.zip'
-];
+echo "Directory Info:\n";
+echo "- __DIR__: " . __DIR__ . "\n";
+echo "- DOCUMENT_ROOT: " . ($_SERVER['DOCUMENT_ROOT'] ?? 'N/A') . "\n";
+echo "- Real path of __DIR__: " . @realpath(__DIR__) . "\n";
 
-$foundZip = null;
-echo "Searching for dynime-api.zip...\n";
-foreach ($possiblePaths as $path) {
-    $real = realpath($path);
-    if ($real && file_exists($real)) {
-        echo "- Found at: $real (Size: " . round(filesize($real) / 1024 / 1024, 2) . " MB)\n";
-        $foundZip = $real;
-        break;
+echo "\nListing files in __DIR__:\n";
+try {
+    $files = @scandir(__DIR__);
+    if ($files) {
+        foreach ($files as $f) {
+            echo "  $f\n";
+        }
     } else {
-        echo "- Not found at: $path\n";
+        echo "  Failed to list files in __DIR__\n";
     }
+} catch (\Exception $e) {
+    echo "  Error: " . $e->getMessage() . "\n";
 }
 
-if (!$foundZip) {
-    echo "ERROR: Could not find dynime-api.zip in any of the search paths!\n";
-    exit;
+echo "\nListing files in DOCUMENT_ROOT:\n";
+try {
+    $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+    if ($docRoot) {
+        $files = @scandir($docRoot);
+        if ($files) {
+            foreach ($files as $f) {
+                echo "  $f (Size: " . @filesize($docRoot . '/' . $f) . ")\n";
+            }
+        } else {
+            echo "  Failed to list files in DOCUMENT_ROOT\n";
+        }
+    }
+} catch (\Exception $e) {
+    echo "  Error: " . $e->getMessage() . "\n";
 }
 
-$extractTo = '/home/ssamokxvqc/dynime-api';
-echo "Extracting to: $extractTo...\n";
-
-if (!class_exists('ZipArchive')) {
-    echo "ERROR: ZipArchive extension is not enabled on this PHP server!\n";
-    exit;
-}
-
-$zip = new ZipArchive;
-if ($zip->open($foundZip) === TRUE) {
-    if (!is_dir($extractTo)) {
-        mkdir($extractTo, 0755, true);
+echo "\nListing parent folders:\n";
+$current = __DIR__;
+for ($i = 0; $i < 3; $i++) {
+    $current = dirname($current);
+    echo "- Parent $i: $current\n";
+    try {
+        $files = @scandir($current);
+        if ($files) {
+            foreach ($files as $f) {
+                if ($f !== '.' && $f !== '..') {
+                    echo "  $f\n";
+                }
+            }
+        } else {
+            echo "  Failed to list parent $i\n";
+        }
+    } catch (\Exception $e) {
+        echo "  Error: " . $e->getMessage() . "\n";
     }
-    
-    if ($zip->extractTo($extractTo)) {
-        $zip->close();
-        echo "SUCCESS: Backend successfully extracted and deployed!\n";
-        // Delete the zip for security
-        @unlink($foundZip);
-        echo "Deleted source ZIP file.\n";
-    } else {
-        echo "ERROR: Failed to extract ZIP file. Check directory permissions of: $extractTo\n";
-    }
-} else {
-    echo "ERROR: Could not open the ZIP file.\n";
 }
