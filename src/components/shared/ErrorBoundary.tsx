@@ -22,6 +22,18 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught:", error, errorInfo);
+    
+    const chunkFailedMessage = /Failed to fetch dynamically imported module|Failed to fetch|ChunkLoadError/i;
+    if (error?.message && chunkFailedMessage.test(error.message)) {
+      const reloadKey = "dynime-chunk-reload-attempted";
+      const lastReload = sessionStorage.getItem(reloadKey);
+      const now = Date.now();
+      
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem(reloadKey, now.toString());
+        window.location.reload();
+      }
+    }
   }
 
   render() {

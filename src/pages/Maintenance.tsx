@@ -78,11 +78,11 @@ const Maintenance = () => {
           </p>
           <div className="flex justify-center">
             <a
-              href="mailto:hello@dynime.com"
+              href="mailto:contact@dynime.com"
               className="flex items-center gap-2.5 px-6 py-3 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-primary/30 text-sm text-muted-foreground hover:text-white transition-all duration-300 shadow-sm"
             >
               <Mail className="w-4 h-4 text-primary" />
-              hello@dynime.com
+              contact@dynime.com
             </a>
           </div>
         </div>

@@ -49,7 +49,7 @@ class MailConfigurator
         $username = $username ?: env('MAIL_USERNAME');
         $password = $password ?: env('MAIL_PASSWORD');
         $encryption = $encryption ?: env('MAIL_ENCRYPTION', 'tls');
-        $fromAddress = $fromAddress ?: env('MAIL_FROM_ADDRESS', 'hello@dynime.com');
+        $fromAddress = $fromAddress ?: env('MAIL_FROM_ADDRESS', 'contact@dynime.com');
         $fromName = $fromName ?: env('MAIL_FROM_NAME', 'Dynime');
 
         $driver = 'smtp';

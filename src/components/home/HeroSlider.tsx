@@ -154,79 +154,73 @@ const HeroSlider = () => {
           return (
             <SwiperSlide key={idx}>
               <div className="container-custom relative py-12 md:py-16 lg:py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
-                  <div className="lg:col-span-7">
-                    <motion.div
-                      key={`eb-${idx}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="inline-flex items-center gap-2.5 mb-6 rounded-full border border-border/60 bg-card/70 backdrop-blur-md px-4 py-1.5 shadow-sm"
-                    >
-                      <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${s.accent} text-primary-foreground shadow-md`}>
-                        <Icon className="h-3 w-3" />
-                      </span>
-                      <span className="text-xs sm:text-sm font-medium text-foreground/80">
-                        {s.eyebrow}
-                      </span>
-                    </motion.div>
+                <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
+                  <motion.div
+                    key={`eb-${idx}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="inline-flex items-center gap-2.5 mb-6 rounded-full border border-border/60 bg-card/70 backdrop-blur-md px-4 py-1.5 shadow-sm mx-auto"
+                  >
+                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${s.accent} text-primary-foreground shadow-md`}>
+                      <Icon className="h-3 w-3" />
+                    </span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground/80">
+                      {s.eyebrow}
+                    </span>
+                  </motion.div>
 
-                    <motion.div
-                      key={`tt-${idx}`}
-                      initial={{ opacity: 0, y: 18 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, delay: 0.1 }}
-                    >
-                      {renderHighlighted(s.title, s.highlight, s.isHero)}
-                    </motion.div>
+                  <motion.div
+                    key={`tt-${idx}`}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.1 }}
+                  >
+                    {renderHighlighted(s.title, s.highlight, s.isHero)}
+                  </motion.div>
 
-                    <motion.p
-                      key={`d-${idx}`}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.3 }}
-                      className="mt-6 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed text-balance"
-                    >
-                      {s.description}
-                    </motion.p>
+                  <motion.p
+                    key={`d-${idx}`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="mt-6 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed text-balance mx-auto max-w-2xl"
+                  >
+                    {s.description}
+                  </motion.p>
 
-                    <motion.div
-                      key={`c-${idx}`}
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.45 }}
-                      className="mt-8 flex flex-wrap gap-3"
+                  <motion.div
+                    key={`c-${idx}`}
+                    initial={{ opacity: 0, y: 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.45 }}
+                    className="mt-8 flex flex-wrap gap-3 justify-center"
+                  >
+                    <Button
+                      variant="hero"
+                      size="lg"
+                      asChild
+                      className="h-12 px-7 text-sm font-semibold rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/45 transition-all duration-300 hover:-translate-y-0.5"
                     >
+                      <Link to={s.primary.to}>
+                        {s.primary.label}
+                        <Rocket className="w-4 h-4 ml-2 -rotate-45" />
+                      </Link>
+                    </Button>
+                    {s.secondary && (
                       <Button
-                        variant="hero"
+                        variant="outline"
                         size="lg"
                         asChild
-                        className="h-12 px-7 text-sm font-semibold rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/45 transition-all duration-300 hover:-translate-y-0.5"
+                        className="h-12 px-7 text-sm font-semibold rounded-full border-border/70 bg-card/60 backdrop-blur text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
                       >
-                        <Link to={s.primary.to}>
-                          {s.primary.label}
-                          <Rocket className="w-4 h-4 ml-2 -rotate-45" />
+                        <Link to={s.secondary.to}>
+                          {s.secondary.label}
+                          <ArrowRight className="w-4 h-4 ml-2" />
                         </Link>
                       </Button>
-                      {s.secondary && (
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          asChild
-                          className="h-12 px-7 text-sm font-semibold rounded-full border-border/70 bg-card/60 backdrop-blur text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
-                        >
-                          <Link to={s.secondary.to}>
-                            {s.secondary.label}
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Link>
-                        </Button>
-                      )}
-                    </motion.div>
-                  </div>
-                  
-                  <div className="lg:col-span-5 w-full flex items-center justify-center">
-                    <InteractiveHeroVisual category={s.categoryKey} />
-                  </div>
+                    )}
+                  </motion.div>
                 </div>
               </div>
             </SwiperSlide>
@@ -240,6 +234,7 @@ const HeroSlider = () => {
           {[
             { label: "Dynime OS", to: "/products/os" },
             { label: "DWS · Web Services", to: "/services?cat=dws" },
+            { label: "DES · Ecommerce Solutions", to: "/services?cat=des" },
             { label: "DMS · Marketing", to: "/services?cat=dms" },
             { label: "DSS · Software Dev", to: "/services?cat=dss" },
             { label: "DCS · Consultancy", to: "/services?cat=dcs" },

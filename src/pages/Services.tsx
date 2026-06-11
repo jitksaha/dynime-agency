@@ -34,6 +34,14 @@ const categoryMeta: Record<ServiceTabKey, {
     keywords: "web development, WordPress, Shopify, React, Next.js, Laravel, SaaS, UI/UX",
     accent: "from-blue-500/15 via-transparent to-indigo-500/10 border-blue-500/30",
   },
+  des: {
+    tagline: "High-converting online stores built for global scale.",
+    desc: "Turnkey e-commerce development across Shopify, WooCommerce, custom MERN/Node.js, and enterprise Laravel. We build checkout flows that convert, optimize for page speed, set up multi-currency payment gateways, and design shopping experiences that keep customers coming back.",
+    outcomes: ["Conversion-focused design", "Secure checkout integration", "Seamless inventory sync", "Custom cart & apps"],
+    hubTo: null,
+    keywords: "ecommerce, Shopify, WooCommerce, Laravel ecommerce, online store, checkout, shopping cart",
+    accent: "from-amber-500/15 via-transparent to-orange-500/10 border-amber-500/30",
+  },
   dms: {
     tagline: "Performance marketing that compounds — traffic, leads & revenue.",
     desc: "ROI-positive growth across Meta, Google, TikTok, LinkedIn and organic SEO. Strategists, copywriters and media buyers craft brand stories, run conversion-led ad campaigns, build domain authority and nurture leads through email — every dollar measured, every result reported.",

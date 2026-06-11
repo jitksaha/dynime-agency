@@ -18,7 +18,7 @@ class SiteSettingsSeeder extends Seeder
             ['key' => 'site_favicon',     'value' => null,                              'group' => 'general', 'is_public' => true],
 
             // Contact
-            ['key' => 'contact_email',    'value' => 'hello@dynime.com',               'group' => 'contact', 'is_public' => true],
+            ['key' => 'contact_email',    'value' => 'contact@dynime.com',               'group' => 'contact', 'is_public' => true],
             ['key' => 'contact_phone',    'value' => null,                             'group' => 'contact', 'is_public' => true],
             ['key' => 'contact_address',  'value' => null,                             'group' => 'contact', 'is_public' => true],
 
@@ -36,7 +36,7 @@ class SiteSettingsSeeder extends Seeder
             ['key' => 'google_analytics_id',     'value' => null,                              'group' => 'seo', 'is_public' => true],
 
             // Mail
-            ['key' => 'mail_notification_email', 'value' => 'hello@dynime.com',               'group' => 'mail', 'is_public' => false],
+            ['key' => 'mail_notification_email', 'value' => 'contact@dynime.com',               'group' => 'mail', 'is_public' => false],
             ['key' => 'mail_contact_auto_reply',  'value' => true,                            'group' => 'mail', 'is_public' => false],
 
             // Features
