@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/use-data";
 
-const SITE_NAME = "Dynime Inc.";
+const SITE_NAME = "Dynime";
 const SITE_DOMAIN = typeof window !== "undefined"
   ? `${window.location.protocol}//${window.location.host}`
   : "https://dynimeweb.lovable.app";
@@ -176,7 +176,7 @@ export const useSEO = (config: SEOConfig = {}) => {
         "@context": "https://schema.org",
         "@type": "Organization",
         "@id": `${SITE_DOMAIN}/#organization`,
-        name: SITE_NAME,
+        name: SITE_NAME + " Inc.",
         url: SITE_DOMAIN,
         logo: `${SITE_DOMAIN}/favicon.png`,
         sameAs: [],
@@ -197,6 +197,7 @@ export const useSEO = (config: SEOConfig = {}) => {
         "@type": "WebSite",
         "@id": `${SITE_DOMAIN}/#website`,
         name: SITE_NAME,
+        alternateName: [SITE_NAME + " Inc.", "Dynime Agency"],
         url: SITE_DOMAIN,
         publisher: { "@id": `${SITE_DOMAIN}/#organization` },
         inLanguage: "en",
