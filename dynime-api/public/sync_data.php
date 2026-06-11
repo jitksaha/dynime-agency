@@ -16,25 +16,23 @@ $kernel->bootstrap();
 header('Content-Type: text/plain');
 
 try {
-    echo "Running data:migrate-supabase...\n";
+    echo "Running data:migrate-supabase from local JSON file...\n";
     
-    // Check if there is an exported JSON file we can migrate from, or if we should pull from Supabase directly.
-    // Let's run the migration command.
+    $jsonPath = database_path('seeders/supabase_export.json');
+    if (!file_exists($jsonPath)) {
+        echo "ERROR: JSON file not found at: $jsonPath\n";
+        exit;
+    }
+    
+    echo "Found JSON file at: $jsonPath (Size: " . round(filesize($jsonPath) / 1024, 2) . " KB)\n";
+    
     $output = new \Symfony\Component\Console\Output\BufferedOutput();
+    $exitCode = Illuminate\Support\Facades\Artisan::call('data:migrate-supabase', [], $output);
     
-    // First let's try to run with --export option to get latest data from Supabase first
-    echo "Step 1: Exporting from Supabase to local JSON...\n";
-    $exitCode = Illuminate\Support\Facades\Artisan::call('data:migrate-supabase', ['--export' => true], $output);
     echo "Exit Code: " . $exitCode . "\n";
     echo "Output:\n" . $output->fetch() . "\n";
     
-    echo "\nStep 2: Migrating from local JSON to MySQL...\n";
-    $output2 = new \Symfony\Component\Console\Output\BufferedOutput();
-    $exitCode2 = Illuminate\Support\Facades\Artisan::call('data:migrate-supabase', [], $output2);
-    echo "Exit Code: " . $exitCode2 . "\n";
-    echo "Output:\n" . $output2->fetch() . "\n";
-    
-    echo "\nSync operation completed successfully!\n";
+    echo "Sync operation completed successfully!\n";
 } catch (\Exception $e) {
     echo "Error running migration: " . $e->getMessage() . "\n";
 }
