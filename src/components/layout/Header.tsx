@@ -25,10 +25,10 @@ const megaMenuSpotlights: Record<string, {
   };
 }> = {
   dws: {
-    moreTitle: "Spotlight",
+    moreTitle: "Alternative Services",
     moreLinks: [
-      { label: "SaaS Scaling Playbook", desc: "Design multi-tenant architectures", to: "/blog" },
-      { label: "Page Speed Checklist", desc: "Sub-3s loading times on React/WP", to: "/blog" },
+      { label: "SaaS Development", desc: "Multi-tenant platforms & microservices", to: "/saas-development" },
+      { label: "Page Speed Optimization", desc: "Boost Core Web Vitals to sub-3s", to: "/speed-optimization" },
     ],
     featured: {
       title: "Redesign & Modernize",
@@ -38,10 +38,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   des: {
-    moreTitle: "Spotlight",
+    moreTitle: "Alternative Services",
     moreLinks: [
-      { label: "Shopify Custom Apps", desc: "Tailoring private app backends", to: "/blog" },
-      { label: "WooCommerce vs Surecart", desc: "Finding the best checkout framework", to: "/blog" },
+      { label: "Laravel Ecommerce", desc: "High-security enterprise PHP systems", to: "/laravel-ecommerce" },
+      { label: "Nodejs / MERN Ecommerce", desc: "High-performance JavaScript stores", to: "/nodejs-mern-ecommerce" },
     ],
     featured: {
       title: "POS & Stock Sync",
@@ -51,10 +51,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dms: {
-    moreTitle: "Spotlight",
+    moreTitle: "Alternative Services",
     moreLinks: [
-      { label: "High-ROAS Meta Ads", desc: "Budget optimization structures", to: "/blog" },
-      { label: "Rank #1 Google Guide", desc: "Our tactical on-page SEO keys", to: "/blog" },
+      { label: "SEO Optimization", desc: "Drive recurring organic traffic from Google", to: "/seo" },
+      { label: "Google Ads (PPC)", desc: "Targeted search campaigns with high intent", to: "/google-ads" },
     ],
     featured: {
       title: "Free SEO & Ads Audit",
@@ -64,10 +64,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dss: {
-    moreTitle: "Spotlight",
+    moreTitle: "Alternative Services",
     moreLinks: [
-      { label: "AI Integration Guide", desc: "Connect LLMs to custom software", to: "/blog" },
-      { label: "SaaS QA Best Practices", desc: "Automation checks & unit tests", to: "/blog" },
+      { label: "AI Software Development", desc: "AI-first scalable applications & chatbots", to: "/ai-software-development" },
+      { label: "Dynime Pay (Self-Hosted)", desc: "Open-source billing & multi-rail payments", to: "/pay-open-source" },
     ],
     featured: {
       title: "Custom Software Demo",
@@ -77,10 +77,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dcs: {
-    moreTitle: "Spotlight",
+    moreTitle: "Alternative Services",
     moreLinks: [
-      { label: "US LLC Tax Compliance", desc: "Filing forms & keeping addresses active", to: "/blog" },
-      { label: "Global Payment Gateways", desc: "Stripe & Merchant account guidance", to: "/blog" },
+      { label: "Payment Gateway Setup", desc: "Stripe, PayPal & merchant account guidance", to: "/payment-gateway" },
+      { label: "Business Consulting", desc: "Growth strategies & financial planning", to: "/consulting" },
     ],
     featured: {
       title: "Start Your US/UK Brand",
