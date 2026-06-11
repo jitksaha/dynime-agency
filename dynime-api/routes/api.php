@@ -33,8 +33,12 @@ Route::prefix('v1')->group(function () {
     // ── PUBLIC ROUTES ──────────────────────────────────────────────────────
 
     Route::get('run-migration-temp', function() {
-        \Illuminate\Support\Facades\Artisan::call('data:migrate-supabase');
-        return response()->json(['output' => \Illuminate\Support\Facades\Artisan::output()]);
+        return response()->json([
+            'crm_leads' => \Illuminate\Support\Facades\DB::table('crm_leads')->count(),
+            'crm_pipelines' => \Illuminate\Support\Facades\DB::table('crm_pipelines')->count(),
+            'crm_stages' => \Illuminate\Support\Facades\DB::table('crm_stages')->count(),
+            'crm_activities' => \Illuminate\Support\Facades\DB::table('crm_activities')->count(),
+        ]);
     });
 
         // Auth
