@@ -263,77 +263,80 @@ const Header = () => {
               top: barRect.top,
               width: barRect.width,
             }}
-            className="hidden lg:block rounded-b-2xl border border-t-0 border-border/60 bg-background shadow-[0_24px_80px_-20px_hsl(var(--foreground)/0.4)] p-5 md:p-6"
+            className="hidden lg:block rounded-b-2xl border border-t-0 border-border/60 bg-background shadow-[0_24px_80px_-20px_hsl(var(--foreground)/0.4)] overflow-hidden"
           >
-            <div className="grid grid-cols-12 gap-4">
-              {/* Vertical tabs */}
-              <div className="col-span-3 space-y-1 border-r border-border/30 pr-3">
-                {serviceTabOrder.map((key) => {
-                  const t = serviceTabs[key];
-                  const Icon = t.icon;
-                  const active = activeTab === key;
-                  return (
-                    <button
-                      key={key}
-                      onMouseEnter={() => setActiveTab(key)}
-                      onClick={() => setActiveTab(key)}
-                      className={[
-                        "w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-left transition-all",
-                        active
-                          ? `bg-gradient-to-r ${t.color} border border-primary/25`
-                          : "border border-transparent hover:bg-foreground/5",
-                      ].join(" ")}
-                    >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        active ? "bg-primary/20" : "bg-primary/10"
-                      }`}>
-                        <Icon className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13px] xl:text-[13.5px] font-bold text-foreground leading-tight">{t.label}</div>
-                        <div className="text-[10.5px] xl:text-[11px] text-muted-foreground leading-snug mt-0.5">{t.sublabel}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Items */}
-              <div className="col-span-6">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.18 }}
-                  className="grid grid-cols-2 gap-x-3 gap-y-2"
-                >
-                  {serviceTabs[activeTab].items.map((sub) => {
-                    const Icon = sub.icon;
+            <div className="grid grid-cols-12">
+              {/* Left and Middle Sections with Padding */}
+              <div className="col-span-9 grid grid-cols-9 gap-4 p-5 md:p-6">
+                {/* Vertical tabs */}
+                <div className="col-span-3 space-y-1 border-r border-border/20 pr-3">
+                  {serviceTabOrder.map((key) => {
+                    const t = serviceTabs[key];
+                    const Icon = t.icon;
+                    const active = activeTab === key;
                     return (
-                      <Link
-                        key={sub.label}
-                        to={sub.to}
-                        onClick={() => setMegaOpen(false)}
-                        className="group flex items-start gap-2.5 p-2 rounded-lg hover:bg-foreground/5 transition-colors"
+                      <button
+                        key={key}
+                        onMouseEnter={() => setActiveTab(key)}
+                        onClick={() => setActiveTab(key)}
+                        className={[
+                          "w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-left transition-all",
+                          active
+                            ? `bg-gradient-to-r ${t.color} border border-primary/25`
+                            : "border border-transparent hover:bg-foreground/5",
+                        ].join(" ")}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/20 transition-colors">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          active ? "bg-primary/20" : "bg-primary/10"
+                        }`}>
                           <Icon className="w-4 h-4 text-primary" />
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[13.5px] font-semibold text-foreground leading-tight">{sub.label}</div>
-                          <div className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 line-clamp-1">{sub.desc}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] xl:text-[13.5px] font-bold text-foreground leading-tight">{t.label}</div>
+                          <div className="text-[10.5px] xl:text-[11px] text-muted-foreground leading-snug mt-0.5">{t.sublabel}</div>
                         </div>
-                      </Link>
+                      </button>
                     );
                   })}
-                </motion.div>
+                </div>
+
+                {/* Items */}
+                <div className="col-span-6">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="grid grid-cols-2 gap-x-3 gap-y-2"
+                  >
+                    {serviceTabs[activeTab].items.map((sub) => {
+                      const Icon = sub.icon;
+                      return (
+                        <Link
+                          key={sub.label}
+                          to={sub.to}
+                          onClick={() => setMegaOpen(false)}
+                          className="group flex items-start gap-2.5 p-2 rounded-lg hover:bg-foreground/5 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/20 transition-colors">
+                            <Icon className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13.5px] font-semibold text-foreground leading-tight">{sub.label}</div>
+                            <div className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 line-clamp-1">{sub.desc}</div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                </div>
               </div>
 
-              {/* Right Sidebar - Stripe Style */}
+              {/* Right Sidebar - Stripe Style Panel */}
               {(() => {
                 const spotlight = megaMenuSpotlights[activeTab] || megaMenuSpotlights.dws;
                 return (
-                  <div className="col-span-3 border-l border-border/30 pl-4 flex flex-col justify-between h-full">
+                  <div className="col-span-3 bg-slate-50/70 dark:bg-zinc-900/40 border-l border-border/30 p-5 md:p-6 flex flex-col justify-between">
                     {/* Section 1 - Spotlight links */}
                     <div className="space-y-2.5">
                       <div className="text-[10px] font-heading font-bold text-foreground/50 dark:text-white/60 uppercase tracking-[0.18em] flex items-center gap-1.5">
@@ -363,7 +366,7 @@ const Header = () => {
                       <Link
                         to={spotlight.featured.to}
                         onClick={() => setMegaOpen(false)}
-                        className="group/fc block rounded-lg overflow-hidden border border-border/40 bg-card/20 hover:border-primary/20 transition-all shadow-sm"
+                        className="group/fc block rounded-lg overflow-hidden border border-border/40 bg-background hover:border-primary/20 transition-all shadow-sm"
                       >
                         <div className="relative aspect-[22/9] w-full overflow-hidden bg-muted">
                           <img
