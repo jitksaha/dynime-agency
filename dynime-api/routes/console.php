@@ -45,3 +45,8 @@ Schedule::call(function () {
     \Illuminate\Support\Facades\Cache::forget('sitemap_xml');
 })->weekly()->sundays()->at('03:00');
 
+// Process abandoned checkouts every 30 minutes
+Schedule::command('email:send-abandoned')
+    ->everyThirtyMinutes()
+    ->withoutOverlapping();
+

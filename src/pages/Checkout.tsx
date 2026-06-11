@@ -491,6 +491,65 @@ const Checkout = () => {
   const [emailCheckLoading, setEmailCheckLoading] = useState(false);
   const [emailExists, setEmailExists] = useState<boolean | null>(null);
 
+  const [dialCode, setDialCode] = useState("+1");
+  const [phoneInput, setPhoneInput] = useState("");
+
+  // Sync dialCode + phoneInput to details.phone
+  useEffect(() => {
+    const trimmedInput = phoneInput.trim();
+    setDetails((d) => ({
+      ...d,
+      phone: trimmedInput ? `${dialCode} ${trimmedInput}` : "",
+    }));
+  }, [dialCode, phoneInput]);
+
+  // IP GeoIP lookup on mount
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.country_calling_code) {
+          setDialCode(data.country_calling_code);
+          if (data.country_name) {
+            setDetails((d) => ({
+              ...d,
+              country: data.country_name,
+            }));
+          }
+        }
+      })
+      .catch((err) => console.error("IP lookup failed:", err));
+  }, []);
+
+  // Debounced abandoned cart tracking
+  useEffect(() => {
+    const email = details.email.trim();
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await apiPost<any>("/checkout/track", {
+          email,
+          name: details.full_name,
+          phone: details.phone,
+          cart_data: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+          checkout_details: {
+            company: details.company,
+            line1: details.line1,
+            city: details.city,
+            state: details.state,
+            postal_code: details.postal_code,
+            country: details.country,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to track checkout details:", err);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [details.email, details.full_name, details.phone, items]);
+
   // Debounced email check to verify if account already exists
   useEffect(() => {
     const trimmed = details.email.trim();
@@ -526,6 +585,35 @@ const Checkout = () => {
       email: d.email || user.email || "",
       full_name: d.full_name || (user.user_metadata?.full_name as string) || "",
     }));
+
+    // Fetch user profile from Laravel to get saved billing address if any
+    apiGet<any>("/auth/me")
+      .then((res) => {
+        if (res && res.billing_address) {
+          const addr = res.billing_address;
+          setDetails((d) => ({
+            ...d,
+            line1: addr.line1 || d.line1,
+            city: addr.city || d.city,
+            state: addr.state || d.state,
+            postal_code: addr.postal_code || d.postal_code,
+            country: addr.country || d.country,
+            phone: addr.phone || d.phone,
+            company: addr.company || d.company,
+          }));
+          if (addr.phone) {
+            const parts = addr.phone.trim().split(" ");
+            if (parts.length > 1 && parts[0].startsWith("+")) {
+              setDialCode(parts[0]);
+              setPhoneInput(parts.slice(1).join(" "));
+            } else {
+              setPhoneInput(addr.phone);
+            }
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load user profile address:", err));
+
     // Refresh FlexPay account (and anything else user-scoped) now that we have a session.
     queryClient.invalidateQueries({ queryKey: ["flexpay-account-checkout"] });
   }, [user, queryClient]);
@@ -976,14 +1064,16 @@ const Checkout = () => {
     if (step === "cart") return items.length > 0;
     if (step === "contact") {
       const baseValid = details.full_name.trim().length > 1 &&
-        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(details.email);
+        /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(details.email) &&
+        phoneInput.trim().length > 4;
       if (!baseValid) return false;
 
-      // Enforce that guest users must register and have a password
+      // Enforce validation for new registration users
       if (!user) {
         if (emailExists === true) return false; // Must sign in instead of ordering as guest
-        if (!createAccount) return false; // Must keep create account checked
-        if (!accountPassword || accountPassword.length < 8) return false; // Must provide 8+ char password
+        if (createAccount) {
+          if (!accountPassword || accountPassword.length < 8) return false; // Must provide 8+ char password
+        }
       }
 
       if (isConsultancyBooking && (!bookingDate || !bookingTime)) return false;
@@ -1777,6 +1867,41 @@ const Checkout = () => {
                             )}
                           </div>
                         </div>
+                        <div className="md:col-span-2">
+                          <Label htmlFor="phone">Phone number *</Label>
+                          <div className="flex gap-2 mt-1">
+                            <Select value={dialCode} onValueChange={setDialCode}>
+                              <SelectTrigger className="w-[110px] border-primary/20 bg-background text-sm">
+                                <SelectValue placeholder="Code" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="+1">+1 (US/CA)</SelectItem>
+                                <SelectItem value="+44">+44 (GB)</SelectItem>
+                                <SelectItem value="+61">+61 (AU)</SelectItem>
+                                <SelectItem value="+880">+880 (BD)</SelectItem>
+                                <SelectItem value="+91">+91 (IN)</SelectItem>
+                                <SelectItem value="+92">+92 (PK)</SelectItem>
+                                <SelectItem value="+971">+971 (AE)</SelectItem>
+                                <SelectItem value="+65">+65 (SG)</SelectItem>
+                                <SelectItem value="+60">+60 (MY)</SelectItem>
+                                <SelectItem value="+49">+49 (DE)</SelectItem>
+                                <SelectItem value="+33">+33 (FR)</SelectItem>
+                                <SelectItem value="+966">+966 (SA)</SelectItem>
+                                <SelectItem value="+27">+27 (ZA)</SelectItem>
+                                <SelectItem value="+64">+64 (NZ)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              autoComplete="tel"
+                              placeholder="Phone number"
+                              value={phoneInput}
+                              onChange={(e) => setPhoneInput(e.target.value)}
+                              className="flex-1 border-primary/20 focus-visible:ring-primary"
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       {/* Clean Single Notices below the fields */}
@@ -1798,27 +1923,48 @@ const Checkout = () => {
                       )}
 
                       {!user && !emailCheckLoading && emailExists === false && (
-                        <div className="space-y-3 animate-fade-in">
-                          <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2 bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20">
+                        <div className="space-y-4 bg-muted/20 p-4 rounded-xl border border-border/60 animate-fade-in">
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2 bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20">
                             <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                            <span>New customer email! An account will be created automatically to keep your records secure.</span>
+                            <span>New customer email! You can checkout as a guest or create an account.</span>
                           </div>
-                          <div className="w-full">
-                            <Label htmlFor="create-account-pw" className="text-xs font-semibold text-primary">Choose a password *</Label>
-                            <Input 
-                              id="create-account-pw" 
-                              type="password" 
-                              placeholder="Min. 8 characters" 
-                              value={accountPassword}
-                              onChange={(e) => setAccountPassword(e.target.value)}
-                              className="mt-1 focus-visible:ring-primary border-primary/30"
+
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="guest-toggle" 
+                              checked={!createAccount} 
+                              onCheckedChange={(checked) => setCreateAccount(!checked)} 
                             />
-                            {accountPassword.length > 0 && accountPassword.length < 8 && (
-                              <p className="text-xs text-rose-500 font-medium mt-1 animate-fade-in">
-                                Password must be at least 8 characters long to proceed.
-                              </p>
-                            )}
+                            <Label htmlFor="guest-toggle" className="text-sm font-medium cursor-pointer">
+                              Checkout as guest instead of creating an account
+                            </Label>
                           </div>
+
+                          {createAccount ? (
+                            <div className="w-full space-y-1.5 mt-2">
+                              <Label htmlFor="create-account-pw" className="text-xs font-semibold text-primary">Choose a password *</Label>
+                              <Input 
+                                id="create-account-pw" 
+                                type="password" 
+                                placeholder="Min. 8 characters" 
+                                value={accountPassword}
+                                onChange={(e) => setAccountPassword(e.target.value)}
+                                className="focus-visible:ring-primary border-primary/30 mt-1"
+                              />
+                              <p className="text-[11px] text-muted-foreground mt-1">
+                                Creating an account lets you track your orders, manage services, and access support.
+                              </p>
+                              {accountPassword.length > 0 && accountPassword.length < 8 && (
+                                <p className="text-xs text-rose-500 font-medium mt-1 animate-fade-in">
+                                  Password must be at least 8 characters long to proceed.
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+                              <span><strong>Guest Checkout:</strong> You won't have a portal account to view or manage your order. Invoices and tracking details will be sent via email.</span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -2021,7 +2167,7 @@ const Checkout = () => {
                           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                             <div className="grid md:grid-cols-2 gap-3 pt-1">
-                              <div><Label>Phone</Label><Input autoComplete="tel" placeholder="+1 555 123 4567" value={details.phone} onChange={(e) => setDetails({ ...details, phone: e.target.value })} /></div>
+                              <div><Label>Phone</Label><Input disabled placeholder="Captured in step 2" value={details.phone} className="opacity-70" /></div>
                               <div><Label>Company</Label><Input autoComplete="organization" placeholder="Acme Inc." value={details.company} onChange={(e) => setDetails({ ...details, company: e.target.value })} /></div>
                               <div className="md:col-span-2"><Label>Address</Label><Input autoComplete="address-line1" placeholder="123 Main Street, Apt 4B" value={details.line1} onChange={(e) => setDetails({ ...details, line1: e.target.value })} /></div>
                               <div><Label>City</Label><Input autoComplete="address-level2" placeholder="San Francisco" value={details.city} onChange={(e) => setDetails({ ...details, city: e.target.value })} /></div>

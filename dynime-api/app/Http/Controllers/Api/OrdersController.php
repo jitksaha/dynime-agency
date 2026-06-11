@@ -800,6 +800,15 @@ class OrdersController extends Controller
                 $this->redeemCoupon($applied_coupon);
             }
 
+            if ($customerEmail) {
+                DB::table('abandoned_checkouts')
+                    ->where('email', trim(strtolower($customerEmail)))
+                    ->update([
+                        'status' => 'completed',
+                        'updated_at' => now(),
+                    ]);
+            }
+
             return response()->json($result);
         } catch (\Exception $e) {
             Log::error('[processPayment] Error processing payment: ' . $e->getMessage());

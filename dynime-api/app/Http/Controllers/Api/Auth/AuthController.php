@@ -123,11 +123,29 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
+        $billingAddress = null;
+
+        if ($user) {
+            $latestOrder = \Illuminate\Support\Facades\DB::table('orders')
+                ->where(function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                          ->orWhere('customer_email', $user->email);
+                })
+                ->whereIn('status', ['paid', 'completed'])
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($latestOrder && $latestOrder->billing_address) {
+                $billingAddress = json_decode($latestOrder->billing_address, true);
+            }
+        }
+
         return response()->json([
             'id'    => $user->id,
             'name'  => $user->name ?? $user->full_name,
             'email' => $user->email,
             'role'  => $user->role ?? 'authenticated',
+            'billing_address' => $billingAddress,
         ]);
     }
 

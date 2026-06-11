@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Seo\SeoController;
 use App\Http\Controllers\Api\Settings\SettingsController;
 use App\Http\Controllers\Api\SupabaseProxyController;
 use App\Http\Controllers\Api\Hrm\PayrollController;
+use App\Http\Controllers\Api\CheckoutTrackingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,6 +93,7 @@ Route::prefix('v1')->group(function () {
 
     // Analytics tracking (fire-and-forget from frontend)
     Route::post('analytics/pageview',    [AnalyticsController::class, 'trackPageView']);
+    Route::post('checkout/track',        [CheckoutTrackingController::class, 'track']);
 
     // Supabase proxy routes
     Route::post('supabase-proxy', [SupabaseProxyController::class, 'handle']);
