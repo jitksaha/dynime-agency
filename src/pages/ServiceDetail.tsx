@@ -259,7 +259,7 @@ const ServiceDetailPage = () => {
             </div>
             
             <div className="lg:col-span-5 w-full flex items-center justify-center">
-              <ScrollReveal>
+              <ScrollReveal className="w-full flex justify-center">
                 <InteractiveHeroVisual slug={service.slug} />
               </ScrollReveal>
             </div>
