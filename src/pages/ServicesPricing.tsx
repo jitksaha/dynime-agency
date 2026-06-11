@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 import { servicePages, type ServicePageData } from "@/data/services";
 import { usePageSEO } from "@/hooks/use-page-seo";
 
-const CATEGORY_ORDER: Array<ServicePageData["category"]> = ["dws", "dms", "dss", "dcs"];
+const CATEGORY_ORDER: Array<ServicePageData["category"]> = ["dws", "des", "dms", "dss", "dcs"];
 const CATEGORY_META: Record<ServicePageData["category"], { label: string; sub: string }> = {
   dws: { label: "DWS", sub: "Web Services" },
+  des: { label: "DES", sub: "Ecommerce Solution" },
   dms: { label: "DMS", sub: "Marketing Services" },
   dss: { label: "DSS", sub: "Software & AI" },
   dcs: { label: "DCS", sub: "Consultancy Services" },

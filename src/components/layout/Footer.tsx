@@ -105,8 +105,9 @@ const TrustChip = ({
 
 // Build dynamic footer link groups from the same nav-data source the header uses,
 // so adding/removing a service or product anywhere updates the footer automatically.
-const SERVICE_HUB_ROUTE: Record<"dws" | "dms" | "dss" | "dcs" | "dbm", string> = {
+const SERVICE_HUB_ROUTE: Record<"dws" | "des" | "dms" | "dss" | "dcs" | "dbm", string> = {
   dws: "/services",
+  des: "/services",
   dms: "/services",
   dss: "/services/dss",
   dcs: "/services",
@@ -115,7 +116,7 @@ const SERVICE_HUB_ROUTE: Record<"dws" | "dms" | "dss" | "dcs" | "dbm", string> =
 
 const buildDynamicGroups = (): { title: string; links: { label: string; to: string }[] }[] => {
   // Services — show each division by full name, linking to its main hub page
-  const services = (["dws", "dms", "dss", "dcs"] as const).map((key) => {
+  const services = (["dws", "des", "dms", "dss", "dcs"] as const).map((key) => {
     const tab = serviceTabs[key];
     return {
       label: `${tab.label} – ${tab.sublabel}`,

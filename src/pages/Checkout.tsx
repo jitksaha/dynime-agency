@@ -88,7 +88,7 @@ const tzOffsetLabel = (tz: string): string => {
 
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
 
-type CategoryKey = "dws" | "dms" | "dcs" | "dss";
+type CategoryKey = "dws" | "des" | "dms" | "dcs" | "dss";
 
 type IntakeField =
   | { key: string; label: string; type: "text" | "textarea" | "url" | "date"; placeholder?: string; required?: boolean }
@@ -105,6 +105,16 @@ const CATEGORY_INTAKE: Record<CategoryKey, { title: string; subtitle: string; fi
       { key: "existing_url", label: "Existing website (if any)", type: "url", placeholder: "https://example.com" },
       { key: "launch_date", label: "Target launch date", type: "date" },
       { key: "references", label: "Reference sites / inspiration", type: "textarea", placeholder: "Links or notes about styles you like." },
+    ],
+  },
+  des: {
+    title: "E-Commerce project details",
+    subtitle: "A few details so our e-commerce team can start planning your store.",
+    fields: [
+      { key: "store_type", label: "E-Commerce Platform Choice", type: "select", options: ["Shopify", "WordPress (WooCommerce, Surecart, etc.)", "Node.js / MERN (React, Next.js, Nest)", "Laravel", "Not sure — recommend"], placeholder: "Select platform option", required: true },
+      { key: "existing_site", label: "Existing website / store URL (if any)", type: "url", placeholder: "https://example.com" },
+      { key: "product_count", label: "Approximate number of products", type: "select", options: ["1 – 10", "11 – 100", "101 – 1000", "1000+"], placeholder: "Select product count" },
+      { key: "brief", label: "Store details & goals", type: "textarea", placeholder: "Describe your store, target audience, payment gateways, custom features needed, etc." },
     ],
   },
   dms: {

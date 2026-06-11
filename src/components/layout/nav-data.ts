@@ -9,7 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type ServiceTabKey = "dws" | "dms" | "dss" | "dcs" | "dbm" | "resources";
+export type ServiceTabKey = "dws" | "des" | "dms" | "dss" | "dcs" | "dbm" | "resources";
 
 export interface ServiceItem {
   label: string;
@@ -41,6 +41,16 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
       { label: "SaaS Development", desc: "Multi-tenant SaaS platforms", to: "/saas-development", icon: Rocket },
       { label: "Webflow Development", desc: "No-code & low-code sites", to: "/webflow-development", icon: Wand2 },
       { label: "Page Speed Optimization", desc: "Sub-3s load on any stack", to: "/speed-optimization", icon: Zap },
+    ],
+  },
+  des: {
+    label: "DES", sublabel: "Dynime Ecommerce Solution",
+    color: "from-amber-500/15 to-orange-500/15", icon: ShoppingBag,
+    items: [
+      { label: "Shopify Ecommerce", desc: "Store build, design, redesign & custom apps", to: "/shopify-ecommerce", icon: ShoppingBag },
+      { label: "WordPress Ecommerce", desc: "WooCommerce, Easy Digital Downloads, Surecart", to: "/wordpress-ecommerce", icon: Code },
+      { label: "Nodejs / MERN Ecommerce", desc: "High-performance JS, NestJS & React stores", to: "/nodejs-mern-ecommerce", icon: Cpu },
+      { label: "Laravel Ecommerce", desc: "Secure, enterprise-grade PHP & Laravel stores", to: "/laravel-ecommerce", icon: Shield },
     ],
   },
   dms: {
@@ -111,7 +121,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
   },
 };
 
-export const serviceTabOrder: ServiceTabKey[] = ["dws", "dms", "dss", "dcs"];
+export const serviceTabOrder: ServiceTabKey[] = ["dws", "des", "dms", "dss", "dcs"];
 
 // ───────────────────────── Dynime OS mega menu ─────────────────────────
 export type OsTabKey =

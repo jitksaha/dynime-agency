@@ -20,7 +20,7 @@ import {
 
 // ──────────────── Live service catalog (matches mega-menu + real routes) ────────────────
 type Svc = { slug: string; title: string; url: string; defaultPack?: string };
-type CatKey = "dws" | "dms" | "dss" | "dcs";
+type CatKey = "dws" | "des" | "dms" | "dss" | "dcs";
 
 const CATEGORIES: Record<CatKey, { label: string; services: Svc[] }> = {
   dws: {
@@ -36,6 +36,15 @@ const CATEGORIES: Record<CatKey, { label: string; services: Svc[] }> = {
       { slug: "saas-development", title: "SaaS Development", url: "/saas-development", defaultPack: "custom-web-apps" },
       { slug: "webflow-development", title: "Webflow Development", url: "/webflow-development", defaultPack: "ui-ux-design" },
       { slug: "speed-optimization", title: "Page Speed Optimization", url: "/speed-optimization", defaultPack: "speed-optimization" },
+    ],
+  },
+  des: {
+    label: "DES — Dynime Ecommerce Solution",
+    services: [
+      { slug: "shopify-ecommerce", title: "Shopify Ecommerce", url: "/shopify-ecommerce", defaultPack: "shopify-ecommerce" },
+      { slug: "wordpress-ecommerce", title: "WordPress Ecommerce", url: "/wordpress-ecommerce", defaultPack: "wordpress-ecommerce" },
+      { slug: "nodejs-mern-ecommerce", title: "Nodejs / MERN Ecommerce", url: "/nodejs-mern-ecommerce", defaultPack: "nodejs-mern-ecommerce" },
+      { slug: "laravel-ecommerce", title: "Laravel Ecommerce", url: "/laravel-ecommerce", defaultPack: "laravel-ecommerce" },
     ],
   },
   dms: {

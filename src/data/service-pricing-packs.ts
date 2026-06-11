@@ -1817,5 +1817,265 @@ export const SERVICE_PRICING_PACKS: Record<string, PackBuilder> = {
         ],
       },
     ]),
+
+  // ────────────────────────────────  DES  ────────────────────────────────
+  "shopify-ecommerce": () =>
+    pack("se", "", "", [
+      {
+        price: 499,
+        desc: "Custom storefront design & store build with standard features",
+        features: [
+          "Complete Shopify store build & setup",
+          "Premium conversion theme customized to your brand",
+          "Up to 50 products imported & collections mapped",
+          "Standard integrations (reviews, upsells, cart triggers)",
+          "Payment gateways (Stripe/PayPal) & shipping setup",
+          "Basic training and launch support",
+        ],
+      },
+      {
+        price: 999,
+        desc: "Advanced store build with theme custom code & migration",
+        features: [
+          "Everything in Starter",
+          "Up to 150 products",
+          "Custom Shopify theme tweaks (Liquid adjustments)",
+          "SEO-friendly platform migration (retains search ranks)",
+          "Advanced apps setup (abandoned carts, custom discounts)",
+          "2 rounds of theme revisions",
+        ],
+      },
+      {
+        price: 1899,
+        desc: "Custom storefront + private app development",
+        period: "one-time + 30-day support",
+        features: [
+          "Everything in Basic",
+          "Up to 500 products",
+          "Custom Private Shopify App development for custom business logic",
+          "Full multi-currency & language localization setup",
+          "Advanced page speed tuning (PageSpeed score 90+)",
+          "30 days post-launch support",
+        ],
+        highlighted: true,
+      },
+      {
+        price: 2999,
+        desc: "Enterprise store with ERP, POS, and recurring checkouts",
+        period: "one-time + 90-day care",
+        features: [
+          "Everything in Professional",
+          "ERP, inventory, or physical POS systems sync integration",
+          "Recurring subscriptions setup (Recharge / Bold)",
+          "A/B testing tools setup for product pages",
+          "90 days post-launch developer care",
+          "Priority support SLA",
+        ],
+      },
+      {
+        price: null,
+        desc: "Headless Shopify, multi-store layouts, or customized setups",
+        features: [
+          "Everything in Premium",
+          "Headless Shopify architecture (Hydrogen / Next.js)",
+          "Multi-store international setup",
+          "Custom app backend API hosting setup",
+          "Dedicated e-commerce strategist",
+          "24/7 emergency support contract",
+        ],
+      },
+    ]),
+
+  "wordpress-ecommerce": () =>
+    pack("wpe", "", "", [
+      {
+        price: 399,
+        desc: "Simple e-commerce setup on WordPress",
+        features: [
+          "WooCommerce, EDD, or Surecart installation & configuration",
+          "Up to 25 products with basic variants",
+          "Standard payment gateways (Stripe & PayPal) configured",
+          "Mobile-responsive storefront layout",
+          "Basic sitemap & SEO setup",
+        ],
+      },
+      {
+        price: 799,
+        desc: "Bespoke storefront templates with advanced filters",
+        features: [
+          "Everything in Starter",
+          "Up to 100 products",
+          "Custom theme templates coded to match your identity",
+          "Advanced product search, filters, and comparisons",
+          "Abandoned cart recoveries & coupon setups",
+          "2 rounds of reviews",
+        ],
+      },
+      {
+        price: 1499,
+        desc: "Headless checkout or custom license generators",
+        period: "one-time + 30-day support",
+        features: [
+          "Everything in Basic",
+          "Up to 300 products",
+          "Surecart customized checkouts OR EDD license key generator",
+          "Custom customer user portals with download locks",
+          "Speed tuning & database indexing (sub-3s load)",
+          "30 days post-launch support",
+        ],
+        highlighted: true,
+      },
+      {
+        price: 2499,
+        desc: "Enterprise WP store with third-party CRM sync",
+        period: "one-time + 90-day care",
+        features: [
+          "Everything in Professional",
+          "API connection to Zoho CRM, ERP, or accounting systems",
+          "Multilingual translation integration (WPML / Polylang)",
+          "Malware shield & security hardening",
+          "90 days post-launch care and backups",
+        ],
+      },
+      {
+        price: null,
+        desc: "Multi-vendor marketplaces, wholesale, or custom plugins",
+        features: [
+          "Everything in Premium",
+          "Multi-vendor marketplace (Dokan / WCFM)",
+          "B2B wholesale dynamic pricing modules",
+          "Custom WooCommerce plugin development",
+          "Dedicated project developer",
+        ],
+      },
+    ]),
+
+  "nodejs-mern-ecommerce": () =>
+    pack("nme", "", "", [
+      {
+        price: 1199,
+        desc: "Headless MERN storefront with core e-commerce API",
+        features: [
+          "Headless React storefront with Next.js",
+          "Node.js & NestJS backend API services",
+          "Core product catalog database schema (MongoDB/Postgres)",
+          "Standard customer auth (JWT + email/Google)",
+          "Basic admin panel for products",
+        ],
+      },
+      {
+        price: 2299,
+        desc: "Production-ready headless MERN store with full checkouts",
+        features: [
+          "Everything in Starter",
+          "Full Stripe custom checkout integration with webhooks",
+          "Advanced product variants, categories, and inventory models",
+          "Email triggers and background invoice generators",
+          "Elasticsearch / Algolia instant product search",
+          "30 days support",
+        ],
+      },
+      {
+        price: 3499,
+        desc: "Best value — High-scaling headless store with CI/CD",
+        period: "one-time + 30-day support",
+        features: [
+          "Everything in Basic",
+          "Next.js Incremental Static Regeneration (ISR) (sub-1s loads)",
+          "Custom discount engine & voucher structures",
+          "Automated tests (Unit + Integration) & CI/CD pipeline",
+          "Admin portal dashboard with reports and charts",
+          "30 days support",
+        ],
+        highlighted: true,
+      },
+      {
+        price: 5499,
+        desc: "Omnichannel / Multi-tenant store architecture",
+        period: "one-time + 90-day care",
+        features: [
+          "Everything in Professional",
+          "Omnichannel API (serve web, iOS, Android from same backend)",
+          "Multi-tenant database isolation or vendor backend",
+          "Docker containerization & serverless scaling setups",
+          "90 days post-launch support and logs tracking",
+        ],
+      },
+      {
+        price: null,
+        desc: "Enterprise multi-region e-commerce networks",
+        features: [
+          "Everything in Premium",
+          "Multi-region deployment and local caches",
+          "Tailored admin dashboard with Elasticsearch logs analytics",
+          "Custom ERP/SAP sync connections",
+          "Dedicated senior backend developer",
+        ],
+      },
+    ]),
+
+  "laravel-ecommerce": () =>
+    pack("le", "", "", [
+      {
+        price: 899,
+        desc: "Bespoke Laravel store with Blade frontend & Filament admin",
+        features: [
+          "Laravel e-commerce backend built with clean models",
+          "Filament admin panel setup (catalog, orders, customers)",
+          "Stripe or PayPal checkout integration",
+          "Standard relational database layout (MySQL)",
+          "Basic cache tuning",
+        ],
+      },
+      {
+        price: 1799,
+        desc: "Laravel Livewire/Alpine storefront with background queues",
+        features: [
+          "Everything in Starter",
+          "Dynamic Livewire/Alpine.js reactive storefront",
+          "Laravel background queues for emails, syncs, and logs",
+          "Custom discount coupons & dynamic pricing rules",
+          "Advanced shipping fees calculator API integration",
+          "30 days support",
+        ],
+      },
+      {
+        price: 2799,
+        desc: "High-security custom Laravel store with advanced modules",
+        period: "one-time + 30-day support",
+        features: [
+          "Everything in Basic",
+          "Bespoke security hardening & SQL protection tests",
+          "Filament dashboard customized with charts and analytics",
+          "API connection for CRM or inventory updates",
+          "Full SEO dynamic schema generators",
+          "30 days support",
+        ],
+        highlighted: true,
+      },
+      {
+        price: 4499,
+        desc: "Laravel headless store with separate frontend",
+        period: "one-time + 90-day care",
+        features: [
+          "Everything in Professional",
+          "Laravel API backend with separate Next.js or React frontend",
+          "Multi-warehouse inventory management configurations",
+          "Load testing & performance tuning (caching grids)",
+          "90 days post-launch developer care",
+        ],
+      },
+      {
+        price: null,
+        desc: "Custom e-commerce platforms or ERP systems",
+        features: [
+          "Everything in Premium",
+          "Full ERP / legacy database integration mapping",
+          "Bespoke multi-currency & tax calculators",
+          "Dedicated project lead developer",
+          "SLA-backed support contracts",
+        ],
+      },
+    ]),
 };
 

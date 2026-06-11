@@ -8,7 +8,7 @@ export interface ServicePageData {
   metaTitle: string;
   metaDescription: string;
   icon: LucideIcon;
-  category: "dws" | "dms" | "dcs" | "dss";
+  category: "dws" | "des" | "dms" | "dcs" | "dss";
   categoryLabel: string;
   benefits: { title: string; desc: string }[];
   process: { step: string; title: string; desc: string }[];
@@ -1845,12 +1845,224 @@ export const servicePages: ServicePageData[] = [
       { phase: "Launch & Training", time: "3-5 days" },
     ],
   },
+  {
+    slug: "shopify-ecommerce",
+    title: "Shopify Ecommerce",
+    headline: "Shopify Ecommerce — Store build, design, redesign & custom apps",
+    description: "Get a high-converting, custom Shopify store built for your brand. We design, redesign, build custom themes, and develop custom Shopify apps to extend functionality and scale your sales.",
+    metaTitle: "Shopify Ecommerce Services | Build & Redesign | Dynime",
+    metaDescription: "Professional Shopify ecommerce solutions. Store design, custom themes, store build, store redesign, and custom Shopify app development tailored to scale your sales.",
+    icon: ShoppingBag,
+    category: "des",
+    categoryLabel: "DES — Dynime Ecommerce Solution",
+    benefits: [
+      { title: "Custom Design & Redesign", desc: "Crafting bespoke storefronts that align with your brand identity and captivate shoppers." },
+      { title: "Custom Shopify Apps", desc: "Tailoring complex features and workflows using custom-built private Shopify apps." },
+      { title: "Optimized Checkout", desc: "Reducing cart abandonment with seamless payment gateways and conversion triggers." },
+      { title: "High Performance", desc: "Minimizing page load times and maximizing Google PageSpeed scores." },
+      { title: "ERP & POS Integrations", desc: "Connecting your online store with physical stores, stock systems, and accounting tools." },
+      { title: "Marketing Automation", desc: "Hooking up Klaviyo, email flows, and social channels to boost retention." },
+    ],
+    process: [
+      { step: "01", title: "Strategy & Scope", desc: "Analyze product collections, shipping systems, payment providers, and custom app requirements." },
+      { step: "02", title: "Theme & Custom Dev", desc: "Bespoke storefront UI styling in Liquid, theme customizer setup, and backend API coding." },
+      { step: "03", title: "Catalog & App Setup", desc: "Import products, configure variants, map taxes, and install custom app connections." },
+      { step: "04", title: "Launch & Support", desc: "Complete QA across devices, verify domain mapping, set up analytics, and train your team." },
+    ],
+    faqs: [
+      { q: "Can you migrate my existing store to Shopify?", a: "Yes. We migrate product data, customer accounts, and order histories with zero SEO rank loss." },
+      { q: "Do you develop custom Shopify Apps?", a: "Yes, we build custom public or private Shopify apps using Node.js/React or PHP to extend theme functionality." },
+      { q: "How long does a Shopify store build take?", a: "Standard setups take 2-3 weeks. High-end custom themes with custom apps take 4-6 weeks." },
+    ],
+    features: ["Custom Theme Styling", "Shopify Liquid Coding", "Custom Private App Dev", "Payment/Shipping Automation", "Multi-Currency Checkout", "Klaviyo/Meta Pixel Hookup"],
+    comparison: [
+      ["Bespoke Theme Layouts", true, false],
+      ["Custom Shopify App Dev", true, false],
+      ["Speed Tuning (PageSpeed 90+)", true, false],
+      ["SEO-Safe Domain Migration", true, false],
+      ["Detailed Store Training", true, false],
+      ["Unlimited Post-Launch Support", true, false],
+    ],
+    problems: ["Losing customers on mobile due to slow, unoptimized checkout", "Clunky off-the-shelf themes that make your brand look cheap", "Limitations of Shopify default features blocking custom operations", "App bloat slowing down store speeds and creating security vulnerabilities"],
+    whyNotDIY: [
+      { title: "Clean, Lightweight Code", desc: "We build custom themes with minimal app reliance, keeping your store super fast." },
+      { title: "Bespoke Custom Apps", desc: "Create special loyalty, subscription, or sync features that standard apps can't do." },
+      { title: "SEO Migration Safety", desc: "Preserve all existing organic rank and index pages securely." },
+      { title: "Launch and Scale", desc: "Skip setup struggles and go live with a store built by e-commerce professionals." },
+    ],
+    techStack: ["Shopify", "Liquid", "Ruby", "Node.js", "React", "Klaviyo", "PostgreSQL", "Shopify CLI"],
+    timeline: [
+      { phase: "Planning & Strategy", time: "1 week" },
+      { phase: "Custom Theme Design", time: "2 weeks" },
+      { phase: "App & API Integration", time: "2 weeks" },
+      { phase: "Testing & Launch", time: "1 week" },
+    ],
+  },
+  {
+    slug: "wordpress-ecommerce",
+    title: "WordPress Ecommerce",
+    headline: "WordPress Ecommerce — WooCommerce, Easy Digital Downloads, Surecart",
+    description: "Power your online store with WordPress. Whether you are using WooCommerce, Easy Digital Downloads, or Surecart, we build flexible, fast, and feature-rich ecommerce platforms optimized for conversions.",
+    metaTitle: "WordPress Ecommerce Solutions | WooCommerce & Surecart | Dynime",
+    metaDescription: "Custom WordPress ecommerce setups. Expert integration of WooCommerce, Easy Digital Downloads, and Surecart. Fast, flexible, and conversion-optimized.",
+    icon: Code,
+    category: "des",
+    categoryLabel: "DES — Dynime Ecommerce Solution",
+    benefits: [
+      { title: "Flexibility & Control", desc: "Full ownership of your store database, content, code, and design files with zero monthly platform fees." },
+      { title: "WooCommerce Experts", desc: "High-performance custom extensions, templates, and scaling setups." },
+      { title: "Digital Product Selling", desc: "Easy Digital Downloads configured for licensing, keys, and downloads." },
+      { title: "Surecart Integrations", desc: "Modern, lightweight, and super-fast billing and checkouts via Surecart." },
+      { title: "SEO Advantages", desc: "Leverage WordPress's organic supremacy with perfect schemas and sitemaps." },
+      { title: "Customer Portal", desc: "Secure dashboard for user profiles, order tracking, downloads, and billing." },
+    ],
+    process: [
+      { step: "01", title: "Requirements & Stack", desc: "Select the optimal WordPress system (WooCommerce, EDD, or Surecart) based on your product catalog." },
+      { step: "02", title: "Custom Theme Coding", desc: "Develop clean, fast templates and custom product layouts in Gutenberg or Elementor Pro." },
+      { step: "03", title: "Payment & Settings", desc: "Configure checkout fields, tax rates, shipping policies, and multi-currency rules." },
+      { step: "04", title: "Security & Testing", desc: "Set up WAF, speed caching, database indexing, and run cross-browser purchases." },
+    ],
+    faqs: [
+      { q: "Is WooCommerce secure for payment details?", a: "Yes. All transactions process through Stripe or PayPal with full SSL encryption. We never store credit cards on your server." },
+      { q: "WooCommerce vs Surecart?", a: "Surecart runs checkouts on its secure cloud to avoid database bloat. WooCommerce offers deeper custom plugin support. We build both." },
+      { q: "Can I sell digital files and license keys?", a: "Yes, we specialize in Easy Digital Downloads for automated license generation, email delivery, and update tracking." },
+    ],
+    features: ["WooCommerce Setup", "Surecart Integration", "EDD Licensing Setup", "Stripe & PayPal Hookup", "Advanced Product Filters", "Custom Cart & Checkout Pages"],
+    comparison: [
+      ["Full Database Ownership", true, true],
+      ["Zero Transaction Commission", true, false],
+      ["Custom License Generators", true, false],
+      ["Optimized Gutenberg Layouts", true, false],
+      ["Malware Shield & Security", true, false],
+      ["Ongoing Code Auditing", true, false],
+    ],
+    problems: ["Losing margin to platform transaction fees on Shopify", "Slow, bloated plugins crashing your WordPress server during traffic peaks", "Complexity in generating and protecting digital download links", "Default checkout forms asking for too much data, hurting sales"],
+    whyNotDIY: [
+      { title: "Scale Without Bloat", desc: "We write clean PHP hooks to avoid massive lists of clunky, slow plugins." },
+      { title: "Secure Downloads", desc: "Prevent link sharing and piracy on digital products through proper server rules." },
+      { title: "Conversion Engineering", desc: "Streamline forms and add single-page checkouts proven to convert." },
+      { title: "Peace of Mind Support", desc: "Enjoy daily backups and on-call developer support to keep your store live." },
+    ],
+    techStack: ["WordPress", "WooCommerce", "Easy Digital Downloads", "Surecart", "PHP", "MySQL", "Redis", "Cloudflare"],
+    timeline: [
+      { phase: "Analysis & Selection", time: "3-5 days" },
+      { phase: "Theme & UI Build", time: "2 weeks" },
+      { phase: "Product & Payment Sync", time: "1 week" },
+      { phase: "Security Audit & Launch", time: "3-5 days" },
+    ],
+  },
+  {
+    slug: "nodejs-mern-ecommerce",
+    title: "Nodejs / MERN Ecommerce",
+    headline: "Nodejs/ Mern Ecommerce — Build with javascript, nodejs, nest, react and relate framework that scale business",
+    description: "Build a custom, lightning-fast headless ecommerce store with JavaScript, Node.js, NestJS, and React. Engineered to support high volumes and scale your business with maximum performance.",
+    metaTitle: "Node.js / MERN Headless Ecommerce Development | Dynime",
+    metaDescription: "Scalable, high-performance headless ecommerce platforms built with Javascript, Node.js, NestJS, React, and modern APIs. Tailored for enterprise-level scaling.",
+    icon: Cpu,
+    category: "des",
+    categoryLabel: "DES — Dynime Ecommerce Solution",
+    benefits: [
+      { title: "Headless Performance", desc: "Unmatched page speed and instant page loads via Next.js or React frontend." },
+      { title: "Unlimited Scaling", desc: "Node.js backend with NestJS that can handle thousands of concurrent queries." },
+      { title: "Bespoke APIs", desc: "Custom API-first commerce models that link with mobile apps and retail ERPs." },
+      { title: "Granular Security", desc: "Serverless deployments, isolated database environments, and JWT auth." },
+      { title: "Dynamic Product Catalogs", desc: "Configure complex variants, bundles, and instant search via Elasticsearch." },
+      { title: "Omnichannel Capabilities", desc: "Serve web, iOS, Android, and smart-device shopping from a single API." },
+    ],
+    process: [
+      { step: "01", title: "API Design & Spec", desc: "Map endpoints, data relationships, pricing models, and search logic." },
+      { step: "02", title: "Database & Backend", desc: "Write database schemas, NestJS models, background tasks, and payment triggers." },
+      { step: "03", title: "Frontend Layouts", desc: "Build highly responsive React/NextJS pages using modern styling conventions." },
+      { step: "04", title: "DevOps & Cloud", desc: "Configure serverless clusters, CDNs, automated test pipelines, and log alerts." },
+    ],
+    faqs: [
+      { q: "Why choose MERN over Shopify or WordPress?", a: "MERN is perfect for custom operations, subscription rules, multi-vendor marketplaces, or extreme scaling where SaaS platform limits hold you back." },
+      { q: "How do you manage products?", a: "We build a tailored administrative CMS dashboard or integrate with Headless CMSs like Sanity or Strapi." },
+      { q: "Is NestJS better than Express?", a: "NestJS provides a highly structured TypeScript architecture, ensuring the backend codebase remains maintainable, modular, and easy to scale." },
+    ],
+    features: ["React/Next.js Frontend", "NestJS & Node.js API", "MongoDB / PostgreSQL", "Stripe Custom Checkout", "Elasticsearch Setup", "Docker & Cloud Deploy"],
+    comparison: [
+      ["Blazing Speed (sub-1s loads)", true, false],
+      ["Complete Code Customization", true, false],
+      ["API-First Architecture", true, false],
+      ["Microservices Ready", true, false],
+      ["Unlimited Custom Datatypes", true, false],
+      ["CI/CD Automated Testing", true, false],
+    ],
+    problems: ["Paying heavy monthly bills to SaaS platforms as order volume grows", "Slow performance from heavy SQL database queries during flash sales", "Struggling to sync catalog data with custom iOS/Android apps", "Security breaches leaking customer credentials on generic platforms"],
+    whyNotDIY: [
+      { title: "Avoid Technical Debt", desc: "Custom JS development requires clean architecture — we use NestJS to ensure robust, enterprise-grade backends." },
+      { title: "Production Security", desc: "Ensure bulletproof authentication, session rules, and PCI-compliant checkouts." },
+      { title: "Performance Engineering", desc: "Implement caching structures and CDN layers to handle spikes smoothly." },
+      { title: "Dedicated DevOps Team", desc: "Benefit from secure, automated deployment pipelines that take away server stress." },
+    ],
+    techStack: ["React", "Next.js", "Node.js", "NestJS", "TypeScript", "PostgreSQL", "MongoDB", "Tailwind CSS", "Docker", "AWS"],
+    timeline: [
+      { phase: "System Architecture", time: "1-2 weeks" },
+      { phase: "Backend & DB Setup", time: "3-4 weeks" },
+      { phase: "Frontend & UI Design", time: "3-4 weeks" },
+      { phase: "DevOps & Launch", time: "1 week" },
+    ],
+  },
+  {
+    slug: "laravel-ecommerce",
+    title: "Laravel Ecommerce",
+    headline: "Laravel Ecommerce — Build with php and laravel with high security that scale business",
+    description: "Custom, high-security ecommerce applications built with PHP and Laravel. We design bespoke shopping experiences, custom APIs, and backend admin portals designed to scale securely.",
+    metaTitle: "Laravel Ecommerce Development | Secure & Custom PHP Stores | Dynime",
+    metaDescription: "Bespoke, secure ecommerce applications built with PHP and Laravel. High security, custom database models, APIs, and scales seamlessly as your business grows.",
+    icon: Shield,
+    category: "des",
+    categoryLabel: "DES — Dynime Ecommerce Solution",
+    benefits: [
+      { title: "Enterprise Security", desc: "Built-in CSRF protection, SQL injection prevention, and secure password hashing." },
+      { title: "Bespoke Databases", desc: "Custom relational database design optimized for complex product attributes." },
+      { title: "Advanced Admin Panel", desc: "Tailored Filament or custom admin dashboards for orders, analytics, and stock." },
+      { title: "API Integrations", desc: "Seamless connection to ERPs, inventory management systems, and CRMs." },
+      { title: "Custom Checkout Logic", desc: "Bespoke checkout flows, discount algorithms, and shipping calculators." },
+      { title: "Queue Management", desc: "Background processing for order emails, invoices, and supplier syncs." },
+    ],
+    process: [
+      { step: "01", title: "Database Design", desc: "Map out the relational database structure, tables, and relationships." },
+      { step: "02", title: "Backend API Build", desc: "Write controllers, models, event listeners, and background queue tasks." },
+      { step: "03", title: "Admin Portal", desc: "Build the admin management portal for inventory, orders, and system settings." },
+      { step: "04", title: "Frontend Build", desc: "Create high-converting store layouts using Blade, Alpine.js, or Livewire." },
+    ],
+    faqs: [
+      { q: "Why use Laravel for ecommerce?", a: "Laravel is highly secure, performant, and offers total flexibility to write custom business logic that SaaS tools can't support." },
+      { q: "Can we integrate our local ERP?", a: "Yes. Laravel's HTTP client and queue runner make it easy to sync catalog and stock data with any system." },
+      { q: "What admin panel do you use?", a: "We build modern, fast admin panels using Filament PHP or custom Blade templates." },
+    ],
+    features: ["Custom Database Design", "Bespoke Checkout Flows", "Filament Admin Dashboard", "Background Job Queues", "Secure API Endpoints", "ERP/CRM Sync Setup"],
+    comparison: [
+      ["Enterprise Security Defaults", true, false],
+      ["Relational DB Optimization", true, false],
+      ["Filament Admin Dashboard", true, false],
+      ["Background Queue Setup", true, false],
+      ["Custom Database Schemas", true, false],
+      ["SLA-backed Tech Support", true, false],
+    ],
+    problems: ["Generic ecommerce tools failing under complex discount rules", "SQL database crashes from unoptimized queries during peak checkout hours", "High transaction fees and subscription billing software costs", "Vulnerabilities in old CMS systems leaving customer data at risk"],
+    whyNotDIY: [
+      { title: "Secure Foundations", desc: "Laravel offers state-of-the-art security helpers to keep customer transactions safe." },
+      { title: "Relational Modeling", desc: "Proper database keys and indexes prevent checkout timeouts." },
+      { title: "Scalable Backgrounds", desc: "Utilize queues to process orders instantly without blocking page requests." },
+      { title: "Maintainable Code", desc: "We follow PSR conventions to deliver modular, clean PHP codebases." },
+    ],
+    techStack: ["Laravel", "PHP", "MySQL", "Livewire", "Alpine.js", "Filament", "Redis", "Nginx", "Docker"],
+    timeline: [
+      { phase: "DB & API Design", time: "1 week" },
+      { phase: "Backend Development", time: "3 weeks" },
+      { phase: "Admin & Dashboard Setup", time: "2 weeks" },
+      { phase: "Frontend & QA Launch", time: "1-2 weeks" },
+    ],
+  },
 ];
 
 export const getServiceBySlug = (slug: string): ServicePageData | undefined => {
   return servicePages.find((s) => s.slug === slug);
 };
 
-export const getServicesByCategory = (category: "dws" | "dms" | "dcs" | "dss"): ServicePageData[] => {
+export const getServicesByCategory = (category: "dws" | "des" | "dms" | "dcs" | "dss"): ServicePageData[] => {
   return servicePages.filter((s) => s.category === category);
 };

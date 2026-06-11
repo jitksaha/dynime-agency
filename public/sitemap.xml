@@ -325,6 +325,30 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://dynime.com/shopify-ecommerce</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/wordpress-ecommerce</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/nodejs-mern-ecommerce</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dynime.com/laravel-ecommerce</loc>
+    <lastmod>2026-06-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://dynime.com/blog/itin-without-passport-mailing</loc>
     <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
