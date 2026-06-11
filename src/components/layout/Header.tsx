@@ -25,10 +25,10 @@ const megaMenuSpotlights: Record<string, {
   };
 }> = {
   dws: {
-    moreTitle: "Alternative Services",
+    moreTitle: "Explore More Solutions",
     moreLinks: [
-      { label: "SaaS Development", desc: "Multi-tenant platforms & microservices", to: "/saas-development" },
-      { label: "Page Speed Optimization", desc: "Boost Core Web Vitals to sub-3s", to: "/speed-optimization" },
+      { label: "Shopify Ecommerce", desc: "Build & scale custom online stores", to: "/shopify-ecommerce" },
+      { label: "SEO Optimization", desc: "Drive recurring organic traffic from Google", to: "/seo" },
     ],
     featured: {
       title: "Redesign & Modernize",
@@ -38,10 +38,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   des: {
-    moreTitle: "Alternative Services",
+    moreTitle: "Explore More Solutions",
     moreLinks: [
-      { label: "Laravel Ecommerce", desc: "High-security enterprise PHP systems", to: "/laravel-ecommerce" },
-      { label: "Nodejs / MERN Ecommerce", desc: "High-performance JavaScript stores", to: "/nodejs-mern-ecommerce" },
+      { label: "Web Design & Development", desc: "High-performance React & custom sites", to: "/web-design-development" },
+      { label: "Facebook & Instagram Ads", desc: "Meta paid acquisition that converts", to: "/facebook-ads" },
     ],
     featured: {
       title: "POS & Stock Sync",
@@ -51,10 +51,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dms: {
-    moreTitle: "Alternative Services",
+    moreTitle: "Explore More Solutions",
     moreLinks: [
-      { label: "SEO Optimization", desc: "Drive recurring organic traffic from Google", to: "/seo" },
-      { label: "Google Ads (PPC)", desc: "Targeted search campaigns with high intent", to: "/google-ads" },
+      { label: "React / MERN Apps", desc: "Tailored JS dashboards & modern apps", to: "/react-mern-apps" },
+      { label: "AI Software Development", desc: "Integrate custom AI workflows into software", to: "/ai-software-development" },
     ],
     featured: {
       title: "Free SEO & Ads Audit",
@@ -64,10 +64,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dss: {
-    moreTitle: "Alternative Services",
+    moreTitle: "Explore More Solutions",
     moreLinks: [
-      { label: "AI Software Development", desc: "AI-first scalable applications & chatbots", to: "/ai-software-development" },
-      { label: "Dynime Pay (Self-Hosted)", desc: "Open-source billing & multi-rail payments", to: "/pay-open-source" },
+      { label: "SaaS Development", desc: "Multi-tenant platforms & scaling support", to: "/saas-development" },
+      { label: "Payment Gateway Setup", desc: "Stripe & PayPal compliance and setups", to: "/payment-gateway" },
     ],
     featured: {
       title: "Custom Software Demo",
@@ -77,10 +77,10 @@ const megaMenuSpotlights: Record<string, {
     },
   },
   dcs: {
-    moreTitle: "Alternative Services",
+    moreTitle: "Explore More Solutions",
     moreLinks: [
-      { label: "Payment Gateway Setup", desc: "Stripe, PayPal & merchant account guidance", to: "/payment-gateway" },
-      { label: "Business Consulting", desc: "Growth strategies & financial planning", to: "/consulting" },
+      { label: "Web Design & Development", desc: "Premium custom web platforms & design", to: "/web-design-development" },
+      { label: "Shopify Ecommerce", desc: "Brand new custom store build & theme design", to: "/shopify-ecommerce" },
     ],
     featured: {
       title: "Start Your US/UK Brand",

@@ -28,7 +28,7 @@ export interface ServiceTab {
 
 export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
   dws: {
-    label: "DWS - Web Services", sublabel: "Dynime method for modern web development",
+    label: "DWS - Web Services", sublabel: "Dynime method for web development",
     color: "from-blue-500/15 to-indigo-500/15", icon: Code,
     items: [
       { label: "Web Design & Development", desc: "WordPress, React, Laravel & more", to: "/web-design-development", icon: Globe },
@@ -68,7 +68,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dss: {
-    label: "DSS - Software & AI", sublabel: "Dynime engineering for custom software & AI",
+    label: "DSS - Software & AI", sublabel: "Dynime custom software & AI",
     color: "from-cyan-500/15 to-sky-500/15", icon: Cpu,
     items: [
       { label: "AI Software Development", desc: "AI-first scalable apps", to: "/ai-software-development", icon: Brain },
@@ -80,7 +80,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dcs: {
-    label: "DCS - Consultancy Services", sublabel: "Dynime consultancy for company formation",
+    label: "DCS - Consultancy Services", sublabel: "Dynime company formation",
     color: "from-emerald-500/15 to-teal-500/15", icon: Briefcase,
     items: [
       { label: "US Company Formation", desc: "LLC, C-Corp, EIN & compliance", to: "/us-company", icon: Building2 },
