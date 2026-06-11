@@ -93,7 +93,7 @@ const JobCard = ({ job }: { job: Career }) => (
 
     <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/40">
       <div className="flex items-center gap-1 flex-wrap">
-        {job.posting_channels?.slice(0, 4).map((ch, i) => {
+        {(Array.isArray(job.posting_channels) ? job.posting_channels : []).slice(0, 4).map((ch, i) => {
           const def = findChannel(ch.id);
           return (
             <span

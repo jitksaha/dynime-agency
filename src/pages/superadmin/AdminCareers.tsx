@@ -203,7 +203,7 @@ const AdminCareers = () => {
       responsibilities: j.responsibilities,
       requirements: j.requirements,
       apply_url: j.apply_url,
-      posting_channels: j.posting_channels || [],
+      posting_channels: Array.isArray(j.posting_channels) ? j.posting_channels : [],
       is_featured: j.is_featured,
       is_active: j.is_active,
       sort_order: j.sort_order,
@@ -678,7 +678,7 @@ const AdminCareers = () => {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {filtered.map((j) => {
-                  const channels = j.posting_channels || [];
+                  const channels = Array.isArray(j.posting_channels) ? j.posting_channels : [];
                   return (
                     <div
                       key={j.id}
