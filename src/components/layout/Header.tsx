@@ -12,6 +12,84 @@ import {
   serviceTabs, serviceTabOrder, type ServiceTabKey,
   osTabs, osTabOrder, type OsTabKey,
 } from "./nav-data";
+import featuredImage from "@/assets/business_management_featured.png";
+
+const megaMenuSpotlights: Record<string, {
+  moreTitle: string;
+  moreLinks: { label: string; to: string; desc: string }[];
+  featured: {
+    title: string;
+    desc: string;
+    cta: string;
+    to: string;
+  };
+}> = {
+  dws: {
+    moreTitle: "Spotlight",
+    moreLinks: [
+      { label: "SaaS Scaling Playbook", desc: "Design multi-tenant architectures", to: "/blog" },
+      { label: "Page Speed Checklist", desc: "Sub-3s loading times on React/WP", to: "/blog" },
+    ],
+    featured: {
+      title: "Redesign & Modernize",
+      desc: "Convert legacy code to modern React or WordPress with 25% off.",
+      cta: "Claim offer",
+      to: "/website-redesign",
+    },
+  },
+  des: {
+    moreTitle: "Spotlight",
+    moreLinks: [
+      { label: "Shopify Custom Apps", desc: "Tailoring private app backends", to: "/blog" },
+      { label: "WooCommerce vs Surecart", desc: "Finding the best checkout framework", to: "/blog" },
+    ],
+    featured: {
+      title: "POS & Stock Sync",
+      desc: "Integrate physical store POS database with online store automatically.",
+      cta: "Book demo",
+      to: "/shopify-ecommerce",
+    },
+  },
+  dms: {
+    moreTitle: "Spotlight",
+    moreLinks: [
+      { label: "High-ROAS Meta Ads", desc: "Budget optimization structures", to: "/blog" },
+      { label: "Rank #1 Google Guide", desc: "Our tactical on-page SEO keys", to: "/blog" },
+    ],
+    featured: {
+      title: "Free SEO & Ads Audit",
+      desc: "Get a comprehensive growth audit of your current channels today.",
+      cta: "Get free audit",
+      to: "/contact?service=SEO",
+    },
+  },
+  dss: {
+    moreTitle: "Spotlight",
+    moreLinks: [
+      { label: "AI Integration Guide", desc: "Connect LLMs to custom software", to: "/blog" },
+      { label: "SaaS QA Best Practices", desc: "Automation checks & unit tests", to: "/blog" },
+    ],
+    featured: {
+      title: "Custom Software Demo",
+      desc: "Explore bespoke payment gateway setups, custom CRM & HR software.",
+      cta: "Explore systems",
+      to: "/ai-software-development",
+    },
+  },
+  dcs: {
+    moreTitle: "Spotlight",
+    moreLinks: [
+      { label: "US LLC Tax Compliance", desc: "Filing forms & keeping addresses active", to: "/blog" },
+      { label: "Global Payment Gateways", desc: "Stripe & Merchant account guidance", to: "/blog" },
+    ],
+    featured: {
+      title: "Start Your US/UK Brand",
+      desc: "Form your legal business structure and set up banking remotely.",
+      cta: "Get started",
+      to: "/us-company",
+    },
+  },
+};
 
 const centerNav = [
   { label: "Home", to: "/" },
@@ -189,7 +267,7 @@ const Header = () => {
           >
             <div className="grid grid-cols-12 gap-4">
               {/* Vertical tabs */}
-              <div className="col-span-4 space-y-1 border-r border-border/30 pr-3">
+              <div className="col-span-3 space-y-1 border-r border-border/30 pr-3">
                 {serviceTabOrder.map((key) => {
                   const t = serviceTabs[key];
                   const Icon = t.icon;
@@ -200,20 +278,20 @@ const Header = () => {
                       onMouseEnter={() => setActiveTab(key)}
                       onClick={() => setActiveTab(key)}
                       className={[
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all",
+                        "w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-left transition-all",
                         active
                           ? `bg-gradient-to-r ${t.color} border border-primary/25`
                           : "border border-transparent hover:bg-foreground/5",
                       ].join(" ")}
                     >
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         active ? "bg-primary/20" : "bg-primary/10"
                       }`}>
-                        <Icon className="w-[18px] h-[18px] text-primary" />
+                        <Icon className="w-4 h-4 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[15px] font-bold text-foreground leading-tight">{t.label}</div>
-                        <div className="text-[12px] text-muted-foreground leading-snug mt-0.5">{t.sublabel}</div>
+                        <div className="text-[13px] xl:text-[13.5px] font-bold text-foreground leading-tight">{t.label}</div>
+                        <div className="text-[10.5px] xl:text-[11px] text-muted-foreground leading-snug mt-0.5">{t.sublabel}</div>
                       </div>
                     </button>
                   );
@@ -221,13 +299,13 @@ const Header = () => {
               </div>
 
               {/* Items */}
-              <div className="col-span-8">
+              <div className="col-span-6">
                 <motion.div
                   key={activeTab}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.18 }}
-                  className="grid grid-cols-2 gap-2"
+                  className="grid grid-cols-2 gap-x-3 gap-y-2"
                 >
                   {serviceTabs[activeTab].items.map((sub) => {
                     const Icon = sub.icon;
@@ -236,20 +314,81 @@ const Header = () => {
                         key={sub.label}
                         to={sub.to}
                         onClick={() => setMegaOpen(false)}
-                        className="group flex items-start gap-3 p-3 rounded-xl hover:bg-foreground/5 transition-colors"
+                        className="group flex items-start gap-2.5 p-2 rounded-lg hover:bg-foreground/5 transition-colors"
                       >
-                        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/20 transition-colors">
-                          <Icon className="w-[18px] h-[18px] text-primary" />
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/20 transition-colors">
+                          <Icon className="w-4 h-4 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-[15px] font-semibold text-foreground leading-tight">{sub.label}</div>
-                          <div className="text-[12px] text-muted-foreground leading-snug mt-0.5">{sub.desc}</div>
+                          <div className="text-[13.5px] font-semibold text-foreground leading-tight">{sub.label}</div>
+                          <div className="text-[11.5px] text-muted-foreground leading-snug mt-0.5 line-clamp-1">{sub.desc}</div>
                         </div>
                       </Link>
                     );
                   })}
                 </motion.div>
               </div>
+
+              {/* Right Sidebar - Stripe Style */}
+              {(() => {
+                const spotlight = megaMenuSpotlights[activeTab] || megaMenuSpotlights.dws;
+                return (
+                  <div className="col-span-3 border-l border-border/30 pl-4 flex flex-col justify-between h-full">
+                    {/* Section 1 - Spotlight links */}
+                    <div className="space-y-2.5">
+                      <div className="text-[10px] font-heading font-bold text-foreground/50 dark:text-white/60 uppercase tracking-[0.18em] flex items-center gap-1.5">
+                        <span className="inline-block w-3.5 h-px bg-gradient-to-r from-primary to-primary/0" />
+                        {spotlight.moreTitle}
+                      </div>
+                      <div className="space-y-2.5">
+                        {spotlight.moreLinks.map((link, idx) => (
+                          <Link
+                            key={idx}
+                            to={link.to}
+                            onClick={() => setMegaOpen(false)}
+                            className="group/sl block"
+                          >
+                            <div className="text-[12.5px] font-semibold text-foreground group-hover/sl:text-primary transition-colors flex items-center gap-0.5">
+                              {link.label}
+                              <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover/sl:opacity-100 group-hover/sl:translate-x-0.5 transition-all" />
+                            </div>
+                            <div className="text-[11px] text-muted-foreground leading-tight mt-0.5">{link.desc}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 2 - Featured Card */}
+                    <div className="mt-3 pt-3 border-t border-border/15">
+                      <Link
+                        to={spotlight.featured.to}
+                        onClick={() => setMegaOpen(false)}
+                        className="group/fc block rounded-lg overflow-hidden border border-border/40 bg-card/20 hover:border-primary/20 transition-all shadow-sm"
+                      >
+                        <div className="relative aspect-[22/9] w-full overflow-hidden bg-muted">
+                          <img
+                            src={featuredImage}
+                            alt={spotlight.featured.title}
+                            className="object-cover w-full h-full group-hover/fc:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="p-2.5 space-y-0.5">
+                          <div className="text-[12.5px] font-bold text-foreground group-hover/fc:text-primary transition-colors">
+                            {spotlight.featured.title}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground leading-snug">
+                            {spotlight.featured.desc}
+                          </div>
+                          <div className="text-[11px] font-semibold text-primary inline-flex items-center gap-0.5 pt-0.5">
+                            {spotlight.featured.cta}
+                            <ChevronRight className="w-3 h-3 group-hover/fc:translate-x-0.5 transition-transform" />
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </motion.div>
         )}
