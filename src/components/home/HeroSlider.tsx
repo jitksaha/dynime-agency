@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import InteractiveHeroVisual from "@/components/shared/InteractiveHeroVisual";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -23,6 +24,7 @@ interface Slide {
   icon: LucideIcon;
   accent: string; // tailwind gradient classes from primary token
   isHero?: boolean; // first slide carries h1 for SEO
+  categoryKey: string; // added categoryKey for interactive visual
 }
 
 const slides: Slide[] = [
@@ -37,6 +39,7 @@ const slides: Slide[] = [
     icon: Briefcase,
     accent: "from-primary via-primary/70 to-fuchsia-500",
     isHero: true,
+    categoryKey: "os",
   },
   {
     eyebrow: "DWS — Dynime Web Services",
@@ -48,6 +51,7 @@ const slides: Slide[] = [
     secondary: { label: "See portfolio", to: "/portfolio" },
     icon: Code2,
     accent: "from-sky-500 via-primary to-indigo-500",
+    categoryKey: "dws",
   },
   {
     eyebrow: "DMS — Dynime Marketing Services",
@@ -59,6 +63,7 @@ const slides: Slide[] = [
     secondary: { label: "Book strategy call", to: "/contact" },
     icon: Megaphone,
     accent: "from-amber-500 via-rose-500 to-primary",
+    categoryKey: "dms",
   },
   {
     eyebrow: "DSS — Dynime Software Development",
@@ -70,6 +75,7 @@ const slides: Slide[] = [
     secondary: { label: "Start a project", to: "/contact" },
     icon: Cpu,
     accent: "from-emerald-500 via-teal-500 to-primary",
+    categoryKey: "dss",
   },
   {
     eyebrow: "DCS — Dynime Consultancy Services",
@@ -81,6 +87,7 @@ const slides: Slide[] = [
     secondary: { label: "Investor relations", to: "/investor-relations" },
     icon: Users,
     accent: "from-violet-500 via-primary to-cyan-500",
+    categoryKey: "dcs",
   },
 ];
 
@@ -146,74 +153,80 @@ const HeroSlider = () => {
           const Icon = s.icon;
           return (
             <SwiperSlide key={idx}>
-              <div className="container-custom relative py-16 md:py-24 lg:py-28">
-                <div className="max-w-4xl mx-auto text-center">
-                  <motion.div
-                    key={`eb-${idx}`}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2.5 mb-7 rounded-full border border-border/60 bg-card/70 backdrop-blur-md px-4 py-2 shadow-sm"
-                  >
-                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${s.accent} text-primary-foreground shadow-md`}>
-                      <Icon className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="text-xs sm:text-sm font-medium text-foreground/80">
-                      {s.eyebrow}
-                    </span>
-                  </motion.div>
-
-                  <motion.div
-                    key={`tt-${idx}`}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.1 }}
-                  >
-                    {renderHighlighted(s.title, s.highlight, s.isHero)}
-                  </motion.div>
-
-                  <motion.p
-                    key={`d-${idx}`}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="mt-6 text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance"
-                  >
-                    {s.description}
-                  </motion.p>
-
-                  <motion.div
-                    key={`c-${idx}`}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.45 }}
-                    className="mt-9 flex flex-wrap justify-center gap-3"
-                  >
-                    <Button
-                      variant="hero"
-                      size="lg"
-                      asChild
-                      className="h-12 px-7 text-sm font-semibold rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/45 transition-all duration-300 hover:-translate-y-0.5"
+              <div className="container-custom relative py-12 md:py-16 lg:py-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center text-left">
+                  <div className="lg:col-span-7">
+                    <motion.div
+                      key={`eb-${idx}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="inline-flex items-center gap-2.5 mb-6 rounded-full border border-border/60 bg-card/70 backdrop-blur-md px-4 py-1.5 shadow-sm"
                     >
-                      <Link to={s.primary.to}>
-                        {s.primary.label}
-                        <Rocket className="w-4 h-4 ml-2 -rotate-45" />
-                      </Link>
-                    </Button>
-                    {s.secondary && (
+                      <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${s.accent} text-primary-foreground shadow-md`}>
+                        <Icon className="h-3 w-3" />
+                      </span>
+                      <span className="text-xs sm:text-sm font-medium text-foreground/80">
+                        {s.eyebrow}
+                      </span>
+                    </motion.div>
+
+                    <motion.div
+                      key={`tt-${idx}`}
+                      initial={{ opacity: 0, y: 18 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.7, delay: 0.1 }}
+                    >
+                      {renderHighlighted(s.title, s.highlight, s.isHero)}
+                    </motion.div>
+
+                    <motion.p
+                      key={`d-${idx}`}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.3 }}
+                      className="mt-6 text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed text-balance"
+                    >
+                      {s.description}
+                    </motion.p>
+
+                    <motion.div
+                      key={`c-${idx}`}
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.45 }}
+                      className="mt-8 flex flex-wrap gap-3"
+                    >
                       <Button
-                        variant="outline"
+                        variant="hero"
                         size="lg"
                         asChild
-                        className="h-12 px-7 text-sm font-semibold rounded-full border-border/70 bg-card/60 backdrop-blur text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
+                        className="h-12 px-7 text-sm font-semibold rounded-full shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/45 transition-all duration-300 hover:-translate-y-0.5"
                       >
-                        <Link to={s.secondary.to}>
-                          {s.secondary.label}
-                          <ArrowRight className="w-4 h-4 ml-2" />
+                        <Link to={s.primary.to}>
+                          {s.primary.label}
+                          <Rocket className="w-4 h-4 ml-2 -rotate-45" />
                         </Link>
                       </Button>
-                    )}
-                  </motion.div>
+                      {s.secondary && (
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          asChild
+                          className="h-12 px-7 text-sm font-semibold rounded-full border-border/70 bg-card/60 backdrop-blur text-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
+                        >
+                          <Link to={s.secondary.to}>
+                            {s.secondary.label}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Link>
+                        </Button>
+                      )}
+                    </motion.div>
+                  </div>
+                  
+                  <div className="lg:col-span-5 w-full flex items-center justify-center">
+                    <InteractiveHeroVisual category={s.categoryKey} />
+                  </div>
                 </div>
               </div>
             </SwiperSlide>

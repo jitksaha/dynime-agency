@@ -24,6 +24,7 @@ import UKFormationUpgrade from "@/components/services/UKFormationUpgrade";
 import USCompanyNameChecker from "@/components/services/USCompanyNameChecker";
 import USFormationHero from "@/components/services/USFormationHero";
 import ModernFaq from "@/components/shared/ModernFaq";
+import InteractiveHeroVisual from "@/components/shared/InteractiveHeroVisual";
 
 /* ── Helper data that applies universally ── */
 const buildStats = (countries: number) => [
@@ -202,57 +203,67 @@ const ServiceDetailPage = () => {
           <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-accent/5 blur-3xl" />
         </div>
         <div className="container-custom relative">
-          <ScrollReveal>
-            <div className="max-w-3xl">
-              {(() => {
-                const [catShort, ...catRest] = service.categoryLabel.split(" — ");
-                const catFull = catRest.join(" — ");
-                return (
-                  <nav
-                    aria-label="Breadcrumb"
-                    className="flex items-center gap-1.5 mb-4 text-xs text-muted-foreground min-w-0"
-                  >
-                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary uppercase tracking-wider shrink-0">
-                      {catShort}
-                    </span>
-                    {catFull && (
-                      <span className="hidden sm:inline truncate text-muted-foreground/80">
-                        {catFull}
-                      </span>
-                    )}
-                    <ChevronRight className="w-3 h-3 text-muted-foreground/60 shrink-0" aria-hidden="true" />
-                    <span className="truncate text-foreground/80 font-medium">{service.title}</span>
-                  </nav>
-                );
-              })()}
-              <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                {service.headline}
-              </h1>
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl">
-                {service.description}
-              </p>
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
-                <Button variant="hero" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
-                  <Link to="/contact">
-                    Get a Free Quote <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </Button>
-                <div className="grid grid-cols-2 gap-3 sm:contents w-full">
-                  <Button variant="default" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
-                    <SmoothAnchorLink
-                      href="#pricing"
-                      aria-label="Jump to pricing plans for this service"
-                    >
-                      Pricing <Sparkles className="w-4 h-4 ml-1" aria-hidden="true" />
-                    </SmoothAnchorLink>
-                  </Button>
-                  <Button variant="glass" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
-                    <Link to="/portfolio">Our Work</Link>
-                  </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-7">
+              <ScrollReveal>
+                <div>
+                  {(() => {
+                    const [catShort, ...catRest] = service.categoryLabel.split(" — ");
+                    const catFull = catRest.join(" — ");
+                    return (
+                      <nav
+                        aria-label="Breadcrumb"
+                        className="flex items-center gap-1.5 mb-4 text-xs text-muted-foreground min-w-0"
+                      >
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary uppercase tracking-wider shrink-0">
+                          {catShort}
+                        </span>
+                        {catFull && (
+                          <span className="hidden sm:inline truncate text-muted-foreground/80">
+                            {catFull}
+                          </span>
+                        )}
+                        <ChevronRight className="w-3 h-3 text-muted-foreground/60 shrink-0" aria-hidden="true" />
+                        <span className="truncate text-foreground/80 font-medium">{service.title}</span>
+                      </nav>
+                    );
+                  })()}
+                  <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                    {service.headline}
+                  </h1>
+                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-2xl">
+                    {service.description}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+                    <Button variant="hero" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
+                      <Link to="/contact">
+                        Get a Free Quote <ArrowRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </Button>
+                    <div className="grid grid-cols-2 gap-3 sm:contents w-full">
+                      <Button variant="default" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
+                        <SmoothAnchorLink
+                          href="#pricing"
+                          aria-label="Jump to pricing plans for this service"
+                        >
+                          Pricing <Sparkles className="w-4 h-4 ml-1" aria-hidden="true" />
+                        </SmoothAnchorLink>
+                      </Button>
+                      <Button variant="glass" size="lg" asChild className="w-full sm:w-auto h-auto py-5 sm:py-0 sm:h-11 leading-none rounded-md text-base">
+                        <Link to="/portfolio">Our Work</Link>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
             </div>
-          </ScrollReveal>
+            
+            <div className="lg:col-span-5 w-full flex items-center justify-center">
+              <ScrollReveal>
+                <InteractiveHeroVisual slug={service.slug} />
+              </ScrollReveal>
+            </div>
+          </div>
         </div>
       </section>
       )}
