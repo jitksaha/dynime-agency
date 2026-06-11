@@ -224,6 +224,16 @@ class SupabaseProxyController extends Controller
                 case 'generate_next_milestone_invoice':
                     return response()->json(['data' => 'inv_' . bin2hex(random_bytes(6)), 'error' => null]);
 
+                case 'verify_id_card':
+                    $cardId = $params['_card_id'] ?? '';
+                    $row = DB::table('id_card_assignments')
+                        ->where('card_id', $cardId)
+                        ->first();
+                    if ($row) {
+                        return response()->json(['data' => [$this->decodeRow($row)], 'error' => null]);
+                    }
+                    return response()->json(['data' => [], 'error' => null]);
+
                 default:
                     return response()->json([
                         'data' => null,
