@@ -10,14 +10,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCrmLeads, useUpsertLead } from "@/hooks/use-crm";
-import { Plus, Search, Mail, Phone, Settings2, Info, Copy, PhoneCall, MessageCircle, ChevronRight, ShoppingCart } from "lucide-react";
+import { Plus, Search, Mail, Phone, Settings2, Info, Copy, PhoneCall, MessageCircle, ChevronRight, ShoppingCart, RefreshCw } from "lucide-react";
 import PhoneInput, { detectCountryFromPhone } from "@/components/shared/PhoneInput";
 import LeadActivities from "@/components/shared/LeadActivities";
 import { format } from "date-fns";
-import { apiGet, apiPatch } from "@/lib/api";
+import { apiGet, apiPatch, apiPost } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import Pusher from "pusher-js";
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const prettySource = (s: string) => cap((s || "").replace(/_/g, " "));
@@ -85,6 +86,48 @@ const AdminCrmLeads = () => {
     },
     onError: (e: any) => toast.error(e.message || "Failed to update status"),
   });
+
+  const retrySync = useMutation({
+    mutationFn: async (id: string) => apiPost(`/crm/leads/${id}/retry-sync`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      toast.success("Sync job enqueued");
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to retry sync"),
+  });
+
+  useEffect(() => {
+    const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY || "dynime-pusher-key";
+    const pusherCluster = import.meta.env.VITE_PUSHER_APP_CLUSTER || "mt1";
+    const wsHost = import.meta.env.VITE_PUSHER_HOST || null;
+    const wsPort = import.meta.env.VITE_PUSHER_PORT || null;
+    const forceTLS = !wsHost;
+
+    const pusher = new Pusher(pusherKey, {
+      cluster: pusherCluster,
+      wsHost: wsHost || undefined,
+      wsPort: wsPort ? Number(wsPort) : undefined,
+      forceTLS: forceTLS,
+      disableStats: true,
+    });
+
+    const channel = pusher.subscribe("crm-channel");
+    
+    channel.bind("lead.sync.updated", (data: any) => {
+      qc.invalidateQueries({ queryKey: ["crm-leads"] });
+      if (data?.lead?.zoho_sync_status === 'failed') {
+        toast.error(`Lead "${data.lead.full_name}" sync failed: ${data.lead.zoho_sync_error}`);
+      } else if (data?.lead?.zoho_sync_status === 'synced') {
+        toast.success(`Lead "${data.lead.full_name}" successfully synced to Zoho!`);
+      }
+    });
+
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
+      pusher.disconnect();
+    };
+  }, [qc]);
 
   const createOrderFromLead = (l: any) => {
     const params = new URLSearchParams();
@@ -198,13 +241,14 @@ const AdminCrmLeads = () => {
                   <th className="pr-4">Source</th>
                   <th className="pr-4">Score</th>
                   <th className="pr-4">Status</th>
+                  <th className="pr-4">Zoho Sync</th>
                   <th className="pr-4">Created</th>
                   <th className="w-10"></th>
                 </tr>
               </thead>
               <tbody>
-                {isLoading && <tr><td colSpan={8} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
-                {!isLoading && leads.length === 0 && <tr><td colSpan={8} className="py-6 text-center text-muted-foreground">No leads found.</td></tr>}
+                {isLoading && <tr><td colSpan={9} className="py-6 text-center text-muted-foreground">Loading…</td></tr>}
+                {!isLoading && leads.length === 0 && <tr><td colSpan={9} className="py-6 text-center text-muted-foreground">No leads found.</td></tr>}
                 {leads.map((l: any) => {
                   const score = Number(l.score || 0);
                   const tone = score >= 70 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : score >= 40 ? "bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground";
@@ -225,6 +269,12 @@ const AdminCrmLeads = () => {
                     <td className="py-3 pr-4 font-medium cursor-pointer align-top" onClick={() => { setEditing(l); setOpen(true); }}>
                       <div>{l.full_name}</div>
                       {l.company && <div className="text-[11px] text-muted-foreground font-normal mt-0.5">{l.company}</div>}
+                      {l.assigned_rep && (
+                        <div className="text-[10px] text-primary mt-1 font-normal flex items-center gap-1">
+                          <span className="opacity-70">Owner:</span>
+                          <span className="font-semibold">{l.assigned_rep}</span>
+                        </div>
+                      )}
                     </td>
                     <td>
                       {l.email && (
@@ -314,6 +364,54 @@ const AdminCrmLeads = () => {
                         </SelectContent>
                       </Select>
                     </td>
+                    <td className="pr-4">
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        {l.zoho_sync_status === 'synced' && (
+                          <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15 border-emerald-500/20 text-[11px]">
+                            Synced
+                          </Badge>
+                        )}
+                        {(l.zoho_sync_status === 'pending' || !l.zoho_sync_status) && (
+                          <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/15 border-amber-500/20 text-[11px]">
+                            Pending
+                          </Badge>
+                        )}
+                        {l.zoho_sync_status === 'failed' && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/15">
+                                Failed <Info className="h-3 w-3" />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-3" align="end">
+                              <div className="text-xs font-semibold text-destructive mb-1">Sync Error Details</div>
+                              <p className="text-xs text-muted-foreground break-words">{l.zoho_sync_error || 'Unknown error'}</p>
+                              {l.last_sync_attempt_at && (
+                                <div className="text-[10px] text-muted-foreground mt-2">
+                                  Last attempt: {format(new Date(l.last_sync_attempt_at), "MMM d, h:mm a")}
+                                </div>
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                        
+                        {(l.zoho_sync_status === 'failed' || !l.zoho_id) && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-muted-foreground hover:text-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              retrySync.mutate(l.id);
+                            }}
+                            disabled={retrySync.isPending}
+                            title="Retry Zoho Sync"
+                          >
+                            <RefreshCw className={`h-3.5 w-3.5 ${retrySync.isPending ? 'animate-spin' : ''}`} />
+                          </Button>
+                        )}
+                      </div>
+                    </td>
                     <td className="pr-4 text-xs text-muted-foreground whitespace-nowrap">{format(new Date(l.created_at), "MMM d, yyyy")}</td>
                     <td>
                       <Button
@@ -330,7 +428,7 @@ const AdminCrmLeads = () => {
                   {isOpen && (
                     <tr key={l.id + "-act"} className="border-b bg-muted/20">
                       <td></td>
-                      <td colSpan={7} className="py-4 pr-4">
+                      <td colSpan={8} className="py-4 pr-4">
                         <LeadActivities leadId={l.id} />
                       </td>
                     </tr>

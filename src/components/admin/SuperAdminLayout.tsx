@@ -63,11 +63,7 @@ const navGroupsInvestments: NavGroup = {
 const navGroupsEngagement: NavGroup = {
   label: "Engagement",
   items: [
-    { to: "/superadmin/submissions", label: "Submissions", icon: Inbox },
-    { to: "/superadmin/inbox", label: "Inbox (Replies)", icon: Mail },
-    { to: "/superadmin/chat", label: "Live Chat", icon: MessageSquare },
     { to: "/superadmin/subscribers", label: "Subscribers", icon: Mail },
-    { to: "/superadmin/forms", label: "Form Builder", icon: FormInput },
     { to: "/superadmin/contact-info", label: "Contact Info", icon: Phone },
     { to: "/superadmin/notifications", label: "Email Alerts", icon: Bell },
     { to: "/superadmin/country-eligibility", label: "Country Eligibility", icon: Globe },

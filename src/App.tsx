@@ -119,10 +119,6 @@ import InvestorProtectedRoute from "@/components/investor/InvestorProtectedRoute
 const SuperAdminLogin = lazy(() => import("./pages/superadmin/SuperAdminLogin.tsx"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard.tsx"));
 const AdminContactInfo = lazy(() => import("./pages/admin/AdminContactInfo.tsx"));
-const AdminFormBuilder = lazy(() => import("./pages/admin/AdminFormBuilder.tsx"));
-const AdminSubmissions = lazy(() => import("./pages/admin/AdminSubmissions.tsx"));
-const AdminInbox = lazy(() => import("./pages/admin/AdminInbox.tsx"));
-const AdminChat = lazy(() => import("./pages/admin/AdminChat.tsx"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings.tsx"));
 const AdminTaxSettings = lazy(() => import("./pages/superadmin/AdminTaxSettings.tsx"));
 const AdminPages = lazy(() => import("./pages/admin/AdminPages.tsx"));
@@ -369,10 +365,6 @@ const App = () => (
                   <Route path="/superadmin/login" element={<SuperAdminLogin />} />
                   <Route path="/superadmin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                   <Route path="/superadmin/contact-info" element={<ProtectedRoute><AdminContactInfo /></ProtectedRoute>} />
-                  <Route path="/superadmin/forms" element={<ProtectedRoute><AdminFormBuilder /></ProtectedRoute>} />
-                  <Route path="/superadmin/submissions" element={<ProtectedRoute><AdminSubmissions /></ProtectedRoute>} />
-                  <Route path="/superadmin/inbox" element={<ProtectedRoute><AdminInbox /></ProtectedRoute>} />
-                  <Route path="/superadmin/chat" element={<ProtectedRoute><AdminChat /></ProtectedRoute>} />
                   <Route path="/superadmin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
                   <Route path="/superadmin/tax-settings" element={<ProtectedRoute><AdminTaxSettings /></ProtectedRoute>} />
                   <Route path="/superadmin/payment-gateways" element={<ProtectedRoute><PaymentGateways /></ProtectedRoute>} />

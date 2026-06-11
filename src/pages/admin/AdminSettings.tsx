@@ -58,7 +58,32 @@ const AdminSettings = () => {
   const [showSmtpPass, setShowSmtpPass] = useState(false);
   const [showSmtpCareersPass, setShowSmtpCareersPass] = useState(false);
   const [showSmtpOrdersPass, setShowSmtpOrdersPass] = useState(false);
+  const [showZohoSecret, setShowZohoSecret] = useState(false);
+  const [showZohoRefreshToken, setShowZohoRefreshToken] = useState(false);
   const qc = useQueryClient();
+
+  const getZohoVal = (field: string): string => {
+    try {
+      if (!values.zoho_credentials) {
+        return field === "accounts_domain" ? "https://accounts.zoho.com" : field === "api_domain" ? "https://www.zohoapis.com" : "";
+      }
+      const parsed = JSON.parse(values.zoho_credentials);
+      return parsed[field] || (field === "accounts_domain" ? "https://accounts.zoho.com" : field === "api_domain" ? "https://www.zohoapis.com" : "");
+    } catch {
+      return field === "accounts_domain" ? "https://accounts.zoho.com" : field === "api_domain" ? "https://www.zohoapis.com" : "";
+    }
+  };
+
+  const handleZohoChange = (field: string, val: string) => {
+    let current: Record<string, string> = {};
+    try {
+      if (values.zoho_credentials) {
+        current = JSON.parse(values.zoho_credentials);
+      }
+    } catch {}
+    current[field] = val;
+    setValues({ ...values, zoho_credentials: JSON.stringify(current) });
+  };
 
   const loadBackupStatus = async () => {
     try {
@@ -182,7 +207,8 @@ const AdminSettings = () => {
         "smtp_orders_password",
         "smtp_orders_encryption",
         "smtp_orders_from_address",
-        "smtp_orders_from_name"
+        "smtp_orders_from_name",
+        "zoho_credentials"
       ];
       const rows: { key: string; value: any }[] = keysToSave
         .filter((k) => values[k] !== undefined)
@@ -533,6 +559,111 @@ const AdminSettings = () => {
             <p className="text-[11px] text-muted-foreground mt-1.5">
               Number of days after order payment before a pending referral commission is automatically approved and made available for partner payout request. Use 0 for instant approval.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Zoho CRM Integration */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Database className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Zoho CRM Integration</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Connect your website form submissions with Zoho CRM. Submissions from the contact form are instantly saved locally and automatically synced to Zoho in the background.
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm text-muted-foreground block mb-1">Client ID</label>
+            <input
+              type="text"
+              value={getZohoVal("client_id")}
+              onChange={(e) => handleZohoChange("client_id", e.target.value)}
+              placeholder="e.g. 1000.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-muted-foreground block mb-1">Client Secret</label>
+            <div className="relative">
+              <input
+                type={showZohoSecret ? "text" : "password"}
+                value={getZohoVal("client_secret")}
+                onChange={(e) => handleZohoChange("client_secret", e.target.value)}
+                placeholder="••••••••••••••••••••••••••••••••"
+                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowZohoSecret(!showZohoSecret)}
+                className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground"
+              >
+                {showZohoSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm text-muted-foreground block mb-1">Refresh Token</label>
+            <div className="relative">
+              <input
+                type={showZohoRefreshToken ? "text" : "password"}
+                value={getZohoVal("refresh_token")}
+                onChange={(e) => handleZohoChange("refresh_token", e.target.value)}
+                placeholder="e.g. 1000.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowZohoRefreshToken(!showZohoRefreshToken)}
+                className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground"
+              >
+                {showZohoRefreshToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-muted-foreground block mb-1">Accounts Domain</label>
+              <select
+                value={getZohoVal("accounts_domain")}
+                onChange={(e) => handleZohoChange("accounts_domain", e.target.value)}
+                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="https://accounts.zoho.com">US (.com)</option>
+                <option value="https://accounts.zoho.eu">EU (.eu)</option>
+                <option value="https://accounts.zoho.in">India (.in)</option>
+                <option value="https://accounts.zoho.com.cn">China (.com.cn)</option>
+                <option value="https://accounts.zoho.com.au">Australia (.com.au)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground block mb-1">API Domain</label>
+              <select
+                value={getZohoVal("api_domain")}
+                onChange={(e) => handleZohoChange("api_domain", e.target.value)}
+                className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="https://www.zohoapis.com">US (.com)</option>
+                <option value="https://www.zohoapis.eu">EU (.eu)</option>
+                <option value="https://www.zohoapis.in">India (.in)</option>
+                <option value="https://www.zohoapis.com.cn">China (.com.cn)</option>
+                <option value="https://www.zohoapis.com.au">Australia (.com.au)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-secondary/10 p-3.5 mt-2 space-y-2 text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground block">Webhook Configuration:</span>
+            <p>
+              To enable <strong>two-way sync</strong> (so that representative assignments and status changes in Zoho CRM are synced back to this dashboard in real-time), configure a workflow rule in Zoho CRM that calls this webhook:
+            </p>
+            <div className="flex items-center gap-2 bg-background p-2 rounded border border-border font-mono text-[11px] text-foreground select-all">
+              {`${import.meta.env.VITE_API_URL || window.location.origin}/api/v1/webhooks/zoho`}
+            </div>
           </div>
         </div>
       </div>
