@@ -665,6 +665,61 @@ const AdminSettings = () => {
               {`${import.meta.env.VITE_API_URL || window.location.origin}/api/v1/webhooks/zoho`}
             </div>
           </div>
+
+          <details className="mt-3 group border border-border/60 rounded-lg overflow-hidden bg-secondary/5">
+            <summary className="flex items-center justify-between px-4 py-3 text-xs font-semibold text-foreground hover:bg-secondary/15 cursor-pointer select-none">
+              <span>Detailed Setup & Integration Guide</span>
+              <span className="text-muted-foreground transition-transform group-open:rotate-180">▼</span>
+            </summary>
+            <div className="p-4 border-t border-border/40 space-y-4 text-xs text-muted-foreground leading-relaxed">
+              <div>
+                <h4 className="font-bold text-foreground mb-1">Step 1: Get OAuth Credentials</h4>
+                <ol className="list-decimal pl-4 space-y-1.5">
+                  <li>Go to the <a href="https://api-console.zoho.com" target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">Zoho API Console</a>.</li>
+                  <li>Click <strong>Add Client</strong> and choose <strong>Self Client</strong>.</li>
+                  <li>In the popup, copy your <strong>Client ID</strong> and <strong>Client Secret</strong> and paste them above.</li>
+                  <li>Go to the <strong>Generate Code</strong> tab.</li>
+                  <li>Under <strong>Scope</strong>, paste: <code className="bg-secondary px-1 py-0.5 rounded font-mono text-[10px] text-foreground">ZohoCRM.modules.leads.CREATE,ZohoCRM.modules.leads.UPDATE,ZohoCRM.modules.leads.READ,ZohoCRM.settings.READ</code></li>
+                  <li>Choose the maximum duration (e.g. 10 minutes), add a description, and click <strong>Generate</strong>. Copy the Authorization Code immediately.</li>
+                </ol>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-foreground mb-1">Step 2: Generate the Refresh Token</h4>
+                <p className="mb-2">Run the following cURL command in your terminal (replacing placeholders) to receive your permanent Refresh Token:</p>
+                <pre className="bg-background p-2.5 rounded border border-border text-[10px] font-mono text-foreground overflow-x-auto whitespace-pre-wrap select-all">
+{`curl -X POST "https://accounts.zoho.com/oauth/v2/token" \\
+  -d "code=YOUR_AUTHORIZATION_CODE" \\
+  -d "client_id=YOUR_CLIENT_ID" \\
+  -d "client_secret=YOUR_CLIENT_SECRET" \\
+  -d "grant_type=authorization_code"`}
+                </pre>
+                <p className="mt-1.5 text-[10px] text-amber-500">
+                  Note: Change <code className="bg-secondary px-0.5 py-0.2 rounded font-mono">accounts.zoho.com</code> if you are on EU/IN servers (e.g. <code className="bg-secondary px-0.5 py-0.2 rounded font-mono">accounts.zoho.eu</code>). Copy the returned <code className="bg-secondary px-0.5 py-0.2 rounded font-mono">refresh_token</code> and paste it above.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-foreground mb-1">Step 3: Enable Two-Way Webhook Sync</h4>
+                <ol className="list-decimal pl-4 space-y-1.5">
+                  <li>In Zoho CRM, go to <strong>Settings</strong> ➔ <strong>Developer Space</strong> ➔ <strong>Webhooks</strong> and click <strong>Configure Webhook</strong>.</li>
+                  <li>Set the URL to: <code className="bg-secondary px-1 py-0.5 rounded font-mono text-[10px] text-foreground font-semibold select-all">{`${import.meta.env.VITE_API_URL || window.location.origin}/api/v1/webhooks/zoho`}</code></li>
+                  <li>Set Method to <strong>POST</strong>.</li>
+                  <li>Under <strong>Body ➔ Raw ➔ JSON</strong>, configure it to send the following payload:</li>
+                </ol>
+                <pre className="bg-background p-2.5 mt-2 rounded border border-border text-[10px] font-mono text-foreground overflow-x-auto select-all">
+{`{
+  "id": "\${Leads.Lead Id}",
+  "status": "\${Leads.Lead Status}",
+  "assigned_rep": "\${Leads.Lead Owner}"
+}`}
+                </pre>
+                <p className="mt-2">
+                  Finally, create a <strong>Workflow Rule</strong> in Zoho CRM triggered on Lead Edit/Update, and associate it with this Webhook to keep representatives and stages synced dynamically.
+                </p>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
 
