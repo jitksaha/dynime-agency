@@ -12,7 +12,7 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
     exit;
 }
 
-$zipFile = '/home/ssamokxvqc/dynime.com/dynime-api.zip';
+$zipFile = __DIR__ . '/dynime-api.zip';
 $extractTo = '/home/ssamokxvqc/dynime-api';
 
 header('Content-Type: text/html; charset=utf-8');
