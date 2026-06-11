@@ -101,4 +101,77 @@ class AnalyticsController extends Controller
 
         return response()->json($data);
     }
+
+    public function orders(): JsonResponse
+    {
+        $orders = DB::table('orders')
+            ->select([
+                'id', 'total', 'status',
+                'customer_name', 'customer_email', 'created_at',
+                'tax_amount', 'tax_percent', 'tax_mode', 'tax_label',
+                'refunded_amount', 'refunded_tax_amount', 'refunded_at'
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    public function subscribers(): JsonResponse
+    {
+        $subs = DB::table('newsletter_subscribers')
+            ->select(['id', 'email', 'status', 'created_at'])
+            ->orderByDesc('created_at')
+            ->limit(200)
+            ->get();
+
+        return response()->json($subs);
+    }
+
+    public function fxOrders(): JsonResponse
+    {
+        $fx = DB::table('fx_orders')
+            ->select([
+                'status', 'base_currency', 'base_amount',
+                'revenue_usd', 'cost_usd', 'profit_usd',
+                'fee_usd', 'order_date'
+            ])
+            ->orderByDesc('order_date')
+            ->limit(2000)
+            ->get();
+
+        return response()->json($fx);
+    }
+
+    public function employees(): JsonResponse
+    {
+        $employees = DB::table('dynime_employees')
+            ->select([
+                'employee_id', 'full_name', 'department', 'designation', 'status',
+                'monthly_gross_usd', 'annual_salary_usd'
+            ])
+            ->get();
+
+        return response()->json($employees);
+    }
+
+    public function kpi(): JsonResponse
+    {
+        $kpi = DB::table('dynime_kpi_monthly')
+            ->select([
+                'period', 'revenue_usd', 'net_income_usd', 'mrr_usd',
+                'headcount', 'churn_rate_pct', 'nps_score'
+            ])
+            ->orderBy('period')
+            ->get();
+
+        return response()->json($kpi);
+    }
+
+    public function counts(): JsonResponse
+    {
+        $portfolio = DB::table('portfolio_projects')->count();
+        return response()->json(['portfolio' => $portfolio]);
+    }
 }
+

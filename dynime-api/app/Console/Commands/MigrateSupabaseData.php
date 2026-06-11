@@ -64,6 +64,21 @@ class MigrateSupabaseData extends Command
         // 5. Migrate Employees (must be after site settings to avoid auto-sync termination)
         $this->migrateEmployees($data['employees'] ?? []);
 
+        // 6. Migrate FX Orders
+        $this->migrateGenericTable('fx_orders', $data['fx_orders'] ?? []);
+
+        // 7. Migrate Payroll
+        $this->migrateGenericTable('payroll_runs', $data['payroll_runs'] ?? []);
+        $this->migrateGenericTable('payroll_items', $data['payroll_items'] ?? []);
+        $this->migrateGenericTable('payroll_adjustments', $data['payroll_adjustments'] ?? []);
+        $this->migrateGenericTable('payroll_payslips', $data['payroll_payslips'] ?? []);
+        $this->migrateGenericTable('payroll_salary_history', $data['payroll_salary_history'] ?? []);
+        $this->migrateGenericTable('payroll_audit_logs', $data['payroll_audit_logs'] ?? []);
+
+        // 8. Migrate Dynime Employees & KPI Analytics for Dashboard
+        $this->migrateGenericTable('dynime_employees', $data['dynime_employees'] ?? [], 'employee_id');
+        $this->migrateGenericTable('dynime_kpi_monthly', $data['dynime_kpi_monthly'] ?? [], 'period');
+
         $this->info("All migrations completed!");
         return Command::SUCCESS;
     }
@@ -94,7 +109,16 @@ class MigrateSupabaseData extends Command
             'careers' => 'public.careers',
             'job_applications' => 'public.job_applications',
             'employees' => 'public.employees',
-            'site_settings' => 'public.site_settings'
+            'site_settings' => 'public.site_settings',
+            'fx_orders' => 'public.fx_orders',
+            'payroll_runs' => 'public.payroll_runs',
+            'payroll_items' => 'public.payroll_items',
+            'payroll_adjustments' => 'public.payroll_adjustments',
+            'payroll_payslips' => 'public.payroll_payslips',
+            'payroll_salary_history' => 'public.payroll_salary_history',
+            'payroll_audit_logs' => 'public.payroll_audit_logs',
+            'dynime_employees' => 'public.dynime_employees',
+            'dynime_kpi_monthly' => 'public.dynime_kpi_monthly'
         ];
 
         $exportData = [];
@@ -566,5 +590,59 @@ class MigrateSupabaseData extends Command
         $result[] = trim($currentVal, " \t\n\r\0\x0B\"");
         
         return $result;
+    }
+
+    private function migrateGenericTable(string $tableName, array $rows, string $primaryKey = 'id')
+    {
+        $this->info("\n--- Migrating {$tableName} ---");
+        $mysqlColumns = Schema::getColumnListing($tableName);
+        $imported = 0;
+        $updated = 0;
+
+        foreach ($rows as $row) {
+            try {
+                $existing = DB::table($tableName)->where($primaryKey, $row[$primaryKey])->first();
+
+                $data = [];
+                foreach ($mysqlColumns as $col) {
+                    if (array_key_exists($col, $row)) {
+                        $val = $row[$col];
+
+                        try {
+                            $colType = Schema::getColumnType($tableName, $col);
+                        } catch (Exception $e) {
+                            $colType = 'text';
+                        }
+
+                        if (in_array($colType, ['datetime', 'timestamp'])) {
+                            $val = $this->formatTimestamp($val);
+                        } elseif ($colType === 'date') {
+                            $val = !empty($val) ? date('Y-m-d', strtotime($val)) : null;
+                        } elseif (($colType === 'string' || $colType === 'varchar') && is_string($val)) {
+                            $val = substr($val, 0, 255);
+                        }
+
+                        // Handle JSON fields
+                        if (is_array($val) || is_object($val)) {
+                            $val = json_encode($val);
+                        }
+
+                        $data[$col] = $val;
+                    }
+                }
+
+                if ($existing) {
+                    DB::table($tableName)->where($primaryKey, $row[$primaryKey])->update($data);
+                    $updated++;
+                } else {
+                    DB::table($tableName)->insert($data);
+                    $imported++;
+                }
+            } catch (Exception $e) {
+                $this->error("Failed to migrate row in '{$tableName}' ({$primaryKey}: " . ($row[$primaryKey] ?? 'unknown') . "): " . $e->getMessage());
+            }
+        }
+
+        $this->info("{$tableName} Migration completed: {$imported} imported, {$updated} updated.");
     }
 }

@@ -43,73 +43,81 @@ const perks = [
 const JobCard = ({ job }: { job: Career }) => (
   <Link
     to={`/careers/${job.slug}`}
-    className="group relative block rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-6 hover:border-primary/40 hover:bg-card transition-all duration-300 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.35)]"
+    className="group relative block overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-b from-card/30 to-card/10 backdrop-blur-md p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(var(--primary-rgb),0.08)] hover:-translate-y-1"
   >
+    {/* Background hover light effect */}
+    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
     {job.is_featured && (
-      <span className="absolute -top-2 right-4 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">
-        <Sparkles className="w-3 h-3" /> Featured
+      <span className="absolute -top-px right-6 inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-primary to-accent text-primary-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+        <Sparkles className="w-3 h-3 animate-pulse" /> Featured
       </span>
     )}
-    <div className="flex items-start justify-between gap-4 mb-3">
+
+    <div className="relative z-10 flex flex-col h-full justify-between">
       <div>
-        <p className="text-xs uppercase tracking-wider text-primary font-semibold mb-1">{job.department}</p>
-        <h3 className="font-heading font-bold text-xl text-foreground group-hover:text-primary transition-colors">
+        <p className="text-[10px] uppercase tracking-widest text-primary font-bold mb-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/10">
+          {job.department}
+        </p>
+        <h3 className="font-heading font-extrabold text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300 mb-3">
           {job.title}
         </h3>
+
+        {job.description && (
+          <p className="text-sm text-muted-foreground/80 mb-5 line-clamp-2 leading-relaxed font-sans">{job.description}</p>
+        )}
       </div>
-    </div>
 
-    {job.description && (
-      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{job.description}</p>
-    )}
-
-    <div className="flex flex-wrap gap-2 mb-5">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-xs text-foreground/80">
-        <MapPin className="w-3 h-3" />
-        {job.location}
-        {job.location === "On-site" && job.office_location?.name
-          ? ` · ${job.office_location.name}${job.office_location.city ? `, ${job.office_location.city}` : ""}`
-          : ""}
-      </span>
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-xs text-foreground/80">
-        <Clock className="w-3 h-3" /> {job.employment_type}
-      </span>
-      {job.experience_level && (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-3 py-1 text-xs text-foreground/80">
-          <Briefcase className="w-3 h-3" /> {job.experience_level}
-        </span>
-      )}
-      {job.salary_range && (
-        <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium">
-          {job.salary_range}
-        </span>
-      )}
-      {job.vacancies > 0 && (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 text-emerald-500 px-3 py-1 text-xs font-semibold">
-          <UserPlus className="w-3 h-3" /> {job.vacancies} {job.vacancies === 1 ? "vacancy" : "vacancies"}
-        </span>
-      )}
-    </div>
-
-    <div className="flex items-center justify-between gap-3 pt-3 border-t border-border/40">
-      <div className="flex items-center gap-1 flex-wrap">
-        {(Array.isArray(job.posting_channels) ? job.posting_channels : []).slice(0, 4).map((ch, i) => {
-          const def = findChannel(ch.id);
-          return (
-            <span
-              key={i}
-              title={`Also on ${def.name}`}
-              className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white"
-              style={{ backgroundColor: def.color }}
-            >
-              {def.name.slice(0, 2).toUpperCase()}
+      <div>
+        <div className="flex flex-wrap gap-2 mb-6">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
+            {job.location}
+            {job.location === "On-site" && job.office_location?.name
+              ? ` · ${job.office_location.name}`
+              : ""}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
+            <Clock className="w-3.5 h-3.5 text-primary" /> {job.employment_type}
+          </span>
+          {job.experience_level && (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
+              <Briefcase className="w-3.5 h-3.5 text-primary" /> {job.experience_level}
             </span>
-          );
-        })}
+          )}
+          {job.salary_range && (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-3 py-1 text-xs font-semibold">
+              {job.salary_range}
+            </span>
+          )}
+          {job.vacancies > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary px-3 py-1 text-xs font-semibold">
+              <UserPlus className="w-3.5 h-3.5" /> {job.vacancies} {job.vacancies === 1 ? "vacancy" : "vacancies"}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/20">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(Array.isArray(job.posting_channels) ? job.posting_channels : []).slice(0, 4).map((ch, i) => {
+              const def = findChannel(ch.id);
+              return (
+                <span
+                  key={i}
+                  title={`Also on ${def.name}`}
+                  className="px-2 py-0.5 rounded-md text-[9px] font-extrabold text-white shadow-sm"
+                  style={{ backgroundColor: def.color }}
+                >
+                  {def.name.toUpperCase()}
+                </span>
+              );
+            })}
+          </div>
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-primary group-hover:text-primary-foreground group-hover:bg-primary px-3 py-1.5 rounded-xl border border-primary/25 transition-all duration-300">
+            View Role <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </span>
+        </div>
       </div>
-      <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary group-hover:gap-2 transition-all">
-        View role <ArrowUpRight className="w-4 h-4" />
-      </span>
     </div>
   </Link>
 );

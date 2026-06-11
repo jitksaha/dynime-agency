@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Media\MediaController;
 use App\Http\Controllers\Api\Seo\SeoController;
 use App\Http\Controllers\Api\Settings\SettingsController;
 use App\Http\Controllers\Api\SupabaseProxyController;
+use App\Http\Controllers\Api\Hrm\PayrollController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -122,6 +123,31 @@ Route::prefix('v1')->group(function () {
         Route::get('orders/mine', [\App\Http\Controllers\Api\OrdersController::class, 'myOrders']);
         Route::post('orders/mine/claim', [\App\Http\Controllers\Api\OrdersController::class, 'claimOrders']);
         Route::post('orders/claim', [\App\Http\Controllers\Api\OrdersController::class, 'claimOrders']);
+
+        // Frontend-compatible analytics endpoints
+        Route::get('analytics/orders', [AnalyticsController::class, 'orders'])->middleware('admin');
+        Route::get('analytics/subscribers', [AnalyticsController::class, 'subscribers'])->middleware('admin');
+        Route::get('analytics/fx-orders', [AnalyticsController::class, 'fxOrders'])->middleware('admin');
+        Route::get('analytics/employees', [AnalyticsController::class, 'employees'])->middleware('admin');
+        Route::get('analytics/kpi', [AnalyticsController::class, 'kpi'])->middleware('admin');
+        Route::get('analytics/counts', [AnalyticsController::class, 'counts'])->middleware('admin');
+
+        // Payroll endpoints
+        Route::prefix('payroll')->middleware('admin')->group(function () {
+            Route::get('runs', [PayrollController::class, 'getRuns']);
+            Route::get('runs/{id}/items', [PayrollController::class, 'getItems']);
+            Route::get('items/{id}/adjustments', [PayrollController::class, 'getAdjustments']);
+            Route::get('runs/{id}/audit', [PayrollController::class, 'getAudit']);
+            Route::get('employees/count', [PayrollController::class, 'getActiveEmployeeCount']);
+            Route::post('runs/ensure-current', [PayrollController::class, 'ensureCurrentMonth']);
+            Route::post('runs/{id}/sync', [PayrollController::class, 'syncRun']);
+            Route::post('seed-history', [PayrollController::class, 'seedHistory']);
+            Route::post('runs/generate', [PayrollController::class, 'generateRun']);
+            Route::post('runs/{id}/approve', [PayrollController::class, 'approveRun']);
+            Route::post('runs/{id}/mark-paid', [PayrollController::class, 'markPaid']);
+            Route::post('items/{id}/cancel', [PayrollController::class, 'cancelItem']);
+            Route::post('runs/{id}/lock', [PayrollController::class, 'lockRun']);
+        });
 
         // Admin Order, Verification, and User Lookup routes
         Route::get('orders', [\App\Http\Controllers\Api\OrdersController::class, 'adminIndex'])->middleware('admin');

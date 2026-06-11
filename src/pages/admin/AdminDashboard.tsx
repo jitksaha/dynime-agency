@@ -159,7 +159,9 @@ const AdminDashboard = () => {
 
   const inRange = (iso?: string | null) => {
     if (!iso) return false;
-    const t = new Date(iso).getTime();
+    const normalized = iso.includes(' ') && !iso.includes('T') ? iso.replace(' ', 'T') : iso;
+    const t = new Date(normalized).getTime();
+    if (isNaN(t)) return false;
     return t >= from.getTime() && t <= to.getTime();
   };
   const periodInRange = (period?: string | null) => {
@@ -234,7 +236,10 @@ const AdminDashboard = () => {
       });
     }
     const bucketIdx = (iso: string) => {
-      const t = new Date(iso).getTime();
+      if (!iso) return -1;
+      const normalized = iso.includes(' ') && !iso.includes('T') ? iso.replace(' ', 'T') : iso;
+      const t = new Date(normalized).getTime();
+      if (isNaN(t)) return -1;
       const i = Math.floor((t - startDay.getTime()) / dayMs / bucketDays);
       return i >= 0 && i < buckets.length ? i : -1;
     };

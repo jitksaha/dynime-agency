@@ -140,7 +140,6 @@ const navGroupsCommerce: NavGroup = {
       badge: "Hub",
       children: [
         { to: "/superadmin/hr?tab=employees", label: "Employees", icon: Users },
-        { to: "/superadmin/hr?tab=team-section", label: "Public Team Section", icon: Users },
         { to: "/superadmin/hr?tab=id-cards", label: "ID Card Maker", icon: IdCard },
         { to: "/superadmin/hr?tab=builder", label: "Document Builder", icon: FileText },
         { to: "/superadmin/hr?tab=history", label: "Documents History", icon: FileText },

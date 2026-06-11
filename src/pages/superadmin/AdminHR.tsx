@@ -1079,7 +1079,13 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showIssues, setShowIssues] = useState(false);
 
-  const issues = useMemo(() => employees.filter((e) => !e.employee_code?.trim() || !e.team_member_key?.trim()), [employees]);
+  const issues = useMemo(() => employees.filter((e) => {
+    if (!e.employee_code?.trim()) return true;
+    const meta = (e.metadata || {}) as Record<string, any>;
+    const isPaused = Boolean(meta.paused) || meta.public_status === "paused";
+    if (!isPaused && !e.team_member_key?.trim()) return true;
+    return false;
+  }), [employees]);
   const editingEmployee = useMemo(
     () => (editingId && editingId !== "new" ? employees.find((e) => e.id === editingId) || null : null),
     [editingId, employees],
@@ -1203,9 +1209,11 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
               </thead>
               <tbody>
                 {issues.map((e) => {
+                  const meta = (e.metadata || {}) as Record<string, any>;
+                  const isPaused = Boolean(meta.paused) || meta.public_status === "paused";
                   const missing = [
                     !e.employee_code?.trim() && "employee_code",
-                    !e.team_member_key?.trim() && "team_member_key",
+                    (!isPaused && !e.team_member_key?.trim()) && "team_member_key",
                   ].filter(Boolean).join(", ");
                   return (
                     <tr key={e.id} className="border-t border-border">

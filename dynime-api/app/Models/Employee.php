@@ -24,6 +24,36 @@ class Employee extends Model
         'team_member_key', 'user_id', 'metadata', 'created_by'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($employee) {
+            if (empty($employee->employee_code)) {
+                $employee->employee_code = static::generateEmployeeCode();
+            }
+        });
+    }
+
+    public static function generateEmployeeCode(): string
+    {
+        $lastEmployee = static::whereNotNull('employee_code')
+            ->where('employee_code', 'like', 'DTLE%')
+            ->orderByDesc('employee_code')
+            ->first();
+
+        $nextNum = 1001;
+        if ($lastEmployee) {
+            $lastCode = $lastEmployee->employee_code;
+            $numPart = (int) substr($lastCode, 4);
+            if ($numPart > 0) {
+                $nextNum = $numPart + 1;
+            }
+        }
+        
+        return 'DTLE' . str_pad((string)$nextNum, 6, '0', STR_PAD_LEFT);
+    }
+
     protected function casts(): array
     {
         return [
@@ -39,3 +69,4 @@ class Employee extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 }
+
