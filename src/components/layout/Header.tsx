@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Link from "@/components/shared/PrefetchLink";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, ArrowRight, User } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowRight, User, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import SiteLogo from "@/components/shared/SiteLogo";
 import ThemeToggle from "@/components/shared/ThemeToggle";
