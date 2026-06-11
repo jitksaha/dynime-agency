@@ -30,8 +30,8 @@ export const DEFAULT_ID_CARD_BRAND: IdCardBrand = {
   companyName: "Dynime Inc.",
   siteUrl: "https://dynime.com",
   logoUrl: "",
-  primaryColor: "#1919F5",
-  secondaryColor: "#1919F5",
+  primaryColor: "#635bff",
+  secondaryColor: "#635bff",
   accentColor: "#e879f9",
   headerEmployee: "Employee Identification",
   headerInvestor: "Investor Identification",
@@ -44,7 +44,7 @@ export const DEFAULT_ID_CARD_BRAND: IdCardBrand = {
   qrErrorCorrection: "Q",
   qrMargin: 6,
   verifiedBadgeEnabled: true,
-  verifiedBadgeColor: "#1919F5",
+  verifiedBadgeColor: "#635bff",
   idDigits: 6,
 };
 
