@@ -28,7 +28,7 @@ export interface ServiceTab {
 
 export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
   dws: {
-    label: "DWS - Dynime Web Services", sublabel: "Dynime method for high-performance websites & custom web apps",
+    label: "DWS - Web Services", sublabel: "Dynime method for modern web development",
     color: "from-blue-500/15 to-indigo-500/15", icon: Code,
     items: [
       { label: "Web Design & Development", desc: "WordPress, React, Laravel & more", to: "/web-design-development", icon: Globe },
@@ -44,7 +44,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   des: {
-    label: "DES - Dynime Ecommerce Solution", sublabel: "Dynime solution for scalable e-commerce stores & custom integrations",
+    label: "DES - Ecommerce Solution", sublabel: "Dynime solution for scalable online stores",
     color: "from-amber-500/15 to-orange-500/15", icon: ShoppingBag,
     items: [
       { label: "Shopify Ecommerce", desc: "Store build, design, redesign & custom apps", to: "/shopify-ecommerce", icon: ShoppingBag },
@@ -54,7 +54,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dms: {
-    label: "DMS - Dynime Marketing Services", sublabel: "Dynime approach to data-driven marketing, SEO & high-ROAS ads",
+    label: "DMS - Marketing Services", sublabel: "Dynime approach to digital growth & SEO",
     color: "from-violet-500/15 to-purple-500/15", icon: Megaphone,
     items: [
       { label: "Social Media Management", desc: "Grow online presence", to: "/social-media", icon: Users },
@@ -68,7 +68,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dss: {
-    label: "DSS - Dynime Software & AI", sublabel: "Dynime engineering for AI-augmented software & custom software",
+    label: "DSS - Software & AI", sublabel: "Dynime engineering for custom software & AI",
     color: "from-cyan-500/15 to-sky-500/15", icon: Cpu,
     items: [
       { label: "AI Software Development", desc: "AI-first scalable apps", to: "/ai-software-development", icon: Brain },
@@ -80,7 +80,7 @@ export const serviceTabs: Record<ServiceTabKey, ServiceTab> = {
     ],
   },
   dcs: {
-    label: "DCS - Dynime Consultancy Services", sublabel: "Dynime consultancy for US & UK corporate formation, banking & compliance",
+    label: "DCS - Consultancy Services", sublabel: "Dynime consultancy for company formation",
     color: "from-emerald-500/15 to-teal-500/15", icon: Briefcase,
     items: [
       { label: "US Company Formation", desc: "LLC, C-Corp, EIN & compliance", to: "/us-company", icon: Building2 },
