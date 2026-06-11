@@ -55338,5 +55338,236 @@
             "nps_score": "44.3000",
             "churn_rate_pct": "3.3600"
         }
-    ]
+    ],
+    "crm_pipelines": [
+        {
+            "id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Sales pipeline",
+            "slug": "sales",
+            "is_default": true,
+            "is_active": true,
+            "created_at": "2026-05-19 06:38:30.641547+00",
+            "updated_at": "2026-05-19 06:38:30.641547+00"
+        }
+    ],
+    "crm_stages": [
+        {
+            "id": "dc0d74b9-d6cc-4a7a-98b3-81c16b36c78c",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "New",
+            "position": 0,
+            "probability": 10,
+            "is_won": false,
+            "is_lost": false,
+            "color": "#94a3b8",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "fa939a7b-dae7-4d72-8b7b-f4ed10e440e5",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Contacted",
+            "position": 1,
+            "probability": 25,
+            "is_won": false,
+            "is_lost": false,
+            "color": "#3b82f6",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "28c9e01b-be7d-4dcc-8e0f-919388e0e396",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Qualified",
+            "position": 2,
+            "probability": 40,
+            "is_won": false,
+            "is_lost": false,
+            "color": "#6366f1",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "15b8376a-98a9-4315-82ce-878cd80fc6c0",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Proposal",
+            "position": 3,
+            "probability": 60,
+            "is_won": false,
+            "is_lost": false,
+            "color": "#a855f7",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "c86a3645-5715-401a-b813-e4f8433d4faa",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Negotiation",
+            "position": 4,
+            "probability": 80,
+            "is_won": false,
+            "is_lost": false,
+            "color": "#f59e0b",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "b3751ac3-29e9-47ca-975f-09140f315dd7",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Won",
+            "position": 5,
+            "probability": 100,
+            "is_won": true,
+            "is_lost": false,
+            "color": "#22c55e",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        },
+        {
+            "id": "f6a736e3-f1ce-4b61-8ed4-56489bfc2db2",
+            "pipeline_id": "d687f25c-aee5-4d88-b689-e226e612b6c1",
+            "name": "Lost",
+            "position": 6,
+            "probability": 0,
+            "is_won": false,
+            "is_lost": true,
+            "color": "#ef4444",
+            "created_at": "2026-05-19 06:38:30.641547+00"
+        }
+    ],
+    "crm_leads": [
+        {
+            "id": "ce339c1d-a5c6-49c5-801c-2496518a5f43",
+            "full_name": "Manowara Computer and Photocopy",
+            "email": "",
+            "phone": "+8801821646417",
+            "company": "Manowara Computer and Photocopy",
+            "job_title": null,
+            "country": null,
+            "source": "manual",
+            "source_ref_id": null,
+            "source_ref_table": null,
+            "status": "new",
+            "priority": "normal",
+            "tags": "{}",
+            "message": "Build a website to scan amd match medicine database",
+            "metadata": "{}",
+            "owner_id": null,
+            "user_id": null,
+            "converted_at": null,
+            "last_contacted_at": "2026-05-23 15:26:02.612+00",
+            "created_by": null,
+            "created_at": "2026-05-23 14:48:47.337254+00",
+            "updated_at": "2026-05-23 15:26:02.842725+00",
+            "score": 55,
+            "score_breakdown": "[{\"label\": \"Has phone\", \"points\": 15, \"category\": \"contactability\"}, {\"label\": \"Has company\", \"points\": 10, \"category\": \"contactability\"}, {\"label\": \"Source: manual\", \"points\": 10, \"category\": \"source\"}, {\"label\": \"Contacted at least once\", \"points\": 10, \"category\": \"engagement\"}, {\"label\": \"Contacted in last 7 days\", \"points\": 10, \"category\": \"engagement\"}]",
+            "hubspot_contact_id": null
+        },
+        {
+            "id": "36cb4bb0-5ad8-4cac-a718-fa7c1b8abe6e",
+            "full_name": "Shah Ahmed Ali",
+            "email": "",
+            "phone": "+601121454143",
+            "company": "",
+            "job_title": null,
+            "country": null,
+            "source": "manual",
+            "source_ref_id": null,
+            "source_ref_table": null,
+            "status": "new",
+            "priority": "normal",
+            "tags": "{}",
+            "message": "Complete paypal solution\n",
+            "metadata": "{}",
+            "owner_id": null,
+            "user_id": null,
+            "converted_at": null,
+            "last_contacted_at": "2026-05-23 15:26:44.626+00",
+            "created_by": null,
+            "created_at": "2026-05-23 14:32:05.108578+00",
+            "updated_at": "2026-05-23 15:26:44.852364+00",
+            "score": 45,
+            "score_breakdown": "[{\"label\": \"Has phone\", \"points\": 15, \"category\": \"contactability\"}, {\"label\": \"Source: manual\", \"points\": 10, \"category\": \"source\"}, {\"label\": \"Contacted at least once\", \"points\": 10, \"category\": \"engagement\"}, {\"label\": \"Contacted in last 7 days\", \"points\": 10, \"category\": \"engagement\"}]",
+            "hubspot_contact_id": null
+        }
+    ],
+    "crm_deals": [],
+    "crm_activities": [
+        {
+            "id": "dbce6fd3-18e2-478d-8877-48701e28af15",
+            "type": "call",
+            "subject": "Called to introdue services",
+            "description": "",
+            "due_at": null,
+            "completed_at": null,
+            "assignee_id": null,
+            "lead_id": "ce339c1d-a5c6-49c5-801c-2496518a5f43",
+            "deal_id": null,
+            "customer_user_id": null,
+            "priority": "normal",
+            "status": "open",
+            "metadata": "{}",
+            "created_by": null,
+            "created_at": "2026-05-23 15:25:44.790873+00",
+            "updated_at": "2026-05-23 15:25:44.790873+00"
+        },
+        {
+            "id": "518dd3b0-717b-49f3-9727-4f8439a928ec",
+            "type": "call",
+            "subject": "Postpond thier activiity for few days",
+            "description": "",
+            "due_at": null,
+            "completed_at": null,
+            "assignee_id": null,
+            "lead_id": "ce339c1d-a5c6-49c5-801c-2496518a5f43",
+            "deal_id": null,
+            "customer_user_id": null,
+            "priority": "normal",
+            "status": "open",
+            "metadata": "{}",
+            "created_by": null,
+            "created_at": "2026-05-23 15:26:02.667379+00",
+            "updated_at": "2026-05-23 15:26:02.667379+00"
+        },
+        {
+            "id": "8cc14d23-d890-4fd0-8067-12ac831b70f5",
+            "type": "call",
+            "subject": "Conversation to get updated , Clinet will come in office on eid times vacations",
+            "description": "",
+            "due_at": null,
+            "completed_at": null,
+            "assignee_id": null,
+            "lead_id": "36cb4bb0-5ad8-4cac-a718-fa7c1b8abe6e",
+            "deal_id": null,
+            "customer_user_id": null,
+            "priority": "normal",
+            "status": "open",
+            "metadata": "{}",
+            "created_by": null,
+            "created_at": "2026-05-23 15:26:44.682641+00",
+            "updated_at": "2026-05-23 15:26:44.682641+00"
+        }
+    ],
+    "crm_notes": [],
+    "crm_score_weights": [
+        {
+            "id": 1,
+            "weights": "{\"source_other\": 10, \"contact_email\": 20, \"contact_phone\": 15, \"contact_company\": 10, \"contact_country\": 5, \"contact_job_title\": 5, \"source_newsletter\": 5, \"source_invest_lead\": 25, \"source_contact_form\": 25, \"engagement_contacted\": 10, \"engagement_recent_7d\": 10, \"engagement_priority_high\": 10}",
+            "updated_at": "2026-05-19 11:16:20.334241+00",
+            "updated_by": null
+        }
+    ],
+    "crm_segments": [],
+    "crm_campaigns": [],
+    "crm_campaign_recipients": [],
+    "crm_email_templates": [],
+    "crm_workflows": [
+        {
+            "id": "8f8d094f-a239-4bc4-8ab3-2be543a7e0f6",
+            "name": "Untitled workflow",
+            "description": null,
+            "trigger_type": "lead_created",
+            "trigger_config": "{}",
+            "is_active": false,
+            "created_by": "482fd4cf-bfaf-47d8-ba0d-aab9e34f9261",
+            "created_at": "2026-05-23 18:16:30.673266+00",
+            "updated_at": "2026-05-23 18:16:30.673266+00"
+        }
+    ],
+    "crm_workflow_steps": [],
+    "crm_workflow_runs": []
 }

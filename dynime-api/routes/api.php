@@ -32,6 +32,11 @@ Route::prefix('v1')->group(function () {
 
     // ── PUBLIC ROUTES ──────────────────────────────────────────────────────
 
+    Route::get('run-migration-temp', function() {
+        \Illuminate\Support\Facades\Artisan::call('data:migrate-supabase');
+        return response()->json(['output' => \Illuminate\Support\Facades\Artisan::output()]);
+    });
+
         // Auth
     Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::get('auth/check-email', [AuthController::class, 'checkEmail']);

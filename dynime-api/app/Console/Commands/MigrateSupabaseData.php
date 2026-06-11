@@ -79,6 +79,22 @@ class MigrateSupabaseData extends Command
         $this->migrateGenericTable('dynime_employees', $data['dynime_employees'] ?? [], 'employee_id');
         $this->migrateGenericTable('dynime_kpi_monthly', $data['dynime_kpi_monthly'] ?? [], 'period');
 
+        // 9. Migrate CRM tables
+        $this->migrateGenericTable('crm_pipelines', $data['crm_pipelines'] ?? []);
+        $this->migrateGenericTable('crm_stages', $data['crm_stages'] ?? []);
+        $this->migrateGenericTable('crm_leads', $data['crm_leads'] ?? []);
+        $this->migrateGenericTable('crm_deals', $data['crm_deals'] ?? []);
+        $this->migrateGenericTable('crm_activities', $data['crm_activities'] ?? []);
+        $this->migrateGenericTable('crm_notes', $data['crm_notes'] ?? []);
+        $this->migrateGenericTable('crm_score_weights', $data['crm_score_weights'] ?? []);
+        $this->migrateGenericTable('crm_segments', $data['crm_segments'] ?? []);
+        $this->migrateGenericTable('crm_campaigns', $data['crm_campaigns'] ?? []);
+        $this->migrateGenericTable('crm_campaign_recipients', $data['crm_campaign_recipients'] ?? []);
+        $this->migrateGenericTable('crm_email_templates', $data['crm_email_templates'] ?? []);
+        $this->migrateGenericTable('crm_workflows', $data['crm_workflows'] ?? []);
+        $this->migrateGenericTable('crm_workflow_steps', $data['crm_workflow_steps'] ?? []);
+        $this->migrateGenericTable('crm_workflow_runs', $data['crm_workflow_runs'] ?? []);
+
         $this->info("All migrations completed!");
         return Command::SUCCESS;
     }
@@ -118,7 +134,21 @@ class MigrateSupabaseData extends Command
             'payroll_salary_history' => 'public.payroll_salary_history',
             'payroll_audit_logs' => 'public.payroll_audit_logs',
             'dynime_employees' => 'public.dynime_employees',
-            'dynime_kpi_monthly' => 'public.dynime_kpi_monthly'
+            'dynime_kpi_monthly' => 'public.dynime_kpi_monthly',
+            'crm_pipelines' => 'public.crm_pipelines',
+            'crm_stages' => 'public.crm_stages',
+            'crm_leads' => 'public.crm_leads',
+            'crm_deals' => 'public.crm_deals',
+            'crm_activities' => 'public.crm_activities',
+            'crm_notes' => 'public.crm_notes',
+            'crm_score_weights' => 'public.crm_score_weights',
+            'crm_segments' => 'public.crm_segments',
+            'crm_campaigns' => 'public.crm_campaigns',
+            'crm_campaign_recipients' => 'public.crm_campaign_recipients',
+            'crm_email_templates' => 'public.crm_email_templates',
+            'crm_workflows' => 'public.crm_workflows',
+            'crm_workflow_steps' => 'public.crm_workflow_steps',
+            'crm_workflow_runs' => 'public.crm_workflow_runs'
         ];
 
         $exportData = [];
