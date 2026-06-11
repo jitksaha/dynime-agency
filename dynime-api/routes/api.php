@@ -32,27 +32,7 @@ Route::prefix('v1')->group(function () {
 
     // ── PUBLIC ROUTES ──────────────────────────────────────────────────────
 
-    Route::get('run-migration-temp', function() {
-        $result = [];
-        if (request()->has('run')) {
-            try {
-                $exitCode = \Illuminate\Support\Facades\Artisan::call('data:migrate-supabase');
-                $result['migration_exit_code'] = $exitCode;
-                $result['migration_output'] = \Illuminate\Support\Facades\Artisan::output();
-            } catch (\Exception $e) {
-                $result['migration_error'] = $e->getMessage();
-            }
-        }
 
-        foreach (['crm_leads', 'crm_pipelines', 'crm_stages', 'crm_activities'] as $table) {
-            try {
-                $result[$table] = \Illuminate\Support\Facades\DB::table($table)->count();
-            } catch (\Exception $e) {
-                $result[$table] = 'Error: ' . $e->getMessage();
-            }
-        }
-        return response()->json($result);
-    });
 
         // Auth
     Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
