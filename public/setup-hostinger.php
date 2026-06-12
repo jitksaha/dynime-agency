@@ -134,6 +134,13 @@ $envPath = $apiDir . '/.env';
                 $envContent = "APP_NAME=\"Dynime API\"\nAPP_ENV=production\nAPP_KEY=$appKey\nAPP_DEBUG=false\nAPP_URL=https://dynime.com/api\nFRONTEND_URL=https://dynime.com\n\nDB_CONNECTION=mysql\nDB_HOST=\"$db_host\"\nDB_PORT=\"$db_port\"\nDB_DATABASE=\"$db_database\"\nDB_USERNAME=\"$db_username\"\nDB_PASSWORD=\"$db_password\"\n\nCACHE_STORE=file\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\nSESSION_SECURE_COOKIE=true\nQUEUE_CONNECTION=database\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.hostinger.com\nMAIL_PORT=587\nMAIL_USERNAME=contact@dynime.com\nMAIL_PASSWORD=\nMAIL_ENCRYPTION=tls\nMAIL_FROM_ADDRESS=contact@dynime.com\nMAIL_FROM_NAME=\"Dynime\"\n\nFILESYSTEM_DISK=public\n";
             }
             
+            if (strpos($envContent, 'ADMIN_EMAIL=') === false) {
+                $envContent .= "\nADMIN_EMAIL=\"mail.dynime@gmail.com\"\nADMIN_PASSWORD=\"Dynime123!\"\n";
+            } else {
+                $envContent = preg_replace('/ADMIN_EMAIL=.*/', 'ADMIN_EMAIL="mail.dynime@gmail.com"', $envContent);
+                $envContent = preg_replace('/ADMIN_PASSWORD=.*/', 'ADMIN_PASSWORD="Dynime123!"', $envContent);
+            }
+            
             if (file_put_contents($envPath, $envContent) !== false) {
                 echo "<p class='success'>Success: .env file created/updated successfully!</p>";
             } else {
