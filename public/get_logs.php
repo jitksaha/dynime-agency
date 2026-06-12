@@ -7,6 +7,10 @@ $homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/domains/dynime
 $logFile = $homeDir . '/dynime-api/storage/logs/laravel.log';
 
 header('Content-Type: text/plain; charset=utf-8');
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 if (file_exists($logFile)) {
     echo "=== Laravel Logs (Last 50 lines) ===\n";
     $lines = file($logFile);
