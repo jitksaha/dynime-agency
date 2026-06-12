@@ -1,0 +1,4476 @@
+{
+  "servicePricings": [
+    {
+      "service_slug": "web-design-development",
+      "service_title": "Web Design & Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "wp-starter",
+          "name": "Starter",
+          "description": "Simple, professional 5-page WordPress site for new brands",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "Up to 5 pages (Home, About, Services, Blog, Contact)",
+            "Mobile-responsive theme customization",
+            "Contact form + Google Maps",
+            "Basic on-page SEO setup",
+            "SSL & speed basics",
+            "1 round of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "wp-basic",
+          "name": "Basic",
+          "description": "Growing business site with stronger design & lead capture",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 10 pages with custom layouts",
+            "Premium plugins (Elementor Pro / Yoast)",
+            "WhatsApp + newsletter integration",
+            "Schema markup + sitemap",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "wp-professional",
+          "name": "Professional",
+          "description": "Full custom WordPress build optimised for conversions",
+          "price_usd": 1199,
+          "price_bdt": 119900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 20 pages, fully custom design",
+            "Custom theme + reusable blocks",
+            "Speed-tuned (PageSpeed 90+)",
+            "Advanced SEO + analytics setup",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "wp-premium",
+          "name": "Premium",
+          "description": "High-end WordPress with multilingual & ongoing care",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Multilingual (WPML) up to 3 languages",
+            "Membership / LMS setup if needed",
+            "CRM & marketing automation hookup",
+            "90-day post-launch care",
+            "Priority chat support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "wp-custom-quote",
+          "name": "Custom Quote",
+          "description": "Marketplace, multisite, headless WP or custom integrations",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Headless / multisite architecture",
+            "Custom plugin development",
+            "Dedicated project manager",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "wordpress-woocommerce",
+      "service_title": "WordPress & WooCommerce",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "wc-starter",
+          "name": "Starter",
+          "description": "Launch-ready WooCommerce store (up to 25 products)",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "one-time",
+          "features": [
+            "WooCommerce setup on WordPress",
+            "Up to 25 products imported",
+            "1 payment gateway (Stripe/PayPal)",
+            "Shipping zones & tax basics",
+            "Mobile-responsive theme"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "wc-basic",
+          "name": "Basic",
+          "description": "Custom WooCommerce store with branding & SEO",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 100 products",
+            "Custom theme styling",
+            "Coupons, upsells, abandoned cart",
+            "On-page SEO + schema",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "wc-professional",
+          "name": "Professional",
+          "description": "Full-featured store with conversion optimisation",
+          "price_usd": 1899,
+          "price_bdt": 189900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 500 products",
+            "Multi-currency + multi-payment",
+            "Wishlist, reviews, loyalty plugin",
+            "Speed-tuned checkout",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "wc-premium",
+          "name": "Premium",
+          "description": "Premium store with subscriptions & integrations",
+          "price_usd": 2799,
+          "price_bdt": 279900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Subscriptions / memberships",
+            "ERP/CRM/accounting integration",
+            "Multilingual (up to 3 langs)",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "wc-custom-quote",
+          "name": "Custom Quote",
+          "description": "Marketplace, B2B, or 5,000+ SKU stores",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Marketplace / multi-vendor (Dokan)",
+            "B2B pricing & wholesale",
+            "Custom plugin development",
+            "Dedicated account manager"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "react-mern-apps",
+      "service_title": "React / MERN Apps",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "cwa-starter",
+          "name": "Starter",
+          "description": "MVP web app with auth + 1 core feature",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Single-page React app",
+            "User auth (email + Google)",
+            "1 core feature module",
+            "Basic admin dashboard",
+            "Cloud deploy (Vercel/Netlify)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "cwa-basic",
+          "name": "Basic",
+          "description": "Production-ready SaaS MVP with database & roles",
+          "price_usd": 1999,
+          "price_bdt": 199900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 5 modules / CRUD entities",
+            "Role-based access (admin/user)",
+            "Stripe / payment integration",
+            "Email notifications",
+            "30-day post-launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "cwa-professional",
+          "name": "Professional",
+          "description": "Best value — scalable SaaS with API & integrations",
+          "price_usd": 2999,
+          "price_bdt": 299900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "REST/GraphQL API",
+            "3rd-party integrations (Slack, Zapier, etc.)",
+            "Real-time features (chat/notifications)",
+            "Automated tests + CI/CD",
+            "30-day support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "cwa-premium",
+          "name": "Premium",
+          "description": "Enterprise web app with advanced architecture",
+          "price_usd": 4999,
+          "price_bdt": 499900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Multi-tenant architecture",
+            "Advanced analytics dashboard",
+            "SSO (Google / Microsoft)",
+            "Load testing & monitoring",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "cwa-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-region SaaS, fintech, or regulated industries",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-region deploy & DR plan",
+            "SOC 2 / HIPAA-friendly architecture",
+            "Dedicated engineering team",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "ui-ux-design",
+      "service_title": "UI/UX Design",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "ux-starter",
+          "name": "Starter",
+          "description": "Wireframes & mockups for a small site or MVP (up to 5 screens)",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "Up to 5 screens (desktop + mobile)",
+            "Low-fidelity wireframes",
+            "1 high-fidelity mockup style direction",
+            "Figma source files",
+            "1 round of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "ux-basic",
+          "name": "Basic",
+          "description": "Full UX flow + UI design for a small product or website",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 12 screens",
+            "User flows & site map",
+            "Hi-fi UI design (light/dark)",
+            "Basic design tokens",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "ux-professional",
+          "name": "Professional",
+          "description": "Best value — full product UX/UI with design system",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Up to 25 screens",
+            "Reusable design system + components",
+            "Interactive Figma prototype",
+            "Usability testing (1 round)",
+            "3 rounds of revisions"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "ux-premium",
+          "name": "Premium",
+          "description": "Enterprise-grade design system + multi-product UX",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Up to 50 screens or 2 products",
+            "Full design system + documentation",
+            "Accessibility (WCAG AA) review",
+            "Motion / micro-interaction specs",
+            "Dev handover sessions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "ux-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-platform, design-ops, or ongoing design partnership",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-platform (web + iOS + Android)",
+            "Embedded design partner (monthly)",
+            "Research & user testing program",
+            "Dedicated design lead"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "maintenance-security",
+      "service_title": "Maintenance & Security",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "wm-starter",
+          "name": "Starter",
+          "description": "Essential monthly care for small WordPress sites",
+          "price_usd": 49,
+          "price_bdt": 4900,
+          "period": "/month",
+          "features": [
+            "Weekly core + plugin updates",
+            "Daily off-site backups",
+            "Uptime monitoring (24/7)",
+            "Monthly health report",
+            "Email support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "wm-basic",
+          "name": "Basic",
+          "description": "Stronger care + security hardening for business sites",
+          "price_usd": 99,
+          "price_bdt": 9900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "Malware scanning & removal",
+            "Firewall (WAF) configuration",
+            "Broken link & SEO checks",
+            "Up to 1 hr/mo content edits"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "wm-professional",
+          "name": "Professional",
+          "description": "Best value — full care + performance tuning",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "Monthly speed optimisation",
+            "Database cleanup & caching",
+            "Up to 3 hrs/mo content/dev work",
+            "Priority chat support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "wm-premium",
+          "name": "Premium",
+          "description": "Premium care for high-traffic stores & multisite",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "WooCommerce-specific monitoring",
+            "Staging + change-management workflow",
+            "Up to 8 hrs/mo dev work",
+            "Dedicated account manager"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "wm-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multisite, agency white-label, or 24×7 SLA",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "Multisite / agency white-label",
+            "24×7 emergency response SLA",
+            "Custom dev hours block",
+            "Quarterly strategy review"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "website-redesign",
+      "service_title": "Website Redesign",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "rd-starter",
+          "name": "Starter",
+          "description": "Refresh visuals on your existing 5–7 page website",
+          "price_usd": 349,
+          "price_bdt": 34900,
+          "period": "one-time",
+          "features": [
+            "Visual refresh of up to 7 pages",
+            "New typography & color system",
+            "Mobile responsiveness fixes",
+            "Basic speed cleanup",
+            "1 round of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "rd-basic",
+          "name": "Basic",
+          "description": "Modernised redesign with improved UX & SEO",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 12 pages redesigned",
+            "UX audit + new wireframes",
+            "On-page SEO migration (no ranking loss)",
+            "301 redirect map",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "rd-professional",
+          "name": "Professional",
+          "description": "Full conversion-focused redesign for growing businesses",
+          "price_usd": 1399,
+          "price_bdt": 139900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 20 pages + new sections",
+            "Conversion-optimised CTAs & forms",
+            "PageSpeed 90+ tuning",
+            "Analytics + heatmap setup",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "rd-premium",
+          "name": "Premium",
+          "description": "Premium rebrand-ready redesign with ongoing care",
+          "price_usd": 2599,
+          "price_bdt": 259900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Brand refresh assets included",
+            "Multilingual setup (up to 3 langs)",
+            "A/B testing setup",
+            "90-day care & monitoring"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "rd-custom-quote",
+          "name": "Custom Quote",
+          "description": "Replatform, headless rebuild, or 50+ page sites",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Replatform (e.g. Wix → WP, WP → Headless)",
+            "Custom integrations",
+            "Dedicated project lead",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "shopify",
+      "service_title": "Shopify Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "sh-starter",
+          "name": "Starter",
+          "description": "Shopify store setup with a free theme (≤25 products)",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Shopify store setup",
+            "Free theme customisation",
+            "Up to 25 products imported",
+            "Payment + shipping setup",
+            "Basic SEO (titles, meta, sitemap)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "sh-basic",
+          "name": "Basic",
+          "description": "Premium-themed store with branding & apps",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Premium theme customised to brand",
+            "Up to 100 products",
+            "Essential apps (reviews, upsell, email)",
+            "Conversion-friendly product pages",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "sh-professional",
+          "name": "Professional",
+          "description": "Custom Shopify store with advanced conversion features",
+          "price_usd": 1799,
+          "price_bdt": 179900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Custom Liquid theme tweaks",
+            "Up to 500 products + collections",
+            "Bundles, upsells, abandoned cart flows",
+            "Speed & Core Web Vitals tuning",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "sh-premium",
+          "name": "Premium",
+          "description": "Premium Shopify with subscriptions & integrations",
+          "price_usd": 2699,
+          "price_bdt": 269900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Subscriptions (Recharge / Bold)",
+            "ERP/3PL/accounting integration",
+            "Multi-currency + multi-language",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "sh-custom-quote",
+          "name": "Custom Quote",
+          "description": "Shopify Plus, headless, or 5,000+ SKU stores",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Shopify Plus / Hydrogen headless",
+            "Custom apps & integrations",
+            "Dedicated account manager",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "saas-development",
+      "service_title": "SaaS Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "cwa-starter",
+          "name": "Starter",
+          "description": "MVP web app with auth + 1 core feature",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Single-page React app",
+            "User auth (email + Google)",
+            "1 core feature module",
+            "Basic admin dashboard",
+            "Cloud deploy (Vercel/Netlify)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "cwa-basic",
+          "name": "Basic",
+          "description": "Production-ready SaaS MVP with database & roles",
+          "price_usd": 1999,
+          "price_bdt": 199900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 5 modules / CRUD entities",
+            "Role-based access (admin/user)",
+            "Stripe / payment integration",
+            "Email notifications",
+            "30-day post-launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "cwa-professional",
+          "name": "Professional",
+          "description": "Best value — scalable SaaS with API & integrations",
+          "price_usd": 2999,
+          "price_bdt": 299900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "REST/GraphQL API",
+            "3rd-party integrations (Slack, Zapier, etc.)",
+            "Real-time features (chat/notifications)",
+            "Automated tests + CI/CD",
+            "30-day support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "cwa-premium",
+          "name": "Premium",
+          "description": "Enterprise web app with advanced architecture",
+          "price_usd": 4999,
+          "price_bdt": 499900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Multi-tenant architecture",
+            "Advanced analytics dashboard",
+            "SSO (Google / Microsoft)",
+            "Load testing & monitoring",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "cwa-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-region SaaS, fintech, or regulated industries",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-region deploy & DR plan",
+            "SOC 2 / HIPAA-friendly architecture",
+            "Dedicated engineering team",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "webflow-development",
+      "service_title": "Webflow Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "ux-starter",
+          "name": "Starter",
+          "description": "Wireframes & mockups for a small site or MVP (up to 5 screens)",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "Up to 5 screens (desktop + mobile)",
+            "Low-fidelity wireframes",
+            "1 high-fidelity mockup style direction",
+            "Figma source files",
+            "1 round of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "ux-basic",
+          "name": "Basic",
+          "description": "Full UX flow + UI design for a small product or website",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 12 screens",
+            "User flows & site map",
+            "Hi-fi UI design (light/dark)",
+            "Basic design tokens",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "ux-professional",
+          "name": "Professional",
+          "description": "Best value — full product UX/UI with design system",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Up to 25 screens",
+            "Reusable design system + components",
+            "Interactive Figma prototype",
+            "Usability testing (1 round)",
+            "3 rounds of revisions"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "ux-premium",
+          "name": "Premium",
+          "description": "Enterprise-grade design system + multi-product UX",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Up to 50 screens or 2 products",
+            "Full design system + documentation",
+            "Accessibility (WCAG AA) review",
+            "Motion / micro-interaction specs",
+            "Dev handover sessions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "ux-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-platform, design-ops, or ongoing design partnership",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-platform (web + iOS + Android)",
+            "Embedded design partner (monthly)",
+            "Research & user testing program",
+            "Dedicated design lead"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "speed-optimization",
+      "service_title": "Page Speed Optimization",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "sp-starter",
+          "name": "Starter",
+          "description": "Quick PageSpeed wins for small sites (≤10 pages)",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "PageSpeed Insights audit",
+            "Image compression (WebP)",
+            "Caching plugin setup",
+            "CSS/JS minification",
+            "Before/after report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "sp-basic",
+          "name": "Basic",
+          "description": "Deeper optimisation for business sites (≤25 pages)",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Lazy-loading & deferred JS",
+            "Database cleanup",
+            "Hosting/CDN recommendations",
+            "Mobile Core Web Vitals tuning"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "sp-professional",
+          "name": "Professional",
+          "description": "Full Core Web Vitals overhaul targeting 90+ scores",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Render-blocking resource fixes",
+            "Cloudflare/CDN setup",
+            "Server response (TTFB) tuning",
+            "Target: 90+ on PageSpeed mobile & desktop",
+            "30-day re-test guarantee"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "sp-premium",
+          "name": "Premium",
+          "description": "Premium tuning for large/eCommerce sites",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "WooCommerce/Shopify-specific tuning",
+            "Custom caching architecture",
+            "Server-level optimisation",
+            "60-day monitoring"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "sp-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-domain, headless, or 100+ page enterprise sites",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Edge caching & global CDN strategy",
+            "Custom infra recommendations",
+            "Quarterly performance audits"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "shopify-ecommerce",
+      "service_title": "Shopify Ecommerce",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "se-starter",
+          "name": "Starter",
+          "description": "Custom storefront design & store build with standard features",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "one-time",
+          "features": [
+            "Complete Shopify store build & setup",
+            "Premium conversion theme customized to your brand",
+            "Up to 50 products imported & collections mapped",
+            "Standard integrations (reviews, upsells, cart triggers)",
+            "Payment gateways (Stripe/PayPal) & shipping setup",
+            "Basic training and launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "se-basic",
+          "name": "Basic",
+          "description": "Advanced store build with theme custom code & migration",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 150 products",
+            "Custom Shopify theme tweaks (Liquid adjustments)",
+            "SEO-friendly platform migration (retains search ranks)",
+            "Advanced apps setup (abandoned carts, custom discounts)",
+            "2 rounds of theme revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "se-professional",
+          "name": "Professional",
+          "description": "Custom storefront + private app development",
+          "price_usd": 1899,
+          "price_bdt": 189900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 500 products",
+            "Custom Private Shopify App development for custom business logic",
+            "Full multi-currency & language localization setup",
+            "Advanced page speed tuning (PageSpeed score 90+)",
+            "30 days post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "se-premium",
+          "name": "Premium",
+          "description": "Enterprise store with ERP, POS, and recurring checkouts",
+          "price_usd": 2999,
+          "price_bdt": 299900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "ERP, inventory, or physical POS systems sync integration",
+            "Recurring subscriptions setup (Recharge / Bold)",
+            "A/B testing tools setup for product pages",
+            "90 days post-launch developer care",
+            "Priority support SLA"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "se-custom-quote",
+          "name": "Custom Quote",
+          "description": "Headless Shopify, multi-store layouts, or customized setups",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Headless Shopify architecture (Hydrogen / Next.js)",
+            "Multi-store international setup",
+            "Custom app backend API hosting setup",
+            "Dedicated e-commerce strategist",
+            "24/7 emergency support contract"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "wordpress-ecommerce",
+      "service_title": "WordPress Ecommerce",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "wpe-starter",
+          "name": "Starter",
+          "description": "Simple e-commerce setup on WordPress",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "WooCommerce, EDD, or Surecart installation & configuration",
+            "Up to 25 products with basic variants",
+            "Standard payment gateways (Stripe & PayPal) configured",
+            "Mobile-responsive storefront layout",
+            "Basic sitemap & SEO setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "wpe-basic",
+          "name": "Basic",
+          "description": "Bespoke storefront templates with advanced filters",
+          "price_usd": 799,
+          "price_bdt": 79900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 100 products",
+            "Custom theme templates coded to match your identity",
+            "Advanced product search, filters, and comparisons",
+            "Abandoned cart recoveries & coupon setups",
+            "2 rounds of reviews"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "wpe-professional",
+          "name": "Professional",
+          "description": "Headless checkout or custom license generators",
+          "price_usd": 1499,
+          "price_bdt": 149900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 300 products",
+            "Surecart customized checkouts OR EDD license key generator",
+            "Custom customer user portals with download locks",
+            "Speed tuning & database indexing (sub-3s load)",
+            "30 days post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "wpe-premium",
+          "name": "Premium",
+          "description": "Enterprise WP store with third-party CRM sync",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "API connection to Zoho CRM, ERP, or accounting systems",
+            "Multilingual translation integration (WPML / Polylang)",
+            "Malware shield & security hardening",
+            "90 days post-launch care and backups"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "wpe-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-vendor marketplaces, wholesale, or custom plugins",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-vendor marketplace (Dokan / WCFM)",
+            "B2B wholesale dynamic pricing modules",
+            "Custom WooCommerce plugin development",
+            "Dedicated project developer"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "nodejs-mern-ecommerce",
+      "service_title": "Nodejs / MERN Ecommerce",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "nme-starter",
+          "name": "Starter",
+          "description": "Headless MERN storefront with core e-commerce API",
+          "price_usd": 1199,
+          "price_bdt": 119900,
+          "period": "one-time",
+          "features": [
+            "Headless React storefront with Next.js",
+            "Node.js & NestJS backend API services",
+            "Core product catalog database schema (MongoDB/Postgres)",
+            "Standard customer auth (JWT + email/Google)",
+            "Basic admin panel for products"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "nme-basic",
+          "name": "Basic",
+          "description": "Production-ready headless MERN store with full checkouts",
+          "price_usd": 2299,
+          "price_bdt": 229900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Full Stripe custom checkout integration with webhooks",
+            "Advanced product variants, categories, and inventory models",
+            "Email triggers and background invoice generators",
+            "Elasticsearch / Algolia instant product search",
+            "30 days support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "nme-professional",
+          "name": "Professional",
+          "description": "Best value — High-scaling headless store with CI/CD",
+          "price_usd": 3499,
+          "price_bdt": 349900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Next.js Incremental Static Regeneration (ISR) (sub-1s loads)",
+            "Custom discount engine & voucher structures",
+            "Automated tests (Unit + Integration) & CI/CD pipeline",
+            "Admin portal dashboard with reports and charts",
+            "30 days support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "nme-premium",
+          "name": "Premium",
+          "description": "Omnichannel / Multi-tenant store architecture",
+          "price_usd": 5499,
+          "price_bdt": 549900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Omnichannel API (serve web, iOS, Android from same backend)",
+            "Multi-tenant database isolation or vendor backend",
+            "Docker containerization & serverless scaling setups",
+            "90 days post-launch support and logs tracking"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "nme-custom-quote",
+          "name": "Custom Quote",
+          "description": "Enterprise multi-region e-commerce networks",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-region deployment and local caches",
+            "Tailored admin dashboard with Elasticsearch logs analytics",
+            "Custom ERP/SAP sync connections",
+            "Dedicated senior backend developer"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "laravel-ecommerce",
+      "service_title": "Laravel Ecommerce",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "le-starter",
+          "name": "Starter",
+          "description": "Bespoke Laravel store with Blade frontend & Filament admin",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "one-time",
+          "features": [
+            "Laravel e-commerce backend built with clean models",
+            "Filament admin panel setup (catalog, orders, customers)",
+            "Stripe or PayPal checkout integration",
+            "Standard relational database layout (MySQL)",
+            "Basic cache tuning"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "le-basic",
+          "name": "Basic",
+          "description": "Laravel Livewire/Alpine storefront with background queues",
+          "price_usd": 1799,
+          "price_bdt": 179900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Dynamic Livewire/Alpine.js reactive storefront",
+            "Laravel background queues for emails, syncs, and logs",
+            "Custom discount coupons & dynamic pricing rules",
+            "Advanced shipping fees calculator API integration",
+            "30 days support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "le-professional",
+          "name": "Professional",
+          "description": "High-security custom Laravel store with advanced modules",
+          "price_usd": 2799,
+          "price_bdt": 279900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Bespoke security hardening & SQL protection tests",
+            "Filament dashboard customized with charts and analytics",
+            "API connection for CRM or inventory updates",
+            "Full SEO dynamic schema generators",
+            "30 days support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "le-premium",
+          "name": "Premium",
+          "description": "Laravel headless store with separate frontend",
+          "price_usd": 4499,
+          "price_bdt": 449900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Laravel API backend with separate Next.js or React frontend",
+            "Multi-warehouse inventory management configurations",
+            "Load testing & performance tuning (caching grids)",
+            "90 days post-launch developer care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "le-custom-quote",
+          "name": "Custom Quote",
+          "description": "Custom e-commerce platforms or ERP systems",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Full ERP / legacy database integration mapping",
+            "Bespoke multi-currency & tax calculators",
+            "Dedicated project lead developer",
+            "SLA-backed support contracts"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "social-media",
+      "service_title": "Social Media",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "sm-starter",
+          "name": "Starter",
+          "description": "Starter social presence on 1 platform",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "/month",
+          "features": [
+            "1 platform (FB or IG)",
+            "8 posts / month",
+            "Basic graphic design (Canva)",
+            "Caption + hashtag research",
+            "Monthly report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "sm-basic",
+          "name": "Basic",
+          "description": "Active brand presence on 2 platforms",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "2 platforms (FB + IG)",
+            "16 posts + 4 reels / month",
+            "Stories & community engagement",
+            "Competitor monitoring"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "sm-professional",
+          "name": "Professional",
+          "description": "Best value — full content engine + paid boost",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "3 platforms (add LinkedIn or TikTok)",
+            "24 posts + 8 reels + 1 mini-campaign",
+            "$100 ad boost included",
+            "Monthly strategy call"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "sm-premium",
+          "name": "Premium",
+          "description": "Premium social with influencer & UGC support",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "4 platforms",
+            "Influencer outreach (up to 3/mo)",
+            "UGC sourcing & licensing",
+            "Bi-weekly strategy calls",
+            "Dedicated account manager"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "sm-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-brand, multi-region or 24×7 community ops",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "Multi-brand / multi-region rollout",
+            "24×7 community management",
+            "Custom content studio team"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "facebook-ads",
+      "service_title": "Meta Ads",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "fb-starter",
+          "name": "Starter",
+          "description": "Starter Meta Ads management (≤$1k ad spend)",
+          "price_usd": 249,
+          "price_bdt": 24900,
+          "period": "/month",
+          "features": [
+            "Up to $1k/mo ad spend managed",
+            "1 campaign objective",
+            "3 ad creatives / month",
+            "Pixel + Conversions API setup",
+            "Monthly report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "fb-basic",
+          "name": "Basic",
+          "description": "Growth-stage ads (≤$5k ad spend)",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "Up to $5k/mo ad spend",
+            "2 campaign types (traffic + conversions)",
+            "8 ad creatives / month",
+            "Audience research & lookalikes"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "fb-professional",
+          "name": "Professional",
+          "description": "Best value — full-funnel Meta Ads (≤$15k spend)",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "Up to $15k/mo ad spend",
+            "Full funnel (TOF/MOF/BOF)",
+            "16 creatives + A/B testing",
+            "Bi-weekly optimisation calls"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "fb-premium",
+          "name": "Premium",
+          "description": "Premium Meta Ads with creative production",
+          "price_usd": 1499,
+          "price_bdt": 149900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "Up to $30k/mo ad spend",
+            "Creative production (UGC + statics)",
+            "Advanced retargeting & DPA",
+            "Dedicated media buyer"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "fb-custom-quote",
+          "name": "Custom Quote",
+          "description": "$50k+ monthly spend or multi-region campaigns",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "$50k+ ad spend managed",
+            "Multi-region / multi-language ads",
+            "Senior strategist + buyer team",
+            "Custom reporting dashboard"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "google-ads",
+      "service_title": "Google Ads",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "ga-starter",
+          "name": "Starter",
+          "description": "Starter Google Ads (≤$1k ad spend)",
+          "price_usd": 249,
+          "price_bdt": 24900,
+          "period": "/month",
+          "features": [
+            "Up to $1k/mo ad spend managed",
+            "1 campaign type (Search)",
+            "Keyword research (up to 50)",
+            "Conversion tracking setup",
+            "Monthly report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "ga-basic",
+          "name": "Basic",
+          "description": "Growth Google Ads (≤$5k ad spend)",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "Up to $5k/mo ad spend",
+            "Search + Performance Max",
+            "Negative keyword management",
+            "Landing page recommendations"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "ga-professional",
+          "name": "Professional",
+          "description": "Best value — full-funnel Google Ads (≤$15k spend)",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "Up to $15k/mo ad spend",
+            "Search + PMax + Display + YouTube",
+            "A/B testing on ads & landers",
+            "Bi-weekly optimisation calls"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "ga-premium",
+          "name": "Premium",
+          "description": "Premium Google Ads with creative & CRO support",
+          "price_usd": 1499,
+          "price_bdt": 149900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "Up to $30k/mo ad spend",
+            "YouTube creative scripting",
+            "Landing page CRO recommendations",
+            "Dedicated PPC strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "ga-custom-quote",
+          "name": "Custom Quote",
+          "description": "$50k+ spend or multi-account / multi-region",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "$50k+ ad spend managed",
+            "Multi-account MCC management",
+            "Senior PPC team",
+            "Custom dashboard & SLA"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "seo",
+      "service_title": "SEO",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "seo-starter",
+          "name": "Starter",
+          "description": "Local / small-site SEO (≤10 pages)",
+          "price_usd": 249,
+          "price_bdt": 24900,
+          "period": "/month",
+          "features": [
+            "Technical audit",
+            "On-page SEO for up to 10 pages",
+            "10 target keywords",
+            "Google Business Profile setup",
+            "Monthly ranking report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "seo-basic",
+          "name": "Basic",
+          "description": "Growing-business SEO (≤25 pages)",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "Up to 25 keywords",
+            "2 SEO blog posts / month",
+            "Backlink outreach (5 / month)",
+            "Competitor gap analysis"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "seo-professional",
+          "name": "Professional",
+          "description": "Best value — full-stack SEO for serious growth",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "Up to 50 keywords",
+            "4 SEO blog posts / month",
+            "10 quality backlinks / month",
+            "Schema + Core Web Vitals tuning",
+            "Bi-weekly strategy calls"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "seo-premium",
+          "name": "Premium",
+          "description": "Premium SEO for competitive niches",
+          "price_usd": 1799,
+          "price_bdt": 179900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "Up to 100 keywords",
+            "8 long-form articles / month",
+            "Digital PR & link building",
+            "International / multi-region SEO",
+            "Dedicated SEO strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "seo-custom-quote",
+          "name": "Custom Quote",
+          "description": "Enterprise SEO, eCommerce 1k+ SKU, or YMYL niches",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "Enterprise / eCommerce SEO",
+            "Programmatic SEO setup",
+            "Senior SEO + content team",
+            "Custom reporting dashboard"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "brand-strategy",
+      "service_title": "Brand Strategy",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "br-starter",
+          "name": "Starter",
+          "description": "Starter brand kit (logo + basic guidelines)",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Logo design (3 concepts)",
+            "Color palette + typography",
+            "1-page brand guideline PDF",
+            "Social profile assets",
+            "2 rounds of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "br-basic",
+          "name": "Basic",
+          "description": "Brand identity for new businesses",
+          "price_usd": 799,
+          "price_bdt": 79900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Logo system (primary + variations)",
+            "Brand guideline (10–15 pages)",
+            "Stationery design (card + letterhead)",
+            "Social media templates (5)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "br-professional",
+          "name": "Professional",
+          "description": "Best value — full brand strategy + identity",
+          "price_usd": 1499,
+          "price_bdt": 149900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Brand strategy workshop",
+            "Brand voice & messaging framework",
+            "Full brand book (25+ pages)",
+            "Pitch deck template",
+            "3 rounds of revisions"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "br-premium",
+          "name": "Premium",
+          "description": "Premium rebrand + launch toolkit",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Competitive & market research",
+            "Naming / tagline (if needed)",
+            "Launch campaign assets",
+            "Internal brand training session"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "br-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-brand portfolios, sub-brands, or rebrand rollouts",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Sub-brand architecture",
+            "Multi-region rollout assets",
+            "Dedicated brand strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "content-marketing",
+      "service_title": "Content Marketing",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "cm-starter",
+          "name": "Starter",
+          "description": "Starter blog content (4 posts/month)",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "/month",
+          "features": [
+            "4 SEO blog posts / month (~800 words)",
+            "Keyword research",
+            "Basic on-page SEO",
+            "1 royalty-free image / post",
+            "WordPress publishing"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "cm-basic",
+          "name": "Basic",
+          "description": "Active content engine (8 posts/month)",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "8 posts / month (~1,200 words)",
+            "Editorial calendar",
+            "Internal linking strategy",
+            "Custom blog graphics"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "cm-professional",
+          "name": "Professional",
+          "description": "Best value — content + distribution",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "12 long-form posts / month (~1,500 words)",
+            "Email newsletter (2/month)",
+            "Social repurposing (LinkedIn + IG)",
+            "Monthly content strategy call"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "cm-premium",
+          "name": "Premium",
+          "description": "Premium content with thought-leadership",
+          "price_usd": 1799,
+          "price_bdt": 179900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "20 posts/mo + 4 pillar pages",
+            "Ghostwriting for execs",
+            "Lead magnets / ebooks (1/quarter)",
+            "Dedicated content manager"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "cm-custom-quote",
+          "name": "Custom Quote",
+          "description": "Enterprise content ops or multi-language programs",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "Multi-language content (3+ langs)",
+            "Editorial team (writers + editor)",
+            "Custom analytics dashboard"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "email-marketing",
+      "service_title": "Email Marketing",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "em-starter",
+          "name": "Starter",
+          "description": "Starter email program (≤2k subscribers)",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "/month",
+          "features": [
+            "ESP setup (Mailchimp / Brevo)",
+            "2 campaigns / month",
+            "1 simple automation (welcome)",
+            "Template design",
+            "Monthly report"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "em-basic",
+          "name": "Basic",
+          "description": "Growth email program (≤10k subscribers)",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "/month",
+          "features": [
+            "Everything in Starter",
+            "4 campaigns / month",
+            "3 automations (welcome / abandon / winback)",
+            "List segmentation",
+            "A/B subject line testing"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "em-professional",
+          "name": "Professional",
+          "description": "Best value — full lifecycle email & SMS",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "8 campaigns / month",
+            "5+ automation flows",
+            "SMS marketing add-on",
+            "Deliverability monitoring"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "em-premium",
+          "name": "Premium",
+          "description": "Premium email/CRM with advanced segmentation",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "Klaviyo / HubSpot advanced setup",
+            "Predictive segmentation",
+            "Lead scoring + sales handoff",
+            "Dedicated lifecycle strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "em-custom-quote",
+          "name": "Custom Quote",
+          "description": "Enterprise CRM / 100k+ list / multi-brand",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/month",
+          "features": [
+            "Everything in Premium",
+            "100k+ list management",
+            "Multi-brand / multi-region",
+            "Custom integrations & data warehouse"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "analytics",
+      "service_title": "Analytics & CRO",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "an-starter",
+          "name": "Starter",
+          "description": "GA4 + tag setup for a single site",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "GA4 + GTM setup",
+            "Up to 5 events tracked",
+            "Goals / conversions setup",
+            "Looker Studio starter dashboard",
+            "1 training session (1 hr)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "an-basic",
+          "name": "Basic",
+          "description": "Full analytics stack with eCommerce tracking",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Enhanced eCommerce tracking",
+            "Server-side GTM (basic)",
+            "Heatmaps (Hotjar/Clarity) setup",
+            "Cross-domain tracking"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "an-professional",
+          "name": "Professional",
+          "description": "Best value — analytics + CRO program",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Conversion audit on key pages",
+            "2 A/B tests setup & analysis",
+            "Funnel & cohort dashboards",
+            "Monthly insights report (3 months)"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "an-premium",
+          "name": "Premium",
+          "description": "Premium CRO with ongoing experimentation",
+          "price_usd": 1899,
+          "price_bdt": 189900,
+          "period": "one-time + 90-day program",
+          "features": [
+            "Everything in Professional",
+            "4 A/B tests / month",
+            "Personalisation setup",
+            "Server-side tracking (full)",
+            "Dedicated CRO strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "an-custom-quote",
+          "name": "Custom Quote",
+          "description": "Enterprise data warehouse / BI integration",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Data warehouse (BigQuery / Snowflake)",
+            "Custom BI dashboards",
+            "Multi-source data pipelines",
+            "Dedicated analytics engineer"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "ai-software-development",
+      "service_title": "AI Software Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "ai-starter",
+          "name": "Starter",
+          "description": "AI prototype with OpenAI / Claude / Gemini API",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Single AI feature prototype",
+            "LLM API integration (OpenAI/Anthropic)",
+            "Basic prompt engineering",
+            "Simple web UI",
+            "Cloud deploy"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "ai-basic",
+          "name": "Basic",
+          "description": "AI MVP with RAG + chat interface",
+          "price_usd": 1999,
+          "price_bdt": 199900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "RAG (vector DB) over your data",
+            "Chat UI with history",
+            "Auth + usage limits",
+            "Streaming responses",
+            "30-day post-launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "ai-professional",
+          "name": "Professional",
+          "description": "Best value — production AI app with multi-model & tools",
+          "price_usd": 2999,
+          "price_bdt": 299900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Multi-model orchestration",
+            "Function calling / tool use",
+            "Admin dashboard + analytics",
+            "Eval & safety guardrails",
+            "Stripe billing integration"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "ai-premium",
+          "name": "Premium",
+          "description": "Enterprise AI app with custom fine-tuning",
+          "price_usd": 4999,
+          "price_bdt": 499900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Fine-tuning / LoRA training",
+            "Self-hosted / private model option",
+            "SSO + role-based access",
+            "Observability (LangSmith/Helicone)",
+            "90-day care & monitoring"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "ai-custom-quote",
+          "name": "Custom Quote",
+          "description": "Custom LLMs, agents, or regulated AI deployments",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Custom model training pipeline",
+            "Multi-agent systems",
+            "On-prem / VPC deployment",
+            "Dedicated AI engineering team"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "custom-software-development",
+      "service_title": "Custom Software Development",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "cs-starter",
+          "name": "Starter",
+          "description": "Small internal tool or admin app",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time",
+          "features": [
+            "Single-purpose internal tool",
+            "Auth + 1 core module",
+            "Cloud deploy",
+            "Basic documentation"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "cs-basic",
+          "name": "Basic",
+          "description": "Multi-module business app (5 modules)",
+          "price_usd": 1999,
+          "price_bdt": 199900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 5 modules / CRUD entities",
+            "Role-based access",
+            "Reporting / export to CSV/PDF",
+            "30-day post-launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "cs-professional",
+          "name": "Professional",
+          "description": "Best value — full SaaS / ERP-style app with API",
+          "price_usd": 2999,
+          "price_bdt": 299900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "REST/GraphQL API",
+            "Integrations (3rd-party / accounting)",
+            "Automated tests + CI/CD",
+            "Audit logs",
+            "30-day support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "cs-premium",
+          "name": "Premium",
+          "description": "Enterprise app with advanced architecture",
+          "price_usd": 4999,
+          "price_bdt": 499900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Multi-tenant architecture",
+            "SSO (Google/Microsoft)",
+            "Performance & load testing",
+            "Disaster recovery plan",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "cs-custom-quote",
+          "name": "Custom Quote",
+          "description": "Mission-critical / regulated industries (finance, health)",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "SOC 2 / HIPAA-friendly architecture",
+            "Multi-region deploy & DR",
+            "Dedicated engineering team",
+            "SLA-backed support"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "software-built-with-ai",
+      "service_title": "Software Built With AI",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "swai-starter",
+          "name": "Starter",
+          "description": "AI-augmented MVP shipped fast (1 week)",
+          "price_usd": 799,
+          "price_bdt": 79900,
+          "period": "one-time",
+          "features": [
+            "1-week MVP build using AI tools",
+            "Single core feature",
+            "Auth + cloud deploy",
+            "Source code handover"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "swai-basic",
+          "name": "Basic",
+          "description": "Production-ready app built with AI assistance",
+          "price_usd": 1599,
+          "price_bdt": 159900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 4 modules",
+            "Database + admin panel",
+            "Stripe / payment ready",
+            "Automated tests",
+            "30-day post-launch support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "swai-professional",
+          "name": "Professional",
+          "description": "Best value — fast SaaS build with full QA",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Up to 8 modules",
+            "API + 3rd-party integrations",
+            "Manual QA + automated tests",
+            "CI/CD pipeline",
+            "30-day support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "swai-premium",
+          "name": "Premium",
+          "description": "Premium AI-augmented build with care",
+          "price_usd": 3999,
+          "price_bdt": 399900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Performance tuning",
+            "SSO + role-based access",
+            "Observability & error tracking",
+            "90-day post-launch care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "swai-custom-quote",
+          "name": "Custom Quote",
+          "description": "Long-term AI-augmented engineering partnership",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Embedded engineering pod",
+            "Continuous delivery program",
+            "Dedicated tech lead"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "software-testing-qa",
+      "service_title": "Software Testing & QA",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "qa-starter",
+          "name": "Starter",
+          "description": "Manual QA pass on a small app or website",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "Up to 20 hours manual QA",
+            "Cross-browser testing",
+            "Mobile responsiveness check",
+            "Bug report (Notion/Jira)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "qa-basic",
+          "name": "Basic",
+          "description": "Manual + smoke automation",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "Up to 50 hours QA",
+            "Smoke automation (Playwright/Cypress)",
+            "Regression checklist",
+            "Test plan documentation"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "qa-professional",
+          "name": "Professional",
+          "description": "Best value — full QA program with automation",
+          "price_usd": 1199,
+          "price_bdt": 119900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "End-to-end automation suite",
+            "API testing (Postman/Newman)",
+            "CI/CD integration",
+            "Performance baseline tests",
+            "30-day support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "qa-premium",
+          "name": "Premium",
+          "description": "Premium QA with security & load testing",
+          "price_usd": 2299,
+          "price_bdt": 229900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Security testing (OWASP top 10)",
+            "Load testing (k6 / JMeter)",
+            "Accessibility (WCAG AA) audit",
+            "Dedicated QA lead"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "qa-custom-quote",
+          "name": "Custom Quote",
+          "description": "Embedded QA team / regulated compliance testing",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Embedded QA pod",
+            "SOC 2 / HIPAA compliance testing",
+            "24×5 QA on-call"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "pay-open-source",
+      "service_title": "Dynime Pay (Self-Hosted)",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "pg-starter",
+          "name": "Starter",
+          "description": "1 payment gateway integration on existing site",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "Stripe OR PayPal OR local gateway",
+            "Test + live mode setup",
+            "Basic webhook configuration",
+            "Receipt email setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "pg-basic",
+          "name": "Basic",
+          "description": "Multi-gateway setup with reconciliation",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "2 gateways (e.g. Stripe + local)",
+            "Refund & dispute workflow",
+            "Order reconciliation dashboard",
+            "Tax/invoice email automation"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "pg-professional",
+          "name": "Professional",
+          "description": "Best value — full payments stack with subscriptions",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Subscriptions / recurring billing",
+            "Customer portal (manage cards/plans)",
+            "Failed-payment retry logic",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "pg-premium",
+          "name": "Premium",
+          "description": "Premium payments with fraud & multi-currency",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Multi-currency settlement",
+            "Fraud rules (Radar / Sift)",
+            "PCI-aware checkout audit",
+            "Dedicated integration engineer"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "pg-custom-quote",
+          "name": "Custom Quote",
+          "description": "Marketplace splits, custom acquirers, or PSP integrations",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Marketplace split payments (Connect)",
+            "Direct acquirer / PSP integrations",
+            "Custom risk & compliance workflows"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "us-company",
+      "service_title": "US Company Formation",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "us-starter",
+          "name": "Starter",
+          "description": "Starter LLC formation in WY/DE — state fees extra",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "LLC formation in WY, DE, NV, FL or CA",
+            "EIN application (online filing)",
+            "Operating Agreement template",
+            "BOI report guidance",
+            "Email support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "us-basic",
+          "name": "Basic",
+          "description": "Business-ready LLC with registered agent + address",
+          "price_usd": 349,
+          "price_bdt": 34900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "1-year Registered Agent included",
+            "US business address (1 year)",
+            "Bank-account-ready document pack",
+            "Priority filing (24–48h)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "us-professional",
+          "name": "Professional",
+          "description": "Best value — full LLC + EIN + banking + compliance",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "Mercury / Wise bank intro",
+            "Stripe / PayPal account setup help",
+            "BOI report filing included",
+            "ITIN guidance call (30 min)",
+            "30-day post-formation support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "us-premium",
+          "name": "Premium",
+          "description": "Premium C-Corp / multi-member LLC for startups & funding",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Delaware C-Corp or multi-member LLC",
+            "Founder stock issuance + 83(b) prep",
+            "Cap-table starter (Carta-friendly)",
+            "Annual compliance calendar",
+            "90-day post-formation care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "us-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-state, holding company, or investor-ready structures",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-state or holding co. structuring",
+            "Custom legal documents",
+            "Dedicated formation lead",
+            "Tax & legal partner introductions"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "uk-company",
+      "service_title": "UK Company Formation",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "uk-starter",
+          "name": "Starter",
+          "description": "Basic UK Ltd formation with Companies House filing",
+          "price_usd": 99,
+          "price_bdt": 9900,
+          "period": "one-time",
+          "features": [
+            "Ltd company incorporation",
+            "Companies House filing fee included",
+            "Digital certificate of incorporation",
+            "Memorandum & Articles of Association",
+            "Share certificate template"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "uk-basic",
+          "name": "Basic",
+          "description": "Non-resident friendly Ltd with UK address",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "UK registered office (1 year)",
+            "Director service address (1 year)",
+            "VAT registration guidance",
+            "Bank intro (Wise / Revolut Business)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "uk-professional",
+          "name": "Professional",
+          "description": "Best value — Ltd + address + VAT + first-year filings",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time + 30-day support",
+          "features": [
+            "Everything in Basic",
+            "VAT registration filed for you",
+            "Confirmation Statement (1 filing)",
+            "Bookkeeping starter setup",
+            "Stripe / PayPal UK setup help",
+            "30-day post-formation support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "uk-premium",
+          "name": "Premium",
+          "description": "Premium — Ltd + accountant package + annual care",
+          "price_usd": 799,
+          "price_bdt": 79900,
+          "period": "one-time + 90-day care",
+          "features": [
+            "Everything in Professional",
+            "Annual accounts prep (small co.)",
+            "Corporation tax return (CT600)",
+            "PAYE registration",
+            "Quarterly compliance reminders",
+            "90-day post-formation care"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "uk-custom-quote",
+          "name": "Custom Quote",
+          "description": "Group structures, PLC, or regulated entities (FCA, etc.)",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Group / holding co. structure",
+            "PLC or regulated entity setup",
+            "Dedicated formation lead",
+            "Legal & tax partner introductions"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "virtual-address",
+      "service_title": "US & UK Business Address",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "va-starter",
+          "name": "Starter",
+          "description": "Basic UK or US registered address with mail handling",
+          "price_usd": 79,
+          "price_bdt": 7900,
+          "period": "/year",
+          "features": [
+            "Real UK or US street address",
+            "Statutory & official mail handling",
+            "Mail scanning (up to 25/yr)",
+            "Director / home address privacy",
+            "Online dashboard"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "va-basic",
+          "name": "Basic",
+          "description": "Pro address with worldwide forwarding",
+          "price_usd": 149,
+          "price_bdt": 14900,
+          "period": "/year",
+          "features": [
+            "Everything in Starter",
+            "Unlimited mail scanning",
+            "Worldwide mail forwarding",
+            "Dedicated suite number",
+            "Faster mail processing (24h)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "va-professional",
+          "name": "Professional",
+          "description": "Best value — Pro address + bank-friendly extras",
+          "price_usd": 249,
+          "price_bdt": 24900,
+          "period": "/year",
+          "features": [
+            "Everything in Basic",
+            "UK: director service address / US: priority mail handling",
+            "Phone number + voicemail-to-email",
+            "Bank account introduction assistance",
+            "Priority support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "va-premium",
+          "name": "Premium",
+          "description": "Premium presence in both UK & US",
+          "price_usd": 449,
+          "price_bdt": 44900,
+          "period": "/year",
+          "features": [
+            "Everything in Professional",
+            "Address in BOTH UK and US",
+            "Compliance mail handling",
+            "Annual filings reminder service",
+            "Dedicated account manager"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "va-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-state, multi-country, or compliance-heavy needs",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "/year",
+          "features": [
+            "Everything in Premium",
+            "Multi-state US presence",
+            "EU / Singapore / UAE addresses",
+            "Custom mail-handling SLAs"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "itin-services",
+      "service_title": "ITIN Application Services",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "itin-starter",
+          "name": "Starter",
+          "description": "DIY-assisted ITIN application review",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "W-7 form review",
+            "Document checklist",
+            "Email guidance",
+            "1 revision"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "itin-basic",
+          "name": "Basic",
+          "description": "Standard ITIN application with CAA verification",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "CAA-certified document verification",
+            "Complete W-7 preparation",
+            "Submission within 5–7 business days",
+            "No passport mailing required"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "itin-professional",
+          "name": "Professional",
+          "description": "Best value — Priority ITIN with money-back guarantee",
+          "price_usd": 549,
+          "price_bdt": 54900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Fast-track prep (2–3 business days)",
+            "100% money-back guarantee",
+            "Priority IRS handling",
+            "FedEx tracking included",
+            "Step-by-step status updates"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "itin-premium",
+          "name": "Premium",
+          "description": "ITIN + tax filing combo",
+          "price_usd": 899,
+          "price_bdt": 89900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "First-year US tax return prep (1040-NR)",
+            "EIN application included",
+            "Tax planning consultation (1 hr)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "itin-custom-quote",
+          "name": "Custom Quote",
+          "description": "Family ITINs, dependents, or complex cases",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Family / dependent ITINs",
+            "Renewal & rejection recovery",
+            "Dedicated CAA agent"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "dropshipping-solution",
+      "service_title": "Dropshipping Solution",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "ds-starter",
+          "name": "Starter",
+          "description": "Starter dropshipping store (Shopify or WooCommerce)",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Store setup (Shopify or Woo)",
+            "Niche & product research (10 winners)",
+            "Supplier connection (AliExpress/CJ)",
+            "Basic theme customisation",
+            "Payment + shipping setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "ds-basic",
+          "name": "Basic",
+          "description": "Branded dropshipping with marketing setup",
+          "price_usd": 799,
+          "price_bdt": 79900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "30 winning products imported",
+            "Logo + brand kit",
+            "Email automation (welcome + abandon)",
+            "Pixel + GA4 setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "ds-professional",
+          "name": "Professional",
+          "description": "Best value — full dropship launch + ad creatives",
+          "price_usd": 1499,
+          "price_bdt": 149900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "60 products + premium suppliers",
+            "5 video ad creatives",
+            "First Meta Ads campaign setup",
+            "30-day launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "ds-premium",
+          "name": "Premium",
+          "description": "Premium dropship + 90-day growth program",
+          "price_usd": 2499,
+          "price_bdt": 249900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Private agent / branded packaging sourcing",
+            "10 ad creatives / month (3 months)",
+            "Influencer outreach",
+            "Dedicated launch manager"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "ds-custom-quote",
+          "name": "Custom Quote",
+          "description": "Multi-store, multi-region, or 7-figure scaling",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Multi-store / multi-region setup",
+            "Private supplier negotiations",
+            "Dedicated growth team"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "marketplace-solution",
+      "service_title": "Marketplace Selling Solution",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "mk-starter",
+          "name": "Starter",
+          "description": "Single-marketplace setup (Amazon / eBay / Daraz)",
+          "price_usd": 299,
+          "price_bdt": 29900,
+          "period": "one-time",
+          "features": [
+            "Account setup on 1 marketplace",
+            "Up to 25 listings created",
+            "Category & keyword research",
+            "Basic A+ / image optimisation",
+            "1 round of revisions"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "mk-basic",
+          "name": "Basic",
+          "description": "Optimised listings + multi-marketplace presence",
+          "price_usd": 599,
+          "price_bdt": 59900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "2 marketplaces",
+            "Up to 75 optimised listings",
+            "A+ content / EBC for top SKUs",
+            "PPC campaign setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "mk-professional",
+          "name": "Professional",
+          "description": "Best value — full marketplace growth program",
+          "price_usd": 1099,
+          "price_bdt": 109900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "3 marketplaces",
+            "Up to 200 listings",
+            "PPC management ($1k spend included)",
+            "Inventory & FBA guidance",
+            "Monthly review call"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "mk-premium",
+          "name": "Premium",
+          "description": "Premium marketplace with brand registry & ads",
+          "price_usd": 2199,
+          "price_bdt": 219900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Brand registry assistance",
+            "PPC management ($5k spend)",
+            "Review & reputation management",
+            "Dedicated marketplace strategist"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "mk-custom-quote",
+          "name": "Custom Quote",
+          "description": "Global marketplaces, FBA logistics, or 1k+ SKUs",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Global expansion (US/EU/UK/JP)",
+            "FBA logistics consulting",
+            "Custom analytics dashboard"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "payment-gateway",
+      "service_title": "Payment Gateway Setup",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "pg-starter",
+          "name": "Starter",
+          "description": "1 payment gateway integration on existing site",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "Stripe OR PayPal OR local gateway",
+            "Test + live mode setup",
+            "Basic webhook configuration",
+            "Receipt email setup"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "pg-basic",
+          "name": "Basic",
+          "description": "Multi-gateway setup with reconciliation",
+          "price_usd": 399,
+          "price_bdt": 39900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "2 gateways (e.g. Stripe + local)",
+            "Refund & dispute workflow",
+            "Order reconciliation dashboard",
+            "Tax/invoice email automation"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "pg-professional",
+          "name": "Professional",
+          "description": "Best value — full payments stack with subscriptions",
+          "price_usd": 699,
+          "price_bdt": 69900,
+          "period": "one-time",
+          "features": [
+            "Everything in Basic",
+            "Subscriptions / recurring billing",
+            "Customer portal (manage cards/plans)",
+            "Failed-payment retry logic",
+            "30-day post-launch support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "pg-premium",
+          "name": "Premium",
+          "description": "Premium payments with fraud & multi-currency",
+          "price_usd": 1299,
+          "price_bdt": 129900,
+          "period": "one-time",
+          "features": [
+            "Everything in Professional",
+            "Multi-currency settlement",
+            "Fraud rules (Radar / Sift)",
+            "PCI-aware checkout audit",
+            "Dedicated integration engineer"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "pg-custom-quote",
+          "name": "Custom Quote",
+          "description": "Marketplace splits, custom acquirers, or PSP integrations",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Marketplace split payments (Connect)",
+            "Direct acquirer / PSP integrations",
+            "Custom risk & compliance workflows"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    },
+    {
+      "service_slug": "consulting",
+      "service_title": "Business Consulting",
+      "is_enabled": true,
+      "tiers": [
+        {
+          "id": "co-starter",
+          "name": "Starter",
+          "description": "1-hour business strategy session",
+          "price_usd": 199,
+          "price_bdt": 19900,
+          "period": "one-time",
+          "features": [
+            "60-minute consultation",
+            "Pre-call questionnaire",
+            "Written summary & action items",
+            "Email follow-up (7 days)"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Start Small"
+        },
+        {
+          "id": "co-basic",
+          "name": "Basic",
+          "description": "Strategy sprint (3 sessions)",
+          "price_usd": 499,
+          "price_bdt": 49900,
+          "period": "one-time",
+          "features": [
+            "Everything in Starter",
+            "3 × 60-minute sessions",
+            "Market & competitor snapshot",
+            "30-day action roadmap",
+            "Slack/email support"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Choose Basic"
+        },
+        {
+          "id": "co-professional",
+          "name": "Professional",
+          "description": "Best value — fractional advisor (monthly retainer)",
+          "price_usd": 999,
+          "price_bdt": 99900,
+          "period": "/month",
+          "features": [
+            "Everything in Basic",
+            "Weekly strategy calls",
+            "KPI dashboard setup",
+            "Hiring & vendor advice",
+            "Priority Slack/email support"
+          ],
+          "highlighted": true,
+          "cta_type": "fixed",
+          "cta_label": "Most Popular"
+        },
+        {
+          "id": "co-premium",
+          "name": "Premium",
+          "description": "Premium fractional COO / growth advisor",
+          "price_usd": 1999,
+          "price_bdt": 199900,
+          "period": "/month",
+          "features": [
+            "Everything in Professional",
+            "2× weekly strategy calls",
+            "OKR & process design",
+            "Investor-readiness prep",
+            "Dedicated senior advisor"
+          ],
+          "highlighted": false,
+          "cta_type": "fixed",
+          "cta_label": "Go Premium"
+        },
+        {
+          "id": "co-custom-quote",
+          "name": "Custom Quote",
+          "description": "Long-term advisory, board seats, or M&A support",
+          "price_usd": null,
+          "price_bdt": null,
+          "period": "",
+          "features": [
+            "Everything in Premium",
+            "Board / advisory seat",
+            "Fundraising / M&A support",
+            "Senior partner team"
+          ],
+          "highlighted": false,
+          "cta_type": "quote",
+          "cta_label": "Get Custom Quote"
+        }
+      ],
+      "quote_settings": {
+        "enable_modal": true,
+        "quote_message": "Tell us about your project and we'll send a tailored quote within 24 hours.",
+        "enable_contact": true,
+        "enable_whatsapp": false,
+        "whatsapp_number": ""
+      }
+    }
+  ],
+  "statePricings": [
+    {
+      "state": "Alabama",
+      "abbr": "AL",
+      "llc_formation": 236,
+      "corp_formation": 200,
+      "llc_annual": 125,
+      "llc_annual_label": "$50–$200",
+      "corp_annual": 150,
+      "corp_annual_label": "$150+",
+      "llc_renewal": 125,
+      "corp_renewal": 150,
+      "franchise_tax": "Yes (Revenue)",
+      "notes": "Business Privilege Tax",
+      "sort_order": 0,
+      "is_active": true
+    },
+    {
+      "state": "Alaska",
+      "abbr": "AK",
+      "llc_formation": 250,
+      "corp_formation": 250,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 100,
+      "corp_annual_label": "$100",
+      "llc_renewal": 50,
+      "corp_renewal": 100,
+      "franchise_tax": "No",
+      "notes": "Biennial reporting",
+      "sort_order": 1,
+      "is_active": true
+    },
+    {
+      "state": "Arizona",
+      "abbr": "AZ",
+      "llc_formation": 85,
+      "corp_formation": 60,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 45,
+      "corp_annual_label": "$45",
+      "llc_renewal": 0,
+      "corp_renewal": 45,
+      "franchise_tax": "No",
+      "notes": "No LLC annual fee",
+      "sort_order": 2,
+      "is_active": true
+    },
+    {
+      "state": "Arkansas",
+      "abbr": "AR",
+      "llc_formation": 45,
+      "corp_formation": 45,
+      "llc_annual": 150,
+      "llc_annual_label": "$150",
+      "corp_annual": 150,
+      "corp_annual_label": "$150",
+      "llc_renewal": 150,
+      "corp_renewal": 150,
+      "franchise_tax": "Yes",
+      "notes": "Flat franchise tax",
+      "sort_order": 3,
+      "is_active": true
+    },
+    {
+      "state": "California",
+      "abbr": "CA",
+      "llc_formation": 70,
+      "corp_formation": 100,
+      "llc_annual": 800,
+      "llc_annual_label": "$800 min",
+      "corp_annual": 800,
+      "corp_annual_label": "$800 min",
+      "llc_renewal": 800,
+      "corp_renewal": 800,
+      "franchise_tax": "Yes (Min $800)",
+      "notes": "Highest fixed cost",
+      "sort_order": 4,
+      "is_active": true
+    },
+    {
+      "state": "Colorado",
+      "abbr": "CO",
+      "llc_formation": 50,
+      "corp_formation": 50,
+      "llc_annual": 10,
+      "llc_annual_label": "$10",
+      "corp_annual": 10,
+      "corp_annual_label": "$10",
+      "llc_renewal": 10,
+      "corp_renewal": 10,
+      "franchise_tax": "No",
+      "notes": "Very low fees",
+      "sort_order": 5,
+      "is_active": true
+    },
+    {
+      "state": "Connecticut",
+      "abbr": "CT",
+      "llc_formation": 120,
+      "corp_formation": 250,
+      "llc_annual": 80,
+      "llc_annual_label": "$80",
+      "corp_annual": 150,
+      "corp_annual_label": "$150",
+      "llc_renewal": 80,
+      "corp_renewal": 150,
+      "franchise_tax": "No",
+      "notes": "Annual filing required",
+      "sort_order": 6,
+      "is_active": true
+    },
+    {
+      "state": "Delaware",
+      "abbr": "DE",
+      "llc_formation": 110,
+      "corp_formation": 89,
+      "llc_annual": 300,
+      "llc_annual_label": "$300",
+      "corp_annual": 225,
+      "corp_annual_label": "$225+",
+      "llc_renewal": 300,
+      "corp_renewal": 225,
+      "franchise_tax": "Yes (Corp)",
+      "notes": "Investor-friendly",
+      "sort_order": 7,
+      "is_active": true
+    },
+    {
+      "state": "Florida",
+      "abbr": "FL",
+      "llc_formation": 125,
+      "corp_formation": 70,
+      "llc_annual": 138.75,
+      "llc_annual_label": "$138.75",
+      "corp_annual": 150,
+      "corp_annual_label": "$150",
+      "llc_renewal": 138.75,
+      "corp_renewal": 150,
+      "franchise_tax": "No",
+      "notes": "No personal income tax",
+      "sort_order": 8,
+      "is_active": true
+    },
+    {
+      "state": "Georgia",
+      "abbr": "GA",
+      "llc_formation": 105,
+      "corp_formation": 100,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 50,
+      "corp_annual_label": "$50",
+      "llc_renewal": 50,
+      "corp_renewal": 50,
+      "franchise_tax": "No",
+      "notes": "Easy compliance",
+      "sort_order": 9,
+      "is_active": true
+    },
+    {
+      "state": "Hawaii",
+      "abbr": "HI",
+      "llc_formation": 51,
+      "corp_formation": 50,
+      "llc_annual": 15,
+      "llc_annual_label": "$15",
+      "corp_annual": 15,
+      "corp_annual_label": "$15",
+      "llc_renewal": 15,
+      "corp_renewal": 15,
+      "franchise_tax": "No",
+      "notes": "Very low cost",
+      "sort_order": 10,
+      "is_active": true
+    },
+    {
+      "state": "Idaho",
+      "abbr": "ID",
+      "llc_formation": 103,
+      "corp_formation": 100,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 10,
+      "corp_annual_label": "$0–$20",
+      "llc_renewal": 0,
+      "corp_renewal": 10,
+      "franchise_tax": "No",
+      "notes": "Minimal fees",
+      "sort_order": 11,
+      "is_active": true
+    },
+    {
+      "state": "Illinois",
+      "abbr": "IL",
+      "llc_formation": 153,
+      "corp_formation": 150,
+      "llc_annual": 75,
+      "llc_annual_label": "$75",
+      "corp_annual": 75,
+      "corp_annual_label": "$75+",
+      "llc_renewal": 75,
+      "corp_renewal": 75,
+      "franchise_tax": "Yes (Corp)",
+      "notes": "Corp franchise tax",
+      "sort_order": 12,
+      "is_active": true
+    },
+    {
+      "state": "Indiana",
+      "abbr": "IN",
+      "llc_formation": 97,
+      "corp_formation": 100,
+      "llc_annual": 25,
+      "llc_annual_label": "$25",
+      "corp_annual": 50,
+      "corp_annual_label": "$50",
+      "llc_renewal": 25,
+      "corp_renewal": 50,
+      "franchise_tax": "No",
+      "notes": "Biennial LLC",
+      "sort_order": 13,
+      "is_active": true
+    },
+    {
+      "state": "Iowa",
+      "abbr": "IA",
+      "llc_formation": 50,
+      "corp_formation": 50,
+      "llc_annual": 15,
+      "llc_annual_label": "$15",
+      "corp_annual": 60,
+      "corp_annual_label": "$60",
+      "llc_renewal": 15,
+      "corp_renewal": 60,
+      "franchise_tax": "No",
+      "notes": "Low cost",
+      "sort_order": 14,
+      "is_active": true
+    },
+    {
+      "state": "Kansas",
+      "abbr": "KS",
+      "llc_formation": 85,
+      "corp_formation": 90,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 50,
+      "corp_annual_label": "$50",
+      "llc_renewal": 50,
+      "corp_renewal": 50,
+      "franchise_tax": "No",
+      "notes": "Stable system",
+      "sort_order": 15,
+      "is_active": true
+    },
+    {
+      "state": "Kentucky",
+      "abbr": "KY",
+      "llc_formation": 40,
+      "corp_formation": 40,
+      "llc_annual": 15,
+      "llc_annual_label": "$15",
+      "corp_annual": 15,
+      "corp_annual_label": "$15",
+      "llc_renewal": 15,
+      "corp_renewal": 15,
+      "franchise_tax": "No",
+      "notes": "Very low fees",
+      "sort_order": 16,
+      "is_active": true
+    },
+    {
+      "state": "Louisiana",
+      "abbr": "LA",
+      "llc_formation": 105,
+      "corp_formation": 75,
+      "llc_annual": 30,
+      "llc_annual_label": "$30",
+      "corp_annual": 30,
+      "corp_annual_label": "$30+",
+      "llc_renewal": 30,
+      "corp_renewal": 30,
+      "franchise_tax": "Yes (Corp)",
+      "notes": "Variable franchise tax",
+      "sort_order": 17,
+      "is_active": true
+    },
+    {
+      "state": "Maine",
+      "abbr": "ME",
+      "llc_formation": 178,
+      "corp_formation": 145,
+      "llc_annual": 85,
+      "llc_annual_label": "$85",
+      "corp_annual": 85,
+      "corp_annual_label": "$85",
+      "llc_renewal": 85,
+      "corp_renewal": 85,
+      "franchise_tax": "No",
+      "notes": "Annual filing required",
+      "sort_order": 18,
+      "is_active": true
+    },
+    {
+      "state": "Maryland",
+      "abbr": "MD",
+      "llc_formation": 155,
+      "corp_formation": 120,
+      "llc_annual": 300,
+      "llc_annual_label": "$300",
+      "corp_annual": 300,
+      "corp_annual_label": "$300",
+      "llc_renewal": 300,
+      "corp_renewal": 300,
+      "franchise_tax": "No",
+      "notes": "High fixed fee",
+      "sort_order": 19,
+      "is_active": true
+    },
+    {
+      "state": "Massachusetts",
+      "abbr": "MA",
+      "llc_formation": 520,
+      "corp_formation": 275,
+      "llc_annual": 500,
+      "llc_annual_label": "$500",
+      "corp_annual": 125,
+      "corp_annual_label": "$125+",
+      "llc_renewal": 500,
+      "corp_renewal": 125,
+      "franchise_tax": "No",
+      "notes": "Expensive LLC",
+      "sort_order": 20,
+      "is_active": true
+    },
+    {
+      "state": "Michigan",
+      "abbr": "MI",
+      "llc_formation": 50,
+      "corp_formation": 60,
+      "llc_annual": 25,
+      "llc_annual_label": "$25",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 25,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Low cost",
+      "sort_order": 21,
+      "is_active": true
+    },
+    {
+      "state": "Minnesota",
+      "abbr": "MN",
+      "llc_formation": 155,
+      "corp_formation": 135,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 0,
+      "corp_annual_label": "$0",
+      "llc_renewal": 0,
+      "corp_renewal": 0,
+      "franchise_tax": "No",
+      "notes": "No annual fee",
+      "sort_order": 22,
+      "is_active": true
+    },
+    {
+      "state": "Mississippi",
+      "abbr": "MS",
+      "llc_formation": 53,
+      "corp_formation": 50,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 0,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "LLC-friendly",
+      "sort_order": 23,
+      "is_active": true
+    },
+    {
+      "state": "Missouri",
+      "abbr": "MO",
+      "llc_formation": 51,
+      "corp_formation": 58,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 20,
+      "corp_annual_label": "$20",
+      "llc_renewal": 0,
+      "corp_renewal": 20,
+      "franchise_tax": "No",
+      "notes": "No LLC renewal",
+      "sort_order": 24,
+      "is_active": true
+    },
+    {
+      "state": "Montana",
+      "abbr": "MT",
+      "llc_formation": 35,
+      "corp_formation": 70,
+      "llc_annual": 20,
+      "llc_annual_label": "$20",
+      "corp_annual": 20,
+      "corp_annual_label": "$20",
+      "llc_renewal": 20,
+      "corp_renewal": 20,
+      "franchise_tax": "No",
+      "notes": "No state sales tax",
+      "sort_order": 25,
+      "is_active": true
+    },
+    {
+      "state": "Nebraska",
+      "abbr": "NE",
+      "llc_formation": 103,
+      "corp_formation": 60,
+      "llc_annual": 10,
+      "llc_annual_label": "$10",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 10,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Low fees",
+      "sort_order": 26,
+      "is_active": true
+    },
+    {
+      "state": "Nevada",
+      "abbr": "NV",
+      "llc_formation": 436,
+      "corp_formation": 725,
+      "llc_annual": 350,
+      "llc_annual_label": "$350",
+      "corp_annual": 500,
+      "corp_annual_label": "$500+",
+      "llc_renewal": 350,
+      "corp_renewal": 500,
+      "franchise_tax": "Yes",
+      "notes": "High compliance cost",
+      "sort_order": 27,
+      "is_active": true
+    },
+    {
+      "state": "New Hampshire",
+      "abbr": "NH",
+      "llc_formation": 102,
+      "corp_formation": 100,
+      "llc_annual": 100,
+      "llc_annual_label": "$100",
+      "corp_annual": 100,
+      "corp_annual_label": "$100",
+      "llc_renewal": 100,
+      "corp_renewal": 100,
+      "franchise_tax": "No",
+      "notes": "No sales tax",
+      "sort_order": 28,
+      "is_active": true
+    },
+    {
+      "state": "New Jersey",
+      "abbr": "NJ",
+      "llc_formation": 129,
+      "corp_formation": 125,
+      "llc_annual": 75,
+      "llc_annual_label": "$75",
+      "corp_annual": 75,
+      "corp_annual_label": "$75",
+      "llc_renewal": 75,
+      "corp_renewal": 75,
+      "franchise_tax": "No",
+      "notes": "Stable",
+      "sort_order": 29,
+      "is_active": true
+    },
+    {
+      "state": "New Mexico",
+      "abbr": "NM",
+      "llc_formation": 50,
+      "corp_formation": 100,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 0,
+      "corp_annual_label": "$0",
+      "llc_renewal": 0,
+      "corp_renewal": 0,
+      "franchise_tax": "No",
+      "notes": "Best low-maintenance",
+      "sort_order": 30,
+      "is_active": true
+    },
+    {
+      "state": "New York",
+      "abbr": "NY",
+      "llc_formation": 205,
+      "corp_formation": 125,
+      "llc_annual": 4.5,
+      "llc_annual_label": "$9 biennial",
+      "corp_annual": 25,
+      "corp_annual_label": "$25+",
+      "llc_renewal": 4.5,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Publication cost extra",
+      "sort_order": 31,
+      "is_active": true
+    },
+    {
+      "state": "North Carolina",
+      "abbr": "NC",
+      "llc_formation": 128,
+      "corp_formation": 125,
+      "llc_annual": 200,
+      "llc_annual_label": "$200",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 200,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "LLC costly",
+      "sort_order": 32,
+      "is_active": true
+    },
+    {
+      "state": "North Dakota",
+      "abbr": "ND",
+      "llc_formation": 135,
+      "corp_formation": 100,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 50,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Affordable",
+      "sort_order": 33,
+      "is_active": true
+    },
+    {
+      "state": "Ohio",
+      "abbr": "OH",
+      "llc_formation": 99,
+      "corp_formation": 99,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 0,
+      "corp_annual_label": "$0",
+      "llc_renewal": 0,
+      "corp_renewal": 0,
+      "franchise_tax": "No",
+      "notes": "No annual fee",
+      "sort_order": 34,
+      "is_active": true
+    },
+    {
+      "state": "Oklahoma",
+      "abbr": "OK",
+      "llc_formation": 104,
+      "corp_formation": 50,
+      "llc_annual": 25,
+      "llc_annual_label": "$25",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 25,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Cheap",
+      "sort_order": 35,
+      "is_active": true
+    },
+    {
+      "state": "Oregon",
+      "abbr": "OR",
+      "llc_formation": 100,
+      "corp_formation": 100,
+      "llc_annual": 100,
+      "llc_annual_label": "$100",
+      "corp_annual": 100,
+      "corp_annual_label": "$100",
+      "llc_renewal": 100,
+      "corp_renewal": 100,
+      "franchise_tax": "No",
+      "notes": "No state sales tax",
+      "sort_order": 36,
+      "is_active": true
+    },
+    {
+      "state": "Pennsylvania",
+      "abbr": "PA",
+      "llc_formation": 125,
+      "corp_formation": 125,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 70,
+      "corp_annual_label": "$70",
+      "llc_renewal": 0,
+      "corp_renewal": 70,
+      "franchise_tax": "No",
+      "notes": "LLC no annual fee",
+      "sort_order": 37,
+      "is_active": true
+    },
+    {
+      "state": "Rhode Island",
+      "abbr": "RI",
+      "llc_formation": 156,
+      "corp_formation": 230,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 50,
+      "corp_annual_label": "$50",
+      "llc_renewal": 50,
+      "corp_renewal": 50,
+      "franchise_tax": "No",
+      "notes": "Standard",
+      "sort_order": 38,
+      "is_active": true
+    },
+    {
+      "state": "South Carolina",
+      "abbr": "SC",
+      "llc_formation": 125,
+      "corp_formation": 135,
+      "llc_annual": 0,
+      "llc_annual_label": "$0",
+      "corp_annual": 25,
+      "corp_annual_label": "$25+",
+      "llc_renewal": 0,
+      "corp_renewal": 25,
+      "franchise_tax": "Yes (Corp)",
+      "notes": "Corp tax applies",
+      "sort_order": 39,
+      "is_active": true
+    },
+    {
+      "state": "South Dakota",
+      "abbr": "SD",
+      "llc_formation": 153,
+      "corp_formation": 150,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 50,
+      "corp_annual_label": "$50",
+      "llc_renewal": 50,
+      "corp_renewal": 50,
+      "franchise_tax": "No",
+      "notes": "No income tax",
+      "sort_order": 40,
+      "is_active": true
+    },
+    {
+      "state": "Tennessee",
+      "abbr": "TN",
+      "llc_formation": 307,
+      "corp_formation": 100,
+      "llc_annual": 300,
+      "llc_annual_label": "$300+",
+      "corp_annual": 300,
+      "corp_annual_label": "$300+",
+      "llc_renewal": 300,
+      "corp_renewal": 300,
+      "franchise_tax": "Yes",
+      "notes": "Member/share-based tax",
+      "sort_order": 41,
+      "is_active": true
+    },
+    {
+      "state": "Texas",
+      "abbr": "TX",
+      "llc_formation": 300,
+      "corp_formation": 300,
+      "llc_annual": 0,
+      "llc_annual_label": "$0 (under threshold)",
+      "corp_annual": 150,
+      "corp_annual_label": "$0–$300+",
+      "llc_renewal": 0,
+      "corp_renewal": 150,
+      "franchise_tax": "Yes (Threshold)",
+      "notes": "No tax under revenue threshold",
+      "sort_order": 42,
+      "is_active": true
+    },
+    {
+      "state": "Utah",
+      "abbr": "UT",
+      "llc_formation": 59,
+      "corp_formation": 70,
+      "llc_annual": 20,
+      "llc_annual_label": "$20",
+      "corp_annual": 20,
+      "corp_annual_label": "$20",
+      "llc_renewal": 20,
+      "corp_renewal": 20,
+      "franchise_tax": "No",
+      "notes": "Low cost",
+      "sort_order": 43,
+      "is_active": true
+    },
+    {
+      "state": "Vermont",
+      "abbr": "VT",
+      "llc_formation": 155,
+      "corp_formation": 125,
+      "llc_annual": 35,
+      "llc_annual_label": "$35",
+      "corp_annual": 45,
+      "corp_annual_label": "$45",
+      "llc_renewal": 35,
+      "corp_renewal": 45,
+      "franchise_tax": "No",
+      "notes": "Affordable",
+      "sort_order": 44,
+      "is_active": true
+    },
+    {
+      "state": "Virginia",
+      "abbr": "VA",
+      "llc_formation": 100,
+      "corp_formation": 75,
+      "llc_annual": 50,
+      "llc_annual_label": "$50",
+      "corp_annual": 100,
+      "corp_annual_label": "$100",
+      "llc_renewal": 50,
+      "corp_renewal": 100,
+      "franchise_tax": "No",
+      "notes": "Stable",
+      "sort_order": 45,
+      "is_active": true
+    },
+    {
+      "state": "Washington",
+      "abbr": "WA",
+      "llc_formation": 200,
+      "corp_formation": 200,
+      "llc_annual": 60,
+      "llc_annual_label": "$60",
+      "corp_annual": 60,
+      "corp_annual_label": "$60",
+      "llc_renewal": 60,
+      "corp_renewal": 60,
+      "franchise_tax": "Yes (B&O)",
+      "notes": "B&O tax system",
+      "sort_order": 46,
+      "is_active": true
+    },
+    {
+      "state": "West Virginia",
+      "abbr": "WV",
+      "llc_formation": 100,
+      "corp_formation": 100,
+      "llc_annual": 25,
+      "llc_annual_label": "$25",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 25,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Cheap",
+      "sort_order": 47,
+      "is_active": true
+    },
+    {
+      "state": "Wisconsin",
+      "abbr": "WI",
+      "llc_formation": 130,
+      "corp_formation": 100,
+      "llc_annual": 25,
+      "llc_annual_label": "$25",
+      "corp_annual": 25,
+      "corp_annual_label": "$25",
+      "llc_renewal": 25,
+      "corp_renewal": 25,
+      "franchise_tax": "No",
+      "notes": "Low fees",
+      "sort_order": 48,
+      "is_active": true
+    },
+    {
+      "state": "Wyoming",
+      "abbr": "WY",
+      "llc_formation": 100,
+      "corp_formation": 100,
+      "llc_annual": 60,
+      "llc_annual_label": "$60",
+      "corp_annual": 60,
+      "corp_annual_label": "$60",
+      "llc_renewal": 60,
+      "corp_renewal": 60,
+      "franchise_tax": "No",
+      "notes": "Top choice for non-residents",
+      "sort_order": 49,
+      "is_active": true
+    }
+  ]
+}
