@@ -494,12 +494,19 @@ const VerificationCard = ({
     ? new Date(meta.verified_at).toLocaleString()
     : null;
 
+  const isWebhookPayment = order.payment_gateway !== "manual" && order.payment_gateway !== "bank_transfer";
+  const webhookTone = isWebhookPayment ? "good" : "neutral";
+  const webhookLabel = isWebhookPayment ? "Webhook Payment" : "Not Webhook Payment";
+  const webhookHint = isWebhookPayment
+    ? "Automated verification via provider callback webhooks."
+    : "Offline payment method. No automated webhooks are used.";
+
   return (
     <div className="glass-card p-5 space-y-4 sticky top-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-foreground">Payment verification</h2>
+      <div className="flex items-center justify-between border-b border-border pb-2.5">
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment verification</span>
         </div>
         {meta?.provider && (
           <Badge variant="outline" className="text-[10px] uppercase tracking-wide">
@@ -508,10 +515,18 @@ const VerificationCard = ({
         )}
       </div>
 
+      <VerificationBlock
+        Icon={ServerCog}
+        label="Webhook Integration"
+        value={webhookLabel}
+        tone={webhookTone}
+        hint={webhookHint}
+      />
+
       {!meta ? (
         <div className="rounded-lg border border-dashed border-border p-4 text-center">
           <ShieldQuestion className="w-6 h-6 text-muted-foreground mx-auto mb-2 opacity-50" />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             No verification record yet. The webhook hasn't reported on this order.
           </p>
         </div>

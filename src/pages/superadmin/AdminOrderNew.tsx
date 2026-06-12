@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, Link, useParams, useSearchParams, UNSAFE_NavigationContext } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ interface Props { mode?: "new" | "edit" }
 
 export default function AdminOrderNew({ mode = "new" }: Props) {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const { navigator } = useContext(UNSAFE_NavigationContext);
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -499,6 +501,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           referral_code: referralCode.trim().toUpperCase() || null,
         });
         toast.success("Invoice updated");
+        qc.invalidateQueries({ queryKey: ["admin-order", id] });
+        qc.invalidateQueries({ queryKey: ["admin-orders"] });
+        qc.invalidateQueries({ queryKey: ["dash-orders"] });
         skipGuardRef.current = true;
         baselineRef.current = snapshot;
         navigate(`/superadmin/orders/${id}`);
@@ -540,6 +545,8 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         });
 
         toast.success(`Invoice ${data?.invoice_number || "created"}`);
+        qc.invalidateQueries({ queryKey: ["admin-orders"] });
+        qc.invalidateQueries({ queryKey: ["dash-orders"] });
         skipGuardRef.current = true;
         baselineRef.current = snapshot;
         clearDraft();

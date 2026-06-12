@@ -261,7 +261,7 @@ const Invoice = () => {
   const hasAgreement = !!agreementMeta && agreementMeta.include !== false;
   const agreementRef = data.invoice_number || data.id;
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       {/* Toolbar */}
       <div className="container-custom pt-8 pb-4 print:hidden flex items-center justify-between gap-3 flex-wrap">
         <Button asChild variant="ghost" size="sm">
@@ -391,11 +391,17 @@ const Invoice = () => {
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1">
-                <Mail className="w-3 h-3" /> Billed to
+                <Building2 className="w-3 h-3" /> Billed to
               </p>
-              <p className="font-semibold">{data.customer_name || "Customer"}</p>
+              <p className="font-semibold flex items-center gap-1.5">
+                <UserRound className="w-3.5 h-3.5 text-muted-foreground/85 shrink-0" />
+                {data.customer_name || "Customer"}
+              </p>
               {company && <p className="text-sm">{company}</p>}
-              <p className="text-sm text-muted-foreground">{data.customer_email}</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground/85 shrink-0" />
+                {data.customer_email}
+              </p>
               {phone && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                   <Phone className="w-3 h-3" /> {phone}
