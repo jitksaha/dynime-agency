@@ -64,22 +64,25 @@ $envPath = $apiDir . '/.env';
         <?php
         if (isset($_GET['action']) && $_GET['action'] === 'symlink') {
             if (is_link($apiSymlink)) {
-                unlink($apiSymlink);
+                @unlink($apiSymlink);
             } elseif (file_exists($apiSymlink)) {
                 if (is_dir($apiSymlink)) {
-                    rename($apiSymlink, $apiSymlink . '_bak_' . time());
+                    @rename($apiSymlink, $apiSymlink . '_bak_' . time());
                 } else {
-                    unlink($apiSymlink);
+                    @unlink($apiSymlink);
                 }
             }
             
-            // Try creating symlink
-            if (symlink($apiPublicDir, $apiSymlink)) {
-                echo "<p class='success'>Success: Symlink successfully created! requests to /api/ will route to dynime-api/public.</p>";
-            } else {
-                echo "<p class='error'>Error: Failed to create symlink. If symlinks are disabled by Hostinger, we will try using an index.php wrapper instead.</p>";
-                
-                // Fallback logic: create public_html/api directory and place custom index.php pointing to dynime-api/public/index.php
+            $symlinkCreated = false;
+            if (function_exists('symlink')) {
+                if (@symlink($apiPublicDir, $apiSymlink)) {
+                    $symlinkCreated = true;
+                    echo "<p class='success'>Success: Symlink successfully created! requests to /api/ will route to dynime-api/public.</p>";
+                }
+            }
+            
+            if (!$symlinkCreated) {
+                echo "<p class='warning'>Symlink creation disabled or failed. Creating physical routing folder /api instead...</p>";
                 if (!is_dir($apiSymlink)) {
                     mkdir($apiSymlink, 0755, true);
                 }
@@ -226,16 +229,32 @@ $envPath = $apiDir . '/.env';
         <?php
         if (isset($_GET['action']) && $_GET['action'] === 'migrate') {
             echo "<pre>";
-            $command = "cd " . escapeshellarg($apiDir) . " && php artisan migrate --force 2>&1";
-            echo "Running: $command\n\n";
-            $output = shell_exec($command);
-            echo htmlspecialchars($output);
-            
-            if (isset($_GET['seed']) && $_GET['seed'] === 'true') {
-                $commandSeed = "cd " . escapeshellarg($apiDir) . " && php artisan db:seed --force 2>&1";
-                echo "\nRunning: $commandSeed\n\n";
-                $outputSeed = shell_exec($commandSeed);
-                echo htmlspecialchars($outputSeed);
+            echo "Booting Laravel programmatically to bypass shell_exec restrictions...\n\n";
+            try {
+                // Boot Laravel
+                require $apiDir . '/vendor/autoload.php';
+                $app = require_once $apiDir . '/bootstrap/app.php';
+                
+                $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+                $kernel->bootstrap();
+                
+                echo "Running migrations...\n";
+                $exitCode = Illuminate\Support\Facades\Artisan::call('migrate', [
+                    '--force' => true
+                ]);
+                echo "Exit Code: $exitCode\n";
+                echo "Output:\n" . Illuminate\Support\Facades\Artisan::output() . "\n";
+                
+                if (isset($_GET['seed']) && $_GET['seed'] === 'true') {
+                    echo "\nRunning seeders...\n";
+                    $exitCodeSeed = Illuminate\Support\Facades\Artisan::call('db:seed', [
+                        '--force' => true
+                    ]);
+                    echo "Seed Exit Code: $exitCodeSeed\n";
+                    echo "Output:\n" . Illuminate\Support\Facades\Artisan::output() . "\n";
+                }
+            } catch (Exception $e) {
+                echo "ERROR executing Artisan commands: " . $e->getMessage() . "\n";
             }
             echo "</pre>";
         } else {
