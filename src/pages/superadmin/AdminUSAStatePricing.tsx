@@ -149,9 +149,6 @@ const AdminUSAStatePricing = () => {
               <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
-            <Button variant="outline" size="sm" onClick={seedMissing}>
-              + Seed missing states
-            </Button>
           </div>
         </div>
 

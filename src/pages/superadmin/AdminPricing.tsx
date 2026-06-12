@@ -171,7 +171,12 @@ export default function AdminPricing() {
           service_slug: r.service_slug,
           service_title: r.service_title,
           is_enabled: r.is_enabled ?? true,
-          tiers: Array.isArray(r.tiers) ? r.tiers : [],
+          tiers: Array.isArray(r.tiers) && r.tiers.length > 0 
+            ? r.tiers 
+            : (() => {
+                const s = ALL_SERVICES.find((svc) => svc.slug === r.service_slug);
+                return s ? getDefaultTiers(s) : [];
+              })(),
           quote_settings: r.quote_settings ?? defaultQuoteSettings(),
         };
       });
@@ -195,7 +200,7 @@ export default function AdminPricing() {
     service_slug: selectedSvc.slug,
     service_title: selectedSvc.title,
     is_enabled: true,
-    tiers: [],
+    tiers: getDefaultTiers(selectedSvc),
     quote_settings: defaultQuoteSettings(),
   };
 
@@ -386,6 +391,17 @@ export default function AdminPricing() {
                 <div className="flex flex-wrap items-center gap-2">
                   <Button onClick={addTier} variant="outline" size="sm" className="gap-1.5">
                     <Plus className="h-4 w-4" /> Add tier
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      update({ tiers: getDefaultTiers(selectedSvc) });
+                      toast({ title: "Tiers loaded from code packs. Remember to click 'Save changes' to store them." });
+                    }}
+                    variant="secondary"
+                    size="sm"
+                    className="gap-1.5"
+                  >
+                    Import Tiers from Code
                   </Button>
                   <div className="flex-1" />
                   <Button onClick={save} disabled={saving} className="gap-1.5">
