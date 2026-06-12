@@ -589,20 +589,78 @@ export default function AdminPricing() {
                           </div>
 
                           <div>
-                            <Label className="text-xs">Features (one per line)</Label>
-                            <Textarea
-                              rows={5}
-                              value={tier.features.join("\n")}
-                              onChange={(e) =>
-                                updateTier(i, {
-                                  features: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean),
-                                })
-                              }
-                              className="mt-1 font-mono text-xs"
-                              placeholder={"Feature one\nFeature two\nFeature three"}
-                            />
+                            <Label className="text-xs font-semibold">Tier Features</Label>
+                            
+                            {/* List of current features */}
+                            <div className="space-y-1.5 mt-1.5">
+                              {tier.features.map((feat, fIdx) => (
+                                <div key={fIdx} className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground select-none">·</span>
+                                  <Input
+                                    value={feat}
+                                    onChange={(e) => {
+                                      const newFeats = [...tier.features];
+                                      newFeats[fIdx] = e.target.value;
+                                      updateTier(i, { features: newFeats });
+                                    }}
+                                    className="h-8 text-xs flex-1 font-medium text-foreground bg-card"
+                                    placeholder={`Feature #${fIdx + 1}`}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                    onClick={() => {
+                                      const newFeats = tier.features.filter((_, k) => k !== fIdx);
+                                      updateTier(i, { features: newFeats });
+                                    }}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Add new feature input */}
+                            <div className="flex items-center gap-2 mt-2">
+                              <Input
+                                id={`new-feat-${i}`}
+                                placeholder="Type a feature and press Enter..."
+                                className="h-8 text-xs flex-1"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const val = e.currentTarget.value.trim();
+                                    if (val) {
+                                      updateTier(i, { features: [...tier.features, val] });
+                                      e.currentTarget.value = "";
+                                    }
+                                  }
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-2 gap-1 text-xs"
+                                onClick={() => {
+                                  const input = document.getElementById(`new-feat-${i}`) as HTMLInputElement;
+                                  if (input) {
+                                    const val = input.value.trim();
+                                    if (val) {
+                                      updateTier(i, { features: [...tier.features, val] });
+                                      input.value = "";
+                                    }
+                                  }
+                                }}
+                              >
+                                <Plus className="h-3.5 w-3.5" /> Add
+                              </Button>
+                            </div>
+
                             <p className="text-[10px] text-muted-foreground mt-1">
-                              {tier.features.length} feature{tier.features.length === 1 ? "" : "s"}
+                              {tier.features.length} feature{tier.features.length === 1 ? "" : "s"} total
                             </p>
                           </div>
 
