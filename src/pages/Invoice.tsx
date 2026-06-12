@@ -579,6 +579,7 @@ const Invoice = () => {
           header, footer, nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
           body { padding: 15mm !important; }
+          main, .floating-header-main { padding-top: 0 !important; }
           section { background: #ffffff !important; color: #0a0a14 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         }
