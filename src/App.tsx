@@ -49,10 +49,8 @@ const ReferralRedirect = () => {
   return <Navigate to={code ? `/?ref=${code}` : "/"} replace />;
 };
 
-// Eager: home page (LCP) only
-import Index from "./pages/Index.tsx";
-
-// Lazy: every other route — keeps initial bundle small
+// Lazy: all routes including home page — keeps initial bundle small
+const Index = lazy(() => import("./pages/Index.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Services = lazy(() => import("./pages/Services.tsx"));
 const ServicesPricing = lazy(() => import("./pages/ServicesPricing.tsx"));
