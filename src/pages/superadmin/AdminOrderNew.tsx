@@ -51,6 +51,11 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const [notes, setNotes] = useState("");
   const [included, setIncluded] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [dueDate, setDueDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split("T")[0];
+  });
   const [items, setItems] = useState<LineItem[]>([
     { name: "", description: "", price: 0, quantity: 1 },
   ]);
@@ -145,9 +150,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const snapshot = useMemo(
     () => JSON.stringify({
       customerName, customerEmail, phone, company, currency, status,
-      gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode,
+      gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate,
     }),
-    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode]
+    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate]
   );
   // --- autosave (new mode only) ---
   const AUTOSAVE_KEY = "admin:manual-invoice:draft:v1";
@@ -174,6 +179,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
       if (typeof d.included === "string") setIncluded(d.included);
       if (Array.isArray(d.items) && d.items.length) setItems(d.items);
       if (typeof d.referralCode === "string") setReferralCode(d.referralCode);
+      if (typeof d.dueDate === "string") setDueDate(d.dueDate);
       if (d.savedAt) setAutosavedAt(new Date(d.savedAt));
       toast.info("Restored unsaved draft");
     } catch { /* ignore */ }
@@ -209,6 +215,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     setCustomerName(""); setCustomerEmail(""); setPhone(""); setCompany("");
     setCurrency("USD"); setStatus("pending"); setGateway("manual");
     setDiscount(0); setNotes(""); setIncluded(""); setReferralCode("");
+    const defaultD = new Date();
+    defaultD.setDate(defaultD.getDate() + 14);
+    setDueDate(defaultD.toISOString().split("T")[0]);
     setItems([{ name: "", description: "", price: 0, quantity: 1 }]);
     skipGuardRef.current = true;
     requestAnimationFrame(() => { baselineRef.current = null; skipGuardRef.current = false; });
@@ -350,6 +359,13 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         const sb = (o.service_brief || {}) as any;
         const inc = Array.isArray(sb.included_services) ? sb.included_services : [];
         setIncluded(inc.join("\n"));
+        if (sb.due_date) {
+          setDueDate(sb.due_date);
+        } else {
+          const d = o.created_at ? new Date(o.created_at) : new Date();
+          d.setDate(d.getDate() + 14);
+          setDueDate(d.toISOString().split("T")[0]);
+        }
         const sbIssuer = (sb.issuer || {}) as any;
         if (sbIssuer.type === "employee") {
           setIssuerMode("employee");
@@ -385,6 +401,11 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
             issuerMode: sbIssuer.type === "employee" ? "employee" : "company",
             issuerEmployeeKey: sbIssuer.type === "employee" ? String(sbIssuer.employee_key || sbIssuer.name || "") : "",
             referralCode: (o.referral_code as string) || "",
+            dueDate: sb.due_date || (() => {
+              const d = o.created_at ? new Date(o.created_at) : new Date();
+              d.setDate(d.getDate() + 14);
+              return d.toISOString().split("T")[0];
+            })(),
           });
         });
       } catch (err) {
@@ -442,6 +463,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           ...existingSB,
           manual_invoice: true,
           included_services: includedServices,
+          due_date: dueDate || null,
         };
         if (issuerMode === "employee") {
           if (!selectedEmployee) { toast.error("Pick an employee to issue this invoice under"); setSubmitting(false); return; }
@@ -481,7 +503,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         const billing_address: Record<string, unknown> = {};
         if (phone) billing_address.phone = phone;
         if (company) billing_address.company = company;
-        const service_brief: Record<string, unknown> = { manual_invoice: true };
+        const service_brief: Record<string, unknown> = { manual_invoice: true, due_date: dueDate || null };
         if (includedServices.length) service_brief.included_services = includedServices;
         if (issuerMode === "employee") {
           if (!selectedEmployee) { toast.error("Pick an employee to issue this invoice under"); setSubmitting(false); return; }
@@ -623,7 +645,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           </div>
         </section>
 
-        <section className="glass-card p-4 grid sm:grid-cols-3 gap-3">
+        <section className="glass-card p-4 grid sm:grid-cols-4 gap-3">
           <div>
             <Label>Currency</Label>
             <Select value={currency} onValueChange={setCurrency}>
@@ -650,6 +672,14 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
                 {GATEWAYS.map((g) => <SelectItem key={g} value={g} className="capitalize">{g.replace("_", " ")}</SelectItem>)}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <Label>Due Date</Label>
+            <Input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
           </div>
         </section>
 

@@ -228,7 +228,9 @@ const Invoice = () => {
   const postalCode = toText(addr.postal_code);
   const country = toText(addr.country);
   const paid = isPaid(data.status);
-  const dueDate = new Date(new Date(data.created_at).getTime() + 14 * 86400000);
+  const dueDate = brief.due_date
+    ? new Date(brief.due_date as string)
+    : new Date(new Date(data.created_at).getTime() + 14 * 86400000);
 
   // Optional per-invoice issuer override — when an admin issues a manual
   // invoice under a specific employee's name (rather than the company), the

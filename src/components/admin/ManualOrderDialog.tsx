@@ -47,6 +47,11 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
   const [items, setItems] = useState<LineItem[]>([
     { name: "", description: "", price: 0, quantity: 1 },
   ]);
+  const [dueDate, setDueDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().split("T")[0];
+  });
 
   // Issuer / "From" on the invoice — defaults to the company, but admins can
   // switch to a specific employee for clients that only accept invoices from a
@@ -121,6 +126,13 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
       setNotes(String(row.notes || ""));
       const incl = Array.isArray(brief.included_services) ? (brief.included_services as unknown[]) : [];
       setIncluded(incl.map((s) => String(s)).join("\n"));
+      if (brief.due_date) {
+        setDueDate(String(brief.due_date));
+      } else {
+        const d = row.created_at ? new Date(String(row.created_at)) : new Date();
+        d.setDate(d.getDate() + 14);
+        setDueDate(d.toISOString().split("T")[0]);
+      }
       const itemsArr = Array.isArray(row.items) ? (row.items as Array<Record<string, unknown>>) : [];
       if (itemsArr.length) {
         setItems(itemsArr.map((it) => ({
@@ -189,6 +201,9 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
     setAgClientSignedDate("");
     setAgReference("");
     setPrefillRef("");
+    const defaultD = new Date();
+    defaultD.setDate(defaultD.getDate() + 14);
+    setDueDate(defaultD.toISOString().split("T")[0]);
   };
 
   const updateItem = (idx: number, patch: Partial<LineItem>) => {
@@ -230,6 +245,7 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
 
     const service_brief: Record<string, unknown> = {
       manual_invoice: true,
+      due_date: dueDate || null,
     };
     if (includedServices.length) service_brief.included_services = includedServices;
 
@@ -372,7 +388,7 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
           </section>
 
           {/* Settings */}
-          <section className="grid sm:grid-cols-3 gap-3">
+          <section className="grid sm:grid-cols-4 gap-3">
             <div>
               <Label>Currency</Label>
               <Select value={currency} onValueChange={setCurrency}>
@@ -399,6 +415,14 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
                   {GATEWAYS.map((g) => <SelectItem key={g} value={g} className="capitalize">{g.replace("_", " ")}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label>Due Date</Label>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
             </div>
           </section>
 
