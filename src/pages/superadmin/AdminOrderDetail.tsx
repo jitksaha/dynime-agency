@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -155,7 +155,7 @@ const AdminOrderDetail = () => {
           ? formatCurrency(Number(order.total), (order as any).currency || "USD")
           : undefined;
       try {
-        await supabase.functions.invoke("send-transactional-email", {
+        await db.functions.invoke("send-transactional-email", {
           body: {
             templateName: "order-status-update",
             recipientEmail: order.customer_email,

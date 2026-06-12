@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import AuthDialog from "@/components/auth/AuthDialog";
@@ -752,16 +752,16 @@ const Checkout = () => {
   const { data: flexpaySettings } = useQuery({
     queryKey: ["flexpay-settings-checkout"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
+      const { data } = await db.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
       return data;
     },
   });
   const { data: flexpayAccount, refetch: refetchFlexAccount } = useQuery({
     queryKey: ["flexpay-account-checkout"],
     queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await db.auth.getUser();
       if (!u?.user) return null;
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_credit_accounts")
         .select("*")
         .eq("user_id", u.user.id)
@@ -1115,7 +1115,7 @@ const Checkout = () => {
     if (!coupon.trim()) return;
     setCouponLoading(true);
     try {
-      const { data, error } = await supabase.rpc("validate_coupon", {
+      const { data, error } = await db.rpc("validate_coupon", {
         _code: coupon.trim(), _order_total: subtotal,
       });
       if (error) throw error;
@@ -1163,7 +1163,7 @@ const Checkout = () => {
 
     // FlexPay branch — uses approved credit limit, no external gateway
     if (gateway === "flexpay") {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await db.auth.getUser();
       if (!u?.user) { toast.error("Please sign in to use FlexPay"); setAuthOpen(true); return; }
       if (!flexpayEligible) { toast.error("FlexPay is not available for your account"); return; }
       if (chargeNow > flexpayAvailable) {
@@ -1203,7 +1203,7 @@ const Checkout = () => {
           postal_code: details.postal_code, country: details.country, company: details.company,
           tax_id: details.tax_id, phone: details.phone,
         };
-        const { data, error } = await supabase.rpc("flexpay_checkout", {
+        const { data, error } = await db.rpc("flexpay_checkout", {
           _items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })) as any,
           _customer_name: details.full_name,
           _customer_email: details.email.trim().toLowerCase(),

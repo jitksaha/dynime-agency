@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import InvestorPortalLayout from "@/components/investor/InvestorPortalLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,7 +37,7 @@ const InvestorAgreements = () => {
     queryKey: ["investor-agreements", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("investments" as any)
         .select("*")
         .eq("investor_id", user!.id)
@@ -50,7 +50,7 @@ const InvestorAgreements = () => {
   const callFn = async (inv: any, action: "preview" | "sign") => {
     setBusyAction(action);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-investment-agreement", {
+      const { data, error } = await db.functions.invoke("generate-investment-agreement", {
         body: {
           investment_id: inv.id,
           action,
@@ -78,7 +78,7 @@ const InvestorAgreements = () => {
   const downloadSigned = async (inv: any) => {
     if (!inv.agreement_pdf_path) return;
     try {
-      const { data, error } = await supabase.storage
+      const { data, error } = await db.storage
         .from("investor-documents")
         .createSignedUrl(inv.agreement_pdf_path, 60 * 60);
       if (error) throw error;

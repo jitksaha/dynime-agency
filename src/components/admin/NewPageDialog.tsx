@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +22,7 @@ const NewPageDialog = ({ open, onOpenChange }: NewPageDialogProps) => {
   const createPage = useMutation({
     mutationFn: async () => {
       const slug = newSlug || newTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-      const { error } = await supabase.from("pages").insert({
+      const { error } = await db.from("pages").insert({
         title: newTitle,
         slug,
         content: [],

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,7 @@ const FlexPayReceipt = () => {
 
   const load = async () => {
     if (!id) return;
-    const { data: inst } = await supabase
+    const { data: inst } = await db
       .from("flexpay_emi_installments")
       .select("*")
       .eq("id", id)
@@ -41,7 +41,7 @@ const FlexPayReceipt = () => {
     setInstallment(inst);
     const orderId = (inst as any)?.paid_order_id || (inst as any)?.last_attempt_order_id;
     if (orderId) {
-      const { data: ord } = await supabase
+      const { data: ord } = await db
         .from("orders")
         .select("id, invoice_number, total, currency, payment_gateway, customer_name, customer_email, created_at, status")
         .eq("id", orderId)

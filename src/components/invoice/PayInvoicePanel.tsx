@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CreditCard, Wallet, Banknote, CheckCircle2, Clock, ArrowRightLeft, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import BankDepositDialog, { type BankAccount } from "@/components/checkout/BankDepositDialog";
 import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import type { CurrencyCode } from "@/lib/currency";

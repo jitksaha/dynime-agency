@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Paperclip, Download, Loader2, Eye, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 
 export type Attachment = {
@@ -30,7 +30,7 @@ export const InlineAttachmentPreviews = ({ attachments }: { attachments: Attachm
     (async () => {
       const entries = await Promise.all(
         previewable.map(async (att) => {
-          const { data } = await supabase.storage
+          const { data } = await db.storage
             .from("email-attachments")
             .createSignedUrl(att.path, 600);
           return [att.path, data?.signedUrl ?? ""] as const;
@@ -136,7 +136,7 @@ const AttachmentList = ({ attachments }: { attachments: Attachment[] }) => {
   const open = async (att: Attachment, mode: "view" | "download") => {
     setBusy(`${att.path}-${mode}`);
     try {
-      const { data, error } = await supabase.storage
+      const { data, error } = await db.storage
         .from("email-attachments")
         .createSignedUrl(
           att.path,

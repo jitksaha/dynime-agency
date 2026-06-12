@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Block } from "@/components/page-builder/types";
 import PageBuilder from "@/components/page-builder/PageBuilder";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import { ArrowLeft, Save, Settings, Eye } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/integrations/db/types";
 
 const PageEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +33,7 @@ const PageEditor = () => {
   const { data: page, isLoading } = useQuery({
     queryKey: ["page-editor", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("pages").select("*").eq("id", id!).single();
+      const { data, error } = await db.from("pages").select("*").eq("id", id!).single();
       if (error) throw error;
       return data;
     },
@@ -54,7 +54,7 @@ const PageEditor = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
+      const { error } = await db
         .from("pages")
         .update({
           title,

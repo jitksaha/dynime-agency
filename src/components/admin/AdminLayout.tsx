@@ -1,6 +1,6 @@
 import { useEffect, useState, ReactNode } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { LayoutDashboard, Settings, FileText, MessageSquare, Inbox, Phone, LogOut, Menu, X, FormInput, Briefcase } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";
 import RouteProgress from "@/components/shared/RouteProgress";
@@ -24,12 +24,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = db.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
       if (!session?.user) navigate("/admin/login");
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    db.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
       if (!session?.user) navigate("/admin/login");
@@ -38,7 +38,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await db.auth.signOut();
     navigate("/admin/login");
   };
 

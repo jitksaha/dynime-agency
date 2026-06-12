@@ -33,7 +33,7 @@ interface SiteLogoProps {
  *    dark-only footers, dark navbars.
  *
  * For email (no React DOM / theme), use the server-side mirror
- * `BrandHeader` from `supabase/functions/_shared/transactional-email-templates/
+ * `BrandHeader` from `db/functions/_shared/transactional-email-templates/
  * brand-header.tsx`, which adapts to dark email clients via
  * `prefers-color-scheme`.
  */

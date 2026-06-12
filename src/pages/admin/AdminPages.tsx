@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,7 @@ const AdminPages = () => {
   const { data: pages, isLoading } = useQuery({
     queryKey: ["admin-pages"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("pages")
         .select("*")
         .order("updated_at", { ascending: false });
@@ -51,7 +51,7 @@ const AdminPages = () => {
 
   const deletePage = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("pages").delete().eq("id", id);
+      const { error } = await db.from("pages").delete().eq("id", id);
       if (error) throw error;
     },
     onMutate: async (id: string) => {
@@ -71,7 +71,7 @@ const AdminPages = () => {
 
   const togglePublish = useMutation({
     mutationFn: async ({ id, published }: { id: string; published: boolean }) => {
-      const { error } = await supabase.from("pages").update({ is_published: published }).eq("id", id);
+      const { error } = await db.from("pages").update({ is_published: published }).eq("id", id);
       if (error) throw error;
     },
     onMutate: async ({ id, published }) => {

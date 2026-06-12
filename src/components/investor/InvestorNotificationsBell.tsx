@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Check, CheckCheck } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,7 +31,7 @@ const InvestorNotificationsBell = () => {
     enabled: !!user?.id,
     refetchInterval: 4000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("investor_notifications" as any)
         .select("id,kind,title,body,link,read_at,created_at")
         .eq("investor_id", user!.id)
@@ -50,7 +50,7 @@ const InvestorNotificationsBell = () => {
   // Realtime subscription
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase
+    const channel = db
       .channel(`investor-notifs-${user.id}`)
       .on(
         "postgres_changes",
@@ -58,11 +58,11 @@ const InvestorNotificationsBell = () => {
         () => qc.invalidateQueries({ queryKey: ["investor-notifications", user.id] }),
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, [user?.id, qc]);
 
   const markRead = async (id: string) => {
-    await supabase
+    await db
       .from("investor_notifications" as any)
       .update({ read_at: new Date().toISOString() })
       .eq("id", id);
@@ -70,7 +70,7 @@ const InvestorNotificationsBell = () => {
   };
 
   const markAllRead = async () => {
-    await supabase
+    await db
       .from("investor_notifications" as any)
       .update({ read_at: new Date().toISOString() })
       .eq("investor_id", user!.id)

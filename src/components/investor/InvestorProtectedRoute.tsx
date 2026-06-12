@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import RouteProgress from "@/components/shared/RouteProgress";
 
 const InvestorProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -13,7 +13,7 @@ const InvestorProtectedRoute = ({ children }: { children: React.ReactNode }) => 
     queryKey: ["investor-membership", user?.id],
     enabled: !!user?.id && userRole !== "investor" && !isAdmin,
     queryFn: async () => {
-      const { count } = await supabase
+      const { count } = await db
         .from("investments" as any)
         .select("id", { count: "exact", head: true })
         .eq("investor_id", user!.id);

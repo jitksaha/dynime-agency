@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 export interface InvestmentPlan {
   id: string;
@@ -74,7 +74,7 @@ export const useInvestmentPlans = (opts?: { includeInactive?: boolean }) =>
   useQuery({
     queryKey: ["investment-plans", opts?.includeInactive ? "all" : "active"],
     queryFn: async () => {
-      let q = supabase.from("investment_plans" as any).select("*").order("sort_order", { ascending: true });
+      let q = db.from("investment_plans" as any).select("*").order("sort_order", { ascending: true });
       if (!opts?.includeInactive) q = q.eq("is_active", true);
       const { data, error } = await q;
       if (error) throw error;
@@ -89,7 +89,7 @@ export const useInvestSettings = () =>
   useQuery({
     queryKey: ["invest-settings"],
     queryFn: async (): Promise<InvestSettings> => {
-      const { data, error } = await supabase.from("invest_settings" as any).select("key,value");
+      const { data, error } = await db.from("invest_settings" as any).select("key,value");
       if (error) throw error;
       const out: any = {};
       for (const row of (data as any[]) ?? []) out[row.key] = row.value;

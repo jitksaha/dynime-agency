@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -31,11 +31,11 @@ const TeamAvatarUploader = ({ value, onChange }: Props) => {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `team/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage
+      const { error } = await db.storage
         .from(BUCKET)
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "31536000" });
       if (error) throw error;
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const { data } = db.storage.from(BUCKET).getPublicUrl(path);
       onChange(data.publicUrl);
       toast.success("Photo uploaded.");
     } catch (e) {

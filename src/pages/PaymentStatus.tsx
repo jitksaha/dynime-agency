@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useSEO } from "@/hooks/use-seo";
 import { Loader2 } from "lucide-react";
 import { apiGet } from "@/lib/api";
@@ -76,7 +76,7 @@ const PaymentStatus = () => {
   useEffect(() => {
     if (!data?.id || redirectedRef.current) return;
     if (FINAL.has(data.status)) return;
-    const channel = supabase
+    const channel = db
       .channel(`pay-redirect-${data.id}`)
       .on(
         "postgres_changes",
@@ -91,7 +91,7 @@ const PaymentStatus = () => {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [data?.id, data?.status, callbackHint, navigate]);
 

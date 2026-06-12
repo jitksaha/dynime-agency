@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import type { TeamMember } from "@/lib/home-sections-defaults";
 
 const normalise = (value?: string | null) => (value || "").trim().toLowerCase();
@@ -36,7 +36,7 @@ export const useTeamCardIds = () =>
       // visitors via this hook. Email/name/composite fallback maps are left
       // empty; callers should look up by subject_key (which the team list
       // already computes deterministically from index + name).
-      const { data, error } = await supabase.rpc("list_team_card_ids");
+      const { data, error } = await db.rpc("list_team_card_ids");
       if (error) throw error;
       const bySubjectKey = new Map<string, string>();
       const byEmail = new Map<string, string>();

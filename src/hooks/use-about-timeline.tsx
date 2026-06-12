@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import {
   ABOUT_TIMELINE_KEY,
   DEFAULT_ABOUT_TIMELINE,
@@ -10,7 +10,7 @@ export const useAboutTimeline = () =>
   useQuery<TimelineItem[]>({
     queryKey: ["about-timeline"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("site_settings")
         .select("value")
         .eq("key", ABOUT_TIMELINE_KEY)

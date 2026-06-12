@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAllProductUrls, type ProductUrl, fetchProductUrls, useUpsertProductUrl, useDeleteProductUrl } from "@/hooks/use-product-urls";
 import { Plus, Save, Trash2, ExternalLink, Link2, Globe } from "lucide-react";
 

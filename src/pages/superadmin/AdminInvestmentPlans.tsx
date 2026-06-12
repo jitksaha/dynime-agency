@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -78,7 +78,7 @@ const AdminInvestmentPlans = () => {
   const { data: plans, isLoading } = useQuery({
     queryKey: ["admin-investment-plans"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("investment_plans" as any)
         .select("*")
         .order("sort_order", { ascending: true });
@@ -111,8 +111,8 @@ const AdminInvestmentPlans = () => {
       highlights: Array.isArray(editing.highlights) ? editing.highlights : [],
     };
     const { error } = editing.id
-      ? await supabase.from("investment_plans" as any).update(payload).eq("id", editing.id)
-      : await supabase.from("investment_plans" as any).insert(payload as any);
+      ? await db.from("investment_plans" as any).update(payload).eq("id", editing.id)
+      : await db.from("investment_plans" as any).insert(payload as any);
     if (error) { toast.error(error.message); return; }
     toast.success(editing.id ? "Plan updated" : "Plan created");
     setOpen(false);
@@ -121,7 +121,7 @@ const AdminInvestmentPlans = () => {
   };
 
   const toggle = async (p: Plan, field: "is_active" | "is_featured") => {
-    const { error } = await supabase
+    const { error } = await db
       .from("investment_plans" as any)
       .update({ [field]: !p[field] })
       .eq("id", p.id);
@@ -131,7 +131,7 @@ const AdminInvestmentPlans = () => {
 
   const remove = async (p: Plan) => {
     if (!confirm(`Delete plan "${p.name}"?`)) return;
-    const { error } = await supabase.from("investment_plans" as any).delete().eq("id", p.id);
+    const { error } = await db.from("investment_plans" as any).delete().eq("id", p.id);
     if (error) toast.error(error.message);
     else {
       toast.success("Deleted");
@@ -335,7 +335,7 @@ const InvestmentTargetsCard = () => {
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["admin-invest-targets"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invest_settings" as any)
         .select("value")
         .eq("key", "targets")
@@ -368,7 +368,7 @@ const InvestmentTargetsCard = () => {
       profit_share_multiplier: Number(r.profit_share_multiplier) || 1,
       enabled: r.enabled !== false,
     }));
-    const { error } = await supabase
+    const { error } = await db
       .from("invest_settings" as any)
       .upsert({ key: "targets", value: { items: payload } } as any, { onConflict: "key" });
     if (error) { toast.error(error.message); return; }
@@ -475,7 +475,7 @@ const FundraisingCard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-invest-fundraising"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invest_settings" as any)
         .select("value")
         .eq("key", "fundraising")
@@ -489,7 +489,7 @@ const FundraisingCard = () => {
   const set = (patch: Partial<Fundraising>) => setDraft({ ...f, ...patch });
 
   const save = async () => {
-    const { error } = await supabase
+    const { error } = await db
       .from("invest_settings" as any)
       .upsert({ key: "fundraising", value: f } as any, { onConflict: "key" });
     if (error) { toast.error(error.message); return; }

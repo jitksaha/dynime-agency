@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Copy, Snowflake, Sparkles, ShieldCheck, Wifi, Check, Lock, Zap, Globe, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import dynimeIcon from "@/assets/dynime-icon-dark.svg";
@@ -52,7 +52,7 @@ export const VirtualCard = ({
 
   const handleReveal = async () => {
     if (!revealed) {
-      await supabase.rpc("flexpay_log_cvv_view", { _card_id: card.id });
+      await db.rpc("flexpay_log_cvv_view", { _card_id: card.id });
     }
     setRevealed((v) => !v);
   };
@@ -68,7 +68,7 @@ export const VirtualCard = ({
 
   const toggleFreeze = async () => {
     setBusy(true);
-    const { error } = await supabase.rpc("flexpay_set_card_freeze", {
+    const { error } = await db.rpc("flexpay_set_card_freeze", {
       _card_id: card.id,
       _freeze: !frozen,
     });

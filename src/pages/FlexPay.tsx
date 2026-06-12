@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useQuery } from "@tanstack/react-query";
 import {
   ShieldCheck, CreditCard, Clock, Globe, Sparkles, CheckCircle2, ArrowRight, Calculator, Wallet,
@@ -65,7 +65,7 @@ const FlexPay = () => {
   const { data: settings } = useQuery<Settings | null>({
     queryKey: ["flexpay-settings-public"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
+      const { data } = await db.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
       return data as unknown as Settings | null;
     },
   });

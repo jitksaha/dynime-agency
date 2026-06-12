@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -63,7 +63,7 @@ const DocumentManager = ({
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.storage
+    const { data, error } = await db.storage
       .from(BUCKET)
       .list(serviceId, { sortBy: { column: "updated_at", order: "desc" }, limit: 100 });
     if (error) {
@@ -88,7 +88,7 @@ const DocumentManager = ({
 
   const updateServiceStatus = async (key: string, completedNow: boolean) => {
     // Patch metadata.documents to reflect current latest filenames + completion flags
-    const { data: svc } = await supabase
+    const { data: svc } = await db
       .from("customer_services")
       .select("metadata, status")
       .eq("id", serviceId)
@@ -116,7 +116,7 @@ const DocumentManager = ({
     } else if (svc?.status === "pending") {
       patch.status = "in_progress";
     }
-    await supabase.from("customer_services").update(patch).eq("id", serviceId);
+    await db.from("customer_services").update(patch).eq("id", serviceId);
   };
 
   const onUpload = async (key: string, file: File) => {
@@ -130,9 +130,9 @@ const DocumentManager = ({
       const path = `${serviceId}/${key}__${Date.now()}_${safeName}`;
       const existing = fileForSlot(key);
       if (existing) {
-        await supabase.storage.from(BUCKET).remove([`${serviceId}/${existing.name}`]);
+        await db.storage.from(BUCKET).remove([`${serviceId}/${existing.name}`]);
       }
-      const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+      const { error } = await db.storage.from(BUCKET).upload(path, file, {
         upsert: true,
         contentType: file.type || undefined,
       });
@@ -153,7 +153,7 @@ const DocumentManager = ({
     if (!confirm(`Delete "${file.name}"?`)) return;
     setBusyKey(key);
     try {
-      const { error } = await supabase.storage.from(BUCKET).remove([`${serviceId}/${file.name}`]);
+      const { error } = await db.storage.from(BUCKET).remove([`${serviceId}/${file.name}`]);
       if (error) throw error;
       await load();
       await updateServiceStatus(key, false);
@@ -170,7 +170,7 @@ const DocumentManager = ({
     if (!file) return;
     setBusyKey(key);
     try {
-      const { data, error } = await supabase.storage
+      const { data, error } = await db.storage
         .from(BUCKET)
         .createSignedUrl(`${serviceId}/${file.name}`, 60 * 5);
       if (error) throw error;

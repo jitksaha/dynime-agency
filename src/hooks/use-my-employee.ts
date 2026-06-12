@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 
 export type EmployeeRow = {
@@ -28,7 +28,7 @@ export const useMyEmployee = () => {
     queryKey: ["my-employee", user?.id, user?.email],
     enabled: !!user?.id,
     queryFn: async (): Promise<EmployeeRow | null> => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("employees")
         .select("id, full_name, email, employee_code, designation, department, joining_date, employment_type, work_location, status, currency, gross_salary, pay_cycle, phone, address, photo_url, reporting_to")
         .or(`user_id.eq.${user!.id},email.ilike.${user!.email ?? ""}`)
@@ -39,7 +39,7 @@ export const useMyEmployee = () => {
       // Auto-link user_id if it's not set yet but matched by email
       if (data && user?.id) {
         try {
-          await supabase
+          await db
             .from("employees")
             .update({ user_id: user.id })
             .eq("id", data.id)

@@ -1,6 +1,6 @@
 /**
  * Dynime API Client
- * Replaces @supabase/supabase-js for all backend communication.
+ * Replaces @db/db-js for all backend communication.
  * Uses Laravel Sanctum token-based auth stored in localStorage.
  */
 

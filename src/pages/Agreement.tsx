@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Printer, Download, ArrowLeft, Building2, UserRound, FileText, Mail, Phone, MapPin } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { preloadLogoForTheme } from "@/lib/preload-logo";
 
 type Theme = "dark" | "light";
@@ -55,7 +55,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     (async () => {
       try {
-        const { data } = await supabase
+        const { data } = await db
           .from("site_settings")
           .select("value")
           .eq("key", "default_theme")

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,7 +32,7 @@ const LeadActivities = ({ leadId }: { leadId: string }) => {
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["crm-activities", "lead", leadId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("crm_activities")
         .select("*")
         .eq("lead_id", leadId)
@@ -49,9 +49,9 @@ const LeadActivities = ({ leadId }: { leadId: string }) => {
         lead_id: leadId,
         due_at: draft.due_at || null,
       };
-      const { error } = await supabase.from("crm_activities").insert(payload);
+      const { error } = await db.from("crm_activities").insert(payload);
       if (error) throw error;
-      await supabase
+      await db
         .from("crm_leads")
         .update({ last_contacted_at: new Date().toISOString() })
         .eq("id", leadId);
@@ -69,7 +69,7 @@ const LeadActivities = ({ leadId }: { leadId: string }) => {
 
   const toggle = async (a: any) => {
     const next = a.status === "done" ? "open" : "done";
-    const { error } = await supabase
+    const { error } = await db
       .from("crm_activities")
       .update({ status: next, completed_at: next === "done" ? new Date().toISOString() : null })
       .eq("id", a.id);

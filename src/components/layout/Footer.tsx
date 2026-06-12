@@ -23,7 +23,7 @@ import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 import { useLocation as useGeoCtx } from "@/contexts/LocationContext";
 import dynimeIcon from "@/assets/dynime-icon-light.svg";
 import { useSiteSettings, useContactInfo } from "@/hooks/use-data";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { apiPost } from "@/lib/api";
 import {
   parseFooterBlocks,

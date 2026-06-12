@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,7 +151,7 @@ const SalaryDisplay = ({ raw }: { raw: string }) => {
 const notifyApplicationStatus = async (app: JobApplication, status: string, note?: string) => {
   const updatedAt = new Date().toISOString();
   const trimmedNote = (note || "").trim();
-  const { error } = await supabase.functions.invoke("send-transactional-email", {
+  const { error } = await db.functions.invoke("send-transactional-email", {
     body: {
       templateName: "job-application-status-update",
       recipientEmail: app.email,

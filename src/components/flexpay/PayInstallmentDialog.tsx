@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { apiGet, apiPost } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "@/contexts/LocationContext";
 import { useGeoLocation } from "@/hooks/use-geo-location";
@@ -163,7 +163,7 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
       });
       const url = r?.url || r?.checkout_url;
       try {
-        await supabase.rpc("flexpay_mark_installment_processing", {
+        await db.rpc("flexpay_mark_installment_processing", {
           _installment_id: installment.id,
           _order_id: r?.order_id ?? null,
         });

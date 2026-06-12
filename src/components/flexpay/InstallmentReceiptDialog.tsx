@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { CheckCircle2, Download, FileText, Loader2, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { apiGet } from "@/lib/api";

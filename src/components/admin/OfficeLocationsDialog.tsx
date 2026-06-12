@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,7 @@ export const useOfficeLocations = (opts: { onlyActive?: boolean } = {}) =>
   useQuery({
     queryKey: ["office-locations", opts.onlyActive ?? null],
     queryFn: async () => {
-      let q = supabase.from("office_locations").select("*").order("sort_order").order("name");
+      let q = db.from("office_locations").select("*").order("sort_order").order("name");
       if (opts.onlyActive) q = q.eq("is_active", true);
       const { data, error } = await q;
       if (error) throw error;
@@ -74,10 +74,10 @@ const OfficeLocationsDialog = ({ trigger }: Props) => {
         sort_order: Number(form.sort_order) || 0,
       };
       if (editing) {
-        const { error } = await supabase.from("office_locations").update(payload).eq("id", editing.id);
+        const { error } = await db.from("office_locations").update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("office_locations").insert(payload);
+        const { error } = await db.from("office_locations").insert(payload);
         if (error) throw error;
       }
     },
@@ -91,7 +91,7 @@ const OfficeLocationsDialog = ({ trigger }: Props) => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("office_locations").delete().eq("id", id);
+      const { error } = await db.from("office_locations").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {

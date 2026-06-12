@@ -9,7 +9,7 @@ import VerifiedBadge from "@/components/shared/VerifiedBadge";
 import { useIdCardBrand } from "@/hooks/use-id-card-brand";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import { teamSectionSubjectKeys } from "@/hooks/use-team-card-ids";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 const FALLBACK_SITE_NAME = "Dynime Inc.";
 
@@ -74,7 +74,7 @@ const Verify = () => {
     setLoading(true);
     setNotFound(false);
     (async () => {
-      const { data: rows, error } = await supabase
+      const { data: rows, error } = await db
         .rpc("verify_id_card", { _card_id: shortId });
       if (cancelled) return;
       const data: any = Array.isArray(rows) ? rows[0] : rows;

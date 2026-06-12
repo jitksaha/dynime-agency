@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 type SubmissionRow = { label: string; value: string };
 
@@ -97,11 +97,11 @@ export async function notifySubmission(opts: NotifyOptions): Promise<void> {
 
     // Fire both in parallel; await to surface errors in console but don't throw.
     const sends: Promise<unknown>[] = [
-      supabase.functions.invoke("send-transactional-email", { body: adminPayload }),
+      db.functions.invoke("send-transactional-email", { body: adminPayload }),
     ];
     if (customerPayload) {
       sends.push(
-        supabase.functions.invoke("send-transactional-email", { body: customerPayload }),
+        db.functions.invoke("send-transactional-email", { body: customerPayload }),
       );
     }
     const results = await Promise.allSettled(sends);

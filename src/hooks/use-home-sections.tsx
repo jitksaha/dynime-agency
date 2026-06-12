@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import {
   DEFAULT_HOME_SECTIONS,
   HomeSections,
@@ -13,7 +13,7 @@ export const useHomeSections = () => {
   const query = useQuery<HomeSections>({
     queryKey: ["home-sections"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("site_settings")
         .select("value")
         .eq("key", HOME_SECTIONS_KEY)

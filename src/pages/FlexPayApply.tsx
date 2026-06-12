@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { usePageSEO } from "@/hooks/use-page-seo";
@@ -437,7 +437,7 @@ const FlexPayApply = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke("flexpay-apply", {
+      const { data, error } = await db.functions.invoke("flexpay-apply", {
         body: {
           ...form,
           payment_order_id: savedOrderId,

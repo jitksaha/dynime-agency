@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,7 +92,7 @@ const AdminInvestors = () => {
   const investmentsQ = useQuery({
     queryKey: ["admin-investments"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("investments" as any).select("*").order("created_at", { ascending: false });
+      const { data, error } = await db.from("investments" as any).select("*").order("created_at", { ascending: false });
       if (error) throw error;
       return (data as any[]) as Investment[];
     },
@@ -100,7 +100,7 @@ const AdminInvestors = () => {
   const payoutsQ = useQuery({
     queryKey: ["admin-payouts"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("investment_payouts" as any).select("*").order("created_at", { ascending: false }).limit(500);
+      const { data, error } = await db.from("investment_payouts" as any).select("*").order("created_at", { ascending: false }).limit(500);
       if (error) throw error;
       return (data as any[]) as Payout[];
     },
@@ -108,7 +108,7 @@ const AdminInvestors = () => {
   const withdrawalsQ = useQuery({
     queryKey: ["admin-withdrawals"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("withdrawal_requests" as any).select("*").order("created_at", { ascending: false }).limit(500);
+      const { data, error } = await db.from("withdrawal_requests" as any).select("*").order("created_at", { ascending: false }).limit(500);
       if (error) throw error;
       return (data as any[]) as Withdrawal[];
     },
@@ -126,7 +126,7 @@ const AdminInvestors = () => {
     queryKey: ["admin-investor-profiles", investorIds],
     enabled: investorIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id,email,full_name").in("id", investorIds);
+      const { data, error } = await db.from("profiles").select("id,email,full_name").in("id", investorIds);
       if (error) throw error;
       const map: Record<string, Profile> = {};
       (data ?? []).forEach((p: any) => { map[p.id] = p; });
@@ -151,7 +151,7 @@ const AdminInvestors = () => {
 
   // ---- Investment actions ----
   const updateInvestment = async (id: string, patch: Partial<Investment>) => {
-    const { error } = await supabase.from("investments" as any).update(patch).eq("id", id);
+    const { error } = await db.from("investments" as any).update(patch).eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success("Updated");
@@ -171,7 +171,7 @@ const AdminInvestors = () => {
     const inv = investmentsQ.data?.find((i) => i.id === payoutInvestmentId);
     if (!inv) { toast.error("Pick an investment"); return; }
     if (!newPayout.amount || Number(newPayout.amount) <= 0) { toast.error("Enter amount"); return; }
-    const { error } = await supabase.from("investment_payouts" as any).insert({
+    const { error } = await db.from("investment_payouts" as any).insert({
       investment_id: inv.id,
       investor_id: inv.investor_id,
       payout_type: newPayout.payout_type ?? "monthly",
@@ -193,7 +193,7 @@ const AdminInvestors = () => {
   };
 
   const markPayoutPaid = async (p: Payout) => {
-    const { error } = await supabase
+    const { error } = await db
       .from("investment_payouts" as any)
       .update({ status: "paid", paid_at: new Date().toISOString() })
       .eq("id", p.id);
@@ -203,7 +203,7 @@ const AdminInvestors = () => {
 
   // ---- Withdrawal actions ----
   const decideWithdrawal = async (w: Withdrawal, status: "approved" | "rejected" | "paid", notes?: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from("withdrawal_requests" as any)
       .update({
         status,
@@ -217,7 +217,7 @@ const AdminInvestors = () => {
 
   // ---- Agreement signed URL ----
   const openAgreement = async (path: string) => {
-    const { data, error } = await supabase.storage.from("investor-documents").createSignedUrl(path, 60 * 10);
+    const { data, error } = await db.storage.from("investor-documents").createSignedUrl(path, 60 * 10);
     if (error || !data?.signedUrl) { toast.error("Could not open file"); return; }
     window.open(data.signedUrl, "_blank");
   };

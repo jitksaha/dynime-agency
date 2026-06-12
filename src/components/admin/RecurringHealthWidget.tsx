@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Repeat, ArrowUpRight, AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ const RecurringHealthWidget = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["dash-recurring-services"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("customer_services")
         .select("id, service_name, customer_email, status, billing_cycle, current_period_end, auto_renew, price, currency")
         .eq("type", "recurring")

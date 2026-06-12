@@ -34,7 +34,7 @@ import { printWithSignatureFonts } from "@/lib/print-with-fonts";
 import { downloadHRDocumentPdf } from "@/lib/download-hr-pdf";
 import type { TeamMember } from "@/lib/home-sections-defaults";
 import { HOME_SECTIONS_KEY } from "@/hooks/use-home-sections";
-import type { Database, Json } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/db/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import TeamAvatarUploader from "@/components/admin/TeamAvatarUploader";
 import { useIdCardBrand } from "@/hooks/use-id-card-brand";

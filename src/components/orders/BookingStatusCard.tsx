@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarClock, CheckCircle2, Clock, XCircle, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 
@@ -75,7 +75,7 @@ const BookingStatusCard = ({ orderId, serviceBrief, editable = false, onUpdated,
           ...(next === "cancelled" ? { cancelled_at: new Date().toISOString() } : {}),
         },
       };
-      const { error } = await supabase
+      const { error } = await db
         .from("orders")
         .update({ service_brief: nextBrief })
         .eq("id", orderId);

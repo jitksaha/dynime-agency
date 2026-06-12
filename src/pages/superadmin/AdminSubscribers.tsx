@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const useSubscribers = () =>
   useQuery({
     queryKey: ["newsletter-subscribers"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("newsletter_subscribers")
         .select("*")
         .order("subscribed_at", { ascending: false })
@@ -114,7 +114,7 @@ const AdminSubscribers = () => {
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("newsletter_subscribers").delete().eq("id", id);
+      const { error } = await db.from("newsletter_subscribers").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -127,7 +127,7 @@ const AdminSubscribers = () => {
   const toggleStatus = useMutation({
     mutationFn: async (s: Subscriber) => {
       const next = s.status === "subscribed" ? "unsubscribed" : "subscribed";
-      const { error } = await supabase
+      const { error } = await db
         .from("newsletter_subscribers")
         .update({
           status: next,
@@ -149,7 +149,7 @@ const AdminSubscribers = () => {
     }
     setSyncing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("sync-newsletter-subscribers", {
+      const { data, error } = await db.functions.invoke("sync-newsletter-subscribers", {
         body: {},
       });
       if (error) throw error;

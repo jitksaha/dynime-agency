@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
@@ -242,7 +242,7 @@ const AdminHRRequests = () => {
       for (const f of fulfillFiles) {
         const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `fulfillment/${active.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-        const { error: upErr } = await supabase.storage
+        const { error: upErr } = await db.storage
           .from("hr-request-attachments")
           .upload(path, f, { contentType: f.type || "application/octet-stream", upsert: false });
         if (upErr) throw upErr;
@@ -288,7 +288,7 @@ const AdminHRRequests = () => {
   };
 
   const downloadAttachment = async (path: string, name: string) => {
-    const { data, error } = await supabase.storage
+    const { data, error } = await db.storage
       .from("hr-request-attachments")
       .createSignedUrl(path, 60);
     if (error || !data) return toast.error(error?.message || "Could not get download URL");

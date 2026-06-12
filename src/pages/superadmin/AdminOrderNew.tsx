@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Trash2, Loader2, FileText, ArrowLeft, Building2, UserRound } from "lucide-react";
 import ServiceItemPicker from "@/components/admin/ServiceItemPicker";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import type { TeamMember } from "@/lib/home-sections-defaults";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import InvestorPortalLayout from "@/components/investor/InvestorPortalLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +34,7 @@ const InvestorStatements = () => {
     queryKey: ["investor-statements", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("investment_payouts" as any)
         .select("*, investments:investment_id(plan_name)")
         .eq("investor_id", user!.id)
@@ -46,7 +46,7 @@ const InvestorStatements = () => {
 
   const downloadStatement = async (path: string) => {
     try {
-      const { data, error } = await supabase.storage
+      const { data, error } = await db.storage
         .from("investor-documents")
         .createSignedUrl(path, 60 * 60);
       if (error) throw error;

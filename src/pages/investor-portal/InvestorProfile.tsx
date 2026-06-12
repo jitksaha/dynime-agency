@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import InvestorPortalLayout from "@/components/investor/InvestorPortalLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +34,7 @@ const InvestorProfile = () => {
     queryKey: ["investor-profile", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
+      const { data } = await db.from("profiles").select("*").eq("id", user!.id).maybeSingle();
       return data;
     },
   });
@@ -44,7 +44,7 @@ const InvestorProfile = () => {
     queryKey: ["investor-profile-bank", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("investments" as any)
         .select("bank_details")
         .eq("investor_id", user!.id)
@@ -73,7 +73,7 @@ const InvestorProfile = () => {
     if (!user?.id) return;
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("profiles")
         .update({ full_name: fullName, phone, country } as any)
         .eq("id", user.id);
@@ -93,7 +93,7 @@ const InvestorProfile = () => {
     try {
       // Update bank details on the investor's most recent investment.
       // Withdrawals capture their own bank details per request, so this is informational.
-      const latestRes: any = await supabase
+      const latestRes: any = await db
         .from("investments" as any)
         .select("id")
         .eq("investor_id", user.id)
@@ -105,7 +105,7 @@ const InvestorProfile = () => {
         toast.error("Add an investment first to save default bank details");
         return;
       }
-      const { error } = await (supabase as any)
+      const { error } = await (db as any)
         .from("investments")
         .update({
           bank_details: {
@@ -130,7 +130,7 @@ const InvestorProfile = () => {
     if (newPwd.length < 6) return toast.error("Password must be at least 6 characters");
     setPwdSaving(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPwd });
+      const { error } = await db.auth.updateUser({ password: newPwd });
       if (error) throw error;
       toast.success("Password updated");
       setNewPwd("");

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Plus, Pencil, Trash2, Star, Eye, EyeOff, Upload, X, Search, GripVertical, CheckSquare, History, RotateCcw, Sparkles, Zap } from "lucide-react";
 import { generateAltText } from "@/lib/alt-text";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -226,7 +226,7 @@ const AdminPortfolio = () => {
     }
 
     // Verify auth (RLS requires admin)
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await db.auth.getSession();
     if (!session) {
       const msg = "You must be signed in as an admin to upload images.";
       setUploadError(msg);
@@ -246,20 +246,20 @@ const AdminPortfolio = () => {
     setUploadProgress(10);
     try {
       setUploadProgress(30);
-      const { error: uploadErr } = await supabase.storage
+      const { error: uploadErr } = await db.storage
         .from("portfolio")
         .upload(stablePath, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
       if (uploadErr) throw uploadErr;
 
       setUploadProgress(60);
       // Snapshot copy for history (best-effort)
-      const { error: histErr } = await supabase.storage
+      const { error: histErr } = await db.storage
         .from("portfolio")
         .upload(historyPath, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
       if (histErr) console.warn("History snapshot failed:", histErr.message);
 
       setUploadProgress(85);
-      const { data } = supabase.storage.from("portfolio").getPublicUrl(stablePath);
+      const { data } = db.storage.from("portfolio").getPublicUrl(stablePath);
       // Cache-bust so the browser shows the new image immediately
       const bustedUrl = `${data.publicUrl}?v=${Date.now()}`;
 
@@ -313,7 +313,7 @@ const AdminPortfolio = () => {
     }
     setHistoryLoading(true);
     try {
-      const { data, error } = await supabase.storage
+      const { data, error } = await db.storage
         .from("portfolio")
         .list(`projects/${slug}/history`, {
           limit: 5,
@@ -328,7 +328,7 @@ const AdminPortfolio = () => {
         .slice(0, 5)
         .map((f) => {
           const path = `projects/${slug}/history/${f.name}`;
-          const { data: pub } = supabase.storage.from("portfolio").getPublicUrl(path);
+          const { data: pub } = db.storage.from("portfolio").getPublicUrl(path);
           return {
             name: f.name,
             path,
@@ -352,17 +352,17 @@ const AdminPortfolio = () => {
     try {
       setUploading(true);
       setUploadProgress(20);
-      const { data: blob, error: dlErr } = await supabase.storage.from("portfolio").download(item.path);
+      const { data: blob, error: dlErr } = await db.storage.from("portfolio").download(item.path);
       if (dlErr) throw dlErr;
 
       setUploadProgress(60);
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await db.storage
         .from("portfolio")
         .upload(stablePath, blob, { upsert: true, cacheControl: "3600", contentType: blob.type });
       if (upErr) throw upErr;
 
       setUploadProgress(90);
-      const { data: pub } = supabase.storage.from("portfolio").getPublicUrl(stablePath);
+      const { data: pub } = db.storage.from("portfolio").getPublicUrl(stablePath);
       setForm((f) => ({
         ...f,
         thumbnail_url: `${pub.publicUrl}?v=${Date.now()}`,
@@ -406,7 +406,7 @@ const AdminPortfolio = () => {
         setQuickFallbackUploading(true);
         const ext = quickFallbackFile.name.split(".").pop()?.toLowerCase() || "png";
         const path = `quick-publish/fallback-${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
+        const { error: upErr } = await db.storage
           .from("portfolio")
           .upload(path, quickFallbackFile, {
             upsert: false,
@@ -414,7 +414,7 @@ const AdminPortfolio = () => {
             cacheControl: "3600",
           });
         if (upErr) throw upErr;
-        const { data: pub } = supabase.storage.from("portfolio").getPublicUrl(path);
+        const { data: pub } = db.storage.from("portfolio").getPublicUrl(path);
         fallbackUrl = pub.publicUrl;
         setQuickFallbackUploading(false);
       }

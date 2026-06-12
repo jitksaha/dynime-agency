@@ -7,7 +7,7 @@ import {
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import InvestorNotificationsBell from "@/components/investor/InvestorNotificationsBell";
@@ -32,7 +32,7 @@ const InvestorPortalLayout = ({ title, description, children, actions }: Props) 
   const navigate = useNavigate();
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await db.auth.signOut();
     toast.success("Signed out");
     navigate("/investor/login", { replace: true });
   };

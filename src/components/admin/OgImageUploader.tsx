@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,13 +44,13 @@ const OgImageUploader = ({
     try {
       const ext = file.name.split(".").pop() || "png";
       const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
+      const { error } = await db.storage.from(BUCKET).upload(path, file, {
         cacheControl: "3600",
         upsert: false,
         contentType: file.type,
       });
       if (error) throw error;
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const { data } = db.storage.from(BUCKET).getPublicUrl(path);
       onChange(data.publicUrl);
       toast.success("Image uploaded.");
     } catch (e: any) {
@@ -68,7 +68,7 @@ const OgImageUploader = ({
     }
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-og-image", {
+      const { data, error } = await db.functions.invoke("generate-og-image", {
         body: {
           title: context.title,
           description: context.description || "",

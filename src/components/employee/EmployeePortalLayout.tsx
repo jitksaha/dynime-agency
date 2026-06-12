@@ -4,7 +4,7 @@ import { LayoutDashboard, FileText, Inbox, User as UserIcon, LogOut, Home } from
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -27,7 +27,7 @@ const EmployeePortalLayout = ({ title, description, children, actions }: Props) 
   const navigate = useNavigate();
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await db.auth.signOut();
     toast.success("Signed out");
     navigate("/employee/login", { replace: true });
   };

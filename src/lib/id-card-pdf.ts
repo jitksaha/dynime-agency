@@ -5,7 +5,7 @@
 // id_card_assignments sequencing, so a card issued from either place is
 // indistinguishable and verifies through the public /verify page.
 
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { clampDigits } from "@/hooks/use-card-id";
 import type { IdCardBrand } from "@/lib/id-card-brand";
 
@@ -105,7 +105,7 @@ const allocateSequential = async (
   const initial = (kind || "X")[0].toUpperCase();
   const prefix = `${code}${initial}`;
   const d = clampDigits(digits);
-  const { data } = await supabase
+  const { data } = await db
     .from("id_card_assignments")
     .select("card_id")
     .eq("kind", kind)
@@ -165,7 +165,7 @@ export const resolveOrIssueCardId = async (params: {
   snapshot: Record<string, any>;
 }): Promise<string> => {
   const { kind, subjectKey, brand, snapshot } = params;
-  const { data: existing } = await supabase
+  const { data: existing } = await db
     .from("id_card_assignments")
     .select("card_id")
     .eq("kind", kind)
@@ -176,7 +176,7 @@ export const resolveOrIssueCardId = async (params: {
   for (let offset = 0; offset < 50; offset++) {
     const { candidate } = await allocateSequential(kind, brand.companyName, brand.idDigits, offset);
     const payload = { ...snapshot, id: candidate };
-    const { error } = await supabase.from("id_card_assignments").insert({
+    const { error } = await db.from("id_card_assignments").insert({
       kind,
       subject_key: subjectKey,
       card_id: candidate,

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import Layout from "@/components/layout/Layout";
 import BlockRenderer from "@/components/page-builder/BlockRenderer";
 import { Block } from "@/components/page-builder/types";
@@ -13,7 +13,7 @@ const DynamicPage = () => {
   const { data: page, isLoading, error } = useQuery({
     queryKey: ["public-page", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("pages")
         .select("*")
         .eq("slug", slug!)

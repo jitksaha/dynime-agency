@@ -9,7 +9,7 @@ import { Plus, Trash2, Loader2, FileText, Building2, UserRound, ScrollText, Eye,
 import { Switch } from "@/components/ui/switch";
 import AgreementPreview from "@/components/admin/AgreementPreview";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import type { TeamMember } from "@/lib/home-sections-defaults";
 
@@ -94,14 +94,14 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
     setPrefillLoading(true);
     try {
       let row: Record<string, unknown> | null = null;
-      const { data: r1 } = await supabase
+      const { data: r1 } = await db
         .from("orders")
         .select("*")
         .eq("invoice_number", ref)
         .maybeSingle();
       if (r1) row = r1 as Record<string, unknown>;
       if (!row && /^[0-9a-f-]{36}$/i.test(ref)) {
-        const { data: r2 } = await supabase.from("orders").select("*").eq("id", ref).maybeSingle();
+        const { data: r2 } = await db.from("orders").select("*").eq("id", ref).maybeSingle();
         if (r2) row = r2 as Record<string, unknown>;
       }
       if (!row) {
@@ -278,7 +278,7 @@ export default function ManualOrderDialog({ open, onOpenChange, onCreated }: Pro
     }
     setSubmitting(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("orders")
         .insert([{
           customer_name: customerName.trim() || null,

@@ -5,7 +5,7 @@ import DOMPurify from "isomorphic-dompurify";
 import Layout from "@/components/layout/Layout";
 import { useSEO } from "@/hooks/use-seo";
 import ScrollReveal from "@/components/shared/ScrollReveal";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, ArrowUpRight, Briefcase, Clock, MapPin,
@@ -70,7 +70,7 @@ const useCareerStats = (slug: string | undefined, careerId: string | undefined) 
   // Realtime: refresh applicant count when new applications come in for this career
   useEffect(() => {
     if (!careerId || !slug) return;
-    const channel = supabase
+    const channel = db
       .channel(`career-apps-${careerId}`)
       .on(
         "postgres_changes",
@@ -83,7 +83,7 @@ const useCareerStats = (slug: string | undefined, careerId: string | undefined) 
         () => qc.invalidateQueries({ queryKey: ["career-stats", slug] })
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, [careerId, slug, qc]);
 
   return query;

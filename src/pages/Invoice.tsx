@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import OrderMilestones from "@/components/orders/OrderMilestones";
 import { useParams, Link, useLocation, useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -121,12 +121,12 @@ const Invoice = () => {
   const pollRef = useRef<number | null>(null);
   useEffect(() => {
     if (!orderId) return;
-    const channel = supabase
+    const channel = db
       .channel(`invoice-${orderId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
         () => { fetchInvoice({ silent: true }); })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, [orderId, fetchInvoice]);
 
   useEffect(() => {

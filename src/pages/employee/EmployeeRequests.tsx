@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { useMyEmployee } from "@/hooks/use-my-employee";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import {
   Plus, Loader2, MessageSquare, X, Paperclip, CalendarDays, FileText, Wallet,
@@ -113,7 +113,7 @@ const NewRequestDialog = ({ employeeId, onCreated }: { employeeId: string; onCre
       for (const f of files) {
         const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
         const path = `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-        const { error: upErr } = await supabase.storage
+        const { error: upErr } = await db.storage
           .from("hr-request-attachments")
           .upload(path, f, { contentType: f.type || "application/octet-stream", upsert: false });
         if (upErr) throw upErr;
@@ -121,7 +121,7 @@ const NewRequestDialog = ({ employeeId, onCreated }: { employeeId: string; onCre
       }
 
       // 2) Insert request row
-      const { error } = await supabase.from("hr_requests").insert({
+      const { error } = await db.from("hr_requests").insert({
         employee_id: employeeId,
         created_by: user!.id,
         category: category.value,
@@ -499,7 +499,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
   const { data: events, refetch } = useQuery({
     queryKey: ["hr-request-events", request.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("hr_request_events")
         .select("id, author_role, event_type, message, created_at, metadata")
         .eq("request_id", request.id)
@@ -510,7 +510,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
 
   // Realtime: stream new events + status changes for this request
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel(`hr-request-${request.id}`)
       .on(
         "postgres_changes",
@@ -538,7 +538,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [request.id, refetch, onChanged]);
 
@@ -546,7 +546,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
     if (!comment.trim()) return;
     setPosting(true);
     try {
-      const { error } = await supabase.from("hr_request_events").insert({
+      const { error } = await db.from("hr_request_events").insert({
         request_id: request.id,
         author_id: user!.id,
         author_role: "employee",
@@ -565,7 +565,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
 
   const cancel = async () => {
     if (!confirm("Cancel this request?")) return;
-    const { error } = await supabase.from("hr_requests").update({ status: "cancelled" }).eq("id", request.id);
+    const { error } = await db.from("hr_requests").update({ status: "cancelled" }).eq("id", request.id);
     if (error) return toast.error(error.message);
     toast.success("Request cancelled");
     onChanged();
@@ -573,7 +573,7 @@ const RequestDetail = ({ request, onClose, onChanged }: any) => {
   };
 
   const downloadAttachment = async (path: string, name: string) => {
-    const { data, error } = await supabase.storage
+    const { data, error } = await db.storage
       .from("hr-request-attachments")
       .createSignedUrl(path, 60);
     if (error || !data) return toast.error(error?.message || "Could not get download URL");
@@ -672,7 +672,7 @@ const EmployeeRequests = () => {
     queryKey: ["employee-requests", emp?.id],
     enabled: !!emp?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("hr_requests")
         .select("*")
         .eq("employee_id", emp!.id)

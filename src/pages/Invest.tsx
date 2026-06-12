@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -554,7 +554,7 @@ const Invest = () => {
 
   // Realtime updates: re-fetch plans whenever the table changes
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("invest-plans-live")
       .on(
         "postgres_changes",
@@ -571,7 +571,7 @@ const Invest = () => {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [queryClient]);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 const shortCode = (companyName: string) => {
   const cleaned = (companyName || "").replace(/[^A-Za-z0-9 ]/g, " ").trim();
@@ -32,7 +32,7 @@ const allocateSequential = async (
   const prefix = `${code}${initial}`;
   const d = clampDigits(digits);
 
-  const { data } = await supabase
+  const { data } = await db
     .from("id_card_assignments")
     .select("card_id")
     .eq("kind", kind)
@@ -87,7 +87,7 @@ export const useCardId = (
     setState({ id: "", qrPayload: null });
 
     const run = async () => {
-      const { data: existing } = await supabase
+      const { data: existing } = await db
         .from("id_card_assignments")
         .select("card_id, qr_payload")
         .eq("kind", kind)
@@ -110,7 +110,7 @@ export const useCardId = (
         const payload = currentSnapshot
           ? { ...currentSnapshot, id: candidate }
           : null;
-        const { error } = await supabase
+        const { error } = await db
           .from("id_card_assignments")
           .insert({
             kind,

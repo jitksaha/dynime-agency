@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 // Thin wrappers so existing pages keep working
 const apiGet = <T,>(path: string) => api.get<T>(path).then((r) => r.data);
@@ -312,7 +312,7 @@ export const useCountryEligibility = () => {
   return useQuery({
     queryKey: ["country-eligibility"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("country_eligibility")
         .select("*")
         .eq("is_active", true)
@@ -327,7 +327,7 @@ export const useCountryEligibilityAdmin = () => {
   return useQuery({
     queryKey: ["country-eligibility-admin"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("country_eligibility")
         .select("*")
         .order("sort_order", { ascending: true });
@@ -351,14 +351,14 @@ export const useUpsertCountryEligibility = () => {
         sort_order: row.sort_order,
       };
       if (row.id) {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from("country_eligibility")
           .update(payload)
           .eq("id", row.id);
         if (error) throw error;
         return data;
       } else {
-        const { data, error } = await supabase
+        const { data, error } = await db
           .from("country_eligibility")
           .insert(payload);
         if (error) throw error;
@@ -376,7 +376,7 @@ export const useDeleteCountryEligibility = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("country_eligibility")
         .delete()
         .eq("id", id);

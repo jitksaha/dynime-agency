@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import {
   CreditCard, Wallet, Clock, ArrowRight, CalendarDays, CheckCircle2,
@@ -113,7 +113,7 @@ const AccountFlexPay = () => {
     enabled: !!user,
     queryKey: ["flexpay-account", user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_credit_accounts")
+      const { data } = await db.from("flexpay_credit_accounts")
         .select("*").eq("user_id", user!.id).maybeSingle();
       return data;
     },
@@ -123,7 +123,7 @@ const AccountFlexPay = () => {
     enabled: !!user,
     queryKey: ["flexpay-card-mine", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_virtual_cards")
         .select("id, cardholder_name, card_number, last4, cvv, exp_month, exp_year, status, theme, tier")
         .eq("user_id", user!.id)
@@ -139,7 +139,7 @@ const AccountFlexPay = () => {
     enabled: !!user,
     queryKey: ["flexpay-apps-mine", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_credit_applications")
         .select("*")
         .order("created_at", { ascending: false })
@@ -152,7 +152,7 @@ const AccountFlexPay = () => {
     enabled: !!user,
     queryKey: ["flexpay-plans-mine", user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_emi_plans")
+      const { data } = await db.from("flexpay_emi_plans")
         .select("*").order("created_at", { ascending: false });
       return data || [];
     },
@@ -162,7 +162,7 @@ const AccountFlexPay = () => {
     enabled: !!user,
     queryKey: ["flexpay-installments-mine", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_emi_installments")
         .select("*")
         .order("due_date", { ascending: true });
@@ -175,7 +175,7 @@ const AccountFlexPay = () => {
   // auto-receipt effect below pick it up.
   useEffect(() => {
     if (!user) return;
-    const ch = supabase
+    const ch = db
       .channel(`flexpay-installments-${user.id}`)
       .on(
         "postgres_changes",
@@ -197,7 +197,7 @@ const AccountFlexPay = () => {
         }, 4000)
       : null;
     return () => {
-      supabase.removeChannel(ch);
+      db.removeChannel(ch);
       if (pollId) clearInterval(pollId);
     };
   }, [user, queryClient, awaitingPaidId, installments]);
@@ -257,7 +257,7 @@ const AccountFlexPay = () => {
     enabled: !!user && appIds.length > 0,
     queryKey: ["flexpay-app-docs-mine", appIds.join(",")],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_application_documents")
         .select("*")
         .in("application_id", appIds)
@@ -855,11 +855,11 @@ const ApplicationDocuments = ({
     if (file.size > 10 * 1024 * 1024) return toast.error("Max file size is 10MB");
     const ext = file.name.split(".").pop() || "bin";
     const path = `${applicationId}/${doc.id}/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage
+    const { error: upErr } = await db.storage
       .from("flexpay-documents")
       .upload(path, file, { contentType: file.type, upsert: true });
     if (upErr) return toast.error(upErr.message);
-    const { error } = await supabase
+    const { error } = await db
       .from("flexpay_application_documents")
       .update({
         file_path: path,

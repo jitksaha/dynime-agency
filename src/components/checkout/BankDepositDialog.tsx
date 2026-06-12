@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Building2, Copy, CheckCircle2, Mail, Upload, FileImage, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 export type BankAccount = {
   bank_name?: string;
@@ -103,7 +103,7 @@ const BankDepositDialog = ({
     if (!open) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("contact_info")
         .select("value, type, label")
         .eq("is_active", true)
@@ -139,12 +139,12 @@ const BankDepositDialog = ({
       const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
       const safeRef = (orderNumber || "order").replace(/[^a-zA-Z0-9_-]/g, "_");
       const path = `${safeRef}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await db.storage
         .from("bank-receipts")
         .upload(path, file, { contentType: file.type, upsert: false });
       if (upErr) throw upErr;
 
-      const { error: fnErr } = await supabase.functions.invoke("attach-bank-receipt", {
+      const { error: fnErr } = await db.functions.invoke("attach-bank-receipt", {
         body: {
           session_id: orderNumber,
           path,

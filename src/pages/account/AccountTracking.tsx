@@ -1,6 +1,6 @@
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +31,7 @@ const AccountTracking = () => {
   const { data: orders, isLoading } = useQuery({
     queryKey: ["account-tracking", user?.email],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("orders")
         .select("*")
         .eq("customer_email", user!.email!)

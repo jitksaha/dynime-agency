@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 /**
  * Global realtime listener for inbound emails and outgoing reply delivery
@@ -12,7 +12,7 @@ const MailRealtimeToasts = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("admin-mail-toasts")
       .on(
         "postgres_changes",
@@ -103,7 +103,7 @@ const MailRealtimeToasts = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [navigate]);
 

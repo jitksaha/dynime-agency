@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,21 +57,21 @@ const TrackingTab = () => {
   const { data: accounts } = useQuery({
     queryKey: ["flexpay-tracking-accounts"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_credit_accounts").select("*").order("created_at", { ascending: false });
+      const { data } = await db.from("flexpay_credit_accounts").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
   const { data: installments } = useQuery({
     queryKey: ["flexpay-tracking-installments"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_emi_installments").select("plan_id, amount, status, due_date");
+      const { data } = await db.from("flexpay_emi_installments").select("plan_id, amount, status, due_date");
       return data || [];
     },
   });
   const { data: plans } = useQuery({
     queryKey: ["flexpay-tracking-plans"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_emi_plans").select("id, user_id, status");
+      const { data } = await db.from("flexpay_emi_plans").select("id, user_id, status");
       return data || [];
     },
   });
@@ -180,7 +180,7 @@ const SettingsTab = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["flexpay-settings-admin"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
+      const { data } = await db.from("flexpay_settings").select("*").eq("id", 1).maybeSingle();
       return data;
     },
   });
@@ -200,7 +200,7 @@ const SettingsTab = () => {
       updated_at: new Date().toISOString(),
     };
     delete payload.created_at;
-    const { error } = await supabase.from("flexpay_settings").update(payload).eq("id", 1);
+    const { error } = await db.from("flexpay_settings").update(payload).eq("id", 1);
     if (error) return toast.error(error.message);
     toast.success("Settings saved");
     qc.invalidateQueries({ queryKey: ["flexpay-settings-admin"] });
@@ -321,7 +321,7 @@ const ApplicationsTab = () => {
   const { data: apps } = useQuery({
     queryKey: ["flexpay-apps-admin"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_credit_applications").select("*").order("created_at", { ascending: false });
+      const { data } = await db.from("flexpay_credit_applications").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
@@ -335,7 +335,7 @@ const ApplicationsTab = () => {
   const reject = async (id: string) => {
     const reason = window.prompt("Rejection reason?");
     if (reason === null) return;
-    const { error } = await supabase.from("flexpay_credit_applications")
+    const { error } = await db.from("flexpay_credit_applications")
       .update({ status: "rejected", rejection_reason: reason }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Rejected");
@@ -344,7 +344,7 @@ const ApplicationsTab = () => {
 
   const approve = async () => {
     if (!approveApp) return;
-    const { error } = await supabase.rpc("flexpay_approve_application", {
+    const { error } = await db.rpc("flexpay_approve_application", {
       _app_id: approveApp.id,
       _limit: Number(limit),
       _max_tenure: Number(maxTenure),
@@ -448,7 +448,7 @@ const AdminDocumentsDialog = ({ app, onClose }: { app: any; onClose: () => void 
     enabled: !!app?.id,
     queryKey: ["flexpay-app-docs", app?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_application_documents")
         .select("*")
         .eq("application_id", app.id)
@@ -469,12 +469,12 @@ const AdminDocumentsDialog = ({ app, onClose }: { app: any; onClose: () => void 
       description: note.trim() || null,
       status: "requested",
     }));
-    const { error } = await supabase.from("flexpay_application_documents").insert(rows);
+    const { error } = await db.from("flexpay_application_documents").insert(rows);
     if (error) { setBusy(false); return toast.error(error.message); }
 
     // Email the applicant
     try {
-      await supabase.functions.invoke("send-transactional-email", {
+      await db.functions.invoke("send-transactional-email", {
         body: {
           templateName: "flexpay-document-request",
           recipientEmail: app.email,
@@ -499,7 +499,7 @@ const AdminDocumentsDialog = ({ app, onClose }: { app: any; onClose: () => void 
 
   const review = async (id: string, status: "approved" | "rejected") => {
     const review_note = status === "rejected" ? window.prompt("Reason for rejection?") || "" : null;
-    const { error } = await supabase.from("flexpay_application_documents")
+    const { error } = await db.from("flexpay_application_documents")
       .update({ status, review_note, reviewed_at: new Date().toISOString() })
       .eq("id", id);
     if (error) return toast.error(error.message);
@@ -509,13 +509,13 @@ const AdminDocumentsDialog = ({ app, onClose }: { app: any; onClose: () => void 
 
   const removeReq = async (id: string) => {
     if (!confirm("Remove this document request?")) return;
-    const { error } = await supabase.from("flexpay_application_documents").delete().eq("id", id);
+    const { error } = await db.from("flexpay_application_documents").delete().eq("id", id);
     if (error) return toast.error(error.message);
     refetch();
   };
 
   const viewFile = async (path: string) => {
-    const { data, error } = await supabase.storage.from("flexpay-documents").createSignedUrl(path, 300);
+    const { data, error } = await db.storage.from("flexpay-documents").createSignedUrl(path, 300);
     if (error || !data?.signedUrl) return toast.error("Could not load file");
     window.open(data.signedUrl, "_blank");
   };
@@ -627,13 +627,13 @@ const AccountsTab = () => {
   const { data: accounts } = useQuery({
     queryKey: ["flexpay-accounts-admin"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_credit_accounts").select("*").order("created_at", { ascending: false });
+      const { data } = await db.from("flexpay_credit_accounts").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
 
   const updateField = async (id: string, patch: any) => {
-    const { error } = await supabase.from("flexpay_credit_accounts").update(patch).eq("id", id);
+    const { error } = await db.from("flexpay_credit_accounts").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["flexpay-accounts-admin"] });
@@ -695,14 +695,14 @@ const PlansTab = () => {
   const { data: plans } = useQuery({
     queryKey: ["flexpay-plans-admin"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_emi_plans").select("*").order("created_at", { ascending: false });
+      const { data } = await db.from("flexpay_emi_plans").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
   const { data: accounts } = useQuery({
     queryKey: ["flexpay-accounts-for-plans"],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_credit_accounts").select("id, user_id, email, total_limit, used_limit, currency, status");
+      const { data } = await db.from("flexpay_credit_accounts").select("id, user_id, email, total_limit, used_limit, currency, status");
       return data || [];
     },
   });
@@ -711,7 +711,7 @@ const PlansTab = () => {
     enabled: planIds.length > 0,
     queryKey: ["flexpay-installments-admin", planIds.join(",")],
     queryFn: async () => {
-      const { data } = await supabase.from("flexpay_emi_installments").select("*").in("plan_id", planIds).order("sequence");
+      const { data } = await db.from("flexpay_emi_installments").select("*").in("plan_id", planIds).order("sequence");
       return data || [];
     },
   });
@@ -730,7 +730,7 @@ const PlansTab = () => {
     if (!usedEdit) return;
     const v = Number(usedEdit.value);
     if (!Number.isFinite(v) || v < 0) return toast.error("Invalid value");
-    const { error } = await supabase.rpc("flexpay_admin_set_used_limit", { _account_id: usedEdit.accountId, _new_used_limit: v });
+    const { error } = await db.rpc("flexpay_admin_set_used_limit", { _account_id: usedEdit.accountId, _new_used_limit: v });
     if (error) return toast.error(error.message);
     toast.success("Used credit updated");
     setUsedEdit(null);
@@ -738,7 +738,7 @@ const PlansTab = () => {
   };
 
   const setInstallmentStatus = async (id: string, status: string) => {
-    const { error } = await supabase.rpc("flexpay_admin_update_installment", { _installment_id: id, _status: status });
+    const { error } = await db.rpc("flexpay_admin_update_installment", { _installment_id: id, _status: status });
     if (error) return toast.error(error.message);
     toast.success(`Marked ${status}`);
     refetchAll();
@@ -746,7 +746,7 @@ const PlansTab = () => {
 
   const saveInstallment = async () => {
     if (!editInst) return;
-    const { error } = await supabase.rpc("flexpay_admin_update_installment", {
+    const { error } = await db.rpc("flexpay_admin_update_installment", {
       _installment_id: editInst.id,
       _amount: Number(editInst.amount),
       _due_date: editInst.due_date,
@@ -763,11 +763,11 @@ const PlansTab = () => {
     const plan = (plans || []).find((p: any) => p.id === planId);
     if (!plan) return;
     const acct = (accounts || []).find((a: any) => a.user_id === plan.user_id);
-    const { error: delErr } = await supabase.from("flexpay_emi_plans").delete().eq("id", planId);
+    const { error: delErr } = await db.from("flexpay_emi_plans").delete().eq("id", planId);
     if (delErr) return toast.error(delErr.message);
     if (acct) {
       const newUsed = Math.max(0, Number(acct.used_limit) - Number(plan.financed_amount));
-      await supabase.rpc("flexpay_admin_set_used_limit", { _account_id: acct.id, _new_used_limit: newUsed });
+      await db.rpc("flexpay_admin_set_used_limit", { _account_id: acct.id, _new_used_limit: newUsed });
     }
     toast.success("Plan deleted and credit released");
     refetchAll();
@@ -953,7 +953,7 @@ const CardsTab = () => {
   const { data: cards } = useQuery({
     queryKey: ["flexpay-admin-cards"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("flexpay_virtual_cards")
         .select("*")
         .order("issued_at", { ascending: false });
@@ -983,13 +983,13 @@ const CardsTab = () => {
   const act = async (id: string, action: "freeze" | "unfreeze" | "suspend" | "close" | "reissue") => {
     try {
       if (action === "freeze" || action === "unfreeze") {
-        const { error } = await supabase.rpc("flexpay_set_card_freeze", { _card_id: id, _freeze: action === "freeze" });
+        const { error } = await db.rpc("flexpay_set_card_freeze", { _card_id: id, _freeze: action === "freeze" });
         if (error) throw error;
       } else if (action === "reissue") {
-        const { error } = await supabase.rpc("flexpay_reissue_card", { _card_id: id });
+        const { error } = await db.rpc("flexpay_reissue_card", { _card_id: id });
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await db
           .from("flexpay_virtual_cards")
           .update({ status: action === "suspend" ? "suspended" : "closed", closed_at: action === "close" ? new Date().toISOString() : null })
           .eq("id", id);

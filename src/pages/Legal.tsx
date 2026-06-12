@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { usePageSEO } from "@/hooks/use-page-seo";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import {
   ChevronRight,
   FileText,
@@ -879,7 +879,7 @@ function useDynamicCountries(mode: "blocked" | "review", fallback: string[]) {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("country_eligibility")
         .select("name,reason,status,sort_order")
         .eq("is_active", true)
@@ -894,7 +894,7 @@ function useDynamicCountries(mode: "blocked" | "review", fallback: string[]) {
       );
     };
     load();
-    const channel = supabase
+    const channel = db
       .channel(`legal-countries-${mode}`)
       .on(
         "postgres_changes",
@@ -904,7 +904,7 @@ function useDynamicCountries(mode: "blocked" | "review", fallback: string[]) {
       .subscribe();
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [mode]);
   return items;

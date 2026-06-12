@@ -1,8 +1,8 @@
 import { api, apiGet, apiPost } from './api';
 
-class SupabaseQueryBuilder {
+class DbQueryBuilder {
   private table: string;
-  private action: 'select' | 'insert' | 'update' | 'delete' = 'select';
+  private action: 'select' | 'insert' | 'update' | 'delete' | 'upsert' = 'select';
   private payload: any = null;
   private filters: Array<{ column: string; type: string; value: any }> = [];
   private orderList: Array<{ column: string; ascending: boolean }> = [];
@@ -26,6 +26,12 @@ class SupabaseQueryBuilder {
 
   update(values: any) {
     this.action = 'update';
+    this.payload = values;
+    return this;
+  }
+
+  upsert(values: any, options?: any) {
+    this.action = 'upsert';
     this.payload = values;
     return this;
   }
@@ -85,8 +91,6 @@ class SupabaseQueryBuilder {
     return this;
   }
 
-  // Supabase PostgREST-style OR filter: ".or('type.eq.email,label.ilike.%email%')"
-  // We parse the string and add individual OR-group filters for the backend proxy.
   or(filterString: string) {
     this.filters.push({ column: '__or__', type: 'or', value: filterString });
     return this;
@@ -112,10 +116,9 @@ class SupabaseQueryBuilder {
     return this;
   }
 
-  // Allows thenable/promise execution (for async/await)
   async then(onfulfilled?: (value: any) => any, onrejected?: (reason: any) => any) {
     try {
-      const res = await apiPost<any>('/supabase-proxy', {
+      const res = await apiPost<any>('/db-proxy', {
         table: this.table,
         action: this.action,
         payload: this.payload,
@@ -227,7 +230,7 @@ const authMock = {
 const functionsMock = {
   invoke: async (name: string, { body }: { body?: any } = {}) => {
     try {
-      const res = await apiPost<any>(`/supabase-proxy/functions/${name}`, body || {});
+      const res = await apiPost<any>(`/db-proxy/functions/${name}`, body || {});
       return res;
     } catch (err: any) {
       return { data: null, error: { message: err?.message } };
@@ -251,7 +254,6 @@ const storageMock = {
       }
     },
     remove: async (paths: string[]) => {
-      // Mock remove success
       return { data: paths, error: null };
     },
     getPublicUrl: (path: string) => {
@@ -265,7 +267,7 @@ const storageMock = {
   }),
 };
 
-class SupabaseChannelMock {
+class DbChannelMock {
   on(event: string, filter: any, callback?: any) {
     return this;
   }
@@ -274,19 +276,19 @@ class SupabaseChannelMock {
   }
 }
 
-export const supabase = {
-  from: (table: string) => new SupabaseQueryBuilder(table),
+export const db = {
+  from: (table: string) => new DbQueryBuilder(table),
   auth: authMock,
   functions: functionsMock,
   storage: storageMock,
   rpc: async (functionName: string, params: any = {}) => {
     try {
-      const res = await apiPost<any>(`/supabase-proxy/rpc/${functionName}`, params);
+      const res = await apiPost<any>(`/db-proxy/rpc/${functionName}`, params);
       return res;
     } catch (err: any) {
       return { data: null, error: { message: err?.message } };
     }
   },
-  channel: () => new SupabaseChannelMock(),
+  channel: () => new DbChannelMock(),
   removeChannel: () => {},
 };

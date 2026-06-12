@@ -13,6 +13,7 @@ import {
   Globe, PanelTop, CreditCard, Tag, DollarSign, Mail, Search, Bell, Sun, Moon,
   ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles, Home, Share2, Wand2, Sliders, Lock, LineChart, Link2, TrendingUp,
   IdCard, Layers, Banknote, PieChart, UserCog, ScrollText, Receipt, Rocket, Wallet, Building2, GitMerge,
+  Server, ShieldCheck, Ban,
 } from "lucide-react";
 
 import SiteLogo from "@/components/shared/SiteLogo";
@@ -26,7 +27,7 @@ import {
 import NotificationsBell from "@/components/admin/NotificationsBell";
 import MailRealtimeToasts from "@/components/admin/MailRealtimeToasts";
 import { canAccessRoute } from "@/lib/role-permissions";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/db/types";
 type AppRole = Database["public"]["Enums"]["app_role"];
 
 type NavLeaf = { to: string; label: string; icon: any; badge?: string };
@@ -65,7 +66,6 @@ const navGroupsEngagement: NavGroup = {
   items: [
     { to: "/superadmin/subscribers", label: "Subscribers", icon: Mail },
     { to: "/superadmin/contact-info", label: "Contact Info", icon: Phone },
-    { to: "/superadmin/notifications", label: "Email Alerts", icon: Bell },
     { to: "/superadmin/country-eligibility", label: "Country Eligibility", icon: Globe },
   ],
 };
@@ -195,8 +195,20 @@ const navGroupsSystem: NavGroup = {
   items: [
     { to: "/superadmin/settings", label: "Site Settings", icon: Settings },
     { to: "/superadmin/product-urls", label: "Product URLs", icon: Link2 },
-    { to: "/superadmin/email-portal", label: "Email Portal", icon: Mail },
-    { to: "/superadmin/notifications#smtp", label: "SMTP Settings", icon: Mail },
+    {
+      key: "email-portal",
+      label: "Email Portal",
+      icon: Mail,
+      badge: "Hub",
+      children: [
+        { to: "/superadmin/email-portal?tab=logs", label: "Email Logs", icon: Mail },
+        { to: "/superadmin/email-portal?tab=smtp", label: "SMTP Settings", icon: Server },
+        { to: "/superadmin/email-portal?tab=routing", label: "Email Routing", icon: Settings },
+        { to: "/superadmin/email-portal?tab=identities", label: "Sender Identities", icon: ShieldCheck },
+        { to: "/superadmin/email-portal?tab=alerts", label: "Notification Prefs", icon: Bell },
+        { to: "/superadmin/email-portal?tab=suppressed", label: "Suppressed", icon: Ban },
+      ],
+    },
   ],
 };
 

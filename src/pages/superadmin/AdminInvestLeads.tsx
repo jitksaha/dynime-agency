@@ -3,7 +3,7 @@ import AdminReplyDialog from "@/components/admin/AdminReplyDialog";
 import ReplyHistory from "@/components/admin/ReplyHistory";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import {
   TrendingUp, Search, Mail, Phone, Calendar, Globe, MessageSquare,
@@ -77,7 +77,7 @@ const AdminInvestLeads = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-invest-leads"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invest_leads" as any)
         .select("*")
         .order("created_at", { ascending: false })
@@ -113,7 +113,7 @@ const AdminInvestLeads = () => {
         },
         fetchPage: async (offset, limit) => {
           // Build the query with the same filters the UI applies, server-side.
-          let query = supabase
+          let query = db
             .from("invest_leads" as any)
             .select(
               "id, full_name, email, phone, country, investment_amount, currency, " +
@@ -158,7 +158,7 @@ const AdminInvestLeads = () => {
 
   // Realtime
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("admin-invest-leads-feed")
       .on(
         "postgres_changes",
@@ -173,7 +173,7 @@ const AdminInvestLeads = () => {
       )
       .subscribe((status) => setLiveConnected(status === "SUBSCRIBED"));
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [qc]);
 
@@ -211,7 +211,7 @@ const AdminInvestLeads = () => {
   };
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from("invest_leads" as any)
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", id);
@@ -224,7 +224,7 @@ const AdminInvestLeads = () => {
   };
 
   const updateNotes = async (id: string, admin_notes: string) => {
-    const { error } = await supabase
+    const { error } = await db
       .from("invest_leads" as any)
       .update({ admin_notes, updated_at: new Date().toISOString() })
       .eq("id", id);
@@ -460,7 +460,7 @@ const AdminInvestLeads = () => {
           const stamp = new Date().toLocaleString();
           const note = `[${stamp}] Replied — ${subject}\n${body}`;
           const merged = replyTo.admin_notes ? `${replyTo.admin_notes}\n\n${note}` : note;
-          await supabase
+          await db
             .from("invest_leads" as any)
             .update({
               admin_notes: merged,

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 const LiveChatWidget = () => {
   const location = useLocation();
@@ -25,11 +25,11 @@ const LiveChatWidget = () => {
     let cancelled = false;
 
     (async () => {
-      const { data } = await supabase.rpc("get_chat_messages", { _session_id: sessionId });
+      const { data } = await db.rpc("get_chat_messages", { _session_id: sessionId });
       if (!cancelled && data) setMessages(data);
     })();
 
-    const channel = supabase
+    const channel = db
       .channel(`chat-session-${sessionId}`)
       .on(
         "postgres_changes",
@@ -43,7 +43,7 @@ const LiveChatWidget = () => {
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [started, sessionId]);
 
@@ -54,7 +54,7 @@ const LiveChatWidget = () => {
   const startChat = async () => {
     if (!name.trim()) return;
     setStarted(true);
-    await supabase.from("chat_messages").insert({
+    await db.from("chat_messages").insert({
       session_id: sessionId,
       sender_type: "visitor",
       sender_name: name.trim(),
@@ -64,7 +64,7 @@ const LiveChatWidget = () => {
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-    await supabase.from("chat_messages").insert({
+    await db.from("chat_messages").insert({
       session_id: sessionId,
       sender_type: "visitor",
       sender_name: name,

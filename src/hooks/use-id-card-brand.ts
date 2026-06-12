@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import {
   ID_CARD_BRAND_KEY,
   DEFAULT_ID_CARD_BRAND,
@@ -11,7 +11,7 @@ export const useIdCardBrand = () =>
   useQuery<IdCardBrand>({
     queryKey: ["id-card-brand"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("site_settings")
         .select("value")
         .eq("key", ID_CARD_BRAND_KEY)

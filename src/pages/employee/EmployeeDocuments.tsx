@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMyEmployee } from "@/hooks/use-my-employee";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Download, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -29,7 +29,7 @@ const EmployeeDocuments = () => {
     queryKey: ["employee-docs", emp?.id],
     enabled: !!emp?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("hr_documents")
         .select("id, kind, doc_number, title, period_month, issue_date, status, pdf_storage_path")
         .eq("employee_id", emp!.id)
@@ -42,7 +42,7 @@ const EmployeeDocuments = () => {
   const download = async (docId: string) => {
     setDownloading(docId);
     try {
-      const { data, error } = await supabase.functions.invoke("get-my-hr-document", { body: { doc_id: docId } });
+      const { data, error } = await db.functions.invoke("get-my-hr-document", { body: { doc_id: docId } });
       if (error) throw error;
       if (!data?.url) throw new Error("No download URL");
       window.open(data.url as string, "_blank");

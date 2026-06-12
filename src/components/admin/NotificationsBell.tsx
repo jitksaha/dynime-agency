@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Inbox, MessageSquare, LifeBuoy, CheckCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { apiPatch } from "@/lib/api";
 import {
   DropdownMenu,
@@ -38,20 +38,20 @@ const NotificationsBell = () => {
     const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString();
 
     const [subs, chats, tix] = await Promise.all([
-      supabase
+      db
         .from("form_submissions")
         .select("id, data, created_at, status")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(15),
-      supabase
+      db
         .from("chat_messages")
         .select("id, session_id, sender_name, message, created_at, sender_type, is_read")
         .eq("sender_type", "user")
         .gte("created_at", since)
         .order("created_at", { ascending: false })
         .limit(15),
-      supabase
+      db
         .from("support_tickets")
         .select("id, ticket_number, subject, customer_name, created_at, status")
         .gte("created_at", since)
@@ -108,7 +108,7 @@ const NotificationsBell = () => {
     fetchAll();
     const interval = setInterval(fetchAll, 4000);
 
-    const channel = supabase
+    const channel = db
       .channel("admin-notifications")
       .on(
         "postgres_changes",
@@ -129,7 +129,7 @@ const NotificationsBell = () => {
 
     return () => {
       clearInterval(interval);
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [fetchAll]);
 

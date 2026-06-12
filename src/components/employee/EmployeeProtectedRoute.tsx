@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import RouteProgress from "@/components/shared/RouteProgress";
 
 const EmployeeProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -12,7 +12,7 @@ const EmployeeProtectedRoute = ({ children }: { children: React.ReactNode }) => 
     queryKey: ["employee-membership", user?.id, user?.email],
     enabled: !!user?.id && userRole !== "employee" && !isAdmin,
     queryFn: async () => {
-      const { count } = await supabase
+      const { count } = await db
         .from("employees")
         .select("id", { count: "exact", head: true })
         .or(`user_id.eq.${user!.id},email.ilike.${user!.email ?? ""}`);

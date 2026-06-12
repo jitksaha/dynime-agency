@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMyEmployee } from "@/hooks/use-my-employee";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { FileText, Inbox, Plus, Briefcase, Calendar, MapPin, Building2 } from "lucide-react";
 import { usePageTitle } from "@/hooks/use-page-title";
 
@@ -21,9 +21,9 @@ const EmployeeDashboard = () => {
     enabled: !!emp?.id,
     queryFn: async () => {
       const [docs, reqs, pending] = await Promise.all([
-        supabase.from("hr_documents").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id),
-        supabase.from("hr_requests").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id),
-        supabase.from("hr_requests").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id).in("status", ["pending", "in_review"]),
+        db.from("hr_documents").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id),
+        db.from("hr_requests").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id),
+        db.from("hr_requests").select("id", { count: "exact", head: true }).eq("employee_id", emp!.id).in("status", ["pending", "in_review"]),
       ]);
       return { docs: docs.count ?? 0, reqs: reqs.count ?? 0, pending: pending.count ?? 0 };
     },
@@ -33,7 +33,7 @@ const EmployeeDashboard = () => {
     queryKey: ["employee-recent-requests", emp?.id],
     enabled: !!emp?.id,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("hr_requests")
         .select("id, subject, category, status, created_at")
         .eq("employee_id", emp!.id)

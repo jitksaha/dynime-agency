@@ -10,7 +10,7 @@ import {
   Clock, Bell, RotateCw, Sparkles, Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/use-page-title";
@@ -81,7 +81,7 @@ const AccountCompliance = () => {
   }, [services, tab]);
 
   const toggleAutoRenew = async (id: string, value: boolean) => {
-    const { error } = await supabase.functions.invoke("cancel-recurring", {
+    const { error } = await db.functions.invoke("cancel-recurring", {
       body: { service_id: id, auto_renew: value },
     });
     if (error) toast.error(error.message);
@@ -92,7 +92,7 @@ const AccountCompliance = () => {
   };
 
   const sendReminder = async (s: CustomerService) => {
-    const { error } = await supabase.functions.invoke("send-transactional-email", {
+    const { error } = await db.functions.invoke("send-transactional-email", {
       body: {
         templateName: "service-renewal-reminder",
         recipientEmail: s.customer_email,

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +58,7 @@ const AccountMilestones = () => {
     queryKey: ["account-milestones", user?.email],
     queryFn: async () => {
       // 1) parent orders for this customer
-      const { data: parents, error: pErr } = await supabase
+      const { data: parents, error: pErr } = await db
         .from("orders")
         .select("id, invoice_number, total, currency, created_at, status")
         .eq("customer_email", user!.email!)
@@ -68,7 +68,7 @@ const AccountMilestones = () => {
       if (parentIds.length === 0) return { groups: [] as any[] };
 
       // 2) milestones referencing those parents
-      const { data: milestones, error: mErr } = await supabase
+      const { data: milestones, error: mErr } = await db
         .from("order_milestones")
         .select("*")
         .in("parent_order_id", parentIds)
@@ -80,7 +80,7 @@ const AccountMilestones = () => {
       const childIds = ms.map((m) => m.child_order_id).filter(Boolean) as string[];
       let children: ChildOrder[] = [];
       if (childIds.length) {
-        const { data: c } = await supabase
+        const { data: c } = await db
           .from("orders")
           .select("id, invoice_number, status")
           .in("id", childIds);

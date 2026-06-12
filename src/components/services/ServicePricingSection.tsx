@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { apiGet } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -776,7 +776,7 @@ const ServicePricingSection = ({
     }
     setSubmittingQuote(true);
     try {
-      const { data: tmpl } = await supabase
+      const { data: tmpl } = await db
         .from("form_templates")
         .select("id")
         .eq("is_active", true)
@@ -793,7 +793,7 @@ const ServicePricingSection = ({
         return;
       }
 
-      const { error } = await supabase.from("form_submissions").insert({
+      const { error } = await db.from("form_submissions").insert({
         form_id: tmpl.id,
         data: {
           type: "service_quote",
@@ -1475,7 +1475,7 @@ const QuotePreviewDialog = ({
   const { data: tmpl } = useQuery({
     queryKey: ["preview-form-template"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("form_templates")
         .select("name, slug, fields")
         .eq("slug", "contact")

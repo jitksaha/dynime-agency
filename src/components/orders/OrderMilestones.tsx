@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Circle, FileText, Loader2, Receipt, Truck, Send } from "lucide-react";
@@ -48,7 +48,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
   const { data: parentOrder } = useQuery({
     queryKey: ["order-milestones-parent", orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("orders")
         .select("id, customer_email, customer_name, invoice_number")
         .eq("id", orderId)
@@ -61,7 +61,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
   const { data, isLoading } = useQuery({
     queryKey: ["order-milestones", orderId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("order_milestones")
         .select("*")
         .eq("parent_order_id", orderId)
@@ -82,7 +82,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
     if (!ref) return;
     const payUrl = `${window.location.origin}/invoice/${ref}`;
     try {
-      await supabase.functions.invoke("send-transactional-email", {
+      await db.functions.invoke("send-transactional-email", {
         body: {
           templateName: "order-status-update",
           recipientEmail: parentOrder.customer_email,
@@ -107,7 +107,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
   };
 
   const generateNext = async (m: Milestone, opts?: { silent?: boolean }) => {
-    const { data: newId, error } = await supabase.rpc("generate_next_milestone_invoice", {
+    const { data: newId, error } = await db.rpc("generate_next_milestone_invoice", {
       _milestone_id: m.id,
     });
     if (error) {
@@ -116,7 +116,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
     }
     let childInvoice: string | null = null;
     if (newId) {
-      const { data: child } = await supabase
+      const { data: child } = await db
         .from("orders")
         .select("invoice_number")
         .eq("id", newId)
@@ -135,7 +135,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
     try {
       // 1) record delivered timestamp in metadata
       const meta = { ...(m.metadata || {}), delivered_at: new Date().toISOString() };
-      const { error: upErr } = await supabase
+      const { error: upErr } = await db
         .from("order_milestones")
         .update({ metadata: meta })
         .eq("id", m.id);
@@ -165,7 +165,7 @@ const OrderMilestones = ({ orderId, admin }: Props) => {
     if (!m.child_order_id) return;
     setBusyId(m.id);
     try {
-      const { data: child } = await supabase
+      const { data: child } = await db
         .from("orders")
         .select("invoice_number")
         .eq("id", m.child_order_id)

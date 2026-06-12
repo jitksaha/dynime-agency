@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AccountLayout from "@/components/account/AccountLayout";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ const AccountProfile = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      const { data } = await db.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
       setFullName(data?.full_name || user.user_metadata?.full_name || "");
     })();
     // Supabase exposes the unverified pending change on user.new_email
@@ -37,7 +37,7 @@ const AccountProfile = () => {
   const save = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").upsert({ id: user.id, email: user.email!, full_name: fullName }, { onConflict: "id" });
+    const { error } = await db.from("profiles").upsert({ id: user.id, email: user.email!, full_name: fullName }, { onConflict: "id" });
     setSaving(false);
     if (error) toast.error(error.message); else toast.success("Profile updated");
   };
@@ -45,7 +45,7 @@ const AccountProfile = () => {
   const changePassword = async () => {
     if (pwd.length < 6) return toast.error("Password must be at least 6 characters");
     setPwdSaving(true);
-    const { error } = await supabase.auth.updateUser({ password: pwd });
+    const { error } = await db.auth.updateUser({ password: pwd });
     setPwdSaving(false);
     if (error) toast.error(error.message); else { toast.success("Password updated"); setPwd(""); }
   };
@@ -59,7 +59,7 @@ const AccountProfile = () => {
       return toast.error("That's already your current email");
     }
     setEmailSaving(true);
-    const { error } = await supabase.auth.updateUser(
+    const { error } = await db.auth.updateUser(
       { email: next },
       { emailRedirectTo: `${window.location.origin}/account` }
     );
@@ -77,7 +77,7 @@ const AccountProfile = () => {
     if (!user?.email) return;
     setEmailSaving(true);
     // Re-issuing updateUser with the current email cancels a pending change
-    const { error } = await supabase.auth.updateUser({ email: user.email });
+    const { error } = await db.auth.updateUser({ email: user.email });
     setEmailSaving(false);
     if (error) {
       toast.error(error.message);

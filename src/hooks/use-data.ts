@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { readCachedSiteSettings, writeCachedSiteSettings } from "@/lib/site-settings-cache";
 import { apiGet } from "@/lib/api";
 
@@ -7,7 +7,7 @@ export const useContactInfo = () => {
   return useQuery({
     queryKey: ["contact-info"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("contact_info")
         .select("*")
         .eq("is_active", true)
@@ -22,7 +22,7 @@ export const useAllContactInfo = () => {
   return useQuery({
     queryKey: ["contact-info-all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("contact_info")
         .select("*")
         .order("sort_order");
@@ -58,7 +58,7 @@ export const useFormTemplates = () => {
   return useQuery({
     queryKey: ["form-templates"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("form_templates").select("*").order("created_at");
+      const { data, error } = await db.from("form_templates").select("*").order("created_at");
       if (error) throw error;
       return data;
     },
@@ -69,7 +69,7 @@ export const useFormTemplate = (slug: string) => {
   return useQuery({
     queryKey: ["form-template", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("form_templates")
         .select("*")
         .eq("slug", slug)
@@ -85,7 +85,7 @@ export const useFormSubmissions = (formId?: string) => {
   return useQuery({
     queryKey: ["form-submissions", formId],
     queryFn: async () => {
-      let query = supabase.from("form_submissions").select("*, form_templates(name)").order("created_at", { ascending: false });
+      let query = db.from("form_submissions").select("*, form_templates(name)").order("created_at", { ascending: false });
       if (formId) query = query.eq("form_id", formId);
       const { data, error } = await query;
       if (error) throw error;
@@ -98,7 +98,7 @@ export const useChatSessions = () => {
   return useQuery({
     queryKey: ["chat-sessions"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("chat_messages")
         .select("session_id, sender_name, created_at, is_read, message")
         .order("created_at", { ascending: false });
@@ -127,7 +127,7 @@ export const useChatMessages = (sessionId: string) => {
   return useQuery({
     queryKey: ["chat-messages", sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("chat_messages")
         .select("*")
         .eq("session_id", sessionId)
@@ -142,7 +142,7 @@ export const useChatMessages = (sessionId: string) => {
 export const useSubmitForm = () => {
   return useMutation({
     mutationFn: async ({ formId, data }: { formId: string; data: Record<string, string> }) => {
-      const { error } = await supabase.from("form_submissions").insert({ form_id: formId, data });
+      const { error } = await db.from("form_submissions").insert({ form_id: formId, data });
       if (error) throw error;
     },
   });
@@ -152,7 +152,7 @@ export const useSendChat = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (msg: { session_id: string; sender_type: string; sender_name?: string; message: string }) => {
-      const { error } = await supabase.from("chat_messages").insert(msg);
+      const { error } = await db.from("chat_messages").insert(msg);
       if (error) throw error;
     },
     onSuccess: (_, variables) => {
@@ -166,7 +166,7 @@ export const usePortfolioProjects = (category?: string) => {
   return useQuery({
     queryKey: ["portfolio-projects", category],
     queryFn: async () => {
-      let query = supabase
+      let query = db
         .from("portfolio_projects")
         .select("*")
         .eq("is_published", true)

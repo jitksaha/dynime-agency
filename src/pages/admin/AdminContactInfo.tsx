@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useAllContactInfo } from "@/hooks/use-data";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus, Trash2, Save } from "lucide-react";
@@ -42,7 +42,7 @@ const AdminContactInfo = () => {
   const removeItem = async (index: number) => {
     const item = items[index];
     if (item.id) {
-      await supabase.from("contact_info").delete().eq("id", item.id);
+      await db.from("contact_info").delete().eq("id", item.id);
     }
     setItems(items.filter((_, i) => i !== index));
     toast.success("Removed");
@@ -54,9 +54,9 @@ const AdminContactInfo = () => {
     for (const item of items) {
       const payload = { label: item.label, type: item.type, value: item.value, icon: item.icon, sort_order: item.sort_order, is_active: item.is_active };
       if (item.id) {
-        await supabase.from("contact_info").update(payload).eq("id", item.id);
+        await db.from("contact_info").update(payload).eq("id", item.id);
       } else {
-        await supabase.from("contact_info").insert(payload);
+        await db.from("contact_info").insert(payload);
       }
     }
     setSaving(false);

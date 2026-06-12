@@ -96,7 +96,7 @@ const AdminCustomerServices = () => {
   };
 
   const sendReminder = async (svc: Svc) => {
-    const { error } = await supabase.functions.invoke("send-transactional-email", {
+    const { error } = await db.functions.invoke("send-transactional-email", {
       body: {
         templateName: "service-renewal-reminder",
         recipientEmail: svc.customer_email,

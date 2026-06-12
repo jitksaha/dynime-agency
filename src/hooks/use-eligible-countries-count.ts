@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 /**
  * Returns the count of currently eligible (non-blocked) active countries
@@ -9,7 +9,7 @@ export function useEligibleCountriesCount() {
   return useQuery({
     queryKey: ["eligible-countries-count"],
     queryFn: async () => {
-      const { count, error } = await (supabase as any)
+      const { count, error } = await (db as any)
         .from("country_eligibility")
         .select("id", { count: "exact", head: true })
         .eq("is_active", true)

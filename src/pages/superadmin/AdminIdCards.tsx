@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toPng } from "html-to-image";
 import { QRCodeSVG } from "qrcode.react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { apiPost } from "@/lib/api";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import SiteLogo from "@/components/shared/SiteLogo";
@@ -503,7 +503,7 @@ const AdminIdCards = () => {
   const { data: teamAccounts = [], isLoading: loadingTeam } = useQuery({
     queryKey: ["id-cards", "team-accounts"],
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("manage-team", { body: { action: "list_users" } });
+      const { data, error } = await db.functions.invoke("manage-team", { body: { action: "list_users" } });
       if (error) throw error;
       const users = (data?.users ?? []) as any[];
       return users.filter((u) => u.role).map<CardSubject>((u) => ({
@@ -523,7 +523,7 @@ const AdminIdCards = () => {
   const { data: investors = [], isLoading: loadingInv } = useQuery({
     queryKey: ["id-cards", "investors"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("invest_leads")
         .select("id, full_name, email, phone, country, investment_amount, currency, plan_slug, created_at")
         .order("created_at", { ascending: false })

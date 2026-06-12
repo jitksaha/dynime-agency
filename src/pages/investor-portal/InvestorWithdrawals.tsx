@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useAuth } from "@/hooks/use-auth";
 import InvestorPortalLayout from "@/components/investor/InvestorPortalLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +42,7 @@ const InvestorWithdrawals = () => {
     queryKey: ["withdraw-investments", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("investments" as any)
         .select("id, plan_name, amount, currency, status")
         .eq("investor_id", user!.id)
@@ -56,7 +56,7 @@ const InvestorWithdrawals = () => {
     queryKey: ["investor-withdrawals", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("withdrawal_requests" as any)
         .select("*")
         .eq("investor_id", user!.id)
@@ -73,7 +73,7 @@ const InvestorWithdrawals = () => {
     if (!num || num <= 0) return toast.error("Enter a valid amount");
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("withdrawal_requests" as any).insert({
+      const { error } = await db.from("withdrawal_requests" as any).insert({
         investor_id: user.id,
         investment_id: investmentId || null,
         amount: num,

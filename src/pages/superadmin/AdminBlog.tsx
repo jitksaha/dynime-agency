@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Plus, Pencil, Trash2, Star, Eye, EyeOff, Search, Sparkles, Database, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,14 +73,14 @@ const AdminBlog = () => {
 
   // Realtime auto-sync — reflects external edits instantly
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("admin:blog_posts")
       .on("postgres_changes", { event: "*", schema: "public", table: "blog_posts" }, () => {
         qc.invalidateQueries({ queryKey: ["blog-posts-admin"] });
         qc.invalidateQueries({ queryKey: ["blog-posts"] });
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, [qc]);
 
   const categories = useMemo(() => {
@@ -168,7 +168,7 @@ const AdminBlog = () => {
     if (!confirm("Import 244 SEO-optimized blog posts? Existing slugs are skipped.")) return;
     setSeeding(true);
     try {
-      const { data, error } = await supabase.functions.invoke("seed-blog-posts", { body: {} });
+      const { data, error } = await db.functions.invoke("seed-blog-posts", { body: {} });
       if (error) throw error;
       toast.success(`Imported ${data?.inserted ?? 0} new posts (${data?.skipped ?? 0} already existed)`);
       qc.invalidateQueries({ queryKey: ["admin-blog-posts"] });

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, AlertTriangle, XCircle, Globe2, Search, ShieldCheck, Loader2, Clock, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 
 type Status = "blocked" | "review" | "eligible";
 
@@ -331,7 +331,7 @@ const CountryEligibilityChecker = () => {
   const { data: countries = [], isLoading } = useQuery({
     queryKey: ["country-eligibility-public"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (db as any)
         .from("country_eligibility")
         .select("id,name,aliases,status,category,reason")
         .eq("is_active", true)
@@ -343,7 +343,7 @@ const CountryEligibilityChecker = () => {
   });
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("country-eligibility-feed")
       .on(
         "postgres_changes",
@@ -352,7 +352,7 @@ const CountryEligibilityChecker = () => {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [qc]);
 

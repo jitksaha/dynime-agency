@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Save, ChevronUp, ChevronDown, Users, Loader2, IdCard, Search, X, Pause, Play, EyeOff } from "lucide-react";
@@ -451,7 +451,7 @@ const EmployeeIdEditor = ({
   // `<COMPANY>E<digits>`. Pulls the current max numeric suffix for EMP rows
   // sharing the same company short code and adds 1.
   const issueSequential = async (): Promise<string> => {
-    const { data: brandRow } = await supabase
+    const { data: brandRow } = await db
       .from("site_settings")
       .select("value")
       .eq("key", "id_card_brand_v4")
@@ -470,7 +470,7 @@ const EmployeeIdEditor = ({
     ).toUpperCase();
     const prefix = `${shortCode}E`;
 
-    const { data: rows } = await supabase
+    const { data: rows } = await db
       .from("id_card_assignments")
       .select("card_id")
       .eq("kind", "EMP")
@@ -493,7 +493,7 @@ const EmployeeIdEditor = ({
     try {
       for (let attempt = 0; attempt < 50; attempt++) {
         const candidate = await issueSequential();
-        const { error } = await supabase.from("id_card_assignments").insert({
+        const { error } = await db.from("id_card_assignments").insert({
           kind: "EMP",
           subject_key: subjectKey,
           card_id: candidate,
@@ -536,7 +536,7 @@ const EmployeeIdEditor = ({
     setBusy(true);
     try {
       // Collision check
-      const { data: clash } = await supabase
+      const { data: clash } = await db
         .from("id_card_assignments")
         .select("subject_key")
         .eq("card_id", next)
@@ -545,12 +545,12 @@ const EmployeeIdEditor = ({
         throw new Error(`ID ${next} is already used by another employee`);
       }
       const { error } = currentId
-        ? await supabase
+        ? await db
           .from("id_card_assignments")
           .update({ card_id: next, subject_key: subjectKey })
           .eq("kind", "EMP")
           .eq("card_id", currentId)
-        : await supabase
+        : await db
           .from("id_card_assignments")
           .update({ card_id: next })
           .eq("kind", "EMP")
@@ -633,7 +633,7 @@ const RebuildIdsButton = ({ items, onDone }: { items: TeamMember[]; onDone: () =
 
     setBusy(true);
     try {
-      const { data: brandRow } = await supabase
+      const { data: brandRow } = await db
         .from("site_settings")
         .select("value")
         .eq("key", "id_card_brand_v4")
@@ -654,7 +654,7 @@ const RebuildIdsButton = ({ items, onDone }: { items: TeamMember[]; onDone: () =
       const minStart = 1;
       const ordered = ensureEmployeeKeys(items.filter((m) => m.name.trim()));
 
-      const { data: rows, error: fetchErr } = await supabase
+      const { data: rows, error: fetchErr } = await db
         .from("id_card_assignments")
         .select("id, card_id, subject_key, subject_name, subject_email, qr_payload, created_at")
         .eq("kind", "EMP")
@@ -686,7 +686,7 @@ const RebuildIdsButton = ({ items, onDone }: { items: TeamMember[]; onDone: () =
 
       // Phase A: park each row under a temporary id
       for (let i = 0; i < assignments.length; i++) {
-        const { error } = await supabase
+        const { error } = await db
           .from("id_card_assignments")
           .update({ card_id: tempIds[i] })
           .eq("id", assignments[i].row.id);
@@ -706,7 +706,7 @@ const RebuildIdsButton = ({ items, onDone }: { items: TeamMember[]; onDone: () =
         const newPayload = row.qr_payload
           ? { ...row.qr_payload, id: newId, n: member?.name ?? row.qr_payload.n, r: member?.role ?? row.qr_payload.r, m: member?.specialty ?? row.qr_payload.m, e: member?.email || row.qr_payload.e }
           : row.qr_payload;
-        const { error } = await supabase
+        const { error } = await db
           .from("id_card_assignments")
           .update({
             card_id: newId,

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,7 +127,7 @@ const AdminCareers = () => {
 
   // Realtime: keep admin list in sync with DB and the public /careers page
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("careers-admin-sync")
       .on(
         "postgres_changes",
@@ -140,7 +140,7 @@ const AdminCareers = () => {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [qc]);
 
@@ -300,11 +300,11 @@ const AdminCareers = () => {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `careers/hero-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await db.storage
         .from("site-assets")
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "31536000" });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("site-assets").getPublicUrl(path);
+      const { data: pub } = db.storage.from("site-assets").getPublicUrl(path);
       setForm((f) => ({ ...f, hero_image_url: pub.publicUrl }));
       toast.success("Hero image uploaded");
     } catch (e) {

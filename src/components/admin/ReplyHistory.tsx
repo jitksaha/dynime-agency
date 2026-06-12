@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { History, Mail, User, Loader2, Copy, Check, Search, X, Filter, ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -42,7 +42,7 @@ const ReplyHistory = ({ targetType, targetId, refreshKey = 0 }: Props) => {
 
   useEffect(() => {
     if (!targetId) return;
-    const channel = supabase
+    const channel = db
       .channel(`admin-replies:${targetType}:${targetId}`)
       .on(
         "postgres_changes",
@@ -58,7 +58,7 @@ const ReplyHistory = ({ targetType, targetId, refreshKey = 0 }: Props) => {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [qc, targetType, targetId]);
 
@@ -69,7 +69,7 @@ const ReplyHistory = ({ targetType, targetId, refreshKey = 0 }: Props) => {
       queryFn: async ({ pageParam = 0 }) => {
         const from = (pageParam as number) * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
-        const { data, error, count } = await supabase
+        const { data, error, count } = await db
           .from("admin_replies" as any)
           .select("*", { count: "exact" })
           .eq("target_type", targetType)

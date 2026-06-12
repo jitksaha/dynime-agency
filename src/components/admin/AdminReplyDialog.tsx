@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -61,7 +61,7 @@ const AdminReplyDialog = ({
         (user?.email ? user.email.split("@")[0] : "Dynime team");
       const trimmedSubject = subject.trim();
       const trimmedBody = body.trim();
-      const { error } = await supabase.functions.invoke("send-transactional-email", {
+      const { error } = await db.functions.invoke("send-transactional-email", {
         body: {
           templateName: "admin-reply",
           recipientEmail,
@@ -80,7 +80,7 @@ const AdminReplyDialog = ({
 
       // Log the reply for thread history (best-effort).
       if (targetType && targetId) {
-        const { error: logErr } = await supabase.from("admin_replies" as any).insert({
+        const { error: logErr } = await db.from("admin_replies" as any).insert({
           target_type: targetType,
           target_id: targetId,
           recipient_email: recipientEmail,

@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { canAccessRoute } from "@/lib/role-permissions";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/db/types";
 import RouteProgress from "@/components/shared/RouteProgress";
 
 type AppRole = Database["public"]["Enums"]["app_role"];

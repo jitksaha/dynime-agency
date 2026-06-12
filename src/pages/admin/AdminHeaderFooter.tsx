@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -254,7 +254,7 @@ const AdminHeaderFooter = () => {
       // Auto-sync existing subscribers when a real provider is configured
       if (newsletter.autoSync && newsletter.provider !== "builtin") {
         try {
-          const { data, error } = await supabase.functions.invoke(
+          const { data, error } = await db.functions.invoke(
             "sync-newsletter-subscribers",
             { body: { provider: newsletter.provider } },
           );

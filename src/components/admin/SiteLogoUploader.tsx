@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -317,11 +317,11 @@ const FaviconUploader = () => {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `favicon/${kind}-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await db.storage
         .from(BUCKET)
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "31536000" });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
       const url = pub.publicUrl;
       const previewSrc = withCacheBuster(url);
       const key = kind === "light" ? "favicon_url" : "favicon_dark_url";
@@ -503,11 +503,11 @@ const SiteLogoUploader = () => {
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `logo/${kind}-${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage
+      const { error: upErr } = await db.storage
         .from(BUCKET)
         .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "31536000" });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const { data: pub } = db.storage.from(BUCKET).getPublicUrl(path);
       const url = pub.publicUrl;
       const previewSrc = withCacheBuster(url);
       const urlKey = kind === "light" ? "logo_light" : "logo_dark";
