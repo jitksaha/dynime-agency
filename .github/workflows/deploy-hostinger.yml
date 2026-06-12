@@ -58,12 +58,18 @@ jobs:
 
       - name: 📂 Sync files to Hostinger via lftp
         run: |
+          # Fetch FTP structure first
+          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; find . > ftp-structure.txt; quit"
+          
           TARGET_DIR="./"
           
           # Test connection and detect target directory path
           if lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd domains/dynime.com/public_html"; then
             TARGET_DIR="domains/dynime.com/public_html/"
             echo "Detected main account FTP root. Target: domains/dynime.com/public_html/"
+          elif grep -q "^\./index.html$" ftp-structure.txt; then
+            TARGET_DIR="./"
+            echo "Detected chrooted FTP root (index.html found in root). Target: ./"
           elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd public_html"; then
             TARGET_DIR="public_html/"
             echo "Detected domain-level FTP root. Target: public_html/"
@@ -72,10 +78,7 @@ jobs:
             echo "Detected folder-restricted FTP root. Target: ./"
           fi
           
-          # Fetch FTP structure
-          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; find . > ftp-structure.txt; quit"
-          
-          echo "Executing file sync..."
+          echo "Executing file sync to $TARGET_DIR..."
           lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --parallel=2 ./dist/ $TARGET_DIR; quit"
 
       - name: 🚀 Commit and Push FTP Structure
