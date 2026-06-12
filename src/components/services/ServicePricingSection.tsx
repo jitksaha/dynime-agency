@@ -1160,7 +1160,7 @@ const ServicePricingSection = ({
 
           if (isLoading) {
             return (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="glass-card p-6 h-64 animate-pulse" />
                 ))}
@@ -1170,7 +1170,7 @@ const ServicePricingSection = ({
 
           if (!isSlider) {
             return (
-              <div className={`grid grid-cols-1 md:grid-cols-${Math.min(tiers.length, 3)} gap-5 max-w-5xl mx-auto`}>
+              <div className={`grid grid-cols-1 md:grid-cols-${Math.min(tiers.length, 3)} gap-5 w-full`}>
                 {tiers.map((t, idx) => (
                   <ScrollReveal key={t.id || `${t.name}-${idx}`} delay={idx * 0.08} className="h-full">
                     {renderTierCard(t, idx)}
@@ -1182,7 +1182,7 @@ const ServicePricingSection = ({
 
           // Slider mode (more than 3 tiers)
           return (
-            <div className="max-w-6xl mx-auto">
+            <div className="w-full">
               {/* Header row with arrows top-right */}
               <div className="flex items-center justify-between gap-4 mb-5 px-1">
                 <p className="text-xs text-muted-foreground">
@@ -1258,7 +1258,7 @@ const ServicePricingSection = ({
 
         {addons && (
           <ScrollReveal>
-            <div className="mt-12 max-w-5xl mx-auto">
+            <div className="mt-12 w-full">
               <div className="text-center mb-6">
                 <span className="text-primary text-xs font-semibold uppercase tracking-wider">Upsell</span>
                 <h3 className="font-heading text-2xl md:text-3xl font-bold mt-2">{addons.title}</h3>
