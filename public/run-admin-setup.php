@@ -153,9 +153,13 @@ if (!$symlinkCreated) {
     }
     $fallbackIndex = $apiSymlink . '/index.php';
     $indexCode = "<?php\ndefine('LARAVEL_START', microtime(true));\nif (isset(\$_SERVER['REQUEST_URI'])) {\n    \$_SERVER['REQUEST_URI'] = preg_replace('/^\\/api/', '', \$_SERVER['REQUEST_URI']);\n}\nrequire '" . $apiDir . "/vendor/autoload.php';\n\$app = require_once '" . $apiDir . "/bootstrap/app.php';\n\$kernel = \$app->make(Illuminate\Contracts\Http\Kernel::class);\n\$response = \$kernel->handle(\n    \$request = Illuminate\Http\Request::capture()\n)->send();\n\$kernel->terminate(\$request, \$response);\n";
-    if (file_put_contents($fallbackIndex, $indexCode) !== false) {
-        echo "<p style='color:green;'>Success: Created API physical folder router wrapper!</p>";
+    
+    $fallbackHtaccess = $apiSymlink . '/.htaccess';
+    $htaccessCode = "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteCond %{REQUEST_FILENAME} !-f\n    RewriteCond %{REQUEST_FILENAME} !-d\n    RewriteRule ^(.*)$ index.php [L,QSA]\n</IfModule>\n";
+    
+    if (file_put_contents($fallbackIndex, $indexCode) !== false && file_put_contents($fallbackHtaccess, $htaccessCode) !== false) {
+        echo "<p style='color:green;'>Success: Created API physical folder router wrapper and .htaccess routing rules!</p>";
     } else {
-        echo "<p style='color:red;'>Error: Failed to write router wrapper file.</p>";
+        echo "<p style='color:red;'>Error: Failed to write router wrapper files.</p>";
     }
 }
