@@ -99,7 +99,19 @@ const Invoice = () => {
       setError(null);
       setData((prev) => {
         // avoid unnecessary state updates if nothing changed
-        if (prev && prev.status === row.status && prev.updated_at === row.updated_at && prev.payment_gateway === row.payment_gateway) {
+        if (
+          prev &&
+          prev.status === row.status &&
+          prev.updated_at === row.updated_at &&
+          prev.payment_gateway === row.payment_gateway &&
+          JSON.stringify(prev.service_brief) === JSON.stringify(row.service_brief) &&
+          JSON.stringify(prev.billing_address) === JSON.stringify(row.billing_address) &&
+          prev.customer_name === row.customer_name &&
+          prev.customer_email === row.customer_email &&
+          JSON.stringify(prev.items) === JSON.stringify(row.items) &&
+          prev.total === row.total &&
+          prev.notes === row.notes
+        ) {
           return prev;
         }
         return row;

@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Loader2, FileText, ArrowLeft, Building2, UserRound } from "lucide-react";
+import { Plus, Trash2, Loader2, FileText, ArrowLeft, Building2, UserRound, Eye, EyeOff, CheckCircle2, Mail, Phone, MapPin, Globe } from "lucide-react";
 import ServiceItemPicker from "@/components/admin/ServiceItemPicker";
 import { toast } from "sonner";
 import { db } from "@/integrations/db/client";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import type { TeamMember } from "@/lib/home-sections-defaults";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import SiteLogo from "@/components/shared/SiteLogo";
 
 type IssuerMode = "company" | "employee";
 
@@ -564,6 +566,16 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const titleText = isEdit ? `Edit invoice${invoiceNumber ? ` ${invoiceNumber}` : ""}` : "Create manual invoice";
   const ctaText = isEdit ? "Save changes" : "Create invoice";
 
+  const [showPreview, setShowPreview] = useState(true);
+
+  // Live preview computed values
+  const previewIssuerIsEmployee = issuerMode === "employee" && !!selectedEmployee;
+  const previewIssuerName = previewIssuerIsEmployee ? (selectedEmployee?.name ?? "") : "Dynime Inc.";
+  const previewIssuerEmail = previewIssuerIsEmployee ? (selectedEmployee?.email ?? "") : "support@dynime.com";
+  const previewIssuerRole = previewIssuerIsEmployee ? "" : "Web · Marketing · Software · Consultancy";
+  const previewDueDate = dueDate ? new Date(dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—";
+  const previewFmt = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
+
   return (
     <SuperAdminLayout>
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
@@ -584,7 +596,12 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           {!isEdit && autosavedAt && (
             <Button variant="ghost" size="sm" onClick={discardDraft} disabled={submitting}>Discard draft</Button>
           )}
+          <Button variant="outline" size="sm" onClick={() => setShowPreview(v => !v)} className="gap-1.5 hidden sm:flex">
+            {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            {showPreview ? "Hide preview" : "Show preview"}
+          </Button>
           <Button variant="outline" onClick={() => guardedNavigate(backHref)} disabled={submitting}>Cancel</Button>
+
           <Button onClick={submit} disabled={submitting}>
             {submitting ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <FileText className="w-4 h-4 mr-1.5" />}
             {ctaText}
@@ -592,7 +609,156 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         </div>
       </div>
 
-      <div className="space-y-5 max-w-4xl">
+      <div className={cn("gap-6", showPreview ? "grid xl:grid-cols-2" : "max-w-4xl")}>
+        {/* LIVE PREVIEW PANEL */}
+        {showPreview && (
+          <div className="order-last xl:order-first">
+            <div className="sticky top-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5" /> Live Preview
+              </p>
+              <div className="bg-white dark:bg-card border border-border rounded-xl shadow-md overflow-hidden text-sm">
+                {/* ribbon */}
+                <div className="h-1 w-full bg-primary" />
+
+                {/* header */}
+                <div className="p-5 flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-heading text-2xl font-bold">Invoice</h2>
+                    {invoiceNumber && <p className="text-xs text-muted-foreground font-mono mt-0.5">{invoiceNumber}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">Due {previewDueDate}</p>
+                  </div>
+                  <div className="text-right">
+                    {previewIssuerIsEmployee ? (
+                      <div className="flex items-center justify-end gap-2 mb-1">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-xs">
+                          {previewIssuerName.split(" ").map((s: string) => s[0]).slice(0, 2).join("").toUpperCase()}
+                        </div>
+                        <span className="text-sm font-semibold">{previewIssuerName}</span>
+                      </div>
+                    ) : (
+                      <SiteLogo variant="light" className="h-7 w-auto ml-auto mb-1" />
+                    )}
+                    <p className="text-xs text-muted-foreground">{previewIssuerName}</p>
+                    {previewIssuerEmail && <p className="text-xs text-muted-foreground">{previewIssuerEmail}</p>}
+                  </div>
+                </div>
+
+                {/* meta */}
+                <div className="px-5 pb-4 grid grid-cols-2 gap-x-6 gap-y-1 text-xs border-t border-border pt-3">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Currency</span><span className="font-medium">{currency}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-medium capitalize">{status}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span className="font-medium capitalize">{gateway.replace("_", " ")}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Due date</span><span className="font-medium">{previewDueDate}</span></div>
+                </div>
+
+                {/* from / billed to */}
+                <div className="px-5 py-4 grid grid-cols-2 gap-6 border-t border-border">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 flex items-center gap-1">
+                      {previewIssuerIsEmployee ? <UserRound className="w-3 h-3" /> : <Building2 className="w-3 h-3" />} From
+                    </p>
+                    <p className="font-semibold text-xs">{previewIssuerName}</p>
+                    {previewIssuerRole && <p className="text-[11px] text-muted-foreground">{previewIssuerRole}</p>}
+                    {previewIssuerEmail && (
+                      <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <Mail className="w-2.5 h-2.5" /> {previewIssuerEmail}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 flex items-center gap-1">
+                      <Mail className="w-3 h-3" /> Billed to
+                    </p>
+                    <p className="font-semibold text-xs">{customerName || "Customer"}</p>
+                    {company && <p className="text-[11px]">{company}</p>}
+                    <p className="text-[11px] text-muted-foreground">{customerEmail || "email@example.com"}</p>
+                    {phone && <p className="text-[11px] text-muted-foreground flex items-center gap-1"><Phone className="w-2.5 h-2.5" />{phone}</p>}
+                  </div>
+                </div>
+
+                {/* amount due */}
+                <div className="px-5 py-4 border-t border-border bg-primary/5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Amount due</p>
+                  <p className="font-heading text-3xl font-bold">{previewFmt(total)}</p>
+                  <p className="text-xs text-muted-foreground">due {previewDueDate}</p>
+                </div>
+
+                {/* items */}
+                <div className="px-5 py-4 border-t border-border">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b-2 border-foreground/80 text-left">
+                        <th className="py-1.5 pr-2 font-semibold">Description</th>
+                        <th className="py-1.5 px-2 font-semibold text-center w-10">Qty</th>
+                        <th className="py-1.5 px-2 font-semibold text-right w-20">Price</th>
+                        <th className="py-1.5 pl-2 font-semibold text-right w-20">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.filter(it => it.name.trim()).map((it, i) => (
+                        <tr key={i} className="border-b border-border/60">
+                          <td className="py-2 pr-2">
+                            <p className="font-medium">{it.name}</p>
+                            {it.description && <p className="text-[10px] text-muted-foreground">{it.description}</p>}
+                          </td>
+                          <td className="py-2 px-2 text-center tabular-nums">{it.quantity}</td>
+                          <td className="py-2 px-2 text-right tabular-nums">{previewFmt(it.price)}</td>
+                          <td className="py-2 pl-2 text-right tabular-nums font-medium">{previewFmt(it.price * it.quantity)}</td>
+                        </tr>
+                      ))}
+                      {items.filter(it => it.name.trim()).length === 0 && (
+                        <tr><td colSpan={4} className="py-4 text-center text-muted-foreground italic">No items yet</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                  <div className="mt-3 flex justify-end">
+                    <div className="w-48 space-y-1 text-xs">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">{previewFmt(subtotal)}</span></div>
+                      {Number(discount) > 0 && <div className="flex justify-between text-emerald-600"><span>Discount</span><span className="tabular-nums">−{previewFmt(Number(discount))}</span></div>}
+                      <div className="flex justify-between font-bold text-sm border-t border-foreground/20 pt-1">
+                        <span>Total</span><span className="tabular-nums">{previewFmt(total)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* included services */}
+                {included.trim() && (
+                  <div className="px-5 py-4 border-t border-border bg-muted/20">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> What's included
+                    </p>
+                    <ul className="space-y-1">
+                      {included.split("\n").filter(Boolean).map((s, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-xs">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{s}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* notes */}
+                {notes.trim() && (
+                  <div className="px-5 py-3 border-t border-border">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Notes</p>
+                    <p className="text-xs whitespace-pre-line">{notes}</p>
+                  </div>
+                )}
+
+                {/* footer */}
+                <div className="px-5 py-3 border-t border-border bg-muted/10 text-center text-[10px] text-muted-foreground">
+                  <p>Thank you for choosing <span className="font-semibold text-foreground">Dynime</span>.</p>
+                  <p>Questions? Email support@dynime.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-5">
         <section className="glass-card p-4 grid sm:grid-cols-2 gap-3">
           <div>
             <Label>Customer name</Label>
@@ -837,7 +1003,8 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
             {ctaText}
           </Button>
         </div>
-      </div>
+        </div>{/* end inner form div */}
+      </div>{/* end outer grid */}
     </SuperAdminLayout>
   );
 }
