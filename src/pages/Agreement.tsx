@@ -324,6 +324,7 @@ const Agreement = () => {
       <style>{`
         @page { margin: 14mm; }
         @media print {
+          body * { visibility: visible !important; }
           header[role="banner"], nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
           article { background: #ffffff !important; color: #0a0a14 !important; }

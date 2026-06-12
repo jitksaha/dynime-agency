@@ -573,6 +573,7 @@ const Invoice = () => {
       <style>{`
         @page { margin: 12mm; }
         @media print {
+          body * { visibility: visible !important; }
           header, footer, nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
           section { background: #ffffff !important; color: #0a0a14 !important; }
