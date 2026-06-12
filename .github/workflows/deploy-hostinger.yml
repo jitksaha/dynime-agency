@@ -55,6 +55,7 @@ jobs:
           port: 21
           local-dir: ./dist/
           server-dir: ./
+          timeout: 300000
 
       - name: 🚀 Trigger Backend Deployment Webhook
         run: |
