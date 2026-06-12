@@ -3,7 +3,8 @@
  * Diagnostic helper to print recent Laravel logs
  */
 
-$logFile = '/home/ssamokxvqc/dynime-api/storage/logs/laravel.log';
+$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/domains/dynime.com/public_html');
+$logFile = $homeDir . '/dynime-api/storage/logs/laravel.log';
 
 header('Content-Type: text/plain; charset=utf-8');
 if (file_exists($logFile)) {
@@ -15,13 +16,13 @@ if (file_exists($logFile)) {
     echo "ERROR: log file not found at: $logFile\n";
     
     // Check php error logs in the directory
-    $localLog = __DIR__ . '/error_log';
+    $localLog = $_SERVER['DOCUMENT_ROOT'] . '/error_log';
     if (file_exists($localLog)) {
         echo "\n=== PHP error_log (Last 50 lines) ===\n";
         $lines = file($localLog);
         $lastLines = array_slice($lines, -50);
         echo implode("", $lastLines);
     } else {
-        echo "ERROR: Local error_log not found either.\n";
+        echo "ERROR: Local error_log not found either at: $localLog\n";
     }
 }
