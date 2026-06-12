@@ -79,6 +79,26 @@ const AnimatedStat = ({ value, label, icon: Icon }: { value: string; label: stri
   );
 };
 
+const serviceIllustrationMap: Record<string, string> = {
+  "wordpress-design": "/wordpress-design-illustration.png",
+  "wordpress-woocommerce": "/wordpress-design-illustration.png",
+  "shopify": "/shopify-illustration.png",
+  "shopify-ecommerce": "/shopify-illustration.png",
+  "seo": "/seo-illustration.png",
+  "google-ads": "/marketing-ads-illustration.png",
+  "facebook-ads": "/marketing-ads-illustration.png",
+  "social-media": "/marketing-ads-illustration.png",
+  "content-marketing": "/marketing-ads-illustration.png",
+  "email-marketing": "/marketing-ads-illustration.png",
+  "us-company": "/company-formation-illustration.png",
+  "uk-company": "/company-formation-illustration.png",
+  "itin-services": "/company-formation-illustration.png",
+  "virtual-address": "/company-formation-illustration.png",
+  "ai-software-development": "/ai-software-illustration.png",
+  "custom-software-development": "/ai-software-illustration.png",
+  "software-built-with-ai": "/ai-software-illustration.png",
+};
+
 const ServiceDetailPage = () => {
   const { slug } = useParams();
   const service = getServiceBySlug(slug || "");
@@ -365,8 +385,8 @@ const ServiceDetailPage = () => {
             <ScrollReveal className="lg:col-span-4 flex justify-center">
               <div className="relative w-full max-w-[320px] lg:max-w-none aspect-[4/3] flex items-center justify-center bg-card/60 rounded-2xl border border-border p-6 shadow-md overflow-hidden hover:scale-[1.02] hover:shadow-lg transition-all duration-300">
                 <img
-                  src={`/${service.category}-illustration.png`}
-                  alt={service.metaTitle || service.title}
+                  src={service ? (serviceIllustrationMap[service.slug] || `/${service.category}-illustration.png`) : ""}
+                  alt={service?.metaTitle || service?.title || "Dynime illustration"}
                   className="w-full h-full object-contain filter drop-shadow-sm brightness-100 dark:brightness-95 select-none"
                   loading="lazy"
                 />
