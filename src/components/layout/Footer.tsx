@@ -115,11 +115,17 @@ const SERVICE_HUB_ROUTE: Record<"dws" | "des" | "dms" | "dss" | "dcs" | "dbm", s
 };
 
 const buildDynamicGroups = (): { title: string; links: { label: string; to: string }[] }[] => {
-  // Services — show each division by full name, linking to its main hub page
+  const labels: Record<"dws" | "des" | "dms" | "dss" | "dcs", string> = {
+    dws: "DWS - Dynime Web Services",
+    des: "DES - Dynime Ecommerce Services",
+    dms: "DMS - Dynime Marketing Services",
+    dss: "DSS - Dynime Software Services",
+    dcs: "DCS - Dynime Consultancy Services",
+  };
+
   const services = (["dws", "des", "dms", "dss", "dcs"] as const).map((key) => {
-    const tab = serviceTabs[key];
     return {
-      label: `${tab.label} – ${tab.sublabel}`,
+      label: labels[key],
       to: SERVICE_HUB_ROUTE[key],
     };
   });
