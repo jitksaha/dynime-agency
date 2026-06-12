@@ -53,6 +53,8 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const [gateway, setGateway] = useState("manual");
   const [discount, setDiscount] = useState(0);
   const [notes, setNotes] = useState("");
+  const [partiallyPaid, setPartiallyPaid] = useState(false);
+  const [amountPaid, setAmountPaid] = useState(0);
   const [included, setIncluded] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [dueDate, setDueDate] = useState<string>(() => {
@@ -156,8 +158,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     () => JSON.stringify({
       customerName, customerEmail, phone, company, currency, status,
       gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate,
+      partiallyPaid, amountPaid,
     }),
-    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate]
+    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate, partiallyPaid, amountPaid]
   );
   // --- autosave (new mode only) ---
   const AUTOSAVE_KEY = "admin:manual-invoice:draft:v1";
@@ -364,6 +367,13 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         const sb = (o.service_brief || {}) as any;
         const inc = Array.isArray(sb.included_services) ? sb.included_services : [];
         setIncluded(inc.join("\n"));
+        if (sb.partially_paid) {
+          setPartiallyPaid(true);
+          setAmountPaid(Number(sb.amount_paid || 0));
+        } else {
+          setPartiallyPaid(false);
+          setAmountPaid(0);
+        }
         if (sb.due_date) {
           setDueDate(sb.due_date);
         } else {
@@ -411,6 +421,8 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
               d.setDate(d.getDate() + 14);
               return d.toISOString().split("T")[0];
             })(),
+            partiallyPaid: sb.partially_paid || false,
+            amountPaid: Number(sb.amount_paid || 0),
           });
         });
       } catch (err) {
@@ -431,6 +443,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
 
   const subtotal = items.reduce((s, it) => s + Number(it.price || 0) * Number(it.quantity || 0), 0);
   const total = Math.max(0, subtotal - Number(discount || 0));
+  const remainingDue = partiallyPaid ? Math.max(0, total - Number(amountPaid || 0)) : total;
 
   const submit = async () => {
     const cleanItems = items
@@ -469,6 +482,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           manual_invoice: true,
           included_services: includedServices,
           due_date: dueDate || null,
+          partially_paid: partiallyPaid,
+          amount_paid: partiallyPaid ? amountPaid : 0,
+          amount_due: partiallyPaid ? remainingDue : total,
         };
         if (issuerMode === "employee") {
           if (!selectedEmployee) { toast.error("Pick an employee to issue this invoice under"); setSubmitting(false); return; }
@@ -511,7 +527,13 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         const billing_address: Record<string, unknown> = {};
         if (phone) billing_address.phone = phone;
         if (company) billing_address.company = company;
-        const service_brief: Record<string, unknown> = { manual_invoice: true, due_date: dueDate || null };
+        const service_brief: Record<string, unknown> = {
+          manual_invoice: true,
+          due_date: dueDate || null,
+          partially_paid: partiallyPaid,
+          amount_paid: partiallyPaid ? amountPaid : 0,
+          amount_due: partiallyPaid ? remainingDue : total,
+        };
         if (includedServices.length) service_brief.included_services = includedServices;
         if (issuerMode === "employee") {
           if (!selectedEmployee) { toast.error("Pick an employee to issue this invoice under"); setSubmitting(false); return; }
@@ -685,8 +707,10 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
 
                 {/* amount due */}
                 <div className="px-5 py-4 border-t border-border bg-primary/5">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Amount due</p>
-                  <p className="font-heading text-3xl font-bold">{previewFmt(total)}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">
+                    {partiallyPaid ? "Remaining Balance Due" : "Amount due"}
+                  </p>
+                  <p className="font-heading text-3xl font-bold">{previewFmt(partiallyPaid ? remainingDue : total)}</p>
                   <p className="text-xs text-muted-foreground">due {previewDueDate}</p>
                 </div>
 
@@ -725,6 +749,12 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
                       <div className="flex justify-between font-bold text-sm border-t border-foreground/20 pt-1">
                         <span>Total</span><span className="tabular-nums">{previewFmt(total)}</span>
                       </div>
+                      {partiallyPaid && (
+                        <>
+                          <div className="flex justify-between text-emerald-600"><span>Paid (Advance)</span><span className="tabular-nums">{previewFmt(amountPaid)}</span></div>
+                          <div className="flex justify-between font-bold text-xs"><span>Remaining Due</span><span className="tabular-nums">{previewFmt(remainingDue)}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -998,6 +1028,35 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
             <div className="flex justify-between font-bold text-base border-t border-border pt-2">
               <span>Total</span>
               <span className="tabular-nums">{total.toFixed(2)} {currency}</span>
+            </div>
+            <div className="border-t border-border pt-2.5 mt-2 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="partiallyPaid"
+                  checked={partiallyPaid}
+                  onChange={(e) => setPartiallyPaid(e.target.checked)}
+                  className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                />
+                <Label htmlFor="partiallyPaid" className="text-xs font-semibold cursor-pointer">Partially paid (Advance / Token)</Label>
+              </div>
+              {partiallyPaid && (
+                <div className="flex justify-between items-center gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <span className="text-xs text-muted-foreground font-semibold">Amount Paid</span>
+                  <Input
+                    type="number" min={0} step="0.01"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(Number(e.target.value))}
+                    className="h-8 w-28 text-right tabular-nums"
+                  />
+                </div>
+              )}
+              {partiallyPaid && (
+                <div className="flex justify-between text-xs font-semibold pt-1 border-t border-dashed border-border">
+                  <span className="text-muted-foreground">Remaining Due</span>
+                  <span className="tabular-nums">{remainingDue.toFixed(2)} {currency}</span>
+                </div>
+              )}
             </div>
           </div>
         </section>

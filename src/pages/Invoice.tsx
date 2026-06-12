@@ -500,9 +500,19 @@ const Invoice = () => {
                 <div className="border-t-2 border-foreground/80 pt-2 mt-2">
                   <Total label="Total" value={fmt(data.total)} bold />
                 </div>
-                <div className={cn("rounded-lg px-3 py-2.5 mt-2 flex items-center justify-between font-semibold", paid ? "bg-emerald-500/10 text-emerald-700" : "bg-foreground text-background")}>
-                  <span className="text-sm uppercase tracking-wider">{paid ? "Amount paid" : "Amount due"}</span>
-                  <span className="text-base tabular-nums">{fmt(paid ? data.total : data.total)}</span>
+                {brief.partially_paid && (
+                  <>
+                    <Total label="Amount Paid (Advance)" value={fmt(Number(brief.amount_paid || 0))} tone="text-emerald-600 font-semibold" />
+                    <Total label="Remaining Balance Due" value={fmt(Number(brief.amount_due || 0))} bold />
+                  </>
+                )}
+                <div className={cn("rounded-lg px-3 py-2.5 mt-2 flex items-center justify-between font-semibold", (paid || brief.partially_paid) ? "bg-emerald-500/10 text-emerald-700" : "bg-foreground text-background")}>
+                  <span className="text-sm uppercase tracking-wider">
+                    {paid ? "Amount paid" : brief.partially_paid ? "Balance Due" : "Amount due"}
+                  </span>
+                  <span className="text-base tabular-nums">
+                    {fmt(paid ? data.total : brief.partially_paid ? Number(brief.amount_due || 0) : data.total)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -517,7 +527,7 @@ const Invoice = () => {
               orderId={data.id}
               invoiceNumber={data.invoice_number}
               customerEmail={data.customer_email}
-              amount={data.total}
+              amount={brief.partially_paid ? Number(brief.amount_due || 0) : data.total}
               currency={currency}
               defaultGateway={data.payment_gateway || null}
               status={data.status}
