@@ -13,7 +13,8 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
 }
 
 $zipFile = __DIR__ . '/dynime-api.zip';
-$extractTo = '/home/ssamokxvqc/dynime-api';
+$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/ssamokxvqc/public_html');
+$extractTo = $homeDir . '/dynime-api';
 
 header('Content-Type: text/html; charset=utf-8');
 echo "<h2>cPanel Backend Deployment Webhook</h2>";
