@@ -118,11 +118,11 @@ $envPath = $apiDir . '/.env';
             $envContent = '';
             if (file_exists($templatePath)) {
                 $envContent = file_get_contents($templatePath);
-                $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST=' . $db_host, $envContent);
-                $envContent = str_replace('DB_PORT=3306', 'DB_PORT=' . $db_port, $envContent);
-                $envContent = str_replace('DB_DATABASE=dynime_db', 'DB_DATABASE=' . $db_database, $envContent);
-                $envContent = str_replace('DB_USERNAME=dynime_user', 'DB_USERNAME=' . $db_username, $envContent);
-                $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD=' . $db_password, $envContent);
+                $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST="' . $db_host . '"', $envContent);
+                $envContent = str_replace('DB_PORT=3306', 'DB_PORT="' . $db_port . '"', $envContent);
+                $envContent = str_replace('DB_DATABASE=dynime_db', 'DB_DATABASE="' . $db_database . '"', $envContent);
+                $envContent = str_replace('DB_USERNAME=dynime_user', 'DB_USERNAME="' . $db_username . '"', $envContent);
+                $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD="' . $db_password . '"', $envContent);
                 
                 // APP_KEY generation if empty
                 if (strpos($envContent, 'APP_KEY=') !== false && (trim(explode("\n", explode('APP_KEY=', $envContent)[1])[0]) === '')) {
@@ -131,7 +131,7 @@ $envPath = $apiDir . '/.env';
                 }
             } else {
                 $appKey = 'base64:' . base64_encode(random_bytes(32));
-                $envContent = "APP_NAME=\"Dynime API\"\nAPP_ENV=production\nAPP_KEY=$appKey\nAPP_DEBUG=false\nAPP_URL=https://dynime.com/api\nFRONTEND_URL=https://dynime.com\n\nDB_CONNECTION=mysql\nDB_HOST=$db_host\nDB_PORT=$db_port\nDB_DATABASE=$db_database\nDB_USERNAME=$db_username\nDB_PASSWORD=$db_password\n\nCACHE_STORE=file\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\nSESSION_SECURE_COOKIE=true\nQUEUE_CONNECTION=database\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.hostinger.com\nMAIL_PORT=587\nMAIL_USERNAME=contact@dynime.com\nMAIL_PASSWORD=\nMAIL_ENCRYPTION=tls\nMAIL_FROM_ADDRESS=contact@dynime.com\nMAIL_FROM_NAME=\"Dynime\"\n\nFILESYSTEM_DISK=public\n";
+                $envContent = "APP_NAME=\"Dynime API\"\nAPP_ENV=production\nAPP_KEY=$appKey\nAPP_DEBUG=false\nAPP_URL=https://dynime.com/api\nFRONTEND_URL=https://dynime.com\n\nDB_CONNECTION=mysql\nDB_HOST=\"$db_host\"\nDB_PORT=\"$db_port\"\nDB_DATABASE=\"$db_database\"\nDB_USERNAME=\"$db_username\"\nDB_PASSWORD=\"$db_password\"\n\nCACHE_STORE=file\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\nSESSION_SECURE_COOKIE=true\nQUEUE_CONNECTION=database\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.hostinger.com\nMAIL_PORT=587\nMAIL_USERNAME=contact@dynime.com\nMAIL_PASSWORD=\nMAIL_ENCRYPTION=tls\nMAIL_FROM_ADDRESS=contact@dynime.com\nMAIL_FROM_NAME=\"Dynime\"\n\nFILESYSTEM_DISK=public\n";
             }
             
             if (file_put_contents($envPath, $envContent) !== false) {
