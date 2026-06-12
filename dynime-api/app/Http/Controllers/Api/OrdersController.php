@@ -1626,6 +1626,64 @@ class OrdersController extends Controller
         return response()->json(['data' => $orders]);
     }
 
+    public function adminStore(Request $request): JsonResponse
+    {
+        $id = (string)Str::uuid();
+        $data = $request->all();
+
+        // Validate required fields
+        if (empty($data['customer_email']) || empty($data['items']) || !isset($data['total'])) {
+            return response()->json(['message' => 'Missing required fields: customer_email, items, total'], 400);
+        }
+
+        // Generate invoice number
+        $lastOrder = DB::table('orders')
+            ->where('invoice_number', 'like', 'INV-%')
+            ->orderBy('invoice_number', 'desc')
+            ->first();
+        
+        $nextNum = 1001;
+        if ($lastOrder && preg_match('/INV-(\d+)/', $lastOrder->invoice_number, $matches)) {
+            $nextNum = ((int)$matches[1]) + 1;
+        } else {
+            $count = DB::table('orders')->count();
+            $nextNum = 1001 + $count;
+        }
+        $invoiceNumber = 'INV-' . $nextNum;
+
+        // Insert into database
+        DB::table('orders')->insert([
+            'id' => $id,
+            'customer_name' => $data['customer_name'] ?? null,
+            'customer_email' => $data['customer_email'],
+            'items' => is_array($data['items']) ? json_encode($data['items']) : $data['items'],
+            'subtotal' => $data['subtotal'] ?? $data['total'],
+            'total' => $data['total'],
+            'status' => $data['status'] ?? 'pending',
+            'payment_gateway' => $data['payment_gateway'] ?? 'manual',
+            'discount_amount' => $data['discount_amount'] ?? 0.00,
+            'notes' => $data['notes'] ?? null,
+            'billing_address' => is_array($data['billing_address']) ? json_encode($data['billing_address']) : json_encode([]),
+            'service_brief' => is_array($data['service_brief']) ? json_encode($data['service_brief']) : json_encode([]),
+            'referral_code' => $data['referral_code'] ?? null,
+            'currency' => $data['currency'] ?? 'USD',
+            'user_id' => $data['user_id'] ?? null,
+            'invoice_number' => $invoiceNumber,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $newOrder = DB::table('orders')->where('id', $id)->first();
+        if ($newOrder) {
+            $newOrder->items = json_decode($newOrder->items, true);
+            $newOrder->service_brief = json_decode($newOrder->service_brief, true);
+            $newOrder->billing_address = json_decode($newOrder->billing_address, true);
+            $newOrder->payment_verification = json_decode($newOrder->payment_verification, true);
+        }
+
+        return response()->json($newOrder, 201);
+    }
+
     public function adminShow(string $id): JsonResponse
     {
         $order = DB::table('orders')->where('id', $id)->first();
