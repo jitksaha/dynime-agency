@@ -58,6 +58,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     d.setDate(d.getDate() + 14);
     return d.toISOString().split("T")[0];
   });
+  const [showPreview, setShowPreview] = useState(true);
   const [items, setItems] = useState<LineItem[]>([
     { name: "", description: "", price: 0, quantity: 1 },
   ]);
@@ -565,8 +566,6 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const backHref = isEdit && id ? `/superadmin/orders/${id}` : "/superadmin/orders";
   const titleText = isEdit ? `Edit invoice${invoiceNumber ? ` ${invoiceNumber}` : ""}` : "Create manual invoice";
   const ctaText = isEdit ? "Save changes" : "Create invoice";
-
-  const [showPreview, setShowPreview] = useState(true);
 
   // Live preview computed values
   const previewIssuerIsEmployee = issuerMode === "employee" && !!selectedEmployee;
