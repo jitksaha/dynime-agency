@@ -56,13 +56,13 @@ header('Content-Type: text/html; charset=utf-8');
         <h2>2. Configure/Recreate API Symlink</h2>
         <?php
         if (isset($_GET['action']) && $_GET['action'] === 'symlink') {
-            if (file_exists($apiSymlink)) {
-                if (is_link($apiSymlink)) {
-                    unlink($apiSymlink);
-                } else {
-                    // Rename or delete if normal directory/file
-                    // If it is a directory, rename it
+            if (is_link($apiSymlink)) {
+                unlink($apiSymlink);
+            } elseif (file_exists($apiSymlink)) {
+                if (is_dir($apiSymlink)) {
                     rename($apiSymlink, $apiSymlink . '_bak_' . time());
+                } else {
+                    unlink($apiSymlink);
                 }
             }
             if (symlink($apiPublicDir, $apiSymlink)) {
