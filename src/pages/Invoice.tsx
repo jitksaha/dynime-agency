@@ -330,7 +330,7 @@ const Invoice = () => {
           </div>
 
           {/* Meta grid */}
-          <div className="px-8 md:px-10 pb-6 grid sm:grid-cols-2 gap-x-10 gap-y-2 text-sm relative">
+          <div className="px-8 md:px-10 pb-6 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-x-10 gap-y-2 text-sm relative">
             <Row label="Invoice number" value={<span className="font-mono">{data.invoice_number || data.id.slice(0, 8).toUpperCase()}</span>} />
             <Row label="Currency" value={currency} />
             <Row label="Date of issue" value={new Date(data.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
@@ -342,7 +342,7 @@ const Invoice = () => {
           </div>
 
           {/* From / Bill to */}
-          <div className="px-8 md:px-10 py-6 grid md:grid-cols-2 gap-8 border-t border-border relative">
+          <div className="px-8 md:px-10 py-6 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-8 border-t border-border relative">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1">
                 {issuerIsEmployee ? <UserRound className="w-3 h-3" /> : <Building2 className="w-3 h-3" />} From
@@ -571,11 +571,12 @@ const Invoice = () => {
       </section>
 
       <style>{`
-        @page { margin: 12mm; }
+        @page { size: auto; margin: 0mm; }
         @media print {
           body * { visibility: visible !important; }
           header, footer, nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
+          body { padding: 15mm !important; }
           section { background: #ffffff !important; color: #0a0a14 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         }

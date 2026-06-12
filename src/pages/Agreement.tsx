@@ -184,7 +184,7 @@ const Agreement = () => {
           </header>
 
           {/* Parties */}
-          <section className="px-8 md:px-10 py-6 grid md:grid-cols-2 gap-8 border-b border-border">
+          <section className="px-8 md:px-10 py-6 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-8 border-b border-border">
             <div>
               <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 flex items-center gap-1">
                 {issuerIsEmployee ? <UserRound className="w-3 h-3" /> : <Building2 className="w-3 h-3" />} Service Provider
@@ -291,7 +291,7 @@ const Agreement = () => {
           </section>
 
           {/* Signatures */}
-          <section className="px-8 md:px-10 pb-10 grid sm:grid-cols-2 gap-8 border-t border-border pt-8">
+          <section className="px-8 md:px-10 pb-10 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-8 border-t border-border pt-8">
             <SignatureBlock
               label="Service Provider"
               name={toText((agreement.signatures as Record<string, Record<string, unknown>> | undefined)?.provider?.signer_name) || providerName}
@@ -322,11 +322,12 @@ const Agreement = () => {
       </div>
 
       <style>{`
-        @page { margin: 14mm; }
+        @page { size: auto; margin: 0mm; }
         @media print {
           body * { visibility: visible !important; }
           header[role="banner"], nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
+          body { padding: 15mm !important; }
           article { background: #ffffff !important; color: #0a0a14 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         }
