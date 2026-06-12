@@ -338,9 +338,9 @@ const Services = () => {
                 className={`relative rounded-3xl border bg-gradient-to-br ${meta.accent} p-6 md:p-10 scroll-mt-32`}
               >
                 <ScrollReveal delay={ci * 0.05}>
-                  <header className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-14 h-14 rounded-2xl bg-background/80 border border-border flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <header className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-8">
+                    <div className="flex flex-col md:flex-row items-start gap-4 flex-1 min-w-0">
+                      <div className="w-14 h-14 rounded-2xl bg-background/80 border border-border flex items-center justify-center flex-shrink-0 shadow-sm animate-pulse" style={{ animationDuration: '4s' }}>
                         <CatIcon className="w-7 h-7 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -352,7 +352,7 @@ const Services = () => {
                         <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mt-1 leading-tight">
                           {meta.tagline}
                         </h2>
-                        <p className="text-sm md:text-base text-muted-foreground mt-3 leading-relaxed max-w-3xl">
+                        <p className="text-sm md:text-base text-muted-foreground mt-3 leading-relaxed max-w-2xl">
                           {meta.desc}
                         </p>
                         {meta.outcomes && (
@@ -368,15 +368,27 @@ const Services = () => {
                             ))}
                           </ul>
                         )}
+                        {meta.hubTo && (
+                          <div className="mt-5">
+                            <Button variant="hero" asChild className="shrink-0">
+                              <Link to={meta.hubTo}>
+                                Explore {cat.label} <ArrowRight className="w-4 h-4 ml-1" />
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    {meta.hubTo && (
-                      <Button variant="hero" asChild className="shrink-0">
-                        <Link to={meta.hubTo}>
-                          Explore {cat.label} <ArrowRight className="w-4 h-4 ml-1" />
-                        </Link>
-                      </Button>
-                    )}
+
+                    {/* Branded tech illustration */}
+                    <div className="w-full max-w-[280px] sm:max-w-[320px] aspect-square rounded-2xl border border-border bg-card/60 overflow-hidden shadow-md flex-shrink-0 hover:scale-[1.02] hover:shadow-lg transition-all duration-300">
+                      <img 
+                        src={`/${key}-illustration.png`} 
+                        alt={meta.keywords || cat.label} 
+                        className="w-full h-full object-cover" 
+                        loading="lazy" 
+                      />
+                    </div>
                   </header>
                 </ScrollReveal>
 

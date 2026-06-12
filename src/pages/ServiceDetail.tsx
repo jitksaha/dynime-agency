@@ -360,18 +360,33 @@ const ServiceDetailPage = () => {
               </p>
             </div>
           </ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {service.benefits.map((b, i) => (
-              <ScrollReveal key={b.title} delay={i * 0.08}>
-                <div className="glass-card-hover p-6 h-full group">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column - Illustration */}
+            <ScrollReveal className="lg:col-span-4 flex justify-center">
+              <div className="relative w-full max-w-[320px] lg:max-w-none aspect-[4/3] flex items-center justify-center bg-card/60 rounded-2xl border border-border p-6 shadow-md overflow-hidden hover:scale-[1.02] hover:shadow-lg transition-all duration-300">
+                <img
+                  src={`/${service.category}-illustration.png`}
+                  alt={service.metaTitle || service.title}
+                  className="w-full h-full object-contain filter drop-shadow-sm brightness-100 dark:brightness-95 select-none"
+                  loading="lazy"
+                />
+              </div>
+            </ScrollReveal>
+
+            {/* Right Column - Benefits Grid */}
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {service.benefits.map((b, i) => (
+                <ScrollReveal key={b.title} delay={i * 0.08}>
+                  <div className="glass-card-hover p-6 h-full group">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{b.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
                   </div>
-                  <h3 className="font-heading font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{b.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
-                </div>
-              </ScrollReveal>
-            ))}
+                </ScrollReveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
