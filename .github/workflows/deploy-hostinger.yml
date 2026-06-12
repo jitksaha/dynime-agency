@@ -53,7 +53,7 @@ jobs:
 
       - name: 📂 Sync files to Hostinger via lftp
         run: |
-          lftp -e "set net:timeout 15; set net:max-retries 5; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --parallel=5 ./dist/ ./; quit"
+          lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --parallel=2 ./dist/ ./; quit"
 
       - name: 🚀 Trigger Backend Deployment Webhook
         run: |
