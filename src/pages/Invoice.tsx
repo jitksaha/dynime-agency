@@ -204,7 +204,7 @@ const Invoice = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <Layout hideFooter={true}>
         <div className="container-custom py-20 text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
         </div>
@@ -213,7 +213,7 @@ const Invoice = () => {
   }
   if (error || !data) {
     return (
-      <Layout>
+      <Layout hideFooter={true}>
         <div className="container-custom py-20 text-center">
           <h1 className="font-heading text-2xl font-bold mb-2">Invoice not found</h1>
           <p className="text-muted-foreground mb-4">{error}</p>

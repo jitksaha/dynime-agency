@@ -309,7 +309,7 @@ const PayOpenSource = () => {
   const orbsRef = useParallax();
 
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       {/* ════════════════ HERO ════════════════ */}
       <section
         ref={heroRef}

@@ -1544,7 +1544,7 @@ const Checkout = () => {
       paymentResult === "cancelled" ? "No charge was made. Pick the service you'd like to start with." :
       "Browse services and add a plan to get started.";
     return (
-      <Layout>
+      <Layout hideFooter={true}>
         <div className="container-custom py-14 text-center">
           <ShoppingCart className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
           <h1 className="font-heading text-3xl font-bold mb-2">{emptyHeading}</h1>
@@ -1581,7 +1581,7 @@ const Checkout = () => {
   const activeGateway = gateways?.find((g) => g.id === gateway);
 
   return (
-    <Layout>
+    <Layout hideFooter={true}>
       <section className="py-10 md:py-14 bg-muted/30 min-h-screen">
         <div className="container-custom max-w-6xl">
           <div className="rounded-3xl bg-card border border-border shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.25)] overflow-hidden grid lg:grid-cols-[5fr_7fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
