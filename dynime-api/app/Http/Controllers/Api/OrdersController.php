@@ -1708,6 +1708,48 @@ class OrdersController extends Controller
         $data = $request->all();
         $updateData = [];
 
+        // ── Core invoice fields (from invoice edit form) ─────────────────────
+        if ($request->has('customer_name')) {
+            $updateData['customer_name'] = $data['customer_name'];
+        }
+        if ($request->has('customer_email')) {
+            $updateData['customer_email'] = $data['customer_email'];
+        }
+        if ($request->has('user_id')) {
+            $updateData['user_id'] = $data['user_id'];
+        }
+        if ($request->has('items')) {
+            $updateData['items'] = is_array($data['items']) ? json_encode($data['items']) : $data['items'];
+        }
+        if ($request->has('subtotal')) {
+            $updateData['subtotal'] = $data['subtotal'];
+        }
+        if ($request->has('total')) {
+            $updateData['total'] = $data['total'];
+        }
+        if ($request->has('discount_amount')) {
+            $updateData['discount_amount'] = $data['discount_amount'];
+        }
+        if ($request->has('currency')) {
+            $updateData['currency'] = $data['currency'];
+        }
+        if ($request->has('payment_gateway')) {
+            $updateData['payment_gateway'] = $data['payment_gateway'];
+        }
+        if ($request->has('notes')) {
+            $updateData['notes'] = $data['notes'];
+        }
+        if ($request->has('billing_address')) {
+            $updateData['billing_address'] = is_array($data['billing_address']) ? json_encode($data['billing_address']) : $data['billing_address'];
+        }
+        if ($request->has('service_brief')) {
+            $updateData['service_brief'] = is_array($data['service_brief']) ? json_encode($data['service_brief']) : $data['service_brief'];
+        }
+        if ($request->has('referral_code')) {
+            $updateData['referral_code'] = $data['referral_code'];
+        }
+
+        // ── Status and refund fields ──────────────────────────────────────────
         if ($request->has('status')) {
             $updateData['status'] = $data['status'];
         }
@@ -1722,9 +1764,6 @@ class OrdersController extends Controller
         }
         if ($request->has('refund_reason')) {
             $updateData['refund_reason'] = $data['refund_reason'];
-        }
-        if ($request->has('service_brief')) {
-            $updateData['service_brief'] = is_array($data['service_brief']) ? json_encode($data['service_brief']) : $data['service_brief'];
         }
 
         if (!empty($updateData)) {
