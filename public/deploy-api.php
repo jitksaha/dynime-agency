@@ -1,7 +1,7 @@
 <?php
 /**
- * Automated API Deployment Helper
- * Unzips dynime-api.zip into /home/ssamokxvqc/dynime-api
+ * Automated API Deployment Helper for Hostinger
+ * Unzips dynime-api.zip dynamically into the parent folder's dynime-api directory
  */
 
 $deployToken = 'deploy_token_7782'; // Security token
