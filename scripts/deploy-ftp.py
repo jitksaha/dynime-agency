@@ -154,20 +154,43 @@ def main():
     # Detect directory structure & check for nested public_html
     print("Checking remote file list...")
     remote_files = ftp.nlst()
-    
-    # Safety checks and nested public_html deletion
-    # If the root has 'public_html' folder but we are supposed to be inside it,
-    # wait: let's look at the remote directories.
     print(f"FTP root directory contains: {remote_files}")
     
-    # Check if there is a duplicate nested public_html inside the current FTP directory
+    # If the root contains 'public_html' directory, we are at the domain root level, not chrooted.
     if "public_html" in remote_files:
-        # Let's double check if setup-hostinger.php is also at root
-        if "setup-hostinger.php" in remote_files or "index.html" in remote_files:
+        # Clean up mistaken root files if they exist outside of public_html
+        for root_file in ["setup-hostinger.php", "deploy-api.php", "index.html"]:
+            if root_file in remote_files:
+                try:
+                    ftp.delete(root_file)
+                    print(f"Deleted misplaced root file: {root_file}")
+                except Exception:
+                    pass
+        
+        # Check for nested public_html/public_html
+        try:
+            public_html_contents = ftp.nlst("public_html")
+            # If the output lists paths starting with public_html/
+            if any(item.endswith("public_html") or item.endswith("public_html/") for item in public_html_contents):
+                print("WARNING: Detected nested 'public_html' folder inside the main public_html folder!")
+                confirm = input("Do you want to delete the nested public_html/public_html folder? (y/n): ").strip().lower()
+                if confirm == 'y' or confirm == 'yes':
+                    print("Deleting nested public_html/public_html recursively...")
+                    delete_ftp_dir_recursively(ftp, "public_html/public_html")
+                    print("Nested folder deleted successfully.")
+        except Exception as e:
+            print(f"Note checking nested public_html: {e}")
+
+        # Navigate into the true web root folder
+        print("Navigating into public_html directory...")
+        ftp.cwd("public_html")
+    else:
+        # We are chrooted directly into public_html. Check if there is a nested public_html.
+        if "public_html" in remote_files:
             print("WARNING: Detected nested 'public_html' folder inside a chrooted FTP root!")
-            confirm = input("Do you want to delete this nested 'public_html' directory to fix routing? (y/n): ").strip().lower()
+            confirm = input("Do you want to delete this nested 'public_html' directory? (y/n): ").strip().lower()
             if confirm == 'y' or confirm == 'yes':
-                print("Deleting nested public_html directory recursively...")
+                print("Deleting nested public_html recursively...")
                 delete_ftp_dir_recursively(ftp, "public_html")
                 print("Nested public_html directory successfully deleted.")
 
