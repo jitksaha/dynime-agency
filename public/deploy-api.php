@@ -1,7 +1,7 @@
 <?php
 /**
- * Automated API Deployment Helper for Hostinger
- * Unzips dynime-api.zip dynamically into the parent folder's dynime-api directory
+ * Automated API & Frontend Deployment Helper for Hostinger
+ * Unzips dynime-api.zip and dynime-frontend.zip dynamically
  */
 
 $deployToken = 'deploy_token_7782'; // Security token
@@ -12,48 +12,67 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
     exit;
 }
 
-$zipFile = __DIR__ . '/dynime-api.zip';
-if (!file_exists($zipFile)) {
-    // If running under /public/deploy-api.php, dirname(__DIR__) is the public_html folder
-    $zipFile = dirname(__DIR__) . '/dynime-api.zip';
-}
-if (!file_exists($zipFile)) {
-    // Try absolute path under Hostinger domains setup
-    $zipFile = '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip';
-}
-$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/public_html');
-$extractTo = $homeDir . '/dynime-api';
-
 header('Content-Type: text/html; charset=utf-8');
-echo "<h2>cPanel Backend Deployment Webhook</h2>";
-
-if (!file_exists($zipFile)) {
-    echo "Error: Zip file not found at <code>$zipFile</code>.<br/>";
-    exit;
-}
+echo "<h2>cPanel Deployment Webhook</h2>";
 
 if (!class_exists('ZipArchive')) {
     echo "Error: ZipArchive extension is not enabled on this server's PHP configuration.<br/>";
     exit;
 }
 
-$zip = new ZipArchive;
-if ($zip->open($zipFile) === TRUE) {
-    // Create directory if it doesn't exist
-    if (!is_dir($extractTo)) {
-        mkdir($extractTo, 0755, true);
-    }
-    
-    echo "Extracting backend package to <code>$extractTo</code>...<br/>";
-    
-    // Extract zip
-    if ($zip->extractTo($extractTo)) {
-        $zip->close();
-        unlink($zipFile); // Delete zip file after extraction for security and space
-        echo "<span style='color:green; font-weight:bold;'>Success!</span> Backend successfully extracted and deployed.<br/>";
+// 1. Process Frontend ZIP (extracts directly to the current public_html directory)
+$frontendZip = __DIR__ . '/dynime-frontend.zip';
+if (file_exists($frontendZip)) {
+    echo "Processing Frontend ZIP...<br/>";
+    $zip = new ZipArchive;
+    if ($zip->open($frontendZip) === TRUE) {
+        $extractTo = __DIR__;
+        echo "Extracting frontend package directly to <code>$extractTo</code>...<br/>";
+        if ($zip->extractTo($extractTo)) {
+            $zip->close();
+            unlink($frontendZip); // Delete zip file after extraction
+            echo "<span style='color:green; font-weight:bold;'>Success!</span> Frontend successfully extracted and deployed.<br/>";
+        } else {
+            echo "<span style='color:red; font-weight:bold;'>Error:</span> Failed to extract frontend ZIP. Check folder permissions.<br/>";
+        }
     } else {
-        echo "<span style='color:red; font-weight:bold;'>Error:</span> Failed to extract ZIP file. Check folder permissions of <code>$extractTo</code>.<br/>";
+        echo "Error: Could not open the frontend ZIP file.<br/>";
     }
 } else {
-    echo "Error: Could not open the ZIP file.";
+    echo "Note: Frontend ZIP (dynime-frontend.zip) not found, skipping frontend extraction.<br/>";
 }
+
+// 2. Process Backend ZIP (extracts to sibling dynime-api directory)
+$zipFile = __DIR__ . '/dynime-api.zip';
+if (!file_exists($zipFile)) {
+    $zipFile = dirname(__DIR__) . '/dynime-api.zip';
+}
+if (!file_exists($zipFile)) {
+    $zipFile = '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip';
+}
+
+$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/public_html');
+$apiDir = $homeDir . '/dynime-api';
+
+if (file_exists($zipFile)) {
+    echo "Processing Backend ZIP...<br/>";
+    $zip = new ZipArchive;
+    if ($zip->open($zipFile) === TRUE) {
+        if (!is_dir($apiDir)) {
+            mkdir($apiDir, 0755, true);
+        }
+        echo "Extracting backend package to <code>$apiDir</code>...<br/>";
+        if ($zip->extractTo($apiDir)) {
+            $zip->close();
+            unlink($zipFile); // Delete zip file after extraction
+            echo "<span style='color:green; font-weight:bold;'>Success!</span> Backend successfully extracted and deployed.<br/>";
+        } else {
+            echo "<span style='color:red; font-weight:bold;'>Error:</span> Failed to extract backend ZIP. Check folder permissions.<br/>";
+        }
+    } else {
+        echo "Error: Could not open the backend ZIP file.<br/>";
+    }
+} else {
+    echo "Note: Backend ZIP (dynime-api.zip) not found, skipping backend extraction.<br/>";
+}
+
