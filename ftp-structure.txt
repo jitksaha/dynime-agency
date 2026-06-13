@@ -1596,6 +1596,7 @@
 ./public_html/careers/index.html
 ./public_html/check-api-dir.php
 ./public_html/check_id_card.php
+./public_html/cleanup-nested.php
 ./public_html/company-formation-illustration.png
 ./public_html/consulting/
 ./public_html/consulting/index.html
