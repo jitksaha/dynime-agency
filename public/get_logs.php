@@ -16,10 +16,8 @@ if (function_exists('opcache_reset')) {
     @opcache_reset();
 }
 if (file_exists($logFile)) {
-    echo "=== Laravel Logs (Last 500 lines) ===\n";
-    $lines = file($logFile);
-    $lastLines = array_slice($lines, -500);
-    echo implode("", $lastLines);
+    echo "=== Laravel Logs ===\n";
+    echo file_get_contents($logFile);
 } else {
     echo "ERROR: log file not found at: $logFile\n";
     
