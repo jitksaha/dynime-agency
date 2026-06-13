@@ -2143,19 +2143,19 @@ export default function AdminHR() {
           || (row.team_member_key && e.team_member_key === row.team_member_key)
           || (normalizeEmail(row.email) && normalizeEmail(e.email) === normalizeEmail(row.email)),
         );
-        const metadata = { ...(existing?.metadata || {}), ...row.metadata, sync_source: row.source } as Json;
+        const metadata = { ...row.metadata, ...(existing?.metadata || {}), sync_source: existing?.metadata?.sync_source || row.source } as Json;
         const payload: EmployeeInsert = {
-          user_id: row.user_id || existing?.user_id || null,
-          team_member_key: row.team_member_key || existing?.team_member_key || null,
-          full_name: row.full_name,
-          email: row.email,
-          phone: row.phone,
-          photo_url: row.photo_url,
-          designation: row.designation,
-          department: row.department,
-          work_location: row.work_location,
-          joining_date: row.joining_date,
-          status: row.status,
+          user_id: existing?.user_id || row.user_id || null,
+          team_member_key: existing?.team_member_key || row.team_member_key || null,
+          full_name: existing?.full_name || row.full_name,
+          email: existing?.email || row.email,
+          phone: existing?.phone || row.phone,
+          photo_url: existing?.photo_url || row.photo_url,
+          designation: existing?.designation || row.designation,
+          department: existing?.department || row.department,
+          work_location: existing?.work_location || row.work_location,
+          joining_date: existing?.joining_date || row.joining_date,
+          status: existing?.status || row.status,
           employment_type: existing?.employment_type || "full-time",
           currency: existing?.currency || "USD",
           gross_salary: existing?.gross_salary || 0,

@@ -27,6 +27,7 @@ type Payload = {
   o?: string;
   p?: string;
   s?: string;
+  live_employee?: any;
 };
 
 const decodePayload = (raw: string | null): Payload | null => {
@@ -107,6 +108,7 @@ const Verify = () => {
         o: payload.o,
         p: payload.p,
         s: sk,
+        live_employee: data.live_employee,
       });
       setLoading(false);
     })();
@@ -124,7 +126,25 @@ const Verify = () => {
   // by email (preferred) or name. If the admin marked them as resigned/fired/
   // suspended/on_leave, the ID is no longer valid even though the QR is unchanged.
   const teamMatch = useMemo(() => {
-    if (!data || data.k !== "EMP" || !home?.team?.items?.length) return null;
+    if (!data || data.k !== "EMP") return null;
+    if (data.live_employee) {
+      const emp = data.live_employee;
+      const meta = emp.metadata || {};
+      return {
+        name: emp.full_name,
+        role: emp.designation,
+        photoUrl: emp.photo_url,
+        email: emp.email,
+        phone: emp.phone,
+        country: emp.work_location,
+        joinedAt: emp.joining_date,
+        expiresAt: meta.expires_at || meta.contract_expires,
+        status: emp.status,
+        statusNote: meta.status_note,
+        specialty: emp.department,
+      };
+    }
+    if (!home?.team?.items?.length) return null;
     const emailKey = (data.e || "").trim().toLowerCase();
     const roleKey = (data.r || "").trim().toLowerCase();
     const metaKey = (data.m || "").trim().toLowerCase();

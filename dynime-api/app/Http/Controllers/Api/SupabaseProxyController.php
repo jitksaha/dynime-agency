@@ -230,7 +230,21 @@ class SupabaseProxyController extends Controller
                         ->where('card_id', $cardId)
                         ->first();
                     if ($row) {
-                        return response()->json(['data' => [$this->decodeRow($row)], 'error' => null]);
+                        $decodedRow = $this->decodeRow($row);
+                        if (($decodedRow['kind'] ?? '') === 'EMP') {
+                            $subjectKey = $decodedRow['subject_key'] ?? '';
+                            $cleanKey = preg_replace('/^(team_section|employee):/', '', $subjectKey);
+                            $employee = DB::table('employees')
+                                ->where('team_member_key', $cleanKey)
+                                ->orWhere('team_member_key', $subjectKey)
+                                ->orWhere('id', $cleanKey)
+                                ->orWhere('email', $decodedRow['subject_email'] ?? '')
+                                ->first();
+                            if ($employee) {
+                                $decodedRow['live_employee'] = $this->decodeRow($employee);
+                            }
+                        }
+                        return response()->json(['data' => [$decodedRow], 'error' => null]);
                     }
                     return response()->json(['data' => [], 'error' => null]);
 
