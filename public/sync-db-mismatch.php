@@ -66,21 +66,93 @@ try {
 // Disable foreign keys during sync
 $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
 
+// Fix site_settings table structure first
+try {
+    echo "Checking and repairing site_settings table structure...\n";
+    // Check if table contains column 'group'
+    $cols = [];
+    $stmtCols = $pdo->query("SHOW COLUMNS FROM `site_settings`");
+    while ($c = $stmtCols->fetch()) {
+        $cols[] = strtolower($c['Field']);
+    }
+
+    if (!in_array('group', $cols)) {
+        echo "Adding missing columns to site_settings...\n";
+        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `group` VARCHAR(100) NULL AFTER `value`Color");
+    }
+    // Re-check to check for other columns
+    $stmtCols = $pdo->query("SHOW COLUMNS FROM `site_settings`");
+    $cols = [];
+    while ($c = $stmtCols->fetch()) {
+        $cols[] = strtolower($c['Field']);
+    }
+    
+    if (!in_array('group', $cols)) {
+        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `group` VARCHAR(100) NULL");
+    }
+    if (!in_array('label', $cols)) {
+        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `label` VARCHAR(255) NULL");
+    }
+    if (!in_array('is_public', $cols)) {
+        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `is_public` TINYINT(1) DEFAULT 0");
+    }
+
+    // Convert id column to auto-incrementing if it's text/varchar
+    $idCol = $pdo->query("SHOW COLUMNS FROM `site_settings` WHERE Field = 'id'")->fetch();
+    if ($idCol && strpos(strtolower($idCol['Type']), 'varchar') !== false) {
+        echo "Converting site_settings ID to auto-incrementing integer...\n";
+        $pdo->exec("ALTER TABLE `site_settings` MODIFY COLUMN `id` INT AUTO_INCREMENT PRIMARY KEY");
+    }
+    echo "site_settings table structure verified.\n\n";
+} catch (Exception $e) {
+    echo "Note on site_settings repair: " . $e->getMessage() . "\n";
+}
+
+// Fix usa_state_pricings table structure
+try {
+    echo "Creating/recreating usa_state_pricings table structure to match Laravel structure...\n";
+    $pdo->exec("DROP TABLE IF EXISTS `usa_state_pricings`");
+    $pdo->exec("CREATE TABLE `usa_state_pricings` (
+        `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+        `state` varchar(255) NOT NULL,
+        `abbr` varchar(10) NOT NULL,
+        `llc_formation` decimal(20,6) DEFAULT NULL,
+        `corp_formation` decimal(20,6) DEFAULT NULL,
+        `llc_annual` decimal(20,6) DEFAULT NULL,
+        `llc_annual_label` varchar(255) DEFAULT NULL,
+        `corp_annual` decimal(20,6) DEFAULT NULL,
+        `corp_annual_label` varchar(255) DEFAULT NULL,
+        `llc_renewal` varchar(255) DEFAULT NULL,
+        `corp_renewal` varchar(255) DEFAULT NULL,
+        `state_tax_note` text DEFAULT NULL,
+        `franchise_tax` text DEFAULT NULL,
+        `notes` text DEFAULT NULL,
+        `sort_order` int(11) DEFAULT 0,
+        `is_active` tinyint(1) DEFAULT 1,
+        `created_at` timestamp NULL DEFAULT NULL,
+        `updated_at` timestamp NULL DEFAULT NULL,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+    echo "usa_state_pricings table recreated.\n\n";
+} catch (Exception $e) {
+    echo "Error recreating usa_state_pricings: " . $e->getMessage() . "\n";
+}
+
 // 3. Sync pricing tables
 try {
     echo "Syncing usa_state_pricing -> usa_state_pricings...\n";
-    // Check if both tables exist
     $hasSource = $pdo->query("SHOW TABLES LIKE 'usa_state_pricing'")->rowCount() > 0;
     $hasDest = $pdo->query("SHOW TABLES LIKE 'usa_state_pricings'")->rowCount() > 0;
 
     if ($hasSource && $hasDest) {
         $pdo->exec("TRUNCATE TABLE `usa_state_pricings`");
+        // DO NOT select id, let it auto-increment to avoid overflow issue from pgsql bigint max
         $pdo->exec("INSERT INTO `usa_state_pricings` (
-            id, state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
+            state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
             corp_annual, corp_annual_label, llc_renewal, corp_renewal, state_tax_note, 
             franchise_tax, notes, sort_order, is_active, created_at, updated_at
         ) SELECT 
-            id, state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
+            state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
             corp_annual, corp_annual_label, llc_renewal, corp_renewal, state_tax_note, 
             franchise_tax, notes, sort_order, is_active, created_at, updated_at 
         FROM `usa_state_pricing`");
