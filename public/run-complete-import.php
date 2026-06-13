@@ -213,12 +213,15 @@ foreach ($jsonData as $tableName => $tableData) {
 
         echo " - Clearing existing data (preserving table structure)...\n";
         try {
-            $pdo->exec("DELETE FROM `$tableName`\n");
-            try {
-                $pdo->exec("ALTER TABLE `$tableName` AUTO_INCREMENT = 1;");
-            } catch (Exception $e) {}
+            $pdo->exec("TRUNCATE TABLE `$tableName`");
         } catch (Exception $e) {
-            echo "   - Warning: Failed to clear data: " . $e->getMessage() . "\n";
+            // Fallback to DELETE if TRUNCATE fails (e.g. FK constraints)
+            try {
+                $pdo->exec("DELETE FROM `$tableName`");
+                $pdo->exec("ALTER TABLE `$tableName` AUTO_INCREMENT = 1;");
+            } catch (Exception $e2) {
+                echo "   - Warning: Failed to clear data: " . $e2->getMessage() . "\n";
+            }
         }
     }
 
@@ -264,7 +267,47 @@ foreach ($jsonData as $tableName => $tableData) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        echo "   - Error inserting data: " . $e->getMessage() . "\n";
+        // Error 1467: corrupted auto-increment — drop+recreate the table and retry
+        if (strpos($e->getMessage(), '1467') !== false) {
+            echo "   - Auto-increment corrupted. Dropping and recreating table `$tableName`...\n";
+            try {
+                $pdo->exec("DROP TABLE `$tableName`");
+                // Rebuild column defs
+                $colDefs2 = [];
+                $hasId2 = false;
+                foreach ($columns as $col) {
+                    $name2 = $col['name'];
+                    $type2 = mapPostgresTypeToMysql($col['type'], $name2);
+                    $nullDef2 = ($type2 === 'TIMESTAMP' || $type2 === 'DATE') ? "NULL DEFAULT NULL" : ($col['nullable'] ? "NULL" : "NOT NULL");
+                    $colDefs2[] = "`$name2` $type2 $nullDef2";
+                    if ($name2 === 'id') $hasId2 = true;
+                }
+                if ($hasId2) $colDefs2[] = "PRIMARY KEY (`id`)";
+                $pdo->exec("CREATE TABLE `$tableName` (\n  " . implode(",\n  ", $colDefs2) . "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+                // Retry insert
+                $insertStmt2 = $pdo->prepare($insertSql);
+                $insertedCount2 = 0;
+                $pdo->beginTransaction();
+                foreach ($rows as $row2) {
+                    $bindParams2 = [];
+                    foreach ($colNames as $colName2) {
+                        $val2 = isset($row2[$colName2]) ? $row2[$colName2] : null;
+                        if (is_array($val2) || is_object($val2)) $val2 = json_encode($val2);
+                        elseif (is_bool($val2)) $val2 = $val2 ? 1 : 0;
+                        $bindParams2[$colName2] = $val2;
+                    }
+                    $insertStmt2->execute($bindParams2);
+                    $insertedCount2++;
+                }
+                $pdo->commit();
+                echo "   - Recreated and imported $insertedCount2 rows successfully.\n";
+            } catch (Exception $e3) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                echo "   - Error after recreate: " . $e3->getMessage() . "\n";
+            }
+        } else {
+            echo "   - Error inserting data: " . $e->getMessage() . "\n";
+        }
     }
 }
 
