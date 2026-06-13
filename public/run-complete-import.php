@@ -95,10 +95,10 @@ function mapPostgresTypeToMysql($pgType, $colName) {
         return "TINYINT(1)";
     }
     if (strpos($pgType, 'timestamp') !== false) {
-        return "TIMESTAMP NULL DEFAULT NULL";
+        return "TIMESTAMP";
     }
     if ($pgType === 'date') {
-        return "DATE NULL DEFAULT NULL";
+        return "DATE";
     }
     if (strpos($pgType, 'numeric') !== false || strpos($pgType, 'decimal') !== false) {
         return "DECIMAL(20, 6)";
@@ -149,23 +149,22 @@ foreach ($jsonData as $tableName => $tableData) {
         echo " - Table does not exist. Creating dynamically...\n";
         $colDefs = [];
         $hasId = false;
-        $idType = '';
 
         foreach ($columns as $col) {
             $name = $col['name'];
             $type = mapPostgresTypeToMysql($col['type'], $name);
             $nullDef = $col['nullable'] ? "NULL" : "NOT NULL";
-            
-            // Special handling for TIMESTAMP default behavior in MySQL
-            if (strpos($type, 'TIMESTAMP') !== false) {
-                $colDefs[] = "`$name` $type";
-            } else {
-                $colDefs[] = "`$name` $type $nullDef";
+            $defaultDef = "";
+
+            if ($type === 'TIMESTAMP' || $type === 'DATE') {
+                $nullDef = "NULL";
+                $defaultDef = "DEFAULT NULL";
             }
+
+            $colDefs[] = "`$name` $type $nullDef" . ($defaultDef ? " $defaultDef" : "");
 
             if ($name === 'id') {
                 $hasId = true;
-                $idType = $type;
             }
         }
 
@@ -182,10 +181,39 @@ foreach ($jsonData as $tableName => $tableData) {
             continue;
         }
     } else {
-        echo " - Table exists. Clearing existing data (preserving table structure)...\n";
+        echo " - Table exists. Checking and adding missing columns...\n";
+        // Retrieve existing columns
+        $existingCols = [];
+        $stmtCols = $pdo->query("SHOW COLUMNS FROM `$tableName`");
+        while ($c = $stmtCols->fetch()) {
+            $existingCols[] = strtolower($c['Field']);
+        }
+
+        foreach ($columns as $col) {
+            $name = $col['name'];
+            if (!in_array(strtolower($name), $existingCols)) {
+                $type = mapPostgresTypeToMysql($col['type'], $name);
+                $nullDef = $col['nullable'] ? "NULL" : "NOT NULL";
+                $defaultDef = "";
+
+                if ($type === 'TIMESTAMP' || $type === 'DATE') {
+                    $nullDef = "NULL";
+                    $defaultDef = "DEFAULT NULL";
+                }
+
+                $alterSql = "ALTER TABLE `$tableName` ADD COLUMN `$name` $type $nullDef" . ($defaultDef ? " $defaultDef" : "");
+                try {
+                    $pdo->exec($alterSql);
+                    echo "   - Added missing column `$name` to table `$tableName`.\n";
+                } catch (Exception $e) {
+                    echo "   - Error adding column `$name`: " . $e->getMessage() . "\n";
+                }
+            }
+        }
+
+        echo " - Clearing existing data (preserving table structure)...\n";
         try {
             $pdo->exec("DELETE FROM `$tableName`\n");
-            // Reset auto increment if applicable
             try {
                 $pdo->exec("ALTER TABLE `$tableName` AUTO_INCREMENT = 1;");
             } catch (Exception $e) {}
@@ -202,11 +230,11 @@ foreach ($jsonData as $tableName => $tableData) {
 
     echo " - Importing " . count($rows) . " rows...\n";
     
-    // Get column names to build insert statement
     $colNames = array_map(function($col) { return $col['name']; }, $columns);
     $placeholders = array_map(function($name) { return ":" . $name; }, $colNames);
     
-    $insertSql = "INSERT INTO `$tableName` (" . implode(', ', array_map(function($n) { return "`$n`"; }, $colNames)) . ") 
+    // Use INSERT IGNORE to prevent duplicate key errors during import
+    $insertSql = "INSERT IGNORE INTO `$tableName` (" . implode(', ', array_map(function($n) { return "`$n`"; }, $colNames)) . ") 
                   VALUES (" . implode(', ', $placeholders) . ")";
                   
     try {
@@ -219,7 +247,6 @@ foreach ($jsonData as $tableName => $tableData) {
             foreach ($colNames as $colName) {
                 $val = isset($row[$colName]) ? $row[$colName] : null;
                 
-                // Post-processing types for MySQL PDO
                 if (is_array($val) || is_object($val)) {
                     $val = json_encode($val);
                 } elseif (is_bool($val)) {
