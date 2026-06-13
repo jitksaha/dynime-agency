@@ -788,7 +788,6 @@
 ./dropshipping-solution/index.html
 ./dss-illustration.png
 ./dws-illustration.png
-./dynime-api.zip
 ./dynime-icon-dark.svg
 ./dynime-icon-light.svg
 ./email-marketing/
