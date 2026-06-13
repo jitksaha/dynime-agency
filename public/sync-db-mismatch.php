@@ -78,7 +78,7 @@ try {
 
     if (!in_array('group', $cols)) {
         echo "Adding missing columns to site_settings...\n";
-        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `group` VARCHAR(100) NULL AFTER `value`Color");
+        $pdo->exec("ALTER TABLE `site_settings` ADD COLUMN `group` VARCHAR(100) NULL AFTER `value`");
     }
     // Re-check to check for other columns
     $stmtCols = $pdo->query("SHOW COLUMNS FROM `site_settings`");
