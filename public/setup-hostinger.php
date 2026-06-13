@@ -276,5 +276,53 @@ $envPath = $apiDir . '/.env';
         }
         ?>
     </div>
+
+    <div class="card">
+        <h2>5. Live Database Fix for Jit Kumar Saha ID</h2>
+        <?php
+        if (isset($_GET['action']) && $_GET['action'] === 'fix_jit') {
+            echo "<pre>";
+            try {
+                // Connect to database
+                $dsn = "mysql:host=$db_host;port=$db_port;dbname=$db_database;charset=utf8mb4";
+                $pdo = new PDO($dsn, $db_username, $db_password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]);
+                
+                echo "Connected to database.\n";
+                
+                // 1. Delete matching row from id_card_assignments
+                echo "Deleting id_card_assignments for card_id = 'DTLE001001' or subject_key matching jit...\n";
+                $stmt = $pdo->prepare("DELETE FROM id_card_assignments WHERE card_id = ? OR subject_key LIKE ?");
+                $stmt->execute(['DTLE001001', '%jit-kumar-saha%']);
+                $deletedCount = $stmt->rowCount();
+                echo "Successfully deleted $deletedCount row(s) from id_card_assignments.\n\n";
+                
+                // 2. Also check if there's any employee_code in employees matching DTLE001001
+                echo "Checking if any employee has code 'DTLE001001'...\n";
+                $stmt = $pdo->prepare("SELECT id, full_name, employee_code FROM employees WHERE employee_code = ?");
+                $stmt->execute(['DTLE001001']);
+                $emps = $stmt->fetchAll();
+                if ($emps) {
+                    print_r($emps);
+                    // Update them to DTLE001021
+                    echo "Updating their employee_code to DTLE001021...\n";
+                    $stmt = $pdo->prepare("UPDATE employees SET employee_code = ? WHERE employee_code = ?");
+                    $stmt->execute(['DTLE001021', 'DTLE001001']);
+                    echo "Updated " . $stmt->rowCount() . " employee(s).\n";
+                } else {
+                    echo "No employees found with code 'DTLE001001'.\n";
+                }
+                
+            } catch (Exception $e) {
+                echo "ERROR: " . $e->getMessage() . "\n";
+            }
+            echo "</pre>";
+        } else {
+            echo '<p><a href="?token=' . $deployToken . '&action=fix_jit" class="btn" style="background:#dc2626;">Execute Jit Kumar Saha ID Fix</a></p>';
+        }
+        ?>
+    </div>
 </body>
 </html>
