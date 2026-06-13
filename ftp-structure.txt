@@ -12,6 +12,7 @@
 ./api/
 ./api/.htaccess
 ./api/index.php
+./api-proxy-index.php
 ./apple-touch-icon.png
 ./assets/
 ./assets/About-B3uS9juR.js
@@ -422,6 +423,7 @@
 ./career-heroes/support.jpg
 ./careers/
 ./careers/index.html
+./check-api-dir.php
 ./company-formation-illustration.png
 ./consulting/
 ./consulting/index.html
@@ -459,6 +461,8 @@
 ./google-ads/
 ./google-ads/index.html
 ./index.html
+./inspect-api.php
+./inspect-db-rows.php
 ./itin-services/
 ./itin-services/index.html
 ./laravel-ecommerce/
@@ -942,6 +946,7 @@
 ./public_html/google-ads/index.html
 ./public_html/index.html
 ./public_html/inspect-api.php
+./public_html/inspect-db-rows.php
 ./public_html/itin-services/
 ./public_html/itin-services/index.html
 ./public_html/laravel-ecommerce/
@@ -965,6 +970,7 @@
 ./public_html/products/
 ./public_html/products/os/
 ./public_html/products/os/index.html
+./public_html/query-supabase.php
 ./public_html/react-mern-apps/
 ./public_html/react-mern-apps/index.html
 ./public_html/repair-tables.php
@@ -1005,6 +1011,7 @@
 ./public_html/us-company/index.html
 ./public_html/usa-business-formation/
 ./public_html/usa-business-formation/index.html
+./public_html/view-env.php
 ./public_html/virtual-address/
 ./public_html/virtual-address/index.html
 ./public_html/web-design-development/
@@ -1025,6 +1032,7 @@
 ./public_html/wordpress-maintenance/index.html
 ./public_html/wordpress-woocommerce/
 ./public_html/wordpress-woocommerce/index.html
+./query-supabase.php
 ./react-mern-apps/
 ./react-mern-apps/index.html
 ./repair-tables.php
@@ -1055,6 +1063,7 @@
 ./software-testing-qa/index.html
 ./speed-optimization/
 ./speed-optimization/index.html
+./sync-db-mismatch.php
 ./test-folder.php
 ./track/
 ./track/index.html
