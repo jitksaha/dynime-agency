@@ -1,7 +1,5 @@
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
-const AdminIdCardsInline = lazy(() => import("./AdminIdCards"));
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
@@ -338,8 +336,16 @@ const sourceRowsFromTeam = (teamUsers: TeamUser[], publicMembers: TeamMember[]):
     });
     });
 
+  const sectionEmails = new Set(sectionRows.map(r => normalizeEmail(r.email)).filter(Boolean));
+  const sectionUserIds = new Set(sectionRows.map(r => r.user_id).filter(Boolean));
+
+  const unmatchedAccountRows = accountRows.filter(r => 
+    !sectionUserIds.has(r.user_id) && 
+    (!r.email || !sectionEmails.has(normalizeEmail(r.email)))
+  );
+
   const byIdentity = new Map<string, TeamSourceEmployee>();
-  [...sectionRows, ...accountRows].forEach((row) => {
+  [...sectionRows, ...unmatchedAccountRows].forEach((row) => {
     const key = syncKeyFor(row);
     const prev = byIdentity.get(key);
     byIdentity.set(key, prev ? {
@@ -363,8 +369,9 @@ const sourceRowsFromTeam = (teamUsers: TeamUser[], publicMembers: TeamMember[]):
 
 const valuesEqual = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 const syncKeyFor = (row: { email?: string | null; user_id?: string | null; team_member_key?: string | null; full_name?: string | null }) => {
+  if (row.team_member_key) return `team:${row.team_member_key}`;
   const email = normalizeEmail(row.email);
-  return email || (row.user_id ? `user:${row.user_id}` : row.team_member_key ? `team:${row.team_member_key}` : `name:${(row.full_name || "").toLowerCase()}`);
+  return email || (row.user_id ? `user:${row.user_id}` : `name:${(row.full_name || "").toLowerCase()}`);
 };
 
 // ----------------------------------------------------------------
@@ -378,7 +385,12 @@ const slugify = (s: string) =>
   s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 const memberMatchesEmployee = (m: TeamMember, emp: Partial<Employee>): boolean => {
-  if (emp.team_member_key && m.employeeKey && m.employeeKey === emp.team_member_key) return true;
+  if (emp.team_member_key && m.employeeKey) {
+    return m.employeeKey === emp.team_member_key;
+  }
+  if (emp.team_member_key || m.employeeKey) {
+    return false;
+  }
   const e1 = (m.email || "").trim().toLowerCase();
   const e2 = (emp.email || "").trim().toLowerCase();
   if (e1 && e2 && e1 === e2) return true;
@@ -1093,8 +1105,16 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
 
   const remove = async (id: string) => {
     if (!confirm("Delete this employee and all their HR documents?")) return;
+    const emp = employees.find((e) => e.id === id);
     try {
       await apiDelete(`/hrm/employees/${id}`);
+      if (emp) {
+        try {
+          await writePublicTeamFromEmployee(emp, { showOnPublic: false });
+        } catch (err) {
+          console.warn("Failed to remove from public team", err);
+        }
+      }
       toast.success("Employee deleted"); refetch();
     } catch (e: any) { toast.error(e.message); }
   };
@@ -2138,11 +2158,16 @@ export default function AdminHR() {
       let added = 0, updated = 0, retired = 0;
 
       for (const row of sourceRows) {
-        const existing = currentEmployees.find((e) =>
-          (row.user_id && e.user_id === row.user_id)
-          || (row.team_member_key && e.team_member_key === row.team_member_key)
-          || (normalizeEmail(row.email) && normalizeEmail(e.email) === normalizeEmail(row.email)),
-        );
+        const existing = currentEmployees.find((e) => {
+          if (row.team_member_key && e.team_member_key) {
+            return e.team_member_key === row.team_member_key;
+          }
+          if (row.team_member_key || e.team_member_key) {
+            return false;
+          }
+          return (row.user_id && e.user_id === row.user_id)
+            || (normalizeEmail(row.email) && normalizeEmail(e.email) === normalizeEmail(row.email));
+        });
         const metadata = { ...row.metadata, ...(existing?.metadata || {}), sync_source: existing?.metadata?.sync_source || row.source } as Json;
         const payload: EmployeeInsert = {
           user_id: existing?.user_id || row.user_id || null,
@@ -2243,7 +2268,7 @@ export default function AdminHR() {
   // Tab state synced with ?tab= so deep links / refresh land correctly.
   const location = useLocation();
   const navigate = useNavigate();
-  const VALID_TABS = ["employees", "builder", "history", "id-cards"] as const;
+  const VALID_TABS = ["employees", "builder", "history"] as const;
   type TabVal = typeof VALID_TABS[number];
   const tab: TabVal = useMemo(() => {
     const t = new URLSearchParams(location.search).get("tab") as TabVal | null;
@@ -2253,19 +2278,6 @@ export default function AdminHR() {
     if (v === tab) return;
     navigate({ pathname: location.pathname, search: `?tab=${v}` }, { replace: true });
   };
-
-  // The ID Cards tab embeds the full ID-card maker page (which brings its own
-  // SuperAdminLayout). Render it raw and float a tab bar above it.
-  if (tab === "id-cards") {
-    return (
-      <div className="relative">
-        <FloatingTabBar tab={tab} onChange={setTab} />
-        <Suspense fallback={null}>
-          <AdminIdCardsInline />
-        </Suspense>
-      </div>
-    );
-  }
 
   return (
     <SuperAdminLayout>
@@ -2291,7 +2303,6 @@ export default function AdminHR() {
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="employees" className="gap-1.5"><Users className="w-4 h-4" /> Employees</TabsTrigger>
-          <TabsTrigger value="id-cards" className="gap-1.5"><IdCard className="w-4 h-4" /> ID Cards</TabsTrigger>
           <TabsTrigger value="builder" className="gap-1.5"><FileSignature className="w-4 h-4" /> Document Builder</TabsTrigger>
           <TabsTrigger value="history" className="gap-1.5"><FileText className="w-4 h-4" /> History</TabsTrigger>
         </TabsList>
@@ -2311,34 +2322,4 @@ export default function AdminHR() {
     </SuperAdminLayout>
   );
 }
-
-// Floating bottom tab bar shown when an embedded full page (ID Cards) is
-// occupying the screen, so users can jump back to HR tabs.
-const FloatingTabBar = ({ tab, onChange }: { tab: string; onChange: (v: string) => void }) => {
-  const items = [
-    { v: "employees", label: "Employees", Icon: Users },
-    { v: "id-cards", label: "ID Cards", Icon: IdCard },
-    { v: "builder", label: "Documents", Icon: FileSignature },
-    { v: "history", label: "History", Icon: FileText },
-  ];
-  return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
-      <div className="rounded-full border border-border bg-background/95 backdrop-blur shadow-xl px-2 py-1.5 flex items-center gap-1">
-        {items.map(({ v, label, Icon }) => (
-          <button
-            key={v}
-            onClick={() => onChange(v)}
-            className={cn(
-              "text-xs font-medium px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 transition-colors",
-              tab === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"
-            )}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
 

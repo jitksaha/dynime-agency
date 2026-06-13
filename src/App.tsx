@@ -157,7 +157,6 @@ const SeoDashboard = lazy(() => import("./pages/superadmin/SeoDashboard.tsx"));
 const KeywordTracker = lazy(() => import("./pages/superadmin/KeywordTracker.tsx"));
 const SeoIntegrations = lazy(() => import("./pages/superadmin/SeoIntegrations.tsx"));
 const AdminProductUrls = lazy(() => import("./pages/superadmin/AdminProductUrls.tsx"));
-const AdminIdCards = lazy(() => import("./pages/superadmin/AdminIdCards.tsx"));
 const AdminEmployees = lazy(() => import("./pages/superadmin/AdminEmployees.tsx"));
 const AdminHR = lazy(() => import("./pages/superadmin/AdminHR.tsx"));
 const AdminHRRequests = lazy(() => import("./pages/superadmin/AdminHRRequests.tsx"));
@@ -398,7 +397,6 @@ const App = () => (
 
                   <Route path="/superadmin/team" element={<ProtectedRoute><AdminTeam /></ProtectedRoute>} />
                   <Route path="/superadmin/team-section" element={<ProtectedRoute><AdminTeamSection /></ProtectedRoute>} />
-                  <Route path="/superadmin/id-cards" element={<ProtectedRoute><AdminIdCards /></ProtectedRoute>} />
                   <Route path="/superadmin/employees" element={<ProtectedRoute><AdminEmployees /></ProtectedRoute>} />
                   <Route path="/superadmin/hr" element={<ProtectedRoute><AdminHR /></ProtectedRoute>} />
                   <Route path="/superadmin/hr-requests" element={<ProtectedRoute><AdminHRRequests /></ProtectedRoute>} />
