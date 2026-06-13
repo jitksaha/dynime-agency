@@ -13,10 +13,13 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
 }
 
 $zipFile = __DIR__ . '/dynime-api.zip';
-if (!file_exists($zipFile) && file_exists(dirname(__DIR__) . '/dynime-api.zip')) {
+if (!file_exists($zipFile)) {
+    // If running under /public/deploy-api.php, dirname(__DIR__) is the public_html folder
     $zipFile = dirname(__DIR__) . '/dynime-api.zip';
-} elseif (!file_exists($zipFile) && file_exists(dirname(__DIR__) . '/public_html/dynime-api.zip')) {
-    $zipFile = dirname(__DIR__) . '/public_html/dynime-api.zip';
+}
+if (!file_exists($zipFile)) {
+    // Try absolute path under Hostinger domains setup
+    $zipFile = '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip';
 }
 $homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/public_html');
 $extractTo = $homeDir . '/dynime-api';
