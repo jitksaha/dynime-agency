@@ -9,6 +9,9 @@
 ./ai-software-illustration.png
 ./analytics/
 ./analytics/index.html
+./api/
+./api/.htaccess
+./api/index.php
 ./apple-touch-icon.png
 ./assets/
 ./assets/About-B3uS9juR.js
@@ -440,7 +443,6 @@
 ./dropshipping-solution/index.html
 ./dss-illustration.png
 ./dws-illustration.png
-./dynime-api.zip
 ./dynime-icon-dark.svg
 ./dynime-icon-light.svg
 ./email-marketing/
@@ -901,6 +903,7 @@
 ./public_html/career-heroes/support.jpg
 ./public_html/careers/
 ./public_html/careers/index.html
+./public_html/check-api-dir.php
 ./public_html/company-formation-illustration.png
 ./public_html/consulting/
 ./public_html/consulting/index.html
@@ -938,6 +941,7 @@
 ./public_html/google-ads/
 ./public_html/google-ads/index.html
 ./public_html/index.html
+./public_html/inspect-api.php
 ./public_html/itin-services/
 ./public_html/itin-services/index.html
 ./public_html/laravel-ecommerce/
@@ -963,7 +967,9 @@
 ./public_html/products/os/index.html
 ./public_html/react-mern-apps/
 ./public_html/react-mern-apps/index.html
+./public_html/repair-tables.php
 ./public_html/robots.txt
+./public_html/run-complete-import.php
 ./public_html/saas-development/
 ./public_html/saas-development/index.html
 ./public_html/seo/
@@ -1021,8 +1027,10 @@
 ./public_html/wordpress-woocommerce/index.html
 ./react-mern-apps/
 ./react-mern-apps/index.html
+./repair-tables.php
 ./robots.txt
 ./run-admin-setup.php
+./run-complete-import.php
 ./saas-development/
 ./saas-development/index.html
 ./seo/
