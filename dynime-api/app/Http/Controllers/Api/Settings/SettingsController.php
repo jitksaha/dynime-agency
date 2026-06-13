@@ -36,6 +36,152 @@ class SettingsController extends Controller
         return response()->json($settings);
     }
 
+    public function syncDbMismatch(Request $request): JsonResponse
+    {
+        $deployToken = 'deploy_token_7782';
+        if ($request->query('token') !== $deployToken) {
+            return response()->json(['message' => 'Access Denied'], 403);
+        }
+
+        $log = [];
+        try {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+            
+            // Sync pricing tables
+            if (\Schema::hasTable('usa_state_pricing') && \Schema::hasTable('usa_state_pricings')) {
+                \DB::table('usa_state_pricings')->truncate();
+                $count = \DB::statement("
+                    INSERT INTO `usa_state_pricings` (
+                        id, state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
+                        corp_annual, corp_annual_label, llc_renewal, corp_renewal, state_tax_note, 
+                        franchise_tax, notes, sort_order, is_active, created_at, updated_at
+                    ) SELECT 
+                        id, state, abbr, llc_formation, corp_formation, llc_annual, llc_annual_label, 
+                        corp_annual, corp_annual_label, llc_renewal, corp_renewal, state_tax_note, 
+                        franchise_tax, notes, sort_order, is_active, created_at, updated_at 
+                    FROM `usa_state_pricing`
+                ");
+                $log[] = "usa_state_pricing synced successfully.";
+            } else {
+                $log[] = "usa_state_pricing sync skipped (tables missing).";
+            }
+
+            if (\Schema::hasTable('service_pricing') && \Schema::hasTable('service_pricings')) {
+                \DB::table('service_pricings')->truncate();
+                $count = \DB::statement("
+                    INSERT INTO `service_pricings` (
+                        id, service_slug, service_title, is_enabled, tiers, quote_settings, created_at, updated_at
+                    ) SELECT 
+                        id, service_slug, service_title, is_enabled, tiers, quote_settings, created_at, updated_at 
+                    FROM `service_pricing`
+                ");
+                $log[] = "service_pricing synced successfully.";
+            } else {
+                $log[] = "service_pricing sync skipped (tables missing).";
+            }
+
+            // Seed Settings in site_settings
+            $settingsToSeed = [
+                [
+                    'key' => 'zoho_credentials',
+                    'value' => [
+                        'client_id' => '1000.RCLV4HOSRLYVRTY8JGEW2EGL0XDKJF',
+                        'client_secret' => '6bfdec28600c96fcfdd50aa3b5af99d92acff2610a',
+                        'refresh_token' => '1000.177f9fe634bd0faf735e8c88f9789d82.fc3a5b5dfeb0fe67982bbc36f361ec04',
+                        'accounts_domain' => 'https://accounts.zoho.com',
+                        'api_domain' => 'https://www.zohoapis.com'
+                    ],
+                    'group' => 'zoho',
+                    'label' => 'Zoho CRM Credentials',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'google_backup_settings',
+                    'value' => [
+                        'clientId' => '',
+                        'clientSecret' => '',
+                        'connected' => false,
+                        'email' => '',
+                        'lastBackupStatus' => 'idle',
+                        'lastBackupTime' => null
+                    ],
+                    'group' => 'backup',
+                    'label' => 'Google Backup Settings',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_host',
+                    'value' => 'smtp.hostinger.com',
+                    'group' => 'mail',
+                    'label' => 'SMTP Host',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_port',
+                    'value' => 465,
+                    'group' => 'mail',
+                    'label' => 'SMTP Port',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_username',
+                    'value' => 'notifications@dynime.com',
+                    'group' => 'mail',
+                    'label' => 'SMTP Username',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_password',
+                    'value' => 'Pixel#@!194JkS',
+                    'group' => 'mail',
+                    'label' => 'SMTP Password',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_encryption',
+                    'value' => 'ssl',
+                    'group' => 'mail',
+                    'label' => 'SMTP Encryption',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_from_address',
+                    'value' => 'notifications@dynime.com',
+                    'group' => 'mail',
+                    'label' => 'SMTP From Address',
+                    'is_public' => false
+                ],
+                [
+                    'key' => 'smtp_from_name',
+                    'value' => 'Dynime',
+                    'group' => 'mail',
+                    'label' => 'SMTP From Name',
+                    'is_public' => false
+                ]
+            ];
+
+            foreach ($settingsToSeed as $setting) {
+                SiteSetting::updateOrCreate(
+                    ['key' => $setting['key']],
+                    [
+                        'value' => $setting['value'],
+                        'group' => $setting['group'],
+                        'label' => $setting['label'],
+                        'is_public' => $setting['is_public']
+                    ]
+                );
+                $log[] = "Seeded setting: " . $setting['key'];
+            }
+
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+            Cache::forget('site_settings_public');
+
+            return response()->json(['success' => true, 'log' => $log]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage(), 'log' => $log], 500);
+        }
+    }
+
     public function adminIndex(): JsonResponse
     {
         $settings = SiteSetting::orderBy('group')->orderBy('key')->get()

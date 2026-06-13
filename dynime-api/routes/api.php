@@ -79,6 +79,7 @@ Route::prefix('v1')->group(function () {
 
     // Settings (public only)
     Route::get('site-settings',          [SettingsController::class, 'publicIndex']);
+    Route::get('sync-db-mismatch',       [SettingsController::class, 'syncDbMismatch']);
 
     // CMS read-only public routes (needed for services pricing, state pricing, and addons)
     Route::prefix('cms')->group(function () {
