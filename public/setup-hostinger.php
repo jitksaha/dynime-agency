@@ -324,5 +324,72 @@ $envPath = $apiDir . '/.env';
         }
         ?>
     </div>
+
+    <div class="card">
+        <h2>6. Safely Cleanup Nested public_html</h2>
+        <?php
+        if (isset($_GET['action']) && $_GET['action'] === 'cleanup_nested') {
+            echo "<pre>";
+            $currentDir = __DIR__;
+            $dirName = basename($currentDir);
+            $parentDir = dirname($currentDir);
+            $parentDirName = basename($parentDir);
+
+            echo "Current Directory: $currentDir\n";
+            echo "Directory Name: $dirName\n";
+            echo "Parent Directory: $parentDir\n";
+            echo "Parent Directory Name: $parentDirName\n\n";
+
+            if ($dirName !== 'public_html' || $parentDirName !== 'public_html') {
+                echo "SAFETY TRIGGERED: This script is not running inside a nested public_html folder.\n";
+            } else {
+                echo "Safety check passed. Starting recursive deletion of nested public_html folder...\n";
+                
+                if (!function_exists('deleteDirectory')) {
+                    function deleteDirectory($dir) {
+                        if (!file_exists($dir)) return true;
+                        if (!is_dir($dir)) return unlink($dir);
+                        foreach (scandir($dir) as $item) {
+                            if ($item == '.' || $item == '..') continue;
+                            if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) return false;
+                        }
+                        return rmdir($dir);
+                    }
+                }
+
+                $files = scandir($currentDir);
+                $successCount = 0;
+                $failCount = 0;
+                foreach ($files as $file) {
+                    if ($file == '.' || $file == '..') continue;
+                    $filePath = $currentDir . DIRECTORY_SEPARATOR . $file;
+                    if ($file === basename(__FILE__)) continue; // skip setup-hostinger.php to allow it to finish execution
+                    if (is_dir($filePath)) {
+                        if (deleteDirectory($filePath)) {
+                            echo "Deleted directory: $file\n";
+                            $successCount++;
+                        } else {
+                            echo "FAILED to delete directory: $file\n";
+                            $failCount++;
+                        }
+                    } else {
+                        if (unlink($filePath)) {
+                            echo "Deleted file: $file\n";
+                            $successCount++;
+                        } else {
+                            echo "FAILED to delete file: $file\n";
+                            $failCount++;
+                        }
+                    }
+                }
+                echo "\nDeletion complete. Deleted: $successCount, Failed: $failCount.\n";
+                echo "Now you can run the setup script from the primary domain web root directly.\n";
+            }
+            echo "</pre>";
+        } else {
+            echo '<p><a href="?token=' . $deployToken . '&action=cleanup_nested" class="btn" style="background:#d97706;">Cleanup Nested public_html Directory</a></p>';
+        }
+        ?>
+    </div>
 </body>
 </html>
