@@ -766,6 +766,7 @@
 ./careers/
 ./careers/index.html
 ./check-api-dir.php
+./check_id_card.php
 ./company-formation-illustration.png
 ./consulting/
 ./consulting/index.html
