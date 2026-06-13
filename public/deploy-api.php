@@ -13,7 +13,12 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
 }
 
 $zipFile = __DIR__ . '/dynime-api.zip';
-$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/ssamokxvqc/public_html');
+if (!file_exists($zipFile) && file_exists(dirname(__DIR__) . '/dynime-api.zip')) {
+    $zipFile = dirname(__DIR__) . '/dynime-api.zip';
+} elseif (!file_exists($zipFile) && file_exists(dirname(__DIR__) . '/public_html/dynime-api.zip')) {
+    $zipFile = dirname(__DIR__) . '/public_html/dynime-api.zip';
+}
+$homeDir = dirname($_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/public_html');
 $extractTo = $homeDir . '/dynime-api';
 
 header('Content-Type: text/html; charset=utf-8');
