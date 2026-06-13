@@ -132,6 +132,14 @@ Route::prefix('v1')->group(function () {
         Route::post('orders/mine/claim', [\App\Http\Controllers\Api\OrdersController::class, 'claimOrders']);
         Route::post('orders/claim', [\App\Http\Controllers\Api\OrdersController::class, 'claimOrders']);
 
+        // Google Backup routes (non-prefixed for direct frontend compatibility)
+        Route::middleware(['admin'])->group(function () {
+            Route::get('backup/google/status',       [BackupController::class, 'googleStatus']);
+            Route::post('backup/google/configure',   [BackupController::class, 'googleConfigure']);
+            Route::post('backup/google/disconnect',  [BackupController::class, 'googleDisconnect']);
+        });
+
+
         // Frontend-compatible analytics endpoints
         Route::get('analytics/orders', [AnalyticsController::class, 'orders'])->middleware('admin');
         Route::get('analytics/subscribers', [AnalyticsController::class, 'subscribers'])->middleware('admin');
