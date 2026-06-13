@@ -95,6 +95,10 @@ Route::prefix('v1')->group(function () {
     Route::post('analytics/pageview',    [AnalyticsController::class, 'trackPageView']);
     Route::post('checkout/track',        [CheckoutTrackingController::class, 'track']);
 
+    // Google Drive backup auth routes (Public)
+    Route::get('backup/google/auth', [BackupController::class, 'googleAuth']);
+    Route::get('backup/google/callback', [BackupController::class, 'googleCallback']);
+
     // Supabase proxy routes
     Route::post('supabase-proxy', [SupabaseProxyController::class, 'handle']);
     Route::post('supabase-proxy/rpc/{function}', [SupabaseProxyController::class, 'handleRpc']);
@@ -249,6 +253,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('backup/download/{filename}', [BackupController::class, 'download']);
                 Route::delete('backup/{filename}',      [BackupController::class, 'destroy']);
                 Route::post('backup/clean',             [BackupController::class, 'clean']);
+                
+                // Google Drive backup endpoints
+                Route::get('backup/google/status',       [BackupController::class, 'googleStatus']);
+                Route::post('backup/google/configure',   [BackupController::class, 'googleConfigure']);
+                Route::post('backup/google/disconnect',  [BackupController::class, 'googleDisconnect']);
             });
         });
 

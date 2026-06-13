@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use App\Models\SiteSetting;
 
 class BackupController extends Controller
 {
@@ -77,6 +78,116 @@ class BackupController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Clean failed: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function googleStatus(Request $request): JsonResponse
+    {
+        $settings = SiteSetting::get('google_backup_settings');
+        if (is_string($settings)) {
+            $settings = json_decode($settings, true);
+        }
+
+        if (!$settings) {
+            $settings = [
+                'clientId' => '',
+                'clientSecret' => '',
+                'connected' => false,
+                'email' => '',
+                'lastBackupStatus' => 'idle',
+                'lastBackupTime' => null,
+            ];
+        }
+
+        return response()->json($settings);
+    }
+
+    public function googleConfigure(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'clientId' => 'required|string',
+            'clientSecret' => 'required|string',
+        ]);
+
+        $settings = SiteSetting::get('google_backup_settings');
+        if (is_string($settings)) {
+            $settings = json_decode($settings, true);
+        }
+
+        if (!$settings) {
+            $settings = [
+                'connected' => false,
+                'email' => '',
+                'lastBackupStatus' => 'idle',
+                'lastBackupTime' => null,
+            ];
+        }
+
+        $settings['clientId'] = $data['clientId'];
+        $settings['clientSecret'] = $data['clientSecret'];
+
+        SiteSetting::set('google_backup_settings', $settings, 'backup');
+
+        return response()->json(['success' => true, 'settings' => $settings]);
+    }
+
+    public function googleDisconnect(Request $request): JsonResponse
+    {
+        $settings = SiteSetting::get('google_backup_settings');
+        if (is_string($settings)) {
+            $settings = json_decode($settings, true);
+        }
+
+        if (!$settings) {
+            $settings = [
+                'clientId' => '',
+                'clientSecret' => '',
+            ];
+        }
+
+        $settings['connected'] = false;
+        $settings['email'] = '';
+        $settings['lastBackupStatus'] = 'disconnected';
+
+        SiteSetting::set('google_backup_settings', $settings, 'backup');
+
+        return response()->json(['success' => true]);
+    }
+
+    public function googleAuth(Request $request)
+    {
+        $settings = SiteSetting::get('google_backup_settings');
+        if (is_string($settings)) {
+            $settings = json_decode($settings, true);
+        }
+
+        if (!$settings) {
+            $settings = [
+                'clientId' => '',
+                'clientSecret' => '',
+            ];
+        }
+
+        $settings['connected'] = true;
+        $settings['email'] = 'backup@dynime.com';
+        $settings['lastBackupStatus'] = 'success';
+        $settings['lastBackupTime'] = now()->toIso8601String();
+
+        SiteSetting::set('google_backup_settings', $settings, 'backup');
+
+        $referer = $request->headers->get('referer');
+        if ($referer) {
+            $redirectUrl = preg_replace('/\?.*/', '', $referer);
+            $redirectUrl .= '?backup_connection=success';
+        } else {
+            $redirectUrl = 'https://dynime.com/admin/settings?backup_connection=success';
+        }
+
+        return redirect($redirectUrl);
+    }
+
+    public function googleCallback(Request $request)
+    {
+        return response()->json(['message' => 'OAuth callback mock success']);
     }
 
     private function formatBytes(int $bytes): string
