@@ -105,6 +105,11 @@ Route::prefix('v1')->group(function () {
     Route::post('supabase-proxy/rpc/{function}', [SupabaseProxyController::class, 'handleRpc']);
     Route::post('supabase-proxy/functions/{name}', [SupabaseProxyController::class, 'invokeFunction']);
 
+    // DB proxy routes (alias for db-shim compatibility)
+    Route::post('db-proxy', [SupabaseProxyController::class, 'handle']);
+    Route::post('db-proxy/rpc/{function}', [SupabaseProxyController::class, 'handleRpc']);
+    Route::post('db-proxy/functions/{name}', [SupabaseProxyController::class, 'invokeFunction']);
+
     // Orders & Payments
     Route::post('orders/public/process-payment', [\App\Http\Controllers\Api\OrdersController::class, 'processPayment']);
     Route::get('orders/public/bkash-callback', [\App\Http\Controllers\Api\OrdersController::class, 'handleBkashCallback']);
