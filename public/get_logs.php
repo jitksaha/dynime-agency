@@ -16,8 +16,12 @@ if (function_exists('opcache_reset')) {
     @opcache_reset();
 }
 if (file_exists($logFile)) {
-    echo "=== Laravel Logs ===\n";
-    echo file_get_contents($logFile);
+    echo "=== Laravel Logs (Last 30 lines) ===\n";
+    $content = file_get_contents($logFile);
+    // Find last 3 occurrence of [2026-
+    $lines = explode("\n", $content);
+    $lastLines = array_slice($lines, -50);
+    echo implode("\n", $lastLines);
 } else {
     echo "ERROR: log file not found at: $logFile\n";
     
