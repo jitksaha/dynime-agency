@@ -61,16 +61,29 @@ jobs:
           # Fetch FTP structure first
           lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; find . > ftp-structure.txt; quit"
           
-          TARGET_DIR="public_html/"
+          TARGET_DIR="./"
           
-          # Clean up mistakenly uploaded files in the domain root (outside of public_html)
-          echo "Cleaning up mistaken files in the domain root..."
-          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; rm -f setup-hostinger.php deploy-api.php index.html || true; quit" || true
+          # Test connection and detect target directory path
+          # We check if index.html or setup-hostinger.php exists in the root of the FTP connection.
+          # If it does, we are already inside the public_html folder (chrooted).
+          if grep -q "^\./setup-hostinger.php$" ftp-structure.txt || grep -q "^\./index.html$" ftp-structure.txt; then
+            TARGET_DIR="./"
+            echo "Detected chrooted FTP root (index.html/setup-hostinger.php found). Target: ./"
+          elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd domains/dynime.com/public_html"; then
+            TARGET_DIR="domains/dynime.com/public_html/"
+            echo "Detected main account FTP root. Target: domains/dynime.com/public_html/"
+          elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd public_html"; then
+            TARGET_DIR="public_html/"
+            echo "Detected domain-level FTP root. Target: public_html/"
+          else
+            TARGET_DIR="./"
+            echo "Detected fallback FTP root. Target: ./"
+          fi
           
-          # Clean up the nested public_html/public_html folder if it exists
-          if grep -q "^\./public_html/public_html/$" ftp-structure.txt; then
-            echo "Found nested public_html/public_html folder. Deleting it..."
-            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; glob -d rm -r public_html/public_html; quit" || true
+          # If TARGET_DIR is "./", and a nested public_html directory exists, clean it up
+          if [ "$TARGET_DIR" = "./" ] && grep -q "^\./public_html/$" ftp-structure.txt; then
+            echo "Found nested public_html folder. Deleting it to avoid duplicate route issues..."
+            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; glob -d rm -r public_html; quit" || true
           fi
           
           echo "Executing file sync to $TARGET_DIR..."
