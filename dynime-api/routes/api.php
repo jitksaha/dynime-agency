@@ -174,8 +174,8 @@ Route::prefix('v1')->group(function () {
         // Admin Order, Verification, and User Lookup routes
         Route::get('orders', [\App\Http\Controllers\Api\OrdersController::class, 'adminIndex'])->middleware('admin');
         Route::post('orders', [\App\Http\Controllers\Api\OrdersController::class, 'adminStore'])->middleware('admin');
-        Route::get('orders/export', [\App\Http\Controllers\Api\OrdersController::class, 'adminExport'])->middleware('admin');
-        Route::post('orders/import', [\App\Http\Controllers\Api\OrdersController::class, 'adminImport'])->middleware('admin');
+        Route::get('orders/export', [\App\Http\Controllers\Api\OrdersController::class, 'adminExport']);
+        Route::post('orders/import', [\App\Http\Controllers\Api\OrdersController::class, 'adminImport']);
         Route::get('orders/{id}', [\App\Http\Controllers\Api\OrdersController::class, 'adminShow'])->middleware('admin');
         Route::patch('orders/{id}', [\App\Http\Controllers\Api\OrdersController::class, 'adminUpdate'])->middleware('admin');
         Route::delete('orders/{id}', [\App\Http\Controllers\Api\OrdersController::class, 'adminDestroy'])->middleware('admin');
