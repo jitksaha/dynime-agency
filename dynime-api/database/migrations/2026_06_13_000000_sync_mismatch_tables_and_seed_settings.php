@@ -16,7 +16,14 @@ return new class extends Migration
         // Fix site_settings id auto-increment if missing in live database
         if (Schema::hasTable('site_settings')) {
             try {
-                DB::statement("ALTER TABLE `site_settings` MODIFY `id` BIGINT UNSIGNED AUTO_INCREMENT;");
+                $type = Schema::getColumnType('site_settings', 'id');
+                if ($type === 'string' || $type === 'varchar') {
+                    DB::statement("ALTER TABLE `site_settings` DROP PRIMARY KEY;");
+                    DB::statement("ALTER TABLE `site_settings` CHANGE `id` `old_uuid` VARCHAR(36);");
+                    DB::statement("ALTER TABLE `site_settings` ADD `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY FIRST;");
+                } else {
+                    DB::statement("ALTER TABLE `site_settings` MODIFY `id` BIGINT UNSIGNED AUTO_INCREMENT;");
+                }
             } catch (\Exception $e) {
                 // Ignore if already set or fails
             }
