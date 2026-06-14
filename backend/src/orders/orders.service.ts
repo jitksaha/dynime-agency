@@ -2043,5 +2043,87 @@ export class OrdersService {
     this.eventService.emit('order-updated', { orderId });
     return { ok: true, status };
   }
+
+  async exportOrders() {
+    return this.prisma.orders.findMany({
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async importOrders(orders: any[]) {
+    let createdCount = 0;
+    let updatedCount = 0;
+
+    for (const order of orders) {
+      if (!order.customer_email) {
+        continue;
+      }
+
+      const data: any = {
+        customer_email: order.customer_email,
+        customer_name: order.customer_name || null,
+        items: order.items || [],
+        total: order.total !== undefined ? Number(order.total) : 0,
+        status: order.status || 'pending',
+        stripe_session_id: order.stripe_session_id || null,
+        created_at: order.created_at ? new Date(order.created_at) : new Date(),
+        updated_at: order.updated_at ? new Date(order.updated_at) : new Date(),
+        payment_verification: order.payment_verification || null,
+        coupon_code: order.coupon_code || null,
+        discount_amount: order.discount_amount !== undefined ? Number(order.discount_amount) : 0,
+        user_id: order.user_id || null,
+        invoice_number: order.invoice_number || null,
+        service_brief: order.service_brief || {},
+        billing_address: order.billing_address || {},
+        subtotal: order.subtotal !== undefined ? Number(order.subtotal) : 0,
+        currency: order.currency || 'USD',
+        notes: order.notes || null,
+        is_recurring: order.is_recurring || false,
+        billing_cycle: order.billing_cycle || null,
+        service_category: order.service_category || null,
+        payment_gateway: order.payment_gateway || null,
+        tax_amount: order.tax_amount !== undefined ? Number(order.tax_amount) : 0,
+        tax_percent: order.tax_percent !== undefined ? Number(order.tax_percent) : null,
+        tax_mode: order.tax_mode || null,
+        tax_label: order.tax_label || null,
+        refunded_amount: order.refunded_amount !== undefined ? Number(order.refunded_amount) : 0,
+        refunded_tax_amount: order.refunded_tax_amount !== undefined ? Number(order.refunded_tax_amount) : 0,
+        refunded_at: order.refunded_at ? new Date(order.refunded_at) : null,
+        refund_reason: order.refund_reason || null,
+        referral_code: order.referral_code || null,
+      };
+
+      let existingOrder: any = null;
+      if (order.id) {
+        existingOrder = await this.prisma.orders.findUnique({
+          where: { id: order.id },
+        });
+      }
+
+      if (!existingOrder && order.invoice_number) {
+        existingOrder = await this.prisma.orders.findUnique({
+          where: { invoice_number: order.invoice_number },
+        });
+      }
+
+      if (existingOrder) {
+        await this.prisma.orders.update({
+          where: { id: existingOrder.id },
+          data,
+        });
+        updatedCount++;
+      } else {
+        if (order.id) {
+          data.id = order.id;
+        }
+        await this.prisma.orders.create({
+          data,
+        });
+        createdCount++;
+      }
+    }
+
+    return { created: createdCount, updated: updatedCount };
+  }
 }
 

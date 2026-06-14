@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Package, Eye, ExternalLink, Search, Filter, Plus, Download, Pencil,
   ShieldCheck, ShieldAlert, ShieldQuestion, ServerCog, RefreshCw, Clock, Trash2, X, Link2,
-  Receipt, Undo2, Send, Loader2, Copy, Check,
+  Receipt, Undo2, Send, Loader2, Copy, Check, Upload,
 } from "lucide-react";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { formatCurrency } from "@/lib/currency";
@@ -139,6 +139,63 @@ const AdminOrders = () => {
   const [verifyBusy, setVerifyBusy] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ url: string; type: string } | null>(null);
   const qc = useQueryClient();
+  const [importing, setImporting] = useState(false);
+
+  const handleExportOrders = async () => {
+    try {
+      const orders = await apiGet<any[]>("/orders/export");
+      const dataStr = JSON.stringify(orders, null, 2);
+      const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `dynime-orders-export-${format(new Date(), "yyyy-MM-dd")}.json`;
+
+      const linkElement = document.createElement("a");
+      linkElement.setAttribute("href", dataUri);
+      linkElement.setAttribute("download", exportFileDefaultName);
+      linkElement.click();
+      toast.success("Orders exported successfully");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to export orders");
+    }
+  };
+
+  const handleImportOrders = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result;
+        if (typeof text !== "string") return;
+
+        const orders = JSON.parse(text);
+        if (!Array.isArray(orders)) {
+          toast.error("Invalid file format. File must contain an array of orders.");
+          return;
+        }
+
+        if (orders.length === 0) {
+          toast.error("Exported file is empty.");
+          return;
+        }
+
+        const confirm = window.confirm(`Are you sure you want to import ${orders.length} orders? Existing orders matching by ID or Invoice Number will be overwritten.`);
+        if (!confirm) return;
+
+        setImporting(true);
+        const res = await apiPost<{ created: number; updated: number }>("/orders/import", { orders });
+        toast.success(`Import completed successfully! Created: ${res.created}, Updated/Overwritten: ${res.updated}`);
+        qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      } catch (err: any) {
+        toast.error(err?.message ?? "Failed to parse or import orders file.");
+      } finally {
+        setImporting(false);
+        e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
 
   useOrdersRealtime("admin-orders-list", [
     ["admin-orders"],
@@ -345,6 +402,27 @@ const AdminOrders = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex gap-2 sm:ml-auto">
+          <Button type="button" variant="outline" size="sm" onClick={handleExportOrders} className="gap-1.5 h-9 text-xs">
+            <Download className="w-3.5 h-3.5" /> Export
+          </Button>
+          <label className="cursor-pointer">
+            <Button type="button" asChild variant="outline" size="sm" className="gap-1.5 h-9 text-xs" disabled={importing}>
+              <span>
+                {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                Import
+              </span>
+            </Button>
+            <input
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handleImportOrders}
+              disabled={importing}
+            />
+          </label>
+        </div>
       </div>
 
       {/* Orders Table */}

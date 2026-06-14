@@ -56,6 +56,20 @@ export class OrdersController {
     return this.svc.listForUser(req.user.email, req.user.sub);
   }
 
+  @Get('export')
+  @UseGuards(RolesGuard)
+  @Roles('super_admin', 'manager', 'admin')
+  exportOrders() {
+    return this.svc.exportOrders();
+  }
+
+  @Post('import')
+  @UseGuards(RolesGuard)
+  @Roles('super_admin', 'manager', 'admin')
+  importOrders(@Body() body: { orders: any[] }) {
+    return this.svc.importOrders(body.orders);
+  }
+
   @Get(':id/milestones')
   getMilestones(@Param('id') id: string) {
     return this.svc.getMilestones(id);
