@@ -42,6 +42,11 @@ jobs:
         run: |
           cd dynime-api
           composer install --no-dev --optimize-autoloader
+          
+          # Clean vendor folder to optimize Inodes
+          echo "Cleaning vendor folder..."
+          find vendor -type d \( -name "tests" -o -name "test" -o -name "Testing" -o -name "Docs" -o -name "docs" -o -name "doc" -o -name "Documentation" -o -name ".github" -o -name ".git" -o -name ".gitlab" \) -exec rm -rf {} + 2>/dev/null || true
+          find vendor -type f \( -name "*.md" -o -name "*.txt" -o -name "LICENSE" -o -name "LICENSE.txt" -o -name "license.txt" -o -name "license.md" -o -name "changelog.md" -o -name "CHANGELOG.md" -o -name "composer.json" -o -name "composer.lock" -o -name "phpunit.xml" -o -name "phpunit.xml.dist" -o -name ".gitignore" -o -name ".gitattributes" -o -name ".travis.yml" -o -name ".editorconfig" -o -name "docker-compose.yml" -o -name "Dockerfile" -o -name "Makefile" \) -delete 2>/dev/null || true
 
       - name: Package backend ZIP
         run: |
