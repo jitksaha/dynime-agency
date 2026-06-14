@@ -199,6 +199,19 @@ if (!class_exists('ZipArchive')) {
     exit;
 }
 
+// Backup existing .env file if it exists to preserve database config
+$envBackupPath = tempnam(sys_get_temp_dir(), 'env_');
+$envExists = false;
+if (file_exists($extractTo . '/.env')) {
+    echo "Backing up existing .env configuration... ";
+    if (@copy($extractTo . '/.env', $envBackupPath)) {
+        $envExists = true;
+        echo "Done.<br/>";
+    } else {
+        echo "<span style='color:red;'>Failed to backup .env</span><br/>";
+    }
+}
+
 // Delete old dynime-api folder to clean up removed packages/files (save inodes)
 if (is_dir($extractTo)) {
     echo "Clearing old backend version in <code>$extractTo</code> to prevent inode accumulation... ";
@@ -208,6 +221,17 @@ if (is_dir($extractTo)) {
 
 // Re-create extract directory
 mkdir($extractTo, 0755, true);
+
+// Restore .env file if it was backed up
+if ($envExists && file_exists($envBackupPath)) {
+    echo "Restoring .env configuration... ";
+    if (@copy($envBackupPath, $extractTo . '/.env')) {
+        echo "Done.<br/>";
+    } else {
+        echo "<span style='color:red;'>Failed to restore .env</span><br/>";
+    }
+    @unlink($envBackupPath);
+}
 
 $zip = new ZipArchive;
 if ($zip->open($zipFile) === TRUE) {
