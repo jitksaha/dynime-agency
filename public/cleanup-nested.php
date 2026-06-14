@@ -15,19 +15,19 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
 header('Content-Type: text/plain; charset=utf-8');
 
 $currentDir = __DIR__;
-$dirName = basename($currentDir);
-$parentDir = dirname($currentDir);
-$parentDirName = basename($parentDir);
+$targetDirToDelete = $currentDir . DIRECTORY_SEPARATOR . 'public_html';
 
 echo "Current Directory: $currentDir\n";
-echo "Directory Name: $dirName\n";
-echo "Parent Directory: $parentDir\n";
-echo "Parent Directory Name: $parentDirName\n\n";
+echo "Target Directory to Delete: $targetDirToDelete\n\n";
 
-// CRITICAL SAFETY CHECK: Only delete if we are indeed in a nested public_html folder
-if ($dirName !== 'public_html' || $parentDirName !== 'public_html') {
-    echo "SAFETY TRIGGERED: This script is not running inside a nested public_html folder (e.g. public_html/public_html).\n";
-    echo "No files were deleted.\n";
+if (!is_dir($targetDirToDelete)) {
+    echo "Target directory does not exist or is not a directory. Nothing to delete.\n";
+    exit;
+}
+
+// Safety check to ensure we do not delete the actual root directory
+if (realpath($targetDirToDelete) === realpath($currentDir)) {
+    echo "SAFETY TRIGGERED: Target directory resolves to current directory. Deletion aborted.\n";
     exit;
 }
 
@@ -55,41 +55,8 @@ function deleteDirectory($dir) {
     return rmdir($dir);
 }
 
-// Delete everything in this directory except this script itself (we will delete this script last or let it finish)
-$files = scandir($currentDir);
-$successCount = 0;
-$failCount = 0;
-
-foreach ($files as $file) {
-    if ($file == '.' || $file == '..') {
-        continue;
-    }
-    
-    $filePath = $currentDir . DIRECTORY_SEPARATOR . $file;
-    
-    // Skip this script itself so we can finish execution
-    if ($file === basename(__FILE__)) {
-        continue;
-    }
-    
-    if (is_dir($filePath)) {
-        if (deleteDirectory($filePath)) {
-            echo "Deleted directory: $file\n";
-            $successCount++;
-        } else {
-            echo "FAILED to delete directory: $file\n";
-            $failCount++;
-        }
-    } else {
-        if (unlink($filePath)) {
-            echo "Deleted file: $file\n";
-            $successCount++;
-        } else {
-            echo "FAILED to delete file: $file\n";
-            $failCount++;
-        }
-    }
+if (deleteDirectory($targetDirToDelete)) {
+    echo "\nSuccess! Nested public_html folder and all its contents have been successfully deleted.\n";
+} else {
+    echo "\nError: Failed to delete nested public_html folder fully. Some files may still remain.\n";
 }
-
-echo "\nDeletion complete. Deleted: $successCount, Failed: $failCount.\n";
-echo "Please delete this remaining file: " . basename(__FILE__) . " and its parent folder manually or it will be overwritten/cleaned up on next clean deploy.\n";
