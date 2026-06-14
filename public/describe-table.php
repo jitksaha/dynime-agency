@@ -13,10 +13,18 @@ try {
     ]);
     
     $table = $_GET['table'] ?? 'site_settings';
-    echo "=== Describing Table: $table ===\n";
-    $stmt = $pdo->query("DESCRIBE `$table`");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        print_r($row);
+    if (isset($_GET['dump'])) {
+        echo "=== Dumping Data from: $table ===\n";
+        $stmt = $pdo->query("SELECT * FROM `$table` LIMIT 100");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            print_r($row);
+        }
+    } else {
+        echo "=== Describing Table: $table ===\n";
+        $stmt = $pdo->query("DESCRIBE `$table`");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            print_r($row);
+        }
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
