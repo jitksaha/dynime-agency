@@ -83,7 +83,7 @@ jobs:
           # If TARGET_DIR is "./", and a nested public_html directory exists, clean it up via PHP (fast)
           if [ "$TARGET_DIR" = "./" ] && grep -q "^\./public_html/$" ftp-structure.txt; then
             echo "Found nested public_html folder. Uploading PHP cleanup helper..."
-            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; put public/cleanup-nested.php; quit"
+            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; put public/cleanup-nested.php -o cleanup-nested.php; quit"
             echo "Executing PHP cleanup webhook..."
             curl -s "https://dynime.com/cleanup-nested.php?token=deploy_token_7782"
             echo "Removing PHP cleanup helper..."
