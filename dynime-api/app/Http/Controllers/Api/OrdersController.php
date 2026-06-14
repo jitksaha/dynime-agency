@@ -293,7 +293,8 @@ class OrdersController extends Controller
                 }
 
                 $trustedItems = array_map(function($it) use ($priceMap) {
-                    $trusted = $priceMap[$it['id']] ?? null;
+                    $itemId = $it['id'] ?? $it['slug'] ?? '';
+                    $trusted = $priceMap[$itemId] ?? null;
                     if ($trusted !== null) {
                         $it['price'] = $trusted;
                     }
@@ -610,7 +611,12 @@ class OrdersController extends Controller
                         'customer_name' => $customerName,
                         'customer_email' => $customerEmail,
                         'items' => json_encode(array_map(function($i) {
-                            return ['id' => $i['id'], 'name' => $i['name'], 'price' => $i['price'], 'quantity' => $i['quantity']];
+                            return [
+                                'id' => $i['id'] ?? $i['slug'] ?? 'invoice-item',
+                                'name' => $i['name'] ?? '',
+                                'price' => (double)($i['price'] ?? 0),
+                                'quantity' => (int)($i['quantity'] ?? 1)
+                            ];
                         }, $trustedItems)),
                         'total' => $usdTotal,
                         'status' => 'pending',
@@ -695,7 +701,12 @@ class OrdersController extends Controller
             $orderItems = $isMilestone
                 ? $body['items']
                 : array_map(function($i) {
-                    return ['id' => $i['id'], 'name' => $i['name'], 'price' => $i['price'], 'quantity' => $i['quantity']];
+                    return [
+                        'id' => $i['id'] ?? $i['slug'] ?? 'invoice-item',
+                        'name' => $i['name'] ?? '',
+                        'price' => (double)($i['price'] ?? 0),
+                        'quantity' => (int)($i['quantity'] ?? 1)
+                    ];
                 }, $trustedItems);
 
             $milestoneServiceBrief = $isMilestone ? [
