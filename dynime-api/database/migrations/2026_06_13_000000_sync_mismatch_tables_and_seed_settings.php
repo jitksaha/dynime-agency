@@ -20,7 +20,9 @@ return new class extends Migration
             
             $rows = DB::table('usa_state_pricing')->get();
             foreach ($rows as $row) {
-                DB::table('usa_state_pricings')->insert((array)$row);
+                $data = (array)$row;
+                unset($data['id']); // Let database assign auto-incrementing integer ID
+                DB::table('usa_state_pricings')->insert($data);
             }
             DB::statement("SET FOREIGN_KEY_CHECKS = 1;");
         }
@@ -32,7 +34,9 @@ return new class extends Migration
             
             $rows = DB::table('service_pricing')->get();
             foreach ($rows as $row) {
-                DB::table('service_pricings')->insert((array)$row);
+                $data = (array)$row;
+                unset($data['id']); // Let database assign auto-incrementing integer ID
+                DB::table('service_pricings')->insert($data);
             }
             DB::statement("SET FOREIGN_KEY_CHECKS = 1;");
         }
