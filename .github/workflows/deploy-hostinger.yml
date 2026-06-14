@@ -58,35 +58,36 @@ jobs:
 
       - name: 📂 Sync files to Hostinger via lftp
         run: |
-          # Fetch FTP structure first
-          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; find . > ftp-structure.txt; quit"
+          # Fetch FTP structure first, starting explicitly from the absolute root
+          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /; find . > ftp-structure.txt; quit"
           
-          TARGET_DIR="./"
+          TARGET_DIR="/"
           
           # Test connection and detect target directory path
           # We check if index.html or setup-hostinger.php exists in the root of the FTP connection.
           # If it does, we are already inside the public_html folder (chrooted).
-          if grep -q "^\./\.htaccess" ftp-structure.txt || grep -q "^\./robots.txt" ftp-structure.txt || grep -q "^\./setup-hostinger.php" ftp-structure.txt || grep -q "^\./index.html" ftp-structure.txt; then
-            TARGET_DIR="./"
-            echo "Detected chrooted FTP root (.htaccess/robots.txt/setup-hostinger.php found). Target: ./"
-          elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd domains/dynime.com/public_html"; then
-            TARGET_DIR="domains/dynime.com/public_html/"
-            echo "Detected main account FTP root. Target: domains/dynime.com/public_html/"
-          elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd public_html"; then
-            TARGET_DIR="public_html/"
-            echo "Detected domain-level FTP root. Target: public_html/"
+          if lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /domains/dynime.com/public_html"; then
+            TARGET_DIR="/domains/dynime.com/public_html/"
+            echo "Detected main account FTP root. Target: /domains/dynime.com/public_html/"
+          elif grep -q "^\./\.htaccess" ftp-structure.txt || grep -q "^\./robots.txt" ftp-structure.txt || grep -q "^\./setup-hostinger.php" ftp-structure.txt || grep -q "^\./index.html" ftp-structure.txt; then
+            TARGET_DIR="/"
+            echo "Detected chrooted FTP root (.htaccess/robots.txt/setup-hostinger.php found). Target: /"
+          elif lftp -c "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /public_html"; then
+            TARGET_DIR="/public_html/"
+            echo "Detected domain-level FTP root. Target: /public_html/"
           else
-            TARGET_DIR="./"
-            echo "Detected fallback FTP root. Target: ./"
+            TARGET_DIR="/"
+            echo "Detected fallback FTP root. Target: /"
           fi
           
-          if [ "$TARGET_DIR" = "./" ] && grep -q "^\./public_html/" ftp-structure.txt; then
+          # If TARGET_DIR is "/" (meaning we are chrooted), and a nested public_html directory exists, clean it up via PHP (fast)
+          if [ "$TARGET_DIR" = "/" ] && grep -q "^\./public_html/" ftp-structure.txt; then
             echo "Found nested public_html folder. Uploading PHP cleanup helper..."
-            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; put public/cleanup-nested.php -o cleanup-nested.php; quit"
+            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /; put public/cleanup-nested.php -o cleanup-nested.php; quit"
             echo "Executing PHP cleanup webhook..."
             curl -s "https://dynime.com/cleanup-nested.php?token=deploy_token_7782"
             echo "Removing PHP cleanup helper..."
-            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; rm -f cleanup-nested.php; quit" || true
+            lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /; rm -f cleanup-nested.php; quit" || true
           fi
           
           echo "Executing file sync to $TARGET_DIR..."
