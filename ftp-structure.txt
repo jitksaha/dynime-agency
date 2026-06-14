@@ -100,6 +100,7 @@ payment-gateway
 seo-illustration.png
 speed-optimization
 dynime-icon-dark.svg
+api_bak_1781447043
 software-built-with-ai
 cleanup-nested.php
 maintenance-security
