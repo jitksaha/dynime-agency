@@ -1608,6 +1608,93 @@ class OrdersController extends Controller
         return substr($digits1, -8) === substr($digits2, -8);
     }
 
+    public function adminExport(Request $request): JsonResponse
+    {
+        $orders = DB::table('orders')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                $order->items = json_decode($order->items, true);
+                $order->service_brief = json_decode($order->service_brief, true);
+                $order->billing_address = json_decode($order->billing_address, true);
+                $order->payment_verification = json_decode($order->payment_verification, true);
+                return $order;
+            });
+
+        return response()->json($orders);
+    }
+
+    public function adminImport(Request $request): JsonResponse
+    {
+        $orders = $request->input('orders', []);
+        $created = 0;
+        $updated = 0;
+
+        foreach ($orders as $order) {
+            if (empty($order['customer_email'])) {
+                continue;
+            }
+
+            $items = isset($order['items']) ? json_encode($order['items']) : '[]';
+            $serviceBrief = isset($order['service_brief']) ? json_encode($order['service_brief']) : '{}';
+            $billingAddress = isset($order['billing_address']) ? json_encode($order['billing_address']) : '{}';
+            $paymentVerification = isset($order['payment_verification']) ? json_encode($order['payment_verification']) : null;
+
+            $data = [
+                'customer_email' => $order['customer_email'],
+                'customer_name' => $order['customer_name'] ?? null,
+                'items' => $items,
+                'total' => $order['total'] ?? 0.00,
+                'status' => $order['status'] ?? 'pending',
+                'stripe_session_id' => $order['stripe_session_id'] ?? null,
+                'payment_verification' => $paymentVerification,
+                'coupon_code' => $order['coupon_code'] ?? null,
+                'discount_amount' => $order['discount_amount'] ?? 0.00,
+                'user_id' => $order['user_id'] ?? null,
+                'invoice_number' => $order['invoice_number'] ?? null,
+                'service_brief' => $serviceBrief,
+                'billing_address' => $billingAddress,
+                'subtotal' => $order['subtotal'] ?? 0.00,
+                'currency' => $order['currency'] ?? 'USD',
+                'notes' => $order['notes'] ?? null,
+                'is_recurring' => !empty($order['is_recurring']) ? 1 : 0,
+                'billing_cycle' => $order['billing_cycle'] ?? null,
+                'service_category' => $order['service_category'] ?? null,
+                'payment_gateway' => $order['payment_gateway'] ?? null,
+                'tax_amount' => $order['tax_amount'] ?? 0.00,
+                'tax_percent' => $order['tax_percent'] ?? null,
+                'tax_mode' => $order['tax_mode'] ?? null,
+                'tax_label' => $order['tax_label'] ?? null,
+                'refunded_amount' => $order['refunded_amount'] ?? 0.00,
+                'refunded_tax_amount' => $order['refunded_tax_amount'] ?? 0.00,
+                'refunded_at' => $order['refunded_at'] ?? null,
+                'refund_reason' => $order['refund_reason'] ?? null,
+                'referral_code' => $order['referral_code'] ?? null,
+                'created_at' => $order['created_at'] ?? now(),
+                'updated_at' => $order['updated_at'] ?? now(),
+            ];
+
+            $existing = null;
+            if (!empty($order['id'])) {
+                $existing = DB::table('orders')->where('id', $order['id'])->first();
+            }
+            if (!$existing && !empty($order['invoice_number'])) {
+                $existing = DB::table('orders')->where('invoice_number', $order['invoice_number'])->first();
+            }
+
+            if ($existing) {
+                DB::table('orders')->where('id', $existing->id)->update($data);
+                $updated++;
+            } else {
+                $data['id'] = $order['id'] ?? (string)Str::uuid();
+                DB::table('orders')->insert($data);
+                $created++;
+            }
+        }
+
+        return response()->json(['created' => $created, 'updated' => $updated]);
+    }
+
     public function adminIndex(Request $request): JsonResponse
     {
         $limit = $request->query('limit', 10000);
