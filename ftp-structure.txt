@@ -1958,10 +1958,8 @@
 ./assets/trending-up-CI_Y121m.js
 ./assets/trending-up-CPHLFjBd.js
 ./assets/trending-up-DDo7e7lF.js
-./assets/trending-up-rXKwOhs-.js
 ./assets/triangle-alert-BmKYWkJh.js
 ./assets/triangle-alert-DFmqW-ke.js
-./assets/triangle-alert-DnC3wsn8.js
 ./assets/triangle-alert-DqC6YAZ3.js
 ./assets/triangle-alert-Z25ciYnV.js
 ./assets/triangle-alert-nehtGHTp.js
@@ -1970,7 +1968,6 @@
 ./assets/trophy-ClW3Zvmb.js
 ./assets/trophy-DDfuvXTi.js
 ./assets/trophy-DGhBQUar.js
-./assets/trophy-iP0gZEqB.js
 ./assets/truck-CO__A9jN.js
 ./assets/truck-D-Uf00KU.js
 ./assets/truck-Di2A6BmN.js
@@ -2389,6 +2386,7 @@
 ./careers/
 ./careers/index.html
 ./check-api-dir.php
+./check-routes.php
 ./check_id_card.php
 ./cleanup-nested.php
 ./company-formation-illustration.png
