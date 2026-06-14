@@ -119,9 +119,17 @@ foreach ($unnecessaryFiles as $file) {
     }
 }
 
-// Clean up old archives
-deleteFilesByPattern($docRoot . '/*.zip');
-deleteFilesByPattern($homeDir . '/*.zip');
+// Clean up old archives (excluding dynime-api.zip which is our active deployment bundle)
+foreach (glob($docRoot . '/*.zip') as $file) {
+    if (basename($file) !== 'dynime-api.zip') {
+        @unlink($file);
+    }
+}
+foreach (glob($homeDir . '/*.zip') as $file) {
+    if (basename($file) !== 'dynime-api.zip') {
+        @unlink($file);
+    }
+}
 
 // Helper: Run Laravel Artisan commands from the extracted app directory
 function runLaravelCommand($extractTo, $command) {
