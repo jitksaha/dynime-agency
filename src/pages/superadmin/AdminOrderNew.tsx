@@ -54,7 +54,12 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
   const [discount, setDiscount] = useState(0);
   const [notes, setNotes] = useState("");
   const [partiallyPaid, setPartiallyPaid] = useState(false);
-  const [amountPaid, setAmountPaid] = useState(0);
+  const [partialPayments, setPartialPayments] = useState<Array<{ amount: number; date: string }>>([
+    { amount: 0, date: new Date().toISOString().split("T")[0] },
+  ]);
+  const amountPaid = useMemo(() => {
+    return partialPayments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  }, [partialPayments]);
   const [included, setIncluded] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [dueDate, setDueDate] = useState<string>(() => {
@@ -158,9 +163,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     () => JSON.stringify({
       customerName, customerEmail, phone, company, currency, status,
       gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate,
-      partiallyPaid, amountPaid,
+      partiallyPaid, partialPayments,
     }),
-    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate, partiallyPaid, amountPaid]
+    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate, partiallyPaid, partialPayments]
   );
   // --- autosave (new mode only) ---
   const AUTOSAVE_KEY = "admin:manual-invoice:draft:v1";
@@ -369,10 +374,20 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
         setIncluded(inc.join("\n"));
         if (sb.partially_paid) {
           setPartiallyPaid(true);
-          setAmountPaid(Number(sb.amount_paid || 0));
+          if (sb.partial_payments && Array.isArray(sb.partial_payments)) {
+            setPartialPayments(sb.partial_payments.map((p: any) => ({
+              amount: Number(p.amount) || 0,
+              date: p.date || new Date().toISOString().split("T")[0]
+            })));
+          } else {
+            setPartialPayments([{
+              amount: Number(sb.amount_paid || 0),
+              date: sb.due_date || (o.created_at ? new Date(o.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0])
+            }]);
+          }
         } else {
           setPartiallyPaid(false);
-          setAmountPaid(0);
+          setPartialPayments([{ amount: 0, date: new Date().toISOString().split("T")[0] }]);
         }
         if (sb.due_date) {
           setDueDate(sb.due_date);
@@ -422,7 +437,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
               return d.toISOString().split("T")[0];
             })(),
             partiallyPaid: sb.partially_paid || false,
-            amountPaid: Number(sb.amount_paid || 0),
+            partialPayments: sb.partial_payments && Array.isArray(sb.partial_payments) ? sb.partial_payments.map((p: any) => ({ amount: Number(p.amount) || 0, date: p.date })) : [{ amount: Number(sb.amount_paid || 0), date: sb.due_date || (o.created_at ? new Date(o.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]) }],
           });
         });
       } catch (err) {
@@ -485,6 +500,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           partially_paid: partiallyPaid,
           amount_paid: partiallyPaid ? amountPaid : 0,
           amount_due: partiallyPaid ? remainingDue : total,
+          partial_payments: partiallyPaid ? partialPayments.map(p => ({ amount: Number(p.amount) || 0, date: p.date })) : [],
         };
         if (issuerMode === "employee") {
           if (!selectedEmployee) { toast.error("Pick an employee to issue this invoice under"); setSubmitting(false); return; }
@@ -533,6 +549,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           partially_paid: partiallyPaid,
           amount_paid: partiallyPaid ? amountPaid : 0,
           amount_due: partiallyPaid ? remainingDue : total,
+          partial_payments: partiallyPaid ? partialPayments.map(p => ({ amount: Number(p.amount) || 0, date: p.date })) : [],
         };
         if (includedServices.length) service_brief.included_services = includedServices;
         if (issuerMode === "employee") {
@@ -751,7 +768,13 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
                       </div>
                       {partiallyPaid && (
                         <>
-                          <div className="flex justify-between text-emerald-600"><span>Paid (Advance)</span><span className="tabular-nums">{previewFmt(amountPaid)}</span></div>
+                          <div className="flex justify-between text-emerald-600 font-medium"><span>Paid (Advance)</span><span className="tabular-nums">{previewFmt(amountPaid)}</span></div>
+                          {partialPayments.filter(p => Number(p.amount) > 0).map((p, idx) => (
+                            <div key={idx} className="flex justify-between text-[10px] text-muted-foreground pl-3 border-l border-emerald-500/30">
+                              <span>Paid on {p.date ? new Date(p.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}</span>
+                              <span className="tabular-nums">{previewFmt(Number(p.amount))}</span>
+                            </div>
+                          ))}
                           <div className="flex justify-between font-bold text-xs"><span>Remaining Due</span><span className="tabular-nums">{previewFmt(remainingDue)}</span></div>
                         </>
                       )}
@@ -1041,14 +1064,56 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
                 <Label htmlFor="partiallyPaid" className="text-xs font-semibold cursor-pointer">Partially paid (Advance / Token)</Label>
               </div>
               {partiallyPaid && (
-                <div className="flex justify-between items-center gap-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                  <span className="text-xs text-muted-foreground font-semibold">Amount Paid</span>
-                  <Input
-                    type="number" min={0} step="0.01"
-                    value={amountPaid}
-                    onChange={(e) => setAmountPaid(Number(e.target.value))}
-                    className="h-8 w-28 text-right tabular-nums"
-                  />
+                <div className="space-y-2.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-semibold">Installments / Payments</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-6 text-[10px] px-1.5"
+                      onClick={() => setPartialPayments(p => [...p, { amount: 0, date: new Date().toISOString().split("T")[0] }])}
+                    >
+                      + Add payment
+                    </Button>
+                  </div>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    {partialPayments.map((p, idx) => (
+                      <div key={idx} className="flex gap-1.5 items-center">
+                        <Input
+                          type="number" min={0} step="0.01"
+                          placeholder="Amount"
+                          value={p.amount || ""}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setPartialPayments(prev => prev.map((item, i) => i === idx ? { ...item, amount: val } : item));
+                          }}
+                          className="h-7 w-20 text-right tabular-nums text-xs px-1"
+                        />
+                        <Input
+                          type="date"
+                          value={p.date}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setPartialPayments(prev => prev.map((item, i) => i === idx ? { ...item, date: val } : item));
+                          }}
+                          className="h-7 text-[10px] px-1 flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          onClick={() => {
+                            setPartialPayments(prev => prev.filter((_, i) => i !== idx));
+                          }}
+                          disabled={partialPayments.length === 1}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               {partiallyPaid && (

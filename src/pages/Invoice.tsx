@@ -503,6 +503,12 @@ const Invoice = () => {
                 {brief.partially_paid && (
                   <>
                     <Total label="Amount Paid (Advance)" value={fmt(Number(brief.amount_paid || 0))} tone="text-emerald-600 font-semibold" />
+                    {Array.isArray(brief.partial_payments) && brief.partial_payments.filter((p: any) => Number(p.amount) > 0).map((p: any, idx: number) => (
+                      <div key={idx} className="flex justify-between text-xs text-muted-foreground pl-3 border-l border-emerald-500/30">
+                        <span>Paid on {p.date ? new Date(p.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
+                        <span className="tabular-nums">{fmt(Number(p.amount))}</span>
+                      </div>
+                    ))}
                     <Total label="Remaining Balance Due" value={fmt(Number(brief.amount_due || 0))} bold />
                   </>
                 )}
