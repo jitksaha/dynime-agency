@@ -12,6 +12,7 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -100,7 +101,6 @@ payment-gateway
 seo-illustration.png
 speed-optimization
 dynime-icon-dark.svg
-api_bak_1781447043
 software-built-with-ai
 cleanup-nested.php
 maintenance-security
@@ -115,6 +115,7 @@ api
 dynime-api
 deploy-api.php
 wordpress-woocommerce
+describe-table.php
 contact
 setup-hostinger.php
 vercel.json
