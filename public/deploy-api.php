@@ -123,6 +123,61 @@ foreach ($unnecessaryFiles as $file) {
 deleteFilesByPattern($docRoot . '/*.zip');
 deleteFilesByPattern($homeDir . '/*.zip');
 
+// Helper: Run Laravel Artisan commands from the extracted app directory
+function runLaravelCommand($extractTo, $command) {
+    $oldCwd = getcwd();
+    chdir($extractTo);
+
+    $php = PHP_BINARY ?: 'php';
+    $artisan = escapeshellarg($extractTo . '/artisan');
+    $cmd = escapeshellarg($php) . ' ' . $artisan . ' ' . $command . ' 2>&1';
+    exec($cmd, $output, $exitCode);
+
+    if ($oldCwd !== false) {
+        chdir($oldCwd);
+    }
+
+    return [
+        'command' => $command,
+        'exit_code' => $exitCode,
+        'output' => implode("\n", $output),
+    ];
+}
+
+// Helper: Print an Artisan command result
+function printLaravelCommandResult($result) {
+    $status = $result['exit_code'] === 0
+        ? "<span style='color:green; font-weight:bold;'>Success</span>"
+        : "<span style='color:red; font-weight:bold;'>Failed</span>";
+
+    echo "<h4>" . htmlspecialchars($result['command']) . " — $status (exit {$result['exit_code']})</h4>";
+    echo "<pre style='white-space: pre-wrap; background:#f6f8fa; padding:12px; border-radius:6px;'>" . htmlspecialchars($result['output']) . "</pre>";
+}
+
+// Helper: Verify order import/export routes are registered
+function verifyOrderRoutes($extractTo) {
+    $routeList = runLaravelCommand($extractTo, 'route:list --path=orders');
+    printLaravelCommandResult($routeList);
+
+    $requiredRoutes = [
+        'GET|HEAD v1/orders/export',
+        'POST v1/orders/import',
+    ];
+
+    $output = $routeList['output'];
+    $missing = array_filter($requiredRoutes, function ($route) use ($output) {
+        return strpos($output, $route) === false;
+    });
+
+    if (!empty($missing)) {
+        echo "<p><span style='color:red; font-weight:bold;'>Route verification failed.</span> Missing: " . htmlspecialchars(implode(', ', $missing)) . "</p>";
+        return false;
+    }
+
+    echo "<p><span style='color:green; font-weight:bold;'>Route verification passed.</span> Order import/export endpoints are registered.</p>";
+    return true;
+}
+
 // --- 2. Extract backend ZIP ---
 echo "<h3>Extracting Backend Package...</h3>";
 
@@ -156,22 +211,34 @@ if ($zip->open($zipFile) === TRUE) {
         @unlink($zipFile); // Delete zip file after extraction for security and space
         echo "<span style='color:green; font-weight:bold;'>Success!</span> Backend successfully extracted and deployed.<br/>";
         
-        // Clear routes and config cache to ensure new endpoints are recognized
-        echo "Clearing application cache...<br/>";
-        try {
-            require_once $extractTo . '/vendor/autoload.php';
-            $app = require_once $extractTo . '/bootstrap/app.php';
-            $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-            $kernel->bootstrap();
-            
-            $exitCodeRoute = Illuminate\Support\Facades\Artisan::call('route:clear');
-            $exitCodeConfig = Illuminate\Support\Facades\Artisan::call('config:clear');
-            
-            echo "Route clear exit code: $exitCodeRoute<br/>";
-            echo "Config clear exit code: $exitCodeConfig<br/>";
-            echo "<span style='color:green; font-weight:bold;'>Success!</span> Cache cleared successfully.<br/>";
-        } catch (\Exception $e) {
-            echo "Warning: Failed to clear cache: " . $e->getMessage() . "<br/>";
+        // Clear Laravel caches through Artisan so new routes are recognized on live.
+        echo "<h3>Clearing application cache and verifying routes...</h3>";
+
+        if (!file_exists($extractTo . '/artisan')) {
+            echo "<p><span style='color:red; font-weight:bold;'>Error:</span> Laravel artisan file not found at <code>" . htmlspecialchars($extractTo . '/artisan') . "</code>.</p>";
+        } else {
+            $cacheCommands = [
+                'route:clear',
+                'config:clear',
+                'cache:clear',
+            ];
+
+            $cacheFailed = false;
+            foreach ($cacheCommands as $cacheCommand) {
+                $result = runLaravelCommand($extractTo, $cacheCommand);
+                printLaravelCommandResult($result);
+                if ($result['exit_code'] !== 0) {
+                    $cacheFailed = true;
+                }
+            }
+
+            $routesVerified = verifyOrderRoutes($extractTo);
+
+            if ($cacheFailed || !$routesVerified) {
+                echo "<p><span style='color:red; font-weight:bold;'>Deployment warning:</span> Backend extracted, but cache clearing or route verification failed. Orders import/export may still return 404/405 until this is fixed.</p>";
+            } else {
+                echo "<p><span style='color:green; font-weight:bold;'>Success!</span> Cache cleared and order import/export routes verified.</p>";
+            }
         }
     } else {
         echo "<span style='color:red; font-weight:bold;'>Error:</span> Failed to extract ZIP file. Check folder permissions of <code>$extractTo</code>.<br/>";
