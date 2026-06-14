@@ -16,6 +16,7 @@ dms-illustration.png
 .gitignore
 nodejs-mern-ecommerce
 api-proxy-index.php
+read-log.php
 404.html
 saas-development
 wordpress-design-illustration.png
