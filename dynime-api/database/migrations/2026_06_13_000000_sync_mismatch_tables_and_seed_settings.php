@@ -13,6 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Fix site_settings id auto-increment if missing in live database
+        if (Schema::hasTable('site_settings')) {
+            try {
+                DB::statement("ALTER TABLE `site_settings` MODIFY `id` BIGINT UNSIGNED AUTO_INCREMENT;");
+            } catch (\Exception $e) {
+                // Ignore if already set or fails
+            }
+        }
+
         // 1. Sync usa_state_pricing (singular) to usa_state_pricings (plural)
         if (Schema::hasTable('usa_state_pricing') && Schema::hasTable('usa_state_pricings')) {
             DB::statement("SET FOREIGN_KEY_CHECKS = 0;");
