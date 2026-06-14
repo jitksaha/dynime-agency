@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -140,6 +140,7 @@ const AdminOrders = () => {
   const [verifyResult, setVerifyResult] = useState<{ url: string; type: string } | null>(null);
   const qc = useQueryClient();
   const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportOrders = async () => {
     try {
@@ -407,21 +408,25 @@ const AdminOrders = () => {
           <Button type="button" variant="outline" size="sm" onClick={handleExportOrders} className="gap-1.5 h-9 text-xs">
             <Download className="w-3.5 h-3.5" /> Export
           </Button>
-          <label className="cursor-pointer">
-            <Button type="button" asChild variant="outline" size="sm" className="gap-1.5 h-9 text-xs" disabled={importing}>
-              <span>
-                {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                Import
-              </span>
-            </Button>
-            <input
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={handleImportOrders}
-              disabled={importing}
-            />
-          </label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-1.5 h-9 text-xs"
+            disabled={importing}
+          >
+            {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Import
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImportOrders}
+            disabled={importing}
+          />
         </div>
       </div>
 
