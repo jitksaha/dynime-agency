@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Fix site_settings id auto-increment if missing in live database
+        // Fix site_settings id auto-increment and value nullable if missing in live database
         if (Schema::hasTable('site_settings')) {
             try {
                 $type = Schema::getColumnType('site_settings', 'id');
@@ -24,6 +24,8 @@ return new class extends Migration
                 } else {
                     DB::statement("ALTER TABLE `site_settings` MODIFY `id` BIGINT UNSIGNED AUTO_INCREMENT;");
                 }
+                // Enforce nullable on value column to allow seeding nulls
+                DB::statement("ALTER TABLE `site_settings` MODIFY `value` LONGTEXT NULL;");
             } catch (\Exception $e) {
                 // Ignore if already set or fails
             }
