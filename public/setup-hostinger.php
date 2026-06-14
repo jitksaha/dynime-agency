@@ -101,6 +101,23 @@ $envPath = $apiDir . '/.env';
             echo "\nSuccessfully resolved working database credentials!\n";
             echo "DB_DATABASE: $successDb\n";
             echo "DB_USERNAME: $successUser\n\n";
+
+            // Enforce nullable on site_settings value column and bigint auto-increment id column if missing
+            try {
+                $pdo->exec("ALTER TABLE `site_settings` MODIFY `value` LONGTEXT NULL;");
+                echo "Database correction: Enforced nullable on site_settings <code>value</code> column... <span class='success'>SUCCESS</span>\n";
+                
+                $stmt = $pdo->query("DESCRIBE `site_settings` `id`");
+                $idCol = $stmt->fetch();
+                if ($idCol && (strpos($idCol['Type'], 'char') !== false || strpos($idCol['Type'], 'varchar') !== false)) {
+                    $pdo->exec("ALTER TABLE `site_settings` DROP PRIMARY KEY;");
+                    $pdo->exec("ALTER TABLE `site_settings` CHANGE `id` `old_uuid` VARCHAR(36);");
+                    $pdo->exec("ALTER TABLE `site_settings` ADD `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY FIRST;");
+                    echo "Database correction: Converted site_settings <code>id</code> column from UUID to auto-incrementing integer... <span class='success'>SUCCESS</span>\n";
+                }
+            } catch (Exception $e) {
+                echo "Database correction warning: " . $e->getMessage() . "\n";
+            }
             
             // 1. Write/Update .env
             echo "1. Writing/Updating .env file... ";
@@ -185,6 +202,15 @@ $envPath = $apiDir . '/.env';
                 $exitCodeSeed = Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
                 echo "Exit code: $exitCodeSeed\n";
                 echo "   Seeds Output:\n" . trim(Illuminate\Support\Facades\Artisan::output()) . "\n";
+                
+                echo "   Running data:migrate-supabase ... ";
+                try {
+                    $exitCodeData = Illuminate\Support\Facades\Artisan::call('data:migrate-supabase');
+                    echo "Exit code: $exitCodeData\n";
+                    echo "   Output:\n" . trim(Illuminate\Support\Facades\Artisan::output()) . "\n";
+                } catch (Exception $e) {
+                    echo "Warning: " . $e->getMessage() . "\n";
+                }
                 
                 echo "   Clearing all Laravel caches... ";
                 Illuminate\Support\Facades\Artisan::call('route:clear');
