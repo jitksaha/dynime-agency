@@ -51,7 +51,178 @@ $envPath = $apiDir . '/.env';
 </head>
 <body>
     <h1>Hostinger Automated Setup & Diagnostics</h1>
-    
+
+    <div class="card" style="border: 2px solid #635bff; background: #f5f3ff;">
+        <h2>⚡ One-Click Complete Setup</h2>
+        <p>This will automatically detect the correct database, configure/update the `.env` file, recreate the API access symlink, run all migrations & seeds, clear all application caches, and apply the Jit Saha ID card fix.</p>
+        <p><a href="?token=<?php echo $deployToken; ?>&action=one_click_setup" class="btn" style="background: #635bff; font-size: 1.1em; padding: 12px 24px;">Run One-Click Setup</a></p>
+    </div>
+
+    <?php
+    if (isset($_GET['action']) && $_GET['action'] === 'one_click_setup') {
+        echo '<div class="card" style="border: 2px solid #059669; background: #f0fdf4;">';
+        echo '<h2>⚡ One-Click Setup Console Output</h2>';
+        echo '<pre>';
+        
+        $db_host = '127.0.0.1';
+        $db_port = '3306';
+        $db_password = 'Pixel#@!194JkS';
+        
+        $possibleDatabases = [
+            'u740731947_dynimeagency',
+            'u740731947_dynime',
+            'ssamokxvqc_dynimeagency'
+        ];
+        
+        $successDb = null;
+        $successUser = null;
+        
+        echo "Testing database connections with password <code>" . htmlspecialchars($db_password) . "</code>...\n";
+        foreach ($possibleDatabases as $db) {
+            echo "Trying database: $db, user: $db ... ";
+            try {
+                $dsn = "mysql:host=$db_host;port=$db_port;dbname=$db;charset=utf8mb4";
+                $pdo = new PDO($dsn, $db, $db_password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_TIMEOUT => 2
+                ]);
+                echo "<span class='success'>CONNECTED!</span>\n";
+                $successDb = $db;
+                $successUser = $db;
+                break;
+            } catch (Exception $e) {
+                echo "<span class='error'>Failed</span> (" . $e->getMessage() . ")\n";
+            }
+        }
+        
+        if (!$successDb) {
+            echo "\n<span class='error'>ERROR: Could not connect to any of the databases using password Pixel#@!194JkS. Please check database configuration manually.</span>\n";
+        } else {
+            echo "\nSuccessfully resolved working database credentials!\n";
+            echo "DB_DATABASE: $successDb\n";
+            echo "DB_USERNAME: $successUser\n\n";
+            
+            // 1. Write/Update .env
+            echo "1. Writing/Updating .env file... ";
+            $templatePath = $apiDir . '/.env.example';
+            $envContent = '';
+            if (file_exists($templatePath)) {
+                $envContent = file_get_contents($templatePath);
+                $envContent = str_replace('DB_HOST=127.0.0.1', 'DB_HOST="' . $db_host . '"', $envContent);
+                $envContent = str_replace('DB_PORT=3306', 'DB_PORT="' . $db_port . '"', $envContent);
+                $envContent = str_replace('DB_DATABASE=dynime_db', 'DB_DATABASE="' . $successDb . '"', $envContent);
+                $envContent = str_replace('DB_USERNAME=dynime_user', 'DB_USERNAME="' . $successUser . '"', $envContent);
+                $envContent = str_replace('DB_PASSWORD=', 'DB_PASSWORD="' . $db_password . '"', $envContent);
+                
+                if (strpos($envContent, 'APP_KEY=') !== false && (trim(explode("\n", explode('APP_KEY=', $envContent)[1])[0]) === '')) {
+                    $appKey = 'base64:' . base64_encode(random_bytes(32));
+                    $envContent = str_replace('APP_KEY=', 'APP_KEY=' . $appKey, $envContent);
+                }
+            } else {
+                $appKey = 'base64:' . base64_encode(random_bytes(32));
+                $envContent = "APP_NAME=\"Dynime API\"\nAPP_ENV=production\nAPP_KEY=$appKey\nAPP_DEBUG=false\nAPP_URL=https://dynime.com/api\nFRONTEND_URL=https://dynime.com\n\nDB_CONNECTION=mysql\nDB_HOST=\"$db_host\"\nDB_PORT=\"$db_port\"\nDB_DATABASE=\"$successDb\"\nDB_USERNAME=\"$successUser\"\nDB_PASSWORD=\"$db_password\"\n\nCACHE_STORE=file\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\nSESSION_SECURE_COOKIE=true\nQUEUE_CONNECTION=database\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.hostinger.com\nMAIL_PORT=587\nMAIL_USERNAME=contact@dynime.com\nMAIL_PASSWORD=\nMAIL_ENCRYPTION=tls\nMAIL_FROM_ADDRESS=contact@dynime.com\nMAIL_FROM_NAME=\"Dynime\"\n\nFILESYSTEM_DISK=public\n";
+            }
+            
+            if (strpos($envContent, 'ADMIN_EMAIL=') === false) {
+                $envContent .= "\nADMIN_EMAIL=\"mail.dynime@gmail.com\"\nADMIN_PASSWORD=\"Dynime123!\"\n";
+            } else {
+                $envContent = preg_replace('/ADMIN_EMAIL=.*/', 'ADMIN_EMAIL="mail.dynime@gmail.com"', $envContent);
+                $envContent = preg_replace('/ADMIN_PASSWORD=.*/', 'ADMIN_PASSWORD="Dynime123!"', $envContent);
+            }
+            
+            if (file_put_contents($envPath, $envContent) !== false) {
+                echo "<span class='success'>SUCCESS</span>\n";
+            } else {
+                echo "<span class='error'>FAILED</span> (Could not write to $envPath)\n";
+            }
+            
+            // 2. Configure symlink / wrapper
+            echo "2. Reconfiguring API Symlink/Wrapper... ";
+            if (is_link($apiSymlink)) {
+                @unlink($apiSymlink);
+            } elseif (file_exists($apiSymlink)) {
+                if (is_dir($apiSymlink)) {
+                    @rename($apiSymlink, $apiSymlink . '_bak_' . time());
+                } else {
+                    @unlink($apiSymlink);
+                }
+            }
+            
+            $symlinkCreated = false;
+            if (function_exists('symlink')) {
+                if (@symlink($apiPublicDir, $apiSymlink)) {
+                    $symlinkCreated = true;
+                    echo "<span class='success'>SUCCESS (Symlink Created)</span>\n";
+                }
+            }
+            if (!$symlinkCreated) {
+                if (!is_dir($apiSymlink)) {
+                    mkdir($apiSymlink, 0755, true);
+                }
+                $fallbackIndex = $apiSymlink . '/index.php';
+                $indexCode = "<?php\ndefine('LARAVEL_START', microtime(true));\nrequire '" . $apiDir . "/vendor/autoload.php';\n\$app = require_once '" . $apiDir . "/bootstrap/app.php';\n\$kernel = \$app->make(Illuminate\Contracts\Http\Kernel::class);\n\$response = \$kernel->handle(\n    \$request = Illuminate\Http\Request::capture()\n)->send();\n\$kernel->terminate(\$request, \$response);\n";
+                $fallbackHtaccess = $apiSymlink . '/.htaccess';
+                $htaccessCode = "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteCond %{REQUEST_FILENAME} !-f\n    RewriteCond %{REQUEST_FILENAME} !-d\n    RewriteRule ^(.*)$ index.php [L,QSA]\n</IfModule>\n";
+                file_put_contents($fallbackIndex, $indexCode);
+                file_put_contents($fallbackHtaccess, $htaccessCode);
+                echo "<span class='success'>SUCCESS (Wrapper Created)</span>\n";
+            }
+            
+            // 3. Boot Laravel and run migrations
+            echo "3. Booting Laravel & running migrations:\n";
+            try {
+                require $apiDir . '/vendor/autoload.php';
+                $app = require_once $apiDir . '/bootstrap/app.php';
+                $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+                $kernel->bootstrap();
+                
+                echo "   Running migrate --force ... ";
+                $exitCode = Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                echo "Exit code: $exitCode\n";
+                echo "   Migrations Output:\n" . trim(Illuminate\Support\Facades\Artisan::output()) . "\n";
+                
+                echo "   Running db:seed --force ... ";
+                $exitCodeSeed = Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+                echo "Exit code: $exitCodeSeed\n";
+                echo "   Seeds Output:\n" . trim(Illuminate\Support\Facades\Artisan::output()) . "\n";
+                
+                echo "   Clearing all Laravel caches... ";
+                Illuminate\Support\Facades\Artisan::call('route:clear');
+                Illuminate\Support\Facades\Artisan::call('config:clear');
+                Illuminate\Support\Facades\Artisan::call('cache:clear');
+                echo "<span class='success'>SUCCESS</span>\n";
+            } catch (Exception $e) {
+                echo "   <span class='error'>Artisan Command Error:</span> " . $e->getMessage() . "\n";
+            }
+            
+            // 4. Run Jit Kumar Saha ID Fix
+            echo "4. Running Jit Kumar Saha ID card assignment fix... ";
+            try {
+                $stmt = $pdo->prepare("DELETE FROM id_card_assignments WHERE card_id = ? OR subject_key LIKE ?");
+                $stmt->execute(['DTLE001001', '%jit-kumar-saha%']);
+                $deletedCount = $stmt->rowCount();
+                
+                $stmt = $pdo->prepare("SELECT id FROM employees WHERE employee_code = ?");
+                $stmt->execute(['DTLE001001']);
+                $hasEmp = $stmt->fetch();
+                $updatedCount = 0;
+                if ($hasEmp) {
+                    $stmt = $pdo->prepare("UPDATE employees SET employee_code = ? WHERE employee_code = ?");
+                    $stmt->execute(['DTLE001021', 'DTLE001001']);
+                    $updatedCount = $stmt->rowCount();
+                }
+                echo "<span class='success'>SUCCESS</span> (Deleted assignments: $deletedCount, Updated employees: $updatedCount)\n";
+            } catch (Exception $e) {
+                echo "<span class='error'>FAILED</span> (" . $e->getMessage() . ")\n";
+            }
+        }
+        
+        echo "\n=== One-Click Setup Finished ===\n";
+        echo '</pre>';
+        echo '</div>';
+    }
+    ?>
+
     <div class="card">
         <h2>1. Path Resolution</h2>
         <?php
@@ -212,23 +383,23 @@ $envPath = $apiDir . '/.env';
         <form method="post" action="?token=<?php echo $deployToken; ?>">
             <div class="form-group">
                 <label>Database Host:</label>
-                <input type="text" name="db_host" value="<?php echo htmlspecialchars($db_host ?? '127.0.0.1'); ?>" required>
+                <input type="text" name="db_host" value="<?php echo htmlspecialchars(($db_host && $db_host !== '127.0.0.1') ? $db_host : '127.0.0.1'); ?>" required>
             </div>
             <div class="form-group">
                 <label>Database Port:</label>
-                <input type="text" name="db_port" value="<?php echo htmlspecialchars($db_port ?? '3306'); ?>" required>
+                <input type="text" name="db_port" value="<?php echo htmlspecialchars(($db_port && $db_port !== '3306') ? $db_port : '3306'); ?>" required>
             </div>
             <div class="form-group">
                 <label>Database Name:</label>
-                <input type="text" name="db_database" value="<?php echo htmlspecialchars($db_database ?? ''); ?>" required placeholder="e.g. u740731947_dynime">
+                <input type="text" name="db_database" value="<?php echo htmlspecialchars($db_database ? $db_database : 'u740731947_dynimeagency'); ?>" required placeholder="e.g. u740731947_dynimeagency">
             </div>
             <div class="form-group">
                 <label>Database Username:</label>
-                <input type="text" name="db_username" value="<?php echo htmlspecialchars($db_username ?? ''); ?>" required placeholder="e.g. u740731947_user">
+                <input type="text" name="db_username" value="<?php echo htmlspecialchars($db_username ? $db_username : 'u740731947_dynimeagency'); ?>" required placeholder="e.g. u740731947_dynimeagency">
             </div>
             <div class="form-group">
                 <label>Database Password:</label>
-                <input type="password" name="db_password" value="<?php echo htmlspecialchars($db_password ?? ''); ?>" required>
+                <input type="password" name="db_password" value="<?php echo htmlspecialchars($db_password ? $db_password : 'Pixel#@!194JkS'); ?>" required>
             </div>
             <button type="submit" name="save_env" class="btn">Save & Create .env File</button>
         </form>
