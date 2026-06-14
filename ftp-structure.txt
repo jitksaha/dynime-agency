@@ -781,6 +781,7 @@
 ./custom-web-apps/
 ./custom-web-apps/index.html
 ./dcs-illustration.png
+./deploy-api.php
 ./des-illustration.png
 ./diagnose-db.php
 ./dms-illustration.png
@@ -804,6 +805,7 @@
 ./get_logs.php
 ./google-ads/
 ./google-ads/index.html
+./index.html
 ./inspect-api.php
 ./inspect-db-rows.php
 ./itin-services/
@@ -1390,6 +1392,7 @@
 ./services/dss/
 ./services/dss/index.html
 ./services/index.html
+./setup-hostinger.php
 ./shopify/
 ./shopify/index.html
 ./shopify-ecommerce/
