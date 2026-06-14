@@ -12,7 +12,6 @@ portfolio
 index.html
 dms-illustration.png
 .replit
-dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -98,6 +97,7 @@ email-marketing
 shopify-illustration.png
 _redirects
 payment-gateway
+api_bak_1781454114
 seo-illustration.png
 speed-optimization
 dynime-icon-dark.svg
