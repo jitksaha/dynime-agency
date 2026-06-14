@@ -155,6 +155,24 @@ if ($zip->open($zipFile) === TRUE) {
         $zip->close();
         @unlink($zipFile); // Delete zip file after extraction for security and space
         echo "<span style='color:green; font-weight:bold;'>Success!</span> Backend successfully extracted and deployed.<br/>";
+        
+        // Clear routes and config cache to ensure new endpoints are recognized
+        echo "Clearing application cache...<br/>";
+        try {
+            require_once $extractTo . '/vendor/autoload.php';
+            $app = require_once $extractTo . '/bootstrap/app.php';
+            $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+            $kernel->bootstrap();
+            
+            $exitCodeRoute = Illuminate\Support\Facades\Artisan::call('route:clear');
+            $exitCodeConfig = Illuminate\Support\Facades\Artisan::call('config:clear');
+            
+            echo "Route clear exit code: $exitCodeRoute<br/>";
+            echo "Config clear exit code: $exitCodeConfig<br/>";
+            echo "<span style='color:green; font-weight:bold;'>Success!</span> Cache cleared successfully.<br/>";
+        } catch (\Exception $e) {
+            echo "Warning: Failed to clear cache: " . $e->getMessage() . "<br/>";
+        }
     } else {
         echo "<span style='color:red; font-weight:bold;'>Error:</span> Failed to extract ZIP file. Check folder permissions of <code>$extractTo</code>.<br/>";
     }

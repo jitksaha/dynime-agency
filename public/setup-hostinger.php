@@ -278,6 +278,37 @@ $envPath = $apiDir . '/.env';
     </div>
 
     <div class="card">
+        <h2>4b. Clear Application Cache</h2>
+        <p>Clear Laravel's route, config, and application cache.</p>
+        <?php
+        if (isset($_GET['action']) && $_GET['action'] === 'clear_cache') {
+            echo "<pre>";
+            try {
+                require $apiDir . '/vendor/autoload.php';
+                $app = require_once $apiDir . '/bootstrap/app.php';
+                $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+                $kernel->bootstrap();
+                
+                echo "Clearing route cache...\n";
+                $exitCodeRoute = Illuminate\Support\Facades\Artisan::call('route:clear');
+                echo "Exit Code: $exitCodeRoute\n";
+                
+                echo "Clearing config cache...\n";
+                $exitCodeConfig = Illuminate\Support\Facades\Artisan::call('config:clear');
+                echo "Exit Code: $exitCodeConfig\n";
+                
+                echo "Success!\n";
+            } catch (Exception $e) {
+                echo "ERROR executing Artisan commands: " . $e->getMessage() . "\n";
+            }
+            echo "</pre>";
+        } else {
+            echo '<p><a href="?token=' . $deployToken . '&action=clear_cache" class="btn" style="background:#d97706;">Clear All Cache</a></p>';
+        }
+        ?>
+    </div>
+
+    <div class="card">
         <h2>5. Live Database Fix for Jit Kumar Saha ID</h2>
         <?php
         if (isset($_GET['action']) && $_GET['action'] === 'fix_jit') {
