@@ -23,6 +23,30 @@ $routesFile = $apiDir . '/routes/api.php';
 echo "Routes File: $routesFile\n";
 echo "Routes File Exists: " . (file_exists($routesFile) ? 'YES' : 'NO') . "\n\n";
 
+$apiFolder = $docRoot . '/api';
+echo "=== Checking /api Folder and Router Wrapper ===\n";
+echo "/api Folder Path: $apiFolder\n";
+echo "/api Exists: " . (file_exists($apiFolder) ? 'YES' : 'NO') . "\n";
+echo "/api is Link: " . (is_link($apiFolder) ? 'YES' : 'NO') . "\n";
+if (is_link($apiFolder)) {
+    echo "/api Target: " . readlink($apiFolder) . "\n";
+}
+$apiIndex = $apiFolder . '/index.php';
+echo "/api/index.php Exists: " . (file_exists($apiIndex) ? 'YES' : 'NO') . "\n";
+if (file_exists($apiIndex)) {
+    echo "--- /api/index.php Contents ---\n";
+    echo file_get_contents($apiIndex) . "\n";
+    echo "---------------------------------\n";
+}
+$apiHtaccess = $apiFolder . '/.htaccess';
+echo "/api/.htaccess Exists: " . (file_exists($apiHtaccess) ? 'YES' : 'NO') . "\n";
+if (file_exists($apiHtaccess)) {
+    echo "--- /api/.htaccess Contents ---\n";
+    echo file_get_contents($apiHtaccess) . "\n";
+    echo "---------------------------------\n";
+}
+echo "\n";
+
 if (file_exists($routesFile)) {
     $content = file_get_contents($routesFile);
     
