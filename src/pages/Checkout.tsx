@@ -47,6 +47,7 @@ import { computeTax, useTaxSettings } from "@/lib/tax";
 import { apiGet, apiPost } from "@/lib/api";
 import { getReferralCode } from '@/components/shared/ReferralTracker';
 import { COUNTRY_DIAL_CODES } from "@/data/country-dial-codes";
+import { useGeoLocation } from "@/hooks/use-geo-location";
 
 type StepKey = "cart" | "contact" | "pay";
 type MilestoneStage = { label: string; percent: number; amount: number };
@@ -253,6 +254,84 @@ const JurisdictionDropdown = ({
   );
 };
 
+const CountryDropdown = ({
+  value,
+  onChange,
+  options,
+  placeholder,
+  id,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  id?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredOptions = useMemo(() => {
+    if (!search.trim()) return options;
+    const s = search.toLowerCase();
+    return options.filter(opt => opt.toLowerCase().includes(s));
+  }, [options, search]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal mt-1 border-input bg-background h-10 px-3 py-2 text-sm hover:translate-y-0 active:scale-100"
+        >
+          <span className={cn("truncate", !value && "text-muted-foreground")}>
+            {value || placeholder || "Select country..."}
+          </span>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-[--radix-popover-trigger-width] min-w-[280px]" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search country..."
+            value={search}
+            onValueChange={setSearch}
+            className="h-9"
+          />
+          <CommandList className="max-h-[250px] overflow-y-auto">
+            <CommandEmpty>No country found.</CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((opt) => (
+                <CommandItem
+                  key={opt}
+                  value={opt}
+                  onSelect={() => {
+                    onChange(opt);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                  className="cursor-pointer text-xs"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === opt ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span>{opt}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const CardLogos = () => (
   <div className="flex items-center gap-1">
     {/* Visa */}
@@ -331,7 +410,7 @@ const Checkout = () => {
   const COUNTRIES = useMemo(() => {
     if (!countryEligibilityRows || countryEligibilityRows.length === 0) return COUNTRIES_FALLBACK;
     return countryEligibilityRows
-      .filter((r: any) => r.status === 'eligible' && r.is_active)
+      .filter((r: any) => r.status !== 'blocked' && r.is_active)
       .map((r: any) => r.name)
       .sort();
   }, [countryEligibilityRows]);
@@ -506,6 +585,7 @@ const Checkout = () => {
   const [selectedCountryCode, setSelectedCountryCode] = useState("US");
   const [openDial, setOpenDial] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
+  const commandInputRef = useRef<HTMLInputElement>(null);
 
   // Sync dialCode + phoneInput to details.phone
   useEffect(() => {
@@ -516,26 +596,83 @@ const Checkout = () => {
     }));
   }, [dialCode, phoneInput]);
 
-  // IP GeoIP lookup on mount
+  const { geo } = useGeoLocation();
+
+  // IP GeoIP lookup on mount via robust hook
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.country_calling_code) {
-          setDialCode(data.country_calling_code);
-          if (data.country) {
-            setSelectedCountryCode(data.country);
+    if (geo?.countryCode) {
+      setDetails((d) => {
+        const countryIsDefaultOrEmpty = d.country === "United States" || !d.country;
+        const phoneIsEmpty = !phoneInput && !d.phone;
+
+        const matched = COUNTRY_DIAL_CODES.find(
+          (c) => c.code.toUpperCase() === geo.countryCode.toUpperCase()
+        );
+
+        if (matched) {
+          if (phoneIsEmpty) {
+            setDialCode(matched.dial_code);
+            setSelectedCountryCode(matched.code);
           }
-          if (data.country_name) {
-            setDetails((d) => ({
+          if (countryIsDefaultOrEmpty) {
+            return {
               ...d,
-              country: data.country_name,
-            }));
+              country: matched.name,
+            };
           }
         }
-      })
-      .catch((err) => console.error("IP lookup failed:", err));
-  }, []);
+        return d;
+      });
+    }
+  }, [geo, phoneInput]);
+
+  // Handle global keystrokes to focus and type into search when popover is open
+  useEffect(() => {
+    if (!openDial) return;
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const input = document.querySelector('input[placeholder="Search country name or code..."]') as HTMLInputElement | null;
+      console.log("[KEY_FORWARD] Key pressed:", e.key, "ActiveElement:", document.activeElement?.tagName, "InputFound:", !!input);
+      if (!input) return;
+      if (document.activeElement === input) {
+        console.log("[KEY_FORWARD] Input already focused");
+        return;
+      }
+      if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) {
+        console.log("[KEY_FORWARD] Not a single printable key or modifier active");
+        return;
+      }
+
+      // If typing in another text input, don't hijack
+      const active = document.activeElement;
+      if (
+        active &&
+        (active.tagName === "INPUT" ||
+          active.tagName === "TEXTAREA" ||
+          active.getAttribute("contenteditable") === "true")
+      ) {
+        console.log("[KEY_FORWARD] Typing in another input, ignore hijacking");
+        return;
+      }
+
+      console.log("[KEY_FORWARD] Forwarding key:", e.key);
+      e.preventDefault();
+      input.focus();
+      const start = input.selectionStart ?? 0;
+      const end = input.selectionEnd ?? 0;
+      const val = input.value;
+      input.value = val.slice(0, start) + e.key + val.slice(end);
+      input.selectionStart = input.selectionEnd = start + 1;
+      const inputEvent = new Event("input", { bubbles: true });
+      input.dispatchEvent(inputEvent);
+      console.log("[KEY_FORWARD] Forwarded successfully, new value:", input.value);
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown, true);
+    };
+  }, [openDial]);
 
   const currentCountry = useMemo(() => {
     return COUNTRY_DIAL_CODES.find(
@@ -1898,18 +2035,27 @@ const Checkout = () => {
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  className="h-full px-3 gap-1.5 flex items-center justify-between text-sm hover:bg-muted/30 active:bg-muted/50 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none select-none min-w-[85px] max-w-[110px]"
+                                  className="h-full px-2.5 gap-1.5 flex items-center justify-start text-sm hover:bg-muted/30 active:bg-muted/50 hover:translate-y-0 active:scale-100 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none select-none w-auto shrink-0 font-medium text-foreground"
                                 >
-                                  <span className="flex items-center gap-1.5 font-medium text-foreground">
-                                    <span className="text-base leading-none">{currentCountry?.flag}</span>
-                                    <span>{dialCode}</span>
-                                  </span>
-                                  <ChevronDown className="w-3.5 h-3.5 opacity-50 flex-shrink-0" />
+                                  <span className="text-base leading-none shrink-0">{currentCountry?.flag}</span>
+                                  <span className="shrink-0">{dialCode}</span>
+                                  <ChevronDown className="w-3.5 h-3.5 opacity-50 shrink-0" />
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-[300px] p-0" align="start">
-                                <Command>
-                                  <CommandInput placeholder="Search country name or code..." className="h-9" />
+                                <Command filter={(value, search) => {
+                                  const s = search.toLowerCase().trim();
+                                  const cleanSearch = s.startsWith("+") ? s.slice(1) : s;
+                                  const val = value.toLowerCase();
+                                  if (val.includes(s) || val.includes(cleanSearch)) return 1;
+                                  return 0;
+                                }}>
+                                  <CommandInput 
+                                    ref={commandInputRef}
+                                    placeholder="Search country name or code..." 
+                                    className="h-9" 
+                                    autoFocus
+                                  />
                                   <CommandList className="max-h-[250px] overflow-y-auto">
                                     <CommandEmpty>No country found.</CommandEmpty>
                                     <CommandGroup>
@@ -2219,11 +2365,14 @@ const Checkout = () => {
                               <div><Label>City</Label><Input autoComplete="address-level2" placeholder="San Francisco" value={details.city} onChange={(e) => setDetails({ ...details, city: e.target.value })} /></div>
                               <div><Label>Postal code</Label><Input autoComplete="postal-code" placeholder="94103" value={details.postal_code} onChange={(e) => setDetails({ ...details, postal_code: e.target.value })} /></div>
                               <div className="md:col-span-2">
-                                <Label>Country</Label>
-                                <Select value={details.country} onValueChange={(v) => setDetails({ ...details, country: v })}>
-                                  <SelectTrigger><SelectValue placeholder="Select your country" /></SelectTrigger>
-                                  <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                                </Select>
+                                <Label htmlFor="billing-country">Country</Label>
+                                <CountryDropdown
+                                  id="billing-country"
+                                  value={details.country}
+                                  onChange={(v) => setDetails({ ...details, country: v })}
+                                  options={COUNTRIES}
+                                  placeholder="Select country"
+                                />
                                 {details.country && !isCountryEligible(details.country) && (
                                   <p className="mt-1.5 text-xs text-destructive">
                                     Sorry — we can't accept orders from {details.country} due to payment restrictions.
