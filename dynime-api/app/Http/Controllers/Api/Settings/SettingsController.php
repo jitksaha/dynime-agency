@@ -657,7 +657,7 @@ class SettingsController extends Controller
 
         $start = microtime(true);
         try {
-            $ch = curl_init('https://api.keeal.com/v1/checkout/sessions?limit=1');
+            $ch = curl_init('https://api.keeal.com/api/checkout/merchant/sessions?limit=1');
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 "Authorization: Bearer $secret",
                 "Accept: application/json"

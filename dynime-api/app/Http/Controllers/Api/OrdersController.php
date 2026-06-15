@@ -545,7 +545,11 @@ class OrdersController extends Controller
                     'gateway' => 'dodopayment',
                 ];
             } else if ($gateway === 'keeal') {
-                $secretKey = $settings['keeal_secret_key'] ?? null;
+                $isSandbox = ($settings['keeal_sandbox'] ?? 'false') === 'true';
+                $secretKey = $isSandbox 
+                    ? ($settings['keeal_test_secret_key'] ?: ($settings['keeal_secret_key'] ?? null))
+                    : ($settings['keeal_secret_key'] ?? null);
+
                 if (!$secretKey) {
                     throw new \Exception('Keeal credentials not configured.');
                 }
@@ -571,7 +575,7 @@ class OrdersController extends Controller
                     'Authorization' => 'Bearer ' . $secretKey,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
-                ])->post('https://api.keeal.com/v1/checkout/sessions', [
+                ])->post('https://api.keeal.com/api/checkout/sessions', [
                     'mode' => 'payment',
                     'customer_email' => $customerEmail,
                     'success_url' => $keealSuccessUrl,
@@ -1168,7 +1172,10 @@ class OrdersController extends Controller
 
         try {
             $settings = $this->loadPaymentSettings('keeal');
-            $webhookSecret = $settings['keeal_webhook_secret'] ?? null;
+            $isSandbox = ($settings['keeal_sandbox'] ?? 'false') === 'true';
+            $webhookSecret = $isSandbox 
+                ? ($settings['keeal_test_webhook_secret'] ?: ($settings['keeal_webhook_secret'] ?? null))
+                : ($settings['keeal_webhook_secret'] ?? null);
 
             if ($webhookSecret && $signature) {
                 $parts = [];
