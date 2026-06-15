@@ -95,6 +95,20 @@ export default function PayInvoicePanel({
   const [cardElementInstance, setCardElementInstance] = useState<any>(null);
   const [cardholderName, setCardholderName] = useState("");
   const [publicSettings, setPublicSettings] = useState<Record<string, any>>({});
+  
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
+  const [customAmountStr, setCustomAmountStr] = useState("");
+
+  const parsedCustomAmount = Number(customAmountStr);
+  const isCustomAmountInvalid = isCustomAmount && (
+    isNaN(parsedCustomAmount) || 
+    parsedCustomAmount <= 0 || 
+    parsedCustomAmount > amount + 0.01
+  );
+
+  const amountToPay = isCustomAmount && !isCustomAmountInvalid
+    ? parsedCustomAmount
+    : amount;
 
   const stripePublishableKey = useMemo(() => {
     if (!publicSettings) return null;
@@ -268,14 +282,14 @@ export default function PayInvoicePanel({
     // Bank transfer / unknown gateway → no conversion, keep invoice currency.
     if (settleCode === "INVOICE") {
       return {
-        chargeAmount: amount,
+        chargeAmount: amountToPay,
         chargeCurrency: invoiceCurrency,
-        displayAmount: amount,
+        displayAmount: amountToPay,
         displayCurrency: invoiceCurrency,
         converted: false,
         rateNote: null as string | null,
         fxSource: "none" as "none" | "live" | "cache" | "fallback",
-        usable: amount > 0,
+        usable: amountToPay > 0,
       };
     }
 
@@ -285,9 +299,9 @@ export default function PayInvoicePanel({
 
     const ratesValid = invoiceRate > 0 && settleRate > 0 && displayRate > 0;
 
-    const amountUsd = ratesValid ? amount / invoiceRate : amount;
-    const chargeAmount = ratesValid ? Math.round(amountUsd * settleRate * 100) / 100 : amount;
-    const displayAmount = ratesValid ? Math.round(amountUsd * displayRate * 100) / 100 : amount;
+    const amountUsd = ratesValid ? amountToPay / invoiceRate : amountToPay;
+    const chargeAmount = ratesValid ? Math.round(amountUsd * settleRate * 100) / 100 : amountToPay;
+    const displayAmount = ratesValid ? Math.round(amountUsd * displayRate * 100) / 100 : amountToPay;
 
     const converted = ratesValid && invoiceCurrency !== displayCode;
     const fxSource: "live" | "cache" | "fallback" = fxFallback
@@ -302,7 +316,7 @@ export default function PayInvoicePanel({
           : "fallback rate";
 
     const rateNote = converted
-      ? `Converted from ${formatMoney(amount, invoiceCurrency)} at 1 ${invoiceCurrency} ≈ ${(displayRate / invoiceRate).toFixed(4)} ${displayCode} (${sourceLabel})`
+      ? `Converted from ${formatMoney(amountToPay, invoiceCurrency)} at 1 ${invoiceCurrency} ≈ ${(displayRate / invoiceRate).toFixed(4)} ${displayCode} (${sourceLabel})`
       : null;
 
     return {
@@ -315,9 +329,13 @@ export default function PayInvoicePanel({
       fxSource,
       usable: chargeAmount > 0,
     };
-  }, [amount, invoiceCurrency, settleCode, displayCode, rateFor, fxFallback, fxStale]);
+  }, [amountToPay, invoiceCurrency, settleCode, displayCode, rateFor, fxFallback, fxStale]);
 
   const pay = async () => {
+    if (isCustomAmount && isCustomAmountInvalid) {
+      toast.error(`Please enter a valid amount between 0.01 and ${formatMoney(amount, invoiceCurrency)}`);
+      return;
+    }
     if (locked) return;
     if (!gateway) { toast.error("Choose a payment method"); return; }
     if (!conversion.usable) { toast.error("Could not compute charge amount"); return; }
@@ -350,9 +368,10 @@ export default function PayInvoicePanel({
         existing_order_id: orderId,
         customer_email: customerEmail,
         customer_name: customerEmail,
+        amount: amountToPay,
         items: [{
           id: "invoice",
-          name: `Invoice ${invoiceNumber || orderId}${conversion.converted ? ` (${formatMoney(amount, invoiceCurrency)})` : ""}`,
+          name: `Invoice ${invoiceNumber || orderId}${conversion.converted ? ` (${formatMoney(amountToPay, invoiceCurrency)})` : ""}`,
           price: itemPrice,
           quantity: 1,
         }],
@@ -361,7 +380,7 @@ export default function PayInvoicePanel({
         // Audit trail so admins can reconcile FX-converted charges.
         fx: conversion.converted ? {
           invoice_currency: invoiceCurrency,
-          invoice_amount: amount,
+          invoice_amount: amountToPay,
           charge_currency: conversion.chargeCurrency,
           charge_amount: conversion.chargeAmount,
           display_currency: conversion.displayCurrency,
@@ -437,13 +456,13 @@ export default function PayInvoicePanel({
   const previewFor = (gid: string) => {
     const dCode = GATEWAY_DISPLAY_CURRENCY[gid] || "INVOICE";
     if (dCode === "INVOICE") {
-      return { amount, currency: invoiceCurrency, converted: false };
+      return { amount: amountToPay, currency: invoiceCurrency, converted: false };
     }
     const invoiceRate = rateFor(invoiceCurrency);
     const displayRate = rateFor(dCode as CurrencyCode);
     const valid = invoiceRate > 0 && displayRate > 0;
-    const usd = valid ? amount / invoiceRate : amount;
-    const amt = valid ? Math.round(usd * displayRate * 100) / 100 : amount;
+    const usd = valid ? amountToPay / invoiceRate : amountToPay;
+    const amt = valid ? Math.round(usd * displayRate * 100) / 100 : amountToPay;
     return { amount: amt, currency: dCode as CurrencyCode, converted: valid && invoiceCurrency !== dCode };
   };
 
@@ -455,7 +474,7 @@ export default function PayInvoicePanel({
             <Wallet className="w-5 h-5 text-primary" /> Pay this invoice
           </p>
           <p className="text-sm text-muted-foreground">
-            Pay <span className="font-semibold text-foreground">{invoiceFmt}</span> securely with your preferred method.
+            Pay <span className="font-semibold text-foreground">{formatMoney(amountToPay, invoiceCurrency)}</span> securely with your preferred method.
           </p>
         </div>
       </div>
@@ -469,7 +488,73 @@ export default function PayInvoicePanel({
           No payment gateways are currently enabled. Please contact us to settle this invoice.
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
+          {/* Custom Amount Checkout Input & Toggles */}
+          <div className="rounded-lg border border-border bg-background/50 p-4 space-y-3">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold block">
+              Payment Amount Options
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCustomAmount(false);
+                  setCustomAmountStr("");
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  !isCustomAmount
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                }`}
+              >
+                Pay Full Due ({invoiceFmt})
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCustomAmount(true);
+                  setCustomAmountStr("");
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  isCustomAmount
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                }`}
+              >
+                Pay Custom Amount
+              </button>
+            </div>
+
+            {isCustomAmount && (
+              <div className="space-y-1.5 max-w-xs transition-all duration-200">
+                <label className="text-xs text-muted-foreground block font-medium">
+                  Enter payment amount ({invoiceCurrency})
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">
+                    {invoiceCurrency === "BDT" ? "৳" : "$"}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={amount}
+                    placeholder={`Maximum: ${amount}`}
+                    value={customAmountStr}
+                    onChange={(e) => setCustomAmountStr(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </div>
+                {isCustomAmountInvalid && (
+                  <span className="text-xs text-destructive block">
+                    Amount must be between 0.01 and {amount}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3">
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
               <div className="flex-1 min-w-0">
@@ -568,12 +653,12 @@ export default function PayInvoicePanel({
           </div>
 
           {/* Conversion summary — only shown when charge currency differs from invoice currency */}
-          {conversion.converted && gateway && (
+          {gateway && previewFor(gateway).converted && (
             <div className="rounded-lg border border-primary/20 bg-background/60 p-3 text-xs sm:text-[13px] text-foreground/90 flex items-start gap-2">
               <ArrowRightLeft className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
               <div className="space-y-0.5">
                 <div>
-                  Invoice: <span className="font-semibold">{invoiceFmt}</span>
+                  Invoice: <span className="font-semibold">{formatMoney(amountToPay, invoiceCurrency)}</span>
                   <span className="mx-2 text-muted-foreground">→</span>
                   You'll be charged: <span className="font-semibold">{displayFmt}</span>
                 </div>
@@ -584,10 +669,11 @@ export default function PayInvoicePanel({
             </div>
           )}
         </div>
+      </div>
           )}
 
           {/* FX availability notice — only matters when conversion is needed */}
-          {conversion.converted && gateway && conversion.fxSource !== "live" && (
+          {gateway && previewFor(gateway).converted && conversion.fxSource !== "live" && (
             <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs sm:text-[13px] text-foreground/90 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
               <div className="space-y-0.5">

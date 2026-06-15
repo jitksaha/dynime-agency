@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MinioService } from '../storage/minio.service';
 import { AtsScanService } from '../public-forms/ats-scan.service';
-import { testStripe, testBkash, testSSLCommerz, testDodo, testBankTransfer, Result } from './probes';
+import { testStripe, testBkash, testSSLCommerz, testDodo, testBankTransfer, testKeeal, Result } from './probes';
 
 @Injectable()
 export class CmsService {
@@ -116,6 +116,8 @@ export class CmsService {
         return testSSLCommerz(credentials);
       case 'dodopayment':
         return testDodo(credentials);
+      case 'keeal':
+        return testKeeal(credentials);
       case 'bank_transfer':
         return testBankTransfer(credentials);
       default:

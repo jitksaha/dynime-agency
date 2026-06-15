@@ -5,6 +5,7 @@ import { Building2, Copy, CheckCircle2, Mail, Upload, FileImage, X, Loader2 } fr
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/integrations/db/client";
+import { useGeoLocation } from "@/hooks/use-geo-location";
 
 export type BankAccount = {
   bank_name?: string;
@@ -88,13 +89,32 @@ const BankDepositDialog = ({
   displayName = "Bank Transfer",
   customerEmail,
 }: BankDepositInfo) => {
+  const { geo } = useGeoLocation();
   const countryOptions = useMemo(() => {
     return Array.from(new Set(accounts.map((a) => a.country?.trim()).filter(Boolean) as string[])).sort();
   }, [accounts]);
+  
   const [countryFilter, setCountryFilter] = useState("all");
+
+  // Automatically default filter based on geolocation
+  useEffect(() => {
+    if (!open) return;
+    const clientCountry = geo?.country?.trim();
+    if (clientCountry) {
+      const matchedExactName = countryOptions.find(
+        (c) => c.toLowerCase() === clientCountry.toLowerCase()
+      );
+      if (matchedExactName) {
+        setCountryFilter(matchedExactName);
+        return;
+      }
+    }
+    setCountryFilter("all");
+  }, [open, geo, countryOptions]);
+
   const visibleAccounts = countryFilter === "all"
     ? accounts
-    : accounts.filter((a) => a.country?.trim() === countryFilter);
+    : accounts.filter((a) => a.country?.trim().toLowerCase() === countryFilter.toLowerCase());
   const isSingle = visibleAccounts.length <= 1;
 
   // Public support email pulled live from admin contact info

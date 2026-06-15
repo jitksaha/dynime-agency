@@ -574,6 +574,77 @@ export class OrdersService {
     return settings;
   }
 
+  private async completeOrderPayment(
+    orderId: string,
+    sessionId: string,
+    provider: string,
+    verificationData: any,
+  ) {
+    const order = await this.prisma.orders.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('Order not found');
+
+    if (['paid', 'completed', 'refunded'].includes(order.status)) {
+      return order;
+    }
+
+    const brief = (order.service_brief as Record<string, any>) || {};
+    const pendingPayments = brief.pending_payments || {};
+    const totalInvoiceAmount = Number(order.total);
+
+    let amountPaidUSD = totalInvoiceAmount;
+    let foundInPending = false;
+
+    // Try to find the exact session in pending_payments
+    if (sessionId && pendingPayments[sessionId]) {
+      amountPaidUSD = Number(pendingPayments[sessionId].amount) || totalInvoiceAmount;
+      delete pendingPayments[sessionId];
+      foundInPending = true;
+    } else if (brief.partially_paid) {
+      // Fallback for partially paid invoices where session ID didn't match
+      amountPaidUSD = Number(brief.amount_due) || totalInvoiceAmount;
+    }
+
+    let status = 'paid';
+    if (brief.partially_paid || foundInPending) {
+      const currentPaid = Number(brief.amount_paid || 0);
+      const newPaid = currentPaid + amountPaidUSD;
+      const newDue = Math.max(0, totalInvoiceAmount - newPaid);
+
+      brief.amount_paid = newPaid;
+      brief.amount_due = newDue;
+      brief.partially_paid = newDue > 0.01;
+
+      const partialPayments = brief.partial_payments || [];
+      partialPayments.push({
+        amount: amountPaidUSD,
+        date: new Date().toISOString().split('T')[0],
+        gateway: provider,
+        session_id: sessionId,
+      });
+      brief.partial_payments = partialPayments;
+      brief.pending_payments = pendingPayments;
+
+      if (newDue > 0.01) {
+        status = 'pending'; // Remain pending/open for next payments
+      }
+    }
+
+    const updated = await this.prisma.orders.update({
+      where: { id: orderId },
+      data: {
+        status: status as any,
+        payment_verification: {
+          ...verificationData,
+          verified_at: new Date().toISOString(),
+        },
+        service_brief: brief,
+        updated_at: new Date(),
+      },
+    });
+
+    return updated;
+  }
+
   private async fetchUsdToBdt(): Promise<number> {
     try {
       const res = await fetch('https://open.er-api.com/v6/latest/USD');
@@ -653,8 +724,30 @@ export class OrdersService {
       if (['paid', 'completed', 'refunded'].includes(existingOrder.status)) {
         throw new ForbiddenException('This invoice is already paid.');
       }
-      items = existingOrder.items || [];
-      total = Number(existingOrder.total) || 0;
+      
+      const dueAmount = (existingOrder.service_brief && typeof existingOrder.service_brief.amount_due === 'number')
+        ? existingOrder.service_brief.amount_due
+        : (Number(existingOrder.total) || 0);
+
+      let chargeAmount = dueAmount;
+      if (body.amount != null) {
+        const amt = Number(body.amount);
+        if (isNaN(amt) || amt <= 0) {
+          throw new BadRequestException('Invalid payment amount');
+        }
+        if (amt > dueAmount + 0.01) {
+          throw new BadRequestException('Payment amount exceeds remaining due amount');
+        }
+        chargeAmount = amt;
+      }
+
+      items = [{
+        id: 'invoice-payment',
+        name: `Payment for Invoice #${existingOrder.invoice_number || existingOrder.id}`,
+        price: chargeAmount,
+        quantity: 1,
+      }];
+      total = chargeAmount;
       customer_email = existingOrder.customer_email;
       customer_name = existingOrder.customer_name || customer_name;
       body.items = items;
@@ -835,7 +928,10 @@ export class OrdersService {
       result = { client_secret: pi.client_secret, session_id: pi.id, gateway: 'stripe_onsite' };
 
     } else if (gateway === 'keeal') {
-      const secretKey = settings.keeal_secret_key;
+      const isSandbox = settings.keeal_sandbox === 'true';
+      const secretKey = isSandbox
+        ? (settings.keeal_test_secret_key || settings.keeal_secret_key)
+        : settings.keeal_secret_key;
       if (!secretKey) throw new Error('Keeal credentials not configured.');
       const currency = settings.keeal_currency || 'usd';
       const lineItems = body.items.map((item) => ({
@@ -849,21 +945,23 @@ export class OrdersService {
       const keealSuccessUrl = `${clientOrigin || 'http://localhost:5002'}/payment/status/${orderId}?keeal=success`;
       const keealCancelUrl = `${clientOrigin || 'http://localhost:5002'}/checkout?payment=cancelled`;
 
-      const response = await fetch('https://api.keeal.com/v1/checkout/sessions', {
+      const response = await fetch('https://api.keeal.com/api/checkout/sessions', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${secretKey}`,
           'Content-Type': 'application/json',
+          'Idempotency-Key': `idem-${orderId}-${Date.now()}`,
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          mode: 'payment',
-          customer_email: customer_email,
+          line_items: lineItems,
           success_url: keealSuccessUrl,
           cancel_url: keealCancelUrl,
-          line_items: lineItems,
+          customer_email: customer_email || undefined,
+          client_reference_id: orderId,
           metadata: {
             order_id: orderId,
+            customer_name: customer_name || undefined,
           },
         }),
       });
@@ -1082,6 +1180,23 @@ export class OrdersService {
 
     let finalOrderId = existingOrder?.id || preGeneratedOrderId;
     if (!existingOrder && !result._skip_order_insert) {
+      const sessionId = (gateway === 'bkash' ? result.payment_id : result.session_id) || '';
+      const initialServiceBrief = {
+        ...(body.service_brief || {}),
+        amount_paid: 0,
+        amount_due: orderTotal,
+        partially_paid: false,
+        partial_payments: [],
+        pending_payments: sessionId ? {
+          [sessionId]: {
+            amount: orderTotal,
+            gateway: gateway,
+            created_at: new Date().toISOString(),
+          }
+        } : {},
+        ...milestoneServiceBrief,
+      };
+
       const dbOrder = await this.prisma.orders.create({
         data: {
           id: finalOrderId,
@@ -1095,7 +1210,7 @@ export class OrdersService {
           payment_gateway: gateway,
           coupon_code: applied_coupon,
           discount_amount: orderDiscount,
-          service_brief: { ...(body.service_brief || {}), ...milestoneServiceBrief },
+          service_brief: initialServiceBrief,
           billing_address: body.billing_address || {},
           notes: body.notes || null,
           currency: body.currency || 'USD',
@@ -1106,12 +1221,49 @@ export class OrdersService {
       });
       finalOrderId = dbOrder.id;
     } else if (existingOrder) {
-      const patch: any = { payment_gateway: gateway, status: 'pending', referral_code: body.referral_code || null };
+      const sessionId = (gateway === 'bkash' ? result.payment_id : result.session_id) || '';
+      const serviceBrief = typeof existingOrder.service_brief === 'object' && existingOrder.service_brief !== null
+        ? { ...(existingOrder.service_brief as any) }
+        : {};
+      if (!serviceBrief.pending_payments || typeof serviceBrief.pending_payments !== 'object') {
+        serviceBrief.pending_payments = {};
+      }
+      if (sessionId) {
+        serviceBrief.pending_payments[sessionId] = {
+          amount: total,
+          gateway: gateway,
+          created_at: new Date().toISOString(),
+        };
+      }
+
+      const patch: any = {
+        payment_gateway: gateway,
+        status: 'pending',
+        referral_code: body.referral_code || null,
+        service_brief: serviceBrief,
+      };
       if (gateway !== 'bkash' && result.session_id) patch.stripe_session_id = result.session_id;
       if (user_id) patch.user_id = user_id;
       await this.prisma.orders.update({ where: { id: existingOrder.id }, data: patch });
     } else if (result._skip_order_insert) {
       const orderId = result.session_id;
+      const sessionId = (gateway === 'bkash' ? result.payment_id : result.session_id) || '';
+      const initialServiceBrief = {
+        ...(body.service_brief || {}),
+        amount_paid: 0,
+        amount_due: orderTotal,
+        partially_paid: false,
+        partial_payments: [],
+        pending_payments: sessionId ? {
+          [sessionId]: {
+            amount: orderTotal,
+            gateway: gateway,
+            created_at: new Date().toISOString(),
+          }
+        } : {},
+        ...milestoneServiceBrief,
+      };
+
       await this.prisma.orders.update({
         where: { id: orderId },
         data: {
@@ -1120,7 +1272,7 @@ export class OrdersService {
           total: orderTotal,
           subtotal: orderSubtotal,
           items: orderItems,
-          service_brief: { ...(body.service_brief || {}), ...milestoneServiceBrief },
+          service_brief: initialServiceBrief,
           billing_address: body.billing_address || {},
           notes: body.notes || null,
           currency: body.currency || 'USD',
@@ -1242,21 +1394,20 @@ export class OrdersService {
         return failRedirect + '&reason=execute_incomplete';
       }
 
-      const updatedBkashOrder = await this.prisma.orders.update({
-        where: { id: orderId },
-        data: {
-          status: 'paid',
-          payment_verification: {
-            provider: 'bkash',
-            paymentID,
-            trxID: data.trxID,
-            amount: data.amount,
-            merchantInvoiceNumber: data.merchantInvoiceNumber,
-            transactionStatus,
-            verified_at: new Date().toISOString(),
-          },
+      const updatedBkashOrder = await this.completeOrderPayment(
+        orderId,
+        paymentID,
+        'bkash',
+        {
+          provider: 'bkash',
+          paymentID,
+          trxID: data.trxID,
+          amount: data.amount,
+          merchantInvoiceNumber: data.merchantInvoiceNumber,
+          transactionStatus,
+          verified_at: new Date().toISOString(),
         },
-      });
+      );
 
       // Trigger referral commission if applicable
       if (updatedBkashOrder.referral_code) {
@@ -1338,20 +1489,19 @@ export class OrdersService {
 
     if (status === 'VALID' || status === 'VALIDATED') {
       try {
-        const updatedOrder = await this.prisma.orders.update({
-          where: { id: orderId },
-          data: {
-            status: 'paid',
-            payment_verification: {
-              provider: 'sslcommerz',
-              tran_id: tranId,
-              val_id: body.val_id,
-              amount: body.amount,
-              card_type: body.card_type,
-              verified_at: new Date().toISOString(),
-            },
+        const updatedOrder = await this.completeOrderPayment(
+          orderId,
+          tranId,
+          'sslcommerz',
+          {
+            provider: 'sslcommerz',
+            tran_id: tranId,
+            val_id: body.val_id,
+            amount: body.amount,
+            card_type: body.card_type,
+            verified_at: new Date().toISOString(),
           },
-        });
+        );
 
         if (updatedOrder.referral_code) {
           this.referralService.triggerCommission(
@@ -1447,14 +1597,19 @@ export class OrdersService {
       return { received: true, status, error: 'Order not found for session ' + sessionId };
     }
 
-    const updated = await this.prisma.orders.update({
-      where: { id: order.id },
-      data: {
-        status: status as any,
-        payment_verification: verification,
-        updated_at: new Date(),
-      },
-    });
+    let updated;
+    if (status === 'paid') {
+      updated = await this.completeOrderPayment(order.id, sessionId, 'stripe', verification);
+    } else {
+      updated = await this.prisma.orders.update({
+        where: { id: order.id },
+        data: {
+          status: status as any,
+          payment_verification: verification,
+          updated_at: new Date(),
+        },
+      });
+    }
 
     if (status === 'paid' && updated.referral_code) {
       this.referralService.triggerCommission(
@@ -1552,14 +1707,19 @@ export class OrdersService {
       return { received: true, status, error: 'Order not found for paymentId ' + paymentId };
     }
 
-    const updated = await this.prisma.orders.update({
-      where: { id: order.id },
-      data: {
-        status: status as any,
-        payment_verification: verification,
-        updated_at: new Date(),
-      },
-    });
+    let updated;
+    if (status === 'paid') {
+      updated = await this.completeOrderPayment(order.id, paymentId, 'dodopayment', verification);
+    } else {
+      updated = await this.prisma.orders.update({
+        where: { id: order.id },
+        data: {
+          status: status as any,
+          payment_verification: verification,
+          updated_at: new Date(),
+        },
+      });
+    }
 
     if (status === 'paid' && updated.referral_code) {
       this.referralService.triggerCommission(
@@ -1576,7 +1736,10 @@ export class OrdersService {
 
   async handleKeealWebhook(rawBody: string, signature: string) {
     const settings = await this.loadPaymentSettings('keeal');
-    const webhookSecret = settings.keeal_webhook_secret;
+    const isSandbox = settings.keeal_sandbox === 'true';
+    const webhookSecret = isSandbox
+      ? (settings.keeal_test_webhook_secret || settings.keeal_webhook_secret)
+      : settings.keeal_webhook_secret;
 
     if (webhookSecret && signature) {
       const parts: Record<string, string> = {};
@@ -1617,7 +1780,7 @@ export class OrdersService {
     const type = event.type ?? '';
     const obj = event.data?.object ?? event;
     const sessionId = obj.id ?? obj.payment_intent ?? obj.session_id ?? '';
-    const orderId = obj.metadata?.order_id ?? obj.order_id ?? null;
+    const orderId = obj.client_reference_id ?? obj.metadata?.order_id ?? obj.order_id ?? null;
 
     let status: string | null = null;
     if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'payment_intent.succeeded'].includes(type)) {
@@ -1657,19 +1820,25 @@ export class OrdersService {
       return { received: true, status, error: 'Order not found' };
     }
 
-    const updated = await this.prisma.orders.update({
-      where: { id: order.id },
-      data: {
-        status: status as any,
-        payment_verification: {
-          provider: 'keeal',
-          verified_at: new Date().toISOString(),
-          signature_valid: !!signature,
-          authoritative_status: type || event.status || null,
+    let updated;
+    const verification = {
+      provider: 'keeal',
+      verified_at: new Date().toISOString(),
+      signature_valid: !!signature,
+      authoritative_status: type || event.status || null,
+    };
+    if (status === 'paid') {
+      updated = await this.completeOrderPayment(order.id, sessionId || order.stripe_session_id || '', 'keeal', verification);
+    } else {
+      updated = await this.prisma.orders.update({
+        where: { id: order.id },
+        data: {
+          status: status as any,
+          payment_verification: verification,
+          updated_at: new Date(),
         },
-        updated_at: new Date(),
-      },
-    });
+      });
+    }
 
     if (status === 'paid' && updated.referral_code) {
       this.referralService.triggerCommission(
@@ -1753,10 +1922,13 @@ export class OrdersService {
         }
       } else if (order.payment_gateway === 'keeal' && order.stripe_session_id) {
         const settings = await this.loadPaymentSettings('keeal');
-        const secretKey = settings.keeal_secret_key;
+        const isSandbox = settings.keeal_sandbox === 'true';
+        const secretKey = isSandbox
+          ? (settings.keeal_test_secret_key || settings.keeal_secret_key)
+          : settings.keeal_secret_key;
         if (secretKey) {
           try {
-            const res = await fetch(`https://api.keeal.com/v1/checkout/sessions/${order.stripe_session_id}`, {
+            const res = await fetch(`https://api.keeal.com/api/checkout/merchant/sessions/${order.stripe_session_id}`, {
               headers: {
                 Authorization: `Bearer ${secretKey}`,
               },
@@ -1802,13 +1974,16 @@ export class OrdersService {
       }
 
       if (isPaid) {
-        const updated = await this.prisma.orders.update({
-          where: { id: order.id },
-          data: {
-            status: 'paid',
-            updated_at: new Date(),
+        const updated = await this.completeOrderPayment(
+          order.id,
+          order.stripe_session_id || '',
+          order.payment_gateway || 'unknown',
+          {
+            provider: order.payment_gateway || 'unknown',
+            verified_at: new Date().toISOString(),
+            notes: 'Verified via sync check (getStatusBySession)',
           },
-        });
+        );
 
         if (updated.referral_code) {
           this.referralService.triggerCommission(

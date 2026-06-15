@@ -191,3 +191,58 @@ export function testBankTransfer(c: Record<string, any>): Result {
   }
   return { ok: true, status: 'pass', summary: `${accounts.length} bank account(s) configured. Customers will see all required details.`, details: { accounts: accounts.length }, latency_ms: 0 };
 }
+
+export async function testKeeal(c: Record<string, string>): Promise<Result> {
+  const sandbox = String(c.sandbox).toLowerCase() === 'true';
+  const secretKey = sandbox
+    ? (c.test_secret_key || c.secret_key || '').trim()
+    : (c.secret_key || '').trim();
+
+  if (!secretKey) {
+    return { ok: false, status: 'fail', summary: 'Secret key is required.', latency_ms: 0 };
+  }
+
+  const probe = await timed(async () => {
+    const res = await fetchWithTimeout('https://api.keeal.com/api/checkout/merchant/sessions?limit=1', {
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        Accept: 'application/json',
+      },
+    });
+    const body = await res.json().catch(() => ({}));
+    return { res, body };
+  });
+
+  if (probe.error) {
+    return { ok: false, status: 'fail', summary: `Network error contacting Keeal: ${probe.error.message}`, latency_ms: probe.ms };
+  }
+
+  const { res, body } = probe.value!;
+  if (res.status === 401 || res.status === 403) {
+    return {
+      ok: false,
+      status: 'fail',
+      summary: `Keeal rejected the secret key (HTTP ${res.status}). Please verify the key is valid and approved.`,
+      details: { error: body?.message || body?.error },
+      latency_ms: probe.ms,
+    };
+  }
+  if (!res.ok) {
+    return {
+      ok: false,
+      status: 'fail',
+      summary: `Keeal returned HTTP ${res.status}.`,
+      details: { error: body?.message || body?.error },
+      latency_ms: probe.ms,
+    };
+  }
+
+  return {
+    ok: true,
+    status: 'pass',
+    summary: `Keeal secret key is valid (${sandbox ? 'sandbox' : 'live'} mode).`,
+    details: { env: sandbox ? 'sandbox' : 'live' },
+    latency_ms: probe.ms,
+  };
+}
+
