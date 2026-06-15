@@ -116,6 +116,7 @@ dynime-api
 deploy-api.php
 wordpress-woocommerce
 describe-table.php
+get-logs.php
 contact
 setup-hostinger.php
 vercel.json
