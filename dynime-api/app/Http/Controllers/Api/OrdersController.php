@@ -232,8 +232,31 @@ class OrdersController extends Controller
                 if (in_array($existingOrder->status, ['paid', 'completed', 'refunded'])) {
                     return response()->json(['message' => 'This invoice is already paid.'], 403);
                 }
-                $items = json_decode($existingOrder->items, true) ?: [];
-                $total = (double)$existingOrder->total;
+                
+                $brief = json_decode($existingOrder->service_brief, true) ?: [];
+                $dueAmount = (isset($brief['amount_due']) && is_numeric($brief['amount_due']))
+                    ? (double)$brief['amount_due']
+                    : (double)$existingOrder->total;
+
+                $chargeAmount = $dueAmount;
+                if (isset($body['amount']) && $body['amount'] !== null) {
+                    $amt = (double)$body['amount'];
+                    if ($amt <= 0) {
+                        return response()->json(['message' => 'Invalid payment amount'], 400);
+                    }
+                    if ($amt > $dueAmount + 0.01) {
+                        return response()->json(['message' => 'Payment amount exceeds remaining due amount'], 400);
+                    }
+                    $chargeAmount = $amt;
+                }
+
+                $items = [[
+                    'id' => 'invoice-payment',
+                    'name' => 'Payment for Invoice #' . ($existingOrder->invoice_number ?: $existingOrder->id),
+                    'price' => $chargeAmount,
+                    'quantity' => 1,
+                ]];
+                $total = $chargeAmount;
                 $customerEmail = $existingOrder->customer_email;
                 $customerName = $existingOrder->customer_name ?: $customerName;
                 $body['items'] = $items;
@@ -242,7 +265,7 @@ class OrdersController extends Controller
                 $body['customer_name'] = $customerName;
                 $body['currency'] = $existingOrder->currency ?: ($body['currency'] ?? 'USD');
                 $body['billing_address'] = json_decode($existingOrder->billing_address, true) ?: ($body['billing_address'] ?? []);
-                $body['service_brief'] = json_decode($existingOrder->service_brief, true) ?: ($body['service_brief'] ?? []);
+                $body['service_brief'] = $brief;
                 $body['notes'] = $existingOrder->notes ?? ($body['notes'] ?? null);
             }
 
@@ -733,6 +756,23 @@ class OrdersController extends Controller
 
             if (!$existingOrder && !isset($result['_skip_order_insert'])) {
                 $brief = array_merge($body['service_brief'] ?? [], $milestoneServiceBrief);
+                
+                $sessionId = ($gateway === 'bkash' ? ($result['payment_id'] ?? null) : ($result['session_id'] ?? null)) ?: '';
+                $brief['amount_paid'] = $brief['amount_paid'] ?? 0;
+                $brief['amount_due'] = $brief['amount_due'] ?? $orderTotal;
+                $brief['partially_paid'] = $brief['partially_paid'] ?? false;
+                $brief['partial_payments'] = $brief['partial_payments'] ?? [];
+                if (!isset($brief['pending_payments']) || !is_array($brief['pending_payments'])) {
+                    $brief['pending_payments'] = [];
+                }
+                if ($sessionId) {
+                    $brief['pending_payments'][$sessionId] = [
+                        'amount' => $orderTotal,
+                        'gateway' => $gateway,
+                        'created_at' => now()->toIso8601String(),
+                    ];
+                }
+
                 DB::table('orders')->insert(array_merge([
                     'id' => $finalOrderId,
                     'customer_name' => $customerName,
@@ -755,10 +795,24 @@ class OrdersController extends Controller
                     'updated_at' => now(),
                 ], $taxFields));
             } else if ($existingOrder) {
+                $serviceBrief = json_decode($existingOrder->service_brief, true) ?: [];
+                $sessionId = ($gateway === 'bkash' ? ($result['payment_id'] ?? null) : ($result['session_id'] ?? null)) ?: '';
+                if (!isset($serviceBrief['pending_payments']) || !is_array($serviceBrief['pending_payments'])) {
+                    $serviceBrief['pending_payments'] = [];
+                }
+                if ($sessionId) {
+                    $serviceBrief['pending_payments'][$sessionId] = [
+                        'amount' => $total,
+                        'gateway' => $gateway,
+                        'created_at' => now()->toIso8601String(),
+                    ];
+                }
+
                 $patch = [
                     'payment_gateway' => $gateway,
                     'status' => 'pending',
                     'referral_code' => $body['referral_code'] ?? null,
+                    'service_brief' => json_encode($serviceBrief),
                     'updated_at' => now(),
                 ];
                 if ($gateway !== 'bkash' && isset($result['session_id'])) {
@@ -771,6 +825,23 @@ class OrdersController extends Controller
             } else if (isset($result['_skip_order_insert'])) {
                 $orderId = $result['session_id'];
                 $brief = array_merge($body['service_brief'] ?? [], $milestoneServiceBrief);
+                
+                $sessionId = ($gateway === 'bkash' ? ($result['payment_id'] ?? null) : ($result['session_id'] ?? null)) ?: '';
+                $brief['amount_paid'] = $brief['amount_paid'] ?? 0;
+                $brief['amount_due'] = $brief['amount_due'] ?? $orderTotal;
+                $brief['partially_paid'] = $brief['partially_paid'] ?? false;
+                $brief['partial_payments'] = $brief['partial_payments'] ?? [];
+                if (!isset($brief['pending_payments']) || !is_array($brief['pending_payments'])) {
+                    $brief['pending_payments'] = [];
+                }
+                if ($sessionId) {
+                    $brief['pending_payments'][$sessionId] = [
+                        'amount' => $orderTotal,
+                        'gateway' => $gateway,
+                        'created_at' => now()->toIso8601String(),
+                    ];
+                }
+
                 DB::table('orders')->where('id', $orderId)->update(array_merge([
                     'coupon_code' => $applied_coupon,
                     'discount_amount' => $orderDiscount,
@@ -906,26 +977,23 @@ class OrdersController extends Controller
                         'transactionStatus' => $transactionStatus,
                         'statusMessage' => $data['statusMessage'] ?? null,
                         'verified_at' => now()->toIso8601String(),
-                        'notes' => 'bKash execute did not complete.',
+                    'notes' => 'bKash execute did not complete.',
                     ]),
                     'updated_at' => now(),
                 ]);
                 return redirect()->away($failRedirect . '&reason=execute_incomplete');
             }
 
-            DB::table('orders')->where('id', $orderId)->update([
-                'status' => 'paid',
-                'payment_verification' => json_encode([
+            $order = DB::table('orders')->where('id', $orderId)->first();
+            if ($order) {
+                $this->completeOrderPayment($order, 'paid', 'bkash', [
                     'provider' => 'bkash',
                     'paymentID' => $paymentID,
                     'trxID' => $data['trxID'] ?? null,
-                    'amount' => $data['amount'] ?? null,
                     'merchantInvoiceNumber' => $data['merchantInvoiceNumber'] ?? null,
                     'transactionStatus' => $transactionStatus,
-                    'verified_at' => now()->toIso8601String(),
-                ]),
-                'updated_at' => now(),
-            ]);
+                ], $paymentID);
+            }
 
             return redirect()->away($successRedirect);
         } catch (\Exception $err) {
@@ -988,18 +1056,13 @@ class OrdersController extends Controller
 
         if ($status === 'VALID' || $status === 'VALIDATED') {
             try {
-                DB::table('orders')->where('id', $order->id)->update([
-                    'status' => 'paid',
-                    'payment_verification' => json_encode([
-                        'provider' => 'sslcommerz',
-                        'tran_id' => $tranId,
-                        'val_id' => $body['val_id'] ?? null,
-                        'amount' => $body['amount'] ?? null,
-                        'card_type' => $body['card_type'] ?? null,
-                        'verified_at' => now()->toIso8601String(),
-                    ]),
-                    'updated_at' => now(),
-                ]);
+                $this->completeOrderPayment($order, 'paid', 'sslcommerz', [
+                    'provider' => 'sslcommerz',
+                    'tran_id' => $tranId,
+                    'val_id' => $body['val_id'] ?? null,
+                    'amount' => $body['amount'] ?? null,
+                    'card_type' => $body['card_type'] ?? null,
+                ], $tranId);
 
                 return redirect()->away($successRedirect);
             } catch (\Exception $err) {
@@ -1075,16 +1138,11 @@ class OrdersController extends Controller
                 return response()->json(['received' => true, 'status' => $status, 'error' => 'Order not found for session ' . $sessionId]);
             }
 
-            DB::table('orders')->where('id', $order->id)->update([
-                'status' => $status,
-                'payment_verification' => json_encode([
-                    'provider' => 'stripe',
-                    'verified_at' => now()->toIso8601String(),
-                    'signature_valid' => true,
-                    'authoritative_status' => $event['type'] ?? null,
-                ]),
-                'updated_at' => now(),
-            ]);
+            $this->completeOrderPayment($order, $status, 'stripe', [
+                'provider' => 'stripe',
+                'signature_valid' => true,
+                'authoritative_status' => $event['type'] ?? null,
+            ], $sessionId);
 
             return response()->json(['received' => true, 'type' => $event['type'], 'status' => $status, 'order_id' => $order->id]);
         } catch (\Exception $e) {
@@ -1148,16 +1206,11 @@ class OrdersController extends Controller
                 return response()->json(['received' => true, 'status' => $status, 'error' => 'Order not found for paymentId ' . $paymentId]);
             }
 
-            DB::table('orders')->where('id', $order->id)->update([
-                'status' => $status,
-                'payment_verification' => json_encode([
-                    'provider' => 'dodopayment',
-                    'verified_at' => now()->toIso8601String(),
-                    'signature_valid' => true,
-                    'authoritative_status' => $rawStatus ?: $rawEvent,
-                ]),
-                'updated_at' => now(),
-            ]);
+            $this->completeOrderPayment($order, $status, 'dodopayment', [
+                'provider' => 'dodopayment',
+                'signature_valid' => true,
+                'authoritative_status' => $rawStatus ?: $rawEvent,
+            ], $paymentId);
 
             return response()->json(['received' => true, 'status' => $status, 'order_id' => $order->id]);
         } catch (\Exception $e) {
@@ -1250,16 +1303,11 @@ class OrdersController extends Controller
                 return response()->json(['received' => true, 'status' => $status, 'error' => 'Order not found']);
             }
 
-            DB::table('orders')->where('id', $order->id)->update([
-                'status' => $status,
-                'payment_verification' => json_encode([
-                    'provider' => 'keeal',
-                    'verified_at' => now()->toIso8601String(),
-                    'signature_valid' => !empty($signature),
-                    'authoritative_status' => $type ?: ($event['status'] ?? null),
-                ]),
-                'updated_at' => now(),
-            ]);
+            $this->completeOrderPayment($order, $status, 'keeal', [
+                'provider' => 'keeal',
+                'signature_valid' => !empty($signature),
+                'authoritative_status' => $type ?: ($event['status'] ?? null),
+            ], $sessionId);
 
             return response()->json(['received' => true, 'status' => $status, 'order_id' => $order->id]);
         } catch (\Exception $e) {
@@ -1392,11 +1440,17 @@ class OrdersController extends Controller
             }
 
             if ($isPaid) {
-                DB::table('orders')->where('id', $order->id)->update([
-                    'status' => 'paid',
-                    'updated_at' => now(),
-                ]);
-                $order->status = 'paid';
+                $this->completeOrderPayment($order, 'paid', $order->payment_gateway ?: 'unknown', [
+                    'provider' => $order->payment_gateway ?: 'unknown',
+                    'notes' => 'Status checked by session',
+                ], $order->stripe_session_id);
+                
+                $updatedOrder = DB::table('orders')->where('id', $order->id)->first();
+                if ($updatedOrder) {
+                    $order->status = $updatedOrder->status;
+                } else {
+                    $order->status = 'paid';
+                }
             }
         }
 
@@ -1957,5 +2011,70 @@ class OrdersController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning("Failed to send order status update email: " . $e->getMessage());
         }
+    }
+
+    private function completeOrderPayment($order, $status, $provider, $verificationData = [], $sessionId = null)
+    {
+        if (in_array($order->status, ['paid', 'completed', 'refunded'])) {
+            return;
+        }
+
+        if ($status !== 'paid') {
+            DB::table('orders')->where('id', $order->id)->update([
+                'status' => $status,
+                'payment_verification' => json_encode($verificationData),
+                'updated_at' => now(),
+            ]);
+            return;
+        }
+
+        $brief = json_decode($order->service_brief, true) ?: [];
+        $pendingPayments = $brief['pending_payments'] ?? [];
+        $totalInvoiceAmount = (double)$order->total;
+
+        $amountPaidUSD = $totalInvoiceAmount;
+        $foundInPending = false;
+
+        if ($sessionId && isset($pendingPayments[$sessionId])) {
+            $amountPaidUSD = (double)($pendingPayments[$sessionId]['amount'] ?? $totalInvoiceAmount);
+            unset($pendingPayments[$sessionId]);
+            $foundInPending = true;
+        } else if (!empty($brief['partially_paid'])) {
+            $amountPaidUSD = (double)($brief['amount_due'] ?? $totalInvoiceAmount);
+        }
+
+        $finalStatus = 'paid';
+        if (!empty($brief['partially_paid']) || $foundInPending) {
+            $currentPaid = (double)($brief['amount_paid'] ?? 0);
+            $newPaid = $currentPaid + $amountPaidUSD;
+            $newDue = max(0.0, $totalInvoiceAmount - $newPaid);
+
+            $brief['amount_paid'] = $newPaid;
+            $brief['amount_due'] = $newDue;
+            $brief['partially_paid'] = $newDue > 0.01;
+
+            $partialPayments = $brief['partial_payments'] ?? [];
+            $partialPayments[] = [
+                'amount' => $amountPaidUSD,
+                'date' => date('Y-m-d'),
+                'gateway' => $provider,
+                'session_id' => $sessionId,
+            ];
+            $brief['partial_payments'] = $partialPayments;
+            $brief['pending_payments'] = $pendingPayments;
+
+            if ($newDue > 0.01) {
+                $finalStatus = 'pending';
+            }
+        }
+
+        $verificationData['verified_at'] = now()->toIso8601String();
+
+        DB::table('orders')->where('id', $order->id)->update([
+            'status' => $finalStatus,
+            'payment_verification' => json_encode($verificationData),
+            'service_brief' => json_encode($brief),
+            'updated_at' => now(),
+        ]);
     }
 }

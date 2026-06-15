@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Copy, CheckCircle2, Mail, Upload, FileImage, X, Loader2 } from "lucide-react";
+import { Building2, Copy, CheckCircle2, Mail, Upload, FileImage, X, Loader2, ChevronDown, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "@/integrations/db/client";
@@ -78,6 +78,59 @@ const CopyRow = ({ label, value }: { label: string; value: string }) => {
   );
 };
 
+const COUNTRY_MAP: Record<string, string[]> = {
+  BD: ["bangladesh", "bd", "bdesh"],
+  GB: ["united kingdom", "uk", "gb", "great britain", "england"],
+  US: ["united states", "usa", "us", "america"],
+  AU: ["australia", "au"],
+  CA: ["canada", "ca"],
+  IN: ["india", "in"],
+  SG: ["singapore", "sg"],
+  AE: ["united arab emirates", "uae", "ae", "dubai"],
+  MY: ["malaysia", "my"],
+  DE: ["germany", "de"],
+  FR: ["france", "fr"],
+  IT: ["italy", "it"],
+  ES: ["spain", "es"],
+  NL: ["netherlands", "nl", "holland"],
+};
+
+const isCountryMatch = (option: string, code: string | null, name: string | null) => {
+  const optLower = option.toLowerCase().trim();
+  if (code) {
+    const aliases = COUNTRY_MAP[code.toUpperCase()];
+    if (aliases && aliases.some(alias => optLower.includes(alias) || alias.includes(optLower))) {
+      return true;
+    }
+  }
+  if (name) {
+    const nameLower = name.toLowerCase().trim();
+    if (optLower.includes(nameLower) || nameLower.includes(optLower)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const matchesSearch = (option: string, query: string) => {
+  const q = query.toLowerCase().trim();
+  if (!q) return true;
+  
+  const optLower = option.toLowerCase();
+  if (optLower.includes(q)) return true;
+  
+  const matchedCode = Object.entries(COUNTRY_MAP).find(([code, aliases]) => 
+    code.toLowerCase() === q || aliases.some(alias => alias.toLowerCase() === q)
+  );
+  if (matchedCode) {
+    const aliases = matchedCode[1];
+    if (aliases.some(alias => optLower.includes(alias))) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const BankDepositDialog = ({
   open,
   onClose,
@@ -95,22 +148,47 @@ const BankDepositDialog = ({
   }, [accounts]);
   
   const [countryFilter, setCountryFilter] = useState("all");
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Automatically default filter based on geolocation
   useEffect(() => {
     if (!open) return;
+    const clientCode = geo?.countryCode?.trim();
     const clientCountry = geo?.country?.trim();
-    if (clientCountry) {
-      const matchedExactName = countryOptions.find(
-        (c) => c.toLowerCase() === clientCountry.toLowerCase()
+    
+    if (clientCode || clientCountry) {
+      const matched = countryOptions.find((opt) => 
+        isCountryMatch(opt, clientCode || null, clientCountry || null)
       );
-      if (matchedExactName) {
-        setCountryFilter(matchedExactName);
+      if (matched) {
+        setCountryFilter(matched);
         return;
       }
     }
-    setCountryFilter("all");
+    
+    if (countryOptions.length === 1) {
+      setCountryFilter(countryOptions[0]);
+    } else {
+      setCountryFilter("all");
+    }
   }, [open, geo, countryOptions]);
+
+  // Click outside to close custom dropdown
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const filteredOptions = useMemo(() => {
+    return countryOptions.filter(opt => matchesSearch(opt, searchQuery));
+  }, [countryOptions, searchQuery]);
 
   const visibleAccounts = countryFilter === "all"
     ? accounts
@@ -222,15 +300,62 @@ const BankDepositDialog = ({
               {displayName} — deposit accounts
             </h3>
             {countryOptions.length > 1 && (
-              <Select value={countryFilter} onValueChange={setCountryFilter}>
-                <SelectTrigger className="h-9 sm:w-48 text-xs">
-                  <SelectValue placeholder="Filter country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All countries</SelectItem>
-                  {countryOptions.map((country) => <SelectItem key={country} value={country}>{country}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="flex h-9 w-full sm:w-48 items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-xs shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <span>{countryFilter === "all" ? "All countries" : countryFilter}</span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </button>
+                {isOpen && (
+                  <div className="absolute right-0 z-50 mt-1 w-full sm:w-48 rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-80 slide-in-from-top-1">
+                    <div className="flex items-center border-b px-2 py-1.5">
+                      <Search className="mr-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                      <input
+                        type="text"
+                        placeholder="Search country..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex h-7 w-full rounded-md bg-transparent text-xs outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="max-h-[160px] overflow-y-auto p-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCountryFilter("all");
+                          setIsOpen(false);
+                          setSearchQuery("");
+                        }}
+                        className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                      >
+                        All countries
+                      </button>
+                      {filteredOptions.length === 0 ? (
+                        <p className="p-2 text-xs text-muted-foreground text-center">No country found</p>
+                      ) : (
+                        filteredOptions.map((country) => (
+                          <button
+                            key={country}
+                            type="button"
+                            onClick={() => {
+                              setCountryFilter(country);
+                              setIsOpen(false);
+                              setSearchQuery("");
+                            }}
+                            className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground"
+                          >
+                            {country}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           <div className={`grid gap-2 ${isSingle ? "grid-cols-1" : "md:grid-cols-2"}`}>

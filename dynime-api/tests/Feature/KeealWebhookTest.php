@@ -71,7 +71,7 @@ class KeealWebhookTest extends TestCase
         $response = $this->withHeaders([
             'keeal-signature' => $signatureHeader,
             'Content-Type' => 'application/json'
-        ])->postJson('/api/v1/orders/public/keeal-webhook', json_decode($payload, true));
+        ])->postJson('/v1/orders/public/keeal-webhook', json_decode($payload, true));
 
         // 5. Verify response and database update
         $response->assertStatus(200);
@@ -102,7 +102,7 @@ class KeealWebhookTest extends TestCase
         $response = $this->withHeaders([
             'keeal-signature' => 't=' . time() . ',v1=invalidsig',
             'Content-Type' => 'application/json'
-        ])->postJson('/api/v1/orders/public/keeal-webhook', json_decode($payload, true));
+        ])->postJson('/v1/orders/public/keeal-webhook', json_decode($payload, true));
 
         $response->assertStatus(400);
         $response->assertJsonStructure(['error']);
