@@ -43,6 +43,7 @@ custom-software-development
 virtual-address
 custom-web-apps
 brand-strategy
+inspect-order.php
 get_logs.php
 products
 inspect-api.php
@@ -97,7 +98,6 @@ email-marketing
 shopify-illustration.png
 _redirects
 payment-gateway
-api_bak_1781454114
 seo-illustration.png
 speed-optimization
 dynime-icon-dark.svg
