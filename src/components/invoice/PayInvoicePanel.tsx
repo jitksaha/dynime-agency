@@ -455,7 +455,29 @@ export default function PayInvoicePanel({
     }
   };
 
-  const visible = GATEWAYS.filter((g) => enabled.includes(g.id));
+  const visible = useMemo(() => {
+    const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val ?? "");
+    const defaultMeta: Record<string, { label: string; desc: string }> = {
+      keeal: { label: "Keeal", desc: "Pay securely via Keeal hosted checkout." },
+      stripe: { label: "Stripe Checkout", desc: "Pay using Stripe secure hosted checkout." },
+      stripe_onsite: { label: "Credit Card (On-Site)", desc: "Pay directly using your credit or debit card." },
+      sslcommerz: { label: "SSLCommerz", desc: "BD cards & mobile banking." },
+      bkash: { label: "bKash", desc: "Mobile wallet (auto BDT)." },
+      dodopayment: { label: "DodoPayment", desc: "Cards, Apple & Google Pay." },
+      bank_transfer: { label: "Bank Transfer", desc: "Direct deposit, manual." },
+    };
+
+    return GATEWAYS.filter((g) => enabled.includes(g.id)).map((g) => {
+      const customLabel = cleanValue(publicSettings[`gateway_label_${g.id}`]);
+      const customDesc = cleanValue(publicSettings[`gateway_desc_${g.id}`]);
+      const def = defaultMeta[g.id] || { label: g.label, desc: "" };
+      return {
+        id: g.id,
+        label: customLabel || def.label,
+        desc: customDesc || def.desc,
+      };
+    });
+  }, [enabled, publicSettings]);
   const invoiceFmt = formatMoney(amount, invoiceCurrency);
   const displayFmt = formatMoney(conversion.displayAmount, conversion.displayCurrency);
 
@@ -595,6 +617,13 @@ export default function PayInvoicePanel({
                     })}
                   </SelectContent>
                 </Select>
+                {(() => {
+                  const sel = visible.find((x) => x.id === gateway);
+                  if (sel?.desc) {
+                    return <p className="text-[11px] text-muted-foreground mt-1.5">{sel.desc}</p>;
+                  }
+                  return null;
+                })()}
               </div>
               {gateway !== "stripe_onsite" && (
                 <Button

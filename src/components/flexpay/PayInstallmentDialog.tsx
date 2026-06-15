@@ -95,7 +95,7 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
   const amount = Number(installment?.amount || 0);
   const country = (geo?.countryCode || "").toUpperCase();
 
-  const { data: enabledGateways } = useQuery({
+  const { data: gatewayData } = useQuery({
     queryKey: ["installment-pay-gateways"],
     queryFn: async () => {
       const settings = await apiGet<Record<string, any>>("/site-settings");
@@ -103,13 +103,17 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
       // NOTE: FlexPay is intentionally excluded — an installment cannot be
       // repaid using FlexPay credit itself.
       const ids = ["stripe", "keeal", "dodopayment", "sslcommerz", "bkash", "bank_transfer"];
-      return ids.filter((id) => cleanValue(settings[`${id}_enabled`]) === "true");
+      const enabled = ids.filter((id) => cleanValue(settings[`${id}_enabled`]) === "true");
+      return { enabled, settings };
     },
   });
 
   const available = useMemo(() => {
-    if (!enabledGateways) return [];
-    return enabledGateways
+    if (!gatewayData) return [];
+    const { enabled, settings } = gatewayData;
+    const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val ?? "");
+
+    return enabled
       .map((id) => ({ id, cap: GATEWAY_CAPS[id] }))
       .filter(({ cap }) => {
         if (!cap) return false;
@@ -121,8 +125,16 @@ const PayInstallmentDialog = ({ installment, open, onOpenChange }: Props) => {
         }
         return true;
       })
-      .map(({ id, cap }) => ({ id, label: cap.label, desc: cap.desc }));
-  }, [enabledGateways, amount, country, currency]);
+      .map(({ id, cap }) => {
+        const customLabel = cleanValue(settings[`gateway_label_${id}`]);
+        const customDesc = cleanValue(settings[`gateway_desc_${id}`]);
+        return {
+          id,
+          label: customLabel || cap.label,
+          desc: customDesc || cap.desc,
+        };
+      });
+  }, [gatewayData, amount, country, currency]);
 
   useEffect(() => {
     if (available.length && !available.find((g) => g.id === gateway)) {
