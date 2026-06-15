@@ -1879,12 +1879,12 @@ const Checkout = () => {
                         </div>
                         <div className="md:col-span-2">
                           <Label htmlFor="phone">Phone number *</Label>
-                          <div className="flex gap-2 mt-1">
+                          <div className="flex mt-1 items-center rounded-md border border-primary/20 bg-background focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all overflow-hidden h-10 w-full">
                             <Select value={dialCode} onValueChange={setDialCode}>
-                              <SelectTrigger className="w-[110px] border-primary/20 bg-background text-sm">
+                              <SelectTrigger className="w-[100px] h-full border-0 rounded-none bg-transparent px-3 py-2 text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none shadow-none [&>span]:line-clamp-1">
                                 <SelectValue placeholder="Code" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="max-h-[300px]">
                                 <SelectItem value="+1">+1 (US/CA)</SelectItem>
                                 <SelectItem value="+44">+44 (GB)</SelectItem>
                                 <SelectItem value="+61">+61 (AU)</SelectItem>
@@ -1901,6 +1901,7 @@ const Checkout = () => {
                                 <SelectItem value="+64">+64 (NZ)</SelectItem>
                               </SelectContent>
                             </Select>
+                            <div className="h-5 w-px bg-primary/20 flex-shrink-0" />
                             <Input
                               id="phone"
                               type="tel"
@@ -1908,7 +1909,7 @@ const Checkout = () => {
                               placeholder="Phone number"
                               value={phoneInput}
                               onChange={(e) => setPhoneInput(e.target.value)}
-                              className="flex-1 border-primary/20 focus-visible:ring-primary"
+                              className="flex-1 h-full border-0 rounded-none bg-transparent px-3 py-2 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none shadow-none focus-visible:border-0 focus:border-0"
                             />
                           </div>
                         </div>
