@@ -818,7 +818,7 @@ export class OrdersService {
     if (existingOrder) {
       discount_amount = Number(existingOrder.discount_amount || 0);
       applied_coupon = existingOrder.coupon_code || null;
-      total = Number(existingOrder.total) || 0;
+      // Keep total as the chargeAmount determined during the existingOrder check
     } else if (coupon_code && typeof coupon_code === 'string' && coupon_code.trim()) {
       const validation = await this.prisma.$queryRawUnsafe<any[]>(
         'SELECT * FROM public.validate_coupon($1, $2)',
