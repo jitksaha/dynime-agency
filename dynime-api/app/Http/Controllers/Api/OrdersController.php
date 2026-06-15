@@ -338,7 +338,7 @@ class OrdersController extends Controller
             if ($existingOrder) {
                 $discount_amount = (double)($existingOrder->discount_amount ?? 0);
                 $applied_coupon = $existingOrder->coupon_code;
-                $total = (double)$existingOrder->total;
+                // Keep total as the chargeAmount determined during the existingOrder check
             } else if ($couponCode && is_string($couponCode) && trim($couponCode)) {
                 $validation = $this->validateCoupon($couponCode, $subtotal);
                 if (!$validation['valid']) {
