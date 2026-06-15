@@ -64,6 +64,10 @@ export class ImapService implements OnModuleInit, OnModuleDestroy {
         }
       });
 
+      client.on('error', (err) => {
+        this.logger.error('ImapFlow Client Error:', err.message || err);
+      });
+
       await client.connect();
 
       // Get lock for INBOX
