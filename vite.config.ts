@@ -13,9 +13,9 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
-      // Proxy /api/* to Laravel backend during development
+      // Proxy /api/* to NestJS backend during development
       "/api": {
-        target: "http://localhost:8000",
+        target: "http://localhost:3001",
         changeOrigin: true,
       },
     },

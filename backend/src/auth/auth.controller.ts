@@ -126,6 +126,14 @@ export class AuthController {
     return this.auth.getProfile(id);
   }
 
+  @Get('me')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  me(@CurrentUser('id') id: string) {
+    return this.auth.getProfile(id);
+  }
+
   @Get('check-email')
   @Version('1')
   checkEmail(@Query('email') email: string) {

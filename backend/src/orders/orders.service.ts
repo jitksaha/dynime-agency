@@ -667,6 +667,8 @@ export class OrdersService {
       body.notes = existingOrder.notes ?? body.notes ?? null;
     }
 
+    const orderId = existingOrder?.id || preGeneratedOrderId;
+
     if (!gateway || !customer_email || !items?.length || !total) {
       throw new ForbiddenException('Missing required fields: gateway, customer_email, items, total');
     }
@@ -757,8 +759,10 @@ export class OrdersService {
     }
     body.total = chargeNow;
 
-    const settings = await this.loadPaymentSettings(gateway);
-    if (settings[`${gateway}_enabled`] !== 'true') {
+    const settingsGateway = (gateway === 'stripe_onsite') ? 'stripe' : gateway;
+    const settings = await this.loadPaymentSettings(settingsGateway);
+    const enabledKey = (gateway === 'stripe') ? 'stripe_hosted_enabled' : `${gateway}_enabled`;
+    if (settings[enabledKey] !== 'true') {
       throw new ForbiddenException(`${gateway} is not enabled.`);
     }
 
@@ -803,8 +807,76 @@ export class OrdersService {
         body: params.toString(),
       });
       const session = await response.json();
-      if (!response.ok) throw new Error(`Stripe error: ${session.error?.message}`);
+      if (!response.ok) throw new Error(`Stripe error: ${session.error?.message || JSON.stringify(session)}`);
       result = { checkout_url: session.url, session_id: session.id, gateway: 'stripe' };
+
+    } else if (gateway === 'stripe_onsite') {
+      const secretKey = settings.stripe_secret_key;
+      if (!secretKey) throw new Error('Stripe credentials not configured.');
+      const currency = settings.stripe_currency || 'usd';
+      const params = new URLSearchParams();
+      params.append('amount', String(Math.round(body.total * 100)));
+      params.append('currency', currency.toLowerCase());
+      params.append('receipt_email', customer_email);
+      params.append('description', `Order ${orderId}`);
+      params.append('metadata[order_id]', orderId);
+      params.append('automatic_payment_methods[enabled]', 'true');
+
+      const response = await fetch('https://api.stripe.com/v1/payment_intents', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      });
+      const pi = await response.json();
+      if (!response.ok) throw new Error(`Stripe error: ${pi.error?.message || JSON.stringify(pi)}`);
+      result = { client_secret: pi.client_secret, session_id: pi.id, gateway: 'stripe_onsite' };
+
+    } else if (gateway === 'keeal') {
+      const secretKey = settings.keeal_secret_key;
+      if (!secretKey) throw new Error('Keeal credentials not configured.');
+      const currency = settings.keeal_currency || 'usd';
+      const lineItems = body.items.map((item) => ({
+        price_data: {
+          currency: currency.toLowerCase(),
+          product_data: { name: item.name },
+          unit_amount: Math.round(item.price * 100),
+        },
+        quantity: item.quantity,
+      }));
+      const keealSuccessUrl = `${clientOrigin || 'http://localhost:5002'}/payment/status/${orderId}?keeal=success`;
+      const keealCancelUrl = `${clientOrigin || 'http://localhost:5002'}/checkout?payment=cancelled`;
+
+      const response = await fetch('https://api.keeal.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          mode: 'payment',
+          customer_email: customer_email,
+          success_url: keealSuccessUrl,
+          cancel_url: keealCancelUrl,
+          line_items: lineItems,
+          metadata: {
+            order_id: orderId,
+          },
+        }),
+      });
+      const session = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const status = response.status;
+        if (status === 403 || status === 401) {
+          throw new Error(`Keeal API key is invalid or unauthorized (HTTP ${status}). Please update your Keeal secret key in Payment Gateways settings.`);
+        }
+        const errMsg = session.error?.message || session.message || 'Unknown Keeal error';
+        throw new Error(`Keeal error (HTTP ${status}): ${errMsg}`);
+      }
+      result = { checkout_url: session.url, session_id: session.id, gateway: 'keeal' };
 
     } else if (gateway === 'sslcommerz') {
       const storeId = settings.sslcommerz_store_id;
@@ -884,7 +956,7 @@ export class OrdersService {
         });
         productCart.push({ product_id: product.product_id, quantity: item.quantity });
       }
-      const dodoReturnUrl = `${clientOrigin || 'http://localhost:5002'}/payment/status/${preGeneratedOrderId}`;
+      const dodoReturnUrl = `${clientOrigin || 'http://localhost:5002'}/payment/status/${orderId}`;
       const payment = await dodoFetch('/payments', {
         payment_link: true,
         billing: {
@@ -1502,6 +1574,116 @@ export class OrdersService {
     return { received: true, status, orderId: order.id };
   }
 
+  async handleKeealWebhook(rawBody: string, signature: string) {
+    const settings = await this.loadPaymentSettings('keeal');
+    const webhookSecret = settings.keeal_webhook_secret;
+
+    if (webhookSecret && signature) {
+      const parts: Record<string, string> = {};
+      signature.split(',').forEach((part) => {
+        const kv = part.split('=');
+        if (kv.length === 2) {
+          parts[kv[0]] = kv[1];
+        }
+      });
+
+      if (parts.t && parts.v1) {
+        const computed = crypto
+          .createHmac('sha256', webhookSecret)
+          .update(`${parts.t}.${rawBody}`)
+          .digest('hex');
+        if (computed !== parts.v1) {
+          throw new BadRequestException('Invalid Keeal signature');
+        }
+      } else {
+        const computed = crypto
+          .createHmac('sha256', webhookSecret)
+          .update(rawBody)
+          .digest('hex');
+        const cleanHeader = signature.replace('sha256=', '');
+        if (computed !== signature && computed !== cleanHeader) {
+          throw new BadRequestException('Invalid Keeal signature');
+        }
+      }
+    }
+
+    let event: any;
+    try {
+      event = JSON.parse(rawBody);
+    } catch {
+      throw new BadRequestException('Invalid JSON payload');
+    }
+
+    const type = event.type ?? '';
+    const obj = event.data?.object ?? event;
+    const sessionId = obj.id ?? obj.payment_intent ?? obj.session_id ?? '';
+    const orderId = obj.metadata?.order_id ?? obj.order_id ?? null;
+
+    let status: string | null = null;
+    if (['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'payment_intent.succeeded'].includes(type)) {
+      status = 'paid';
+    } else if (['checkout.session.async_payment_failed', 'payment_intent.payment_failed'].includes(type)) {
+      status = 'failed';
+    } else if (type === 'charge.refunded') {
+      status = 'refunded';
+    } else {
+      const rawStatus = (event.status ?? obj.status ?? '').toLowerCase();
+      if (['paid', 'succeeded', 'success', 'completed'].includes(rawStatus)) {
+        status = 'paid';
+      } else if (['failed', 'fail'].includes(rawStatus)) {
+        status = 'failed';
+      } else if (['refunded', 'refund'].includes(rawStatus)) {
+        status = 'refunded';
+      }
+    }
+
+    if (!status) {
+      return { received: true, ignored: type || event.status || 'unknown' };
+    }
+
+    let order: any = null;
+    if (sessionId) {
+      order = await this.prisma.orders.findFirst({
+        where: { stripe_session_id: sessionId },
+      });
+    }
+    if (!order && orderId) {
+      order = await this.prisma.orders.findUnique({
+        where: { id: orderId },
+      });
+    }
+
+    if (!order) {
+      return { received: true, status, error: 'Order not found' };
+    }
+
+    const updated = await this.prisma.orders.update({
+      where: { id: order.id },
+      data: {
+        status: status as any,
+        payment_verification: {
+          provider: 'keeal',
+          verified_at: new Date().toISOString(),
+          signature_valid: !!signature,
+          authoritative_status: type || event.status || null,
+        },
+        updated_at: new Date(),
+      },
+    });
+
+    if (status === 'paid' && updated.referral_code) {
+      this.referralService.triggerCommission(
+        updated.id,
+        updated.customer_email,
+        updated.referral_code,
+        Number(updated.total),
+      ).catch((e) => console.error('[keeal-webhook] referral commission error:', e));
+    }
+
+    this.eventService.emit('order-updated', { orderId: order.id });
+    return { received: true, status, orderId: order.id };
+  }
+
   async findPublicInvoice(ref: string) {
     const isUuid = /^[0-9a-f-]{36}$/i.test(ref);
     const order = await this.prisma.orders.findFirst({
@@ -1539,24 +1721,54 @@ export class OrdersService {
 
     if (order.status === 'pending') {
       let isPaid = false;
-      if (order.payment_gateway === 'stripe' && order.stripe_session_id) {
+      if (['stripe', 'stripe_onsite'].includes(order.payment_gateway || '') && order.stripe_session_id) {
         const settings = await this.loadPaymentSettings('stripe');
         const secretKey = settings.stripe_secret_key;
         if (secretKey) {
           try {
-            const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${order.stripe_session_id}`, {
+            const isPaymentIntent = order.stripe_session_id.startsWith('pi_');
+            const url = isPaymentIntent
+              ? `https://api.stripe.com/v1/payment_intents/${order.stripe_session_id}`
+              : `https://api.stripe.com/v1/checkout/sessions/${order.stripe_session_id}`;
+            const res = await fetch(url, {
               headers: {
                 Authorization: `Basic ${Buffer.from(secretKey + ':').toString('base64')}`,
               },
             });
             if (res.ok) {
               const data = await res.json();
-              if (data.payment_status === 'paid' || data.status === 'complete') {
-                isPaid = true;
+              if (isPaymentIntent) {
+                if (data.status === 'succeeded') {
+                  isPaid = true;
+                }
+              } else {
+                if (data.payment_status === 'paid' || data.status === 'complete') {
+                  isPaid = true;
+                }
               }
             }
           } catch (e) {
             console.error('[getStatusBySession] Stripe verification error:', e);
+          }
+        }
+      } else if (order.payment_gateway === 'keeal' && order.stripe_session_id) {
+        const settings = await this.loadPaymentSettings('keeal');
+        const secretKey = settings.keeal_secret_key;
+        if (secretKey) {
+          try {
+            const res = await fetch(`https://api.keeal.com/v1/checkout/sessions/${order.stripe_session_id}`, {
+              headers: {
+                Authorization: `Bearer ${secretKey}`,
+              },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.payment_status === 'paid' || data.status === 'completed' || data.status === 'succeeded') {
+                isPaid = true;
+              }
+            }
+          } catch (e) {
+            console.error('[getStatusBySession] Keeal verification error:', e);
           }
         }
       } else if (order.payment_gateway === 'dodopayment' && order.stripe_session_id) {

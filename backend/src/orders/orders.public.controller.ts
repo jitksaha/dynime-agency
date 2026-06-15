@@ -119,4 +119,16 @@ export class OrdersPublicController {
     const rawBody = req.rawBody ? req.rawBody.toString('utf8') : '';
     return this.ordersService.handleDodoWebhook(rawBody, signature);
   }
+
+  @Post('keeal-webhook')
+  async keealWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('keeal-signature') signature: string,
+    @Headers('stripe-signature') stripeSignature: string,
+    @Headers('x-keeal-signature') xSignature: string,
+  ) {
+    const rawBody = req.rawBody ? req.rawBody.toString('utf8') : '';
+    const sig = signature || stripeSignature || xSignature;
+    return this.ordersService.handleKeealWebhook(rawBody, sig);
+  }
 }

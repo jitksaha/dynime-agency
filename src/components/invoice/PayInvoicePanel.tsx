@@ -11,6 +11,7 @@ import { apiGet, apiPost } from "@/lib/api";
 
 const GATEWAYS: { id: string; label: string }[] = [
   { id: "stripe", label: "Credit / Debit Card (Stripe)" },
+  { id: "stripe_onsite", label: "Credit Card (On-Site)" },
   { id: "keeal", label: "Keeal" },
   { id: "sslcommerz", label: "SSLCommerz" },
   { id: "dodopayment", label: "DodoPayment" },
@@ -24,6 +25,7 @@ const GATEWAYS: { id: string; label: string }[] = [
 // `INVOICE` means: keep the invoice's own currency (manual settlement).
 const GATEWAY_SETTLE_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
   stripe: "USD",
+  stripe_onsite: "USD",
   keeal: "USD",
   dodopayment: "USD",
   bank_transfer: "USD",
@@ -34,6 +36,7 @@ const GATEWAY_SETTLE_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
 // What the customer's card/wallet will actually be billed in (display only).
 const GATEWAY_DISPLAY_CURRENCY: Record<string, CurrencyCode | "INVOICE"> = {
   stripe: "USD",
+  stripe_onsite: "USD",
   keeal: "USD",
   dodopayment: "USD",
   bank_transfer: "USD",
@@ -88,6 +91,102 @@ export default function PayInvoicePanel({
     open: boolean; accounts: BankAccount[]; instructions?: string; displayName?: string; orderNumber?: string;
   } | null>(null);
 
+  const [stripeInstance, setStripeInstance] = useState<any>(null);
+  const [cardElementInstance, setCardElementInstance] = useState<any>(null);
+  const [cardholderName, setCardholderName] = useState("");
+  const [publicSettings, setPublicSettings] = useState<Record<string, any>>({});
+
+  const stripePublishableKey = useMemo(() => {
+    if (!publicSettings) return null;
+    const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
+    const sandboxVal = cleanValue(publicSettings.stripe_sandbox);
+    const isSandbox = sandboxVal === "true" || sandboxVal === "1";
+    const key = isSandbox ? publicSettings.stripe_test_publishable_key : publicSettings.stripe_publishable_key;
+    if (!key) return null;
+    const cleanedKey = cleanValue(key);
+    if (!cleanedKey.startsWith("pk_") || cleanedKey.length < 90) return null;
+    return cleanedKey;
+  }, [publicSettings]);
+
+  // Load Stripe.js CDN
+  useEffect(() => {
+    const scriptId = "stripe-js-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://js.stripe.com/v3/";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // Instantiate Stripe
+  useEffect(() => {
+    if (!stripePublishableKey) return;
+    const checkStripe = () => {
+      const stripeWindow = (window as any).Stripe;
+      if (stripeWindow) {
+        try {
+          setStripeInstance(stripeWindow(stripePublishableKey));
+        } catch (err) {
+          console.error("[Stripe] Failed to initialize Stripe.js with publishable key:", err);
+        }
+      } else {
+        setTimeout(checkStripe, 100);
+      }
+    };
+    checkStripe();
+  }, [stripePublishableKey]);
+
+  // Mount/unmount card element
+  useEffect(() => {
+    if (!stripeInstance || gateway !== "stripe_onsite") {
+      if (cardElementInstance) {
+        try { cardElementInstance.destroy(); } catch {}
+        setCardElementInstance(null);
+      }
+      return;
+    }
+
+    const elements = stripeInstance.elements();
+    const card = elements.create("card", {
+      style: {
+        base: {
+          color: "hsl(var(--foreground))",
+          fontFamily: 'Inter, sans-serif',
+          fontSmoothing: "antialiased",
+          fontSize: "14px",
+          "::placeholder": {
+            color: "hsl(var(--muted-foreground))",
+          },
+        },
+        invalid: {
+          color: "hsl(var(--destructive))",
+          iconColor: "hsl(var(--destructive))",
+        },
+      },
+    });
+
+    const timer = setTimeout(() => {
+      const container = document.getElementById("invoice-card-element");
+      if (container) {
+        try {
+          card.mount("#invoice-card-element");
+          setCardElementInstance(card);
+        } catch (err) {
+          console.warn("Card element mount error:", err);
+        }
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      if (card) {
+        try { card.destroy(); } catch {}
+      }
+    };
+  }, [stripeInstance, gateway]);
+
   const {
     rateFor,
     isFallback: fxFallback,
@@ -113,6 +212,7 @@ export default function PayInvoicePanel({
     (async () => {
       try {
         const settings = await apiGet<Record<string, any>>("/site-settings");
+        setPublicSettings(settings);
         const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
         const on = Object.keys(settings)
           .filter((key) => key.endsWith("_enabled") && cleanValue(settings[key]) === "true")
@@ -221,6 +321,20 @@ export default function PayInvoicePanel({
     if (locked) return;
     if (!gateway) { toast.error("Choose a payment method"); return; }
     if (!conversion.usable) { toast.error("Could not compute charge amount"); return; }
+    if (gateway === "stripe_onsite") {
+      if (!stripeInstance) {
+        toast.error("Stripe could not initialize. Please contact support.");
+        return;
+      }
+      if (!cardElementInstance) {
+        toast.error("Stripe card element has not loaded. Please wait.");
+        return;
+      }
+      if (!cardholderName.trim()) {
+        toast.error("Please enter Cardholder Name.");
+        return;
+      }
+    }
     if (conversion.converted && conversion.fxSource !== "live") {
       toast.message(
         conversion.fxSource === "cache"
@@ -259,6 +373,36 @@ export default function PayInvoicePanel({
         cancel_url: `${window.location.origin}/i/${invoiceNumber || orderId}?payment=cancelled`,
       });
       if (r?.error) throw new Error(r.error);
+      if (gateway === "stripe_onsite") {
+        if (!r?.client_secret) {
+          throw new Error("Could not initialize Stripe PaymentIntent");
+        }
+        toast.loading("Processing card payment...", { id: "stripe-onsite-pay" });
+        const { error: confirmError, paymentIntent } = await stripeInstance.confirmCardPayment(
+          r.client_secret,
+          {
+            payment_method: {
+              card: cardElementInstance,
+              billing_details: {
+                name: cardholderName.trim(),
+                email: customerEmail.trim().toLowerCase(),
+              },
+            },
+          }
+        );
+        if (confirmError) {
+          toast.dismiss("stripe-onsite-pay");
+          throw new Error(confirmError.message);
+        }
+        if (paymentIntent && paymentIntent.status === "succeeded") {
+          toast.success("Payment succeeded!", { id: "stripe-onsite-pay" });
+          window.location.assign(`${window.location.origin}/i/${invoiceNumber || orderId}?payment=success`);
+          return;
+        } else {
+          toast.dismiss("stripe-onsite-pay");
+          throw new Error("Payment is pending confirmation.");
+        }
+      }
       if (r?.gateway === "bank_transfer" && r?.session_id) {
         markStarted();
         setBank({
@@ -326,56 +470,101 @@ export default function PayInvoicePanel({
         </p>
       ) : (
         <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-            <div className="flex-1 min-w-0">
-              <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 block">
-                Payment method
-              </label>
-              <Select value={gateway} onValueChange={(v) => { setGateway(v); writeLastGateway(v); }}>
-                <SelectTrigger><SelectValue placeholder="Choose a method" /></SelectTrigger>
-                <SelectContent>
-                  {visible.map((g) => {
-                    const p = previewFor(g.id);
-                    const fmt = formatMoney(p.amount, p.currency);
-                    return (
-                      <SelectItem key={g.id} value={g.id}>
-                        <span className="flex items-center justify-between gap-3 w-full min-w-[260px]">
-                          <span className="flex items-center gap-2">
-                            {g.id === "bank_transfer" ? <Banknote className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
-                            {g.label}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+              <div className="flex-1 min-w-0">
+                <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 block">
+                  Payment method
+                </label>
+                <Select value={gateway} onValueChange={(v) => { setGateway(v); writeLastGateway(v); }}>
+                  <SelectTrigger><SelectValue placeholder="Choose a method" /></SelectTrigger>
+                  <SelectContent>
+                    {visible.map((g) => {
+                      const p = previewFor(g.id);
+                      const fmt = formatMoney(p.amount, p.currency);
+                      return (
+                        <SelectItem key={g.id} value={g.id}>
+                          <span className="flex items-center justify-between gap-3 w-full min-w-[260px]">
+                            <span className="flex items-center gap-2">
+                              {g.id === "bank_transfer" ? <Banknote className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                              {g.label}
+                            </span>
+                            <span className="text-xs font-semibold tabular-nums text-foreground/80">
+                              {fmt}
+                              {p.converted && (
+                                <span className="ml-1 font-normal text-muted-foreground">
+                                  ≈ {invoiceFmt}
+                                </span>
+                              )}
+                            </span>
                           </span>
-                          <span className="text-xs font-semibold tabular-nums text-foreground/80">
-                            {fmt}
-                            {p.converted && (
-                              <span className="ml-1 font-normal text-muted-foreground">
-                                ≈ {invoiceFmt}
-                              </span>
-                            )}
-                          </span>
-                        </span>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              onClick={pay}
-              disabled={submitting || !gateway || locked}
-              variant="hero"
-              size="lg"
-              className="sm:w-auto w-full"
-            >
-              {statusLocked ? (
-                <><CheckCircle2 className="w-4 h-4 mr-2" /> Payment {status}</>
-              ) : checkoutStarted ? (
-                <><Clock className="w-4 h-4 mr-2" /> Checkout in progress</>
-              ) : submitting ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting…</>
-              ) : (
-                <><CreditCard className="w-4 h-4 mr-2" /> Pay {displayFmt}</>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              {gateway !== "stripe_onsite" && (
+                <Button
+                  onClick={pay}
+                  disabled={submitting || !gateway || locked}
+                  variant="hero"
+                  size="lg"
+                  className="sm:w-auto w-full"
+                >
+                  {statusLocked ? (
+                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Payment {status}</>
+                  ) : checkoutStarted ? (
+                    <><Clock className="w-4 h-4 mr-2" /> Checkout in progress</>
+                  ) : submitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting…</>
+                  ) : (
+                    <><CreditCard className="w-4 h-4 mr-2" /> Pay {displayFmt}</>
+                  )}
+                </Button>
               )}
-            </Button>
+            </div>
+
+            {gateway === "stripe_onsite" && (
+              <div className="rounded-lg border border-border bg-background p-4 space-y-4 max-w-md">
+                <div className="space-y-3 w-full">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Cardholder Name *</label>
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={cardholderName}
+                      onChange={(e) => setCardholderName(e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground mb-1 block">Card Information *</label>
+                    <div id="invoice-card-element" className="p-3 rounded-lg border border-input bg-background">
+                      {/* Stripe unified Card Element will mount here */}
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={pay}
+                  disabled={submitting || !gateway || locked}
+                  variant="hero"
+                  size="lg"
+                  className="w-full"
+                >
+                  {statusLocked ? (
+                    <><CheckCircle2 className="w-4 h-4 mr-2" /> Payment {status}</>
+                  ) : checkoutStarted ? (
+                    <><Clock className="w-4 h-4 mr-2" /> Checkout in progress</>
+                  ) : submitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing Card…</>
+                  ) : (
+                    <><CreditCard className="w-4 h-4 mr-2" /> Confirm Payment — {displayFmt}</>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Conversion summary — only shown when charge currency differs from invoice currency */}

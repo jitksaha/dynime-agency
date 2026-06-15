@@ -19,6 +19,47 @@ export class CmsService {
     });
   }
 
+  async getPublicSettings() {
+    const rows = await this.prisma.site_settings.findMany({
+      where: {
+        OR: [
+          {
+            key: {
+              in: [
+                'stripe_enabled',
+                'stripe_sandbox',
+                'stripe_publishable_key',
+                'stripe_test_publishable_key',
+                'stripe_currency',
+                'keeal_enabled',
+                'keeal_sandbox',
+                'keeal_currency',
+                'gateway_order',
+              ],
+            },
+          },
+          {
+            key: {
+              endsWith: '_enabled',
+            },
+          },
+          {
+            key: {
+              startsWith: 'gateway_',
+            },
+          },
+        ],
+      },
+    });
+
+    const settings: Record<string, any> = {};
+    rows.forEach((row) => {
+      const val = typeof row.value === 'string' ? row.value.replace(/^"|"$/g, '') : row.value;
+      settings[row.key] = val;
+    });
+    return settings;
+  }
+
   async getSiteSetting(key: string) {
     return this.prisma.site_settings.findUnique({
       where: { key },

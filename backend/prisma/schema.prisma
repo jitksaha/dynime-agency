@@ -94,7 +94,7 @@ model identities {
   last_sign_in_at DateTime? @db.Timestamptz(6)
   created_at      DateTime? @db.Timestamptz(6)
   updated_at      DateTime? @db.Timestamptz(6)
-  email           String?
+  email           String?   @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -430,7 +430,7 @@ model users {
   phone_change                String?                 @default("")
   phone_change_token          String?                 @default("") @db.VarChar(255)
   phone_change_sent_at        DateTime?               @db.Timestamptz(6)
-  confirmed_at                DateTime?               @db.Timestamptz(6)
+  confirmed_at                DateTime?               @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
   email_change_token_current  String?                 @default("") @db.VarChar(255)
   email_change_confirm_status Int?                    @default(0) @db.SmallInt
   banned_until                DateTime?               @db.Timestamptz(6)
@@ -2577,7 +2577,7 @@ model orders {
   refunded_tax_amount     Decimal                   @default(0) @db.Decimal
   refunded_at             DateTime?                 @db.Timestamptz(6)
   refund_reason           String?
-  referral_code           String?
+  referral_code           String?                   @db.VarChar(255)
   flexpay_emi_plans       flexpay_emi_plans[]
   flexpay_paylater_orders flexpay_paylater_orders[]
   inbound_emails          inbound_emails[]
@@ -2699,7 +2699,7 @@ model payroll_runs {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   period_year        Int
   period_month       Int
-  period_start       DateTime?            @db.Date
+  period_start       DateTime?            @default(dbgenerated("make_date(period_year, period_month, 1)")) @db.Date
   currency           String               @default("USD")
   working_days       Int                  @default(22)
   status             String               @default("draft")
@@ -2821,12 +2821,12 @@ model products {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model profiles {
-  id         String   @id @db.Uuid
-  email      String
-  full_name  String?
-  avatar_url String?
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  id                    String                  @id @db.Uuid
+  email                 String
+  full_name             String?
+  avatar_url            String?
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
   users                 users                   @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   verification_requests verification_requests[]
 
@@ -3122,7 +3122,7 @@ model objects {
   updated_at       DateTime? @default(now()) @db.Timestamptz(6)
   last_accessed_at DateTime? @default(now()) @db.Timestamptz(6)
   metadata         Json?
-  path_tokens      String[]
+  path_tokens      String[]  @default(dbgenerated("string_to_array(name, '/'::text)"))
   version          String?
   owner_id         String?
   user_metadata    Json?
@@ -3278,6 +3278,154 @@ model app_storage_migration_map {
   @@schema("public")
 }
 
+model verification_requests {
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type               String                @db.VarChar(50)
+  customer_id        String?               @db.Uuid
+  company_id         String?               @db.Uuid
+  service_order_id   String?               @db.Uuid
+  compliance_case_id String?               @db.Uuid
+  didit_session_id   String?               @unique @db.VarChar(255)
+  workflow_id        String?               @db.VarChar(255)
+  verification_url   String?
+  qr_code_url        String?
+  status             String                @default("pending") @db.VarChar(50)
+  decision           String?               @db.VarChar(50)
+  created_at         DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime              @default(now()) @db.Timestamptz(6)
+  company_name       String?               @db.VarChar(255)
+  country            String?               @db.VarChar(255)
+  events             verification_events[]
+  logs               verification_logs[]
+  profiles           profiles?             @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  orders             orders?               @relation(fields: [service_order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([didit_session_id])
+  @@index([customer_id])
+  @@index([company_id])
+  @@index([service_order_id])
+  @@schema("public")
+}
+
+model verification_events {
+  id                      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  verification_request_id String                @db.Uuid
+  webhook_type            String                @db.VarChar(255)
+  payload                 Json
+  created_at              DateTime              @default(now()) @db.Timestamptz(6)
+  request                 verification_requests @relation(fields: [verification_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model verification_logs {
+  id                      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  verification_request_id String                @db.Uuid
+  action                  String                @db.VarChar(255)
+  description             String
+  created_at              DateTime              @default(now()) @db.Timestamptz(6)
+  request                 verification_requests @relation(fields: [verification_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model partners {
+  id                      String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                 String?       @db.Uuid
+  name                    String        @db.VarChar(255)
+  email                   String        @unique @db.VarChar(255)
+  status                  String        @default("active") @db.VarChar(50)
+  referral_code           String        @unique @db.VarChar(255)
+  commission_earned       Decimal       @default(0.00) @db.Decimal(10, 2)
+  commission_paid         Decimal       @default(0.00) @db.Decimal(10, 2)
+  total_referrals         Int           @default(0)
+  total_sales             Decimal       @default(0.00) @db.Decimal(10, 2)
+  tier                    String        @default("standard") @db.VarChar(50)
+  commission_multiplier   Decimal       @default(1.00) @db.Decimal(3, 2)
+  created_at              DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime      @default(now()) @db.Timestamptz(6)
+  parent_partner_id       String?       @db.Uuid
+  parent_commission_share Decimal       @default(0.10) @db.Decimal(3, 2)
+  commissions             commissions[]
+  parent_partner          partners?     @relation("PartnerSubPartners", fields: [parent_partner_id], references: [id], onUpdate: NoAction)
+  sub_partners            partners[]    @relation("PartnerSubPartners")
+  payouts                 payouts[]
+  referrals               referrals[]
+
+  @@schema("public")
+}
+
+model referrals {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id         String   @db.Uuid
+  referral_code      String   @db.VarChar(255)
+  visitor_ip         String?  @db.VarChar(100)
+  device_fingerprint String?  @db.VarChar(255)
+  landing_page       String?
+  utm_source         String?  @db.VarChar(100)
+  utm_medium         String?  @db.VarChar(100)
+  utm_campaign       String?  @db.VarChar(100)
+  cookie_id          String?  @unique @db.VarChar(255)
+  converted          Boolean  @default(false)
+  order_id           String?  @db.Uuid
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  last_visit         DateTime @default(now()) @db.Timestamptz(6)
+  partners           partners @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model commissions {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id        String    @db.Uuid
+  order_id          String    @db.Uuid
+  customer_id       String?   @db.Uuid
+  service_name      String    @db.VarChar(255)
+  order_amount      Decimal   @db.Decimal(10, 2)
+  profit_amount     Decimal   @db.Decimal(10, 2)
+  commission_amount Decimal   @db.Decimal(10, 2)
+  status            String    @default("pending") @db.VarChar(50)
+  approved_at       DateTime? @db.Timestamptz(6)
+  paid_at           DateTime? @db.Timestamptz(6)
+  payout_id         String?   @db.Uuid
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
+  commission_type   String    @default("standard") @db.VarChar(50)
+  cost_amount       Decimal?  @default(0.00) @db.Decimal(10, 2)
+  partners          partners  @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  payouts           payouts?  @relation(fields: [payout_id], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model payouts {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id     String        @db.Uuid
+  amount         Decimal       @db.Decimal(10, 2)
+  payout_method  String        @db.VarChar(100)
+  details        Json          @default("{}")
+  status         String        @default("pending") @db.VarChar(50)
+  transaction_id String?       @db.VarChar(255)
+  paid_at        DateTime?     @db.Timestamptz(6)
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime      @default(now()) @db.Timestamptz(6)
+  commissions    commissions[]
+  partners       partners      @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model commission_rules {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  min_amount Decimal  @db.Decimal(10, 2)
+  max_amount Decimal  @db.Decimal(10, 2)
+  commission Decimal  @db.Decimal(10, 2)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
 enum aal_level {
   aal1
   aal2
@@ -3369,152 +3517,3 @@ enum buckettype {
 
   @@schema("storage")
 }
-
-model verification_requests {
-  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type               String
-  customer_id        String?               @db.Uuid
-  company_id         String?               @db.Uuid
-  service_order_id   String?               @db.Uuid
-  compliance_case_id String?               @db.Uuid
-  company_name       String?
-  country            String?
-  didit_session_id   String?               @unique
-  workflow_id        String?
-  verification_url   String?
-  qr_code_url        String?
-  status             String                @default("pending")
-  decision           String?
-  created_at         DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime              @default(now()) @db.Timestamptz(6)
-  events             verification_events[]
-  logs               verification_logs[]
-  profiles           profiles?             @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  orders             orders?               @relation(fields: [service_order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([didit_session_id])
-  @@index([customer_id])
-  @@index([company_id])
-  @@index([service_order_id])
-  @@schema("public")
-}
-
-model verification_events {
-  id                      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  verification_request_id String                @db.Uuid
-  webhook_type            String
-  payload                 Json
-  created_at              DateTime              @default(now()) @db.Timestamptz(6)
-  request                 verification_requests @relation(fields: [verification_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-model verification_logs {
-  id                      String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  verification_request_id String                @db.Uuid
-  action                  String
-  description             String
-  created_at              DateTime              @default(now()) @db.Timestamptz(6)
-  request                 verification_requests @relation(fields: [verification_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-model partners {
-  id                    String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id               String?       @db.Uuid
-  name                  String
-  email                 String        @unique
-  status                String        @default("active") // pending, active, suspended
-  referral_code         String        @unique
-  commission_earned     Decimal       @default(0) @db.Decimal(10, 2)
-  commission_paid       Decimal       @default(0) @db.Decimal(10, 2)
-  total_referrals       Int           @default(0)
-  total_sales           Decimal       @default(0) @db.Decimal(10, 2)
-  tier                  String        @default("standard") // standard, reseller, strategic
-  commission_multiplier Decimal       @default(1.0) @db.Decimal(3, 2)
-  parent_partner_id     String?       @db.Uuid
-  parent_commission_share Decimal     @default(0.10) @db.Decimal(3, 2) // default 10% override share of the referred partner's commission
-  created_at            DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime      @default(now()) @db.Timestamptz(6)
-  commissions           commissions[]
-  referrals             referrals[]
-  payouts               payouts[]
-  parent_partner        partners?     @relation("PartnerSubPartners", fields: [parent_partner_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  sub_partners          partners[]    @relation("PartnerSubPartners")
-
-  @@schema("public")
-}
-
-model referrals {
-  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  partner_id         String    @db.Uuid
-  referral_code      String
-  visitor_ip         String?
-  device_fingerprint String?
-  landing_page       String?
-  utm_source         String?
-  utm_medium         String?
-  utm_campaign       String?
-  cookie_id          String?   @unique
-  converted          Boolean   @default(false)
-  order_id           String?   @db.Uuid
-  created_at         DateTime  @default(now()) @db.Timestamptz(6)
-  last_visit         DateTime  @default(now()) @db.Timestamptz(6)
-  partners           partners  @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-model commissions {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  partner_id        String    @db.Uuid
-  order_id          String    @db.Uuid
-  customer_id       String?   @db.Uuid
-  service_name      String
-  order_amount      Decimal   @db.Decimal(10, 2)
-  cost_amount       Decimal   @default(0) @db.Decimal(10, 2)
-  profit_amount     Decimal   @db.Decimal(10, 2)
-  commission_amount Decimal   @db.Decimal(10, 2)
-  status            String    @default("pending") // pending, approved, paid, rejected
-  commission_type   String    @default("standard") // standard, override
-  approved_at       DateTime? @db.Timestamptz(6)
-  paid_at           DateTime? @db.Timestamptz(6)
-  payout_id         String?   @db.Uuid
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
-  partners          partners  @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  payouts           payouts?  @relation(fields: [payout_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-
-  @@schema("public")
-}
-
-model payouts {
-  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  partner_id     String        @db.Uuid
-  amount         Decimal       @db.Decimal(10, 2)
-  payout_method  String // paypal, wise, bank_transfer, payoneer, crypto
-  details        Json          @default("{}")
-  status         String        @default("pending") // pending, approved, paid, rejected
-  transaction_id String?
-  paid_at        DateTime?     @db.Timestamptz(6)
-  created_at     DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime      @default(now()) @db.Timestamptz(6)
-  partners       partners      @relation(fields: [partner_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  commissions    commissions[]
-
-  @@schema("public")
-}
-
-model commission_rules {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  min_amount Decimal  @db.Decimal(10, 2)
-  max_amount Decimal  @db.Decimal(10, 2)
-  commission Decimal  @db.Decimal(10, 2)
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
-
-  @@schema("public")
-}
-

@@ -31,13 +31,17 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
-const toAppUser = (u: AdminUser): AppUser => ({
-  id: String(u.id),
-  email: u.email,
-  name: u.name,
-  roles: [u.role],
-  user_metadata: { full_name: u.name },
-});
+const toAppUser = (u: any): AppUser => {
+  const roles = Array.isArray(u.roles) ? u.roles : (u.role ? [u.role] : []);
+  const name = u.name || u.email?.split('@')[0] || "Admin";
+  return {
+    id: String(u.id),
+    email: u.email,
+    name,
+    roles,
+    user_metadata: { full_name: name },
+  };
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -59,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
     try {
       const res = await authApi.login(email, password);
-      tokenStorage.set(res.data.token);
+      tokenStorage.set((res.data as any).accessToken || res.data.token);
       setUser(toAppUser(res.data.user));
       return { error: null };
     } catch (err: any) {
