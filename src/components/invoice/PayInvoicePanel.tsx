@@ -162,21 +162,25 @@ export default function PayInvoicePanel({
       return;
     }
 
+    const isDark = document.documentElement.classList.contains("dark") || document.body.classList.contains("dark");
+    const textColor = isDark ? "#f8fafc" : "#0f172a";
+    const placeholderColor = isDark ? "#64748b" : "#94a3b8";
+
     const elements = stripeInstance.elements();
     const card = elements.create("card", {
       style: {
         base: {
-          color: "hsl(var(--foreground))",
+          color: textColor,
           fontFamily: 'Inter, sans-serif',
           fontSmoothing: "antialiased",
           fontSize: "14px",
           "::placeholder": {
-            color: "hsl(var(--muted-foreground))",
+            color: placeholderColor,
           },
         },
         invalid: {
-          color: "hsl(var(--destructive))",
-          iconColor: "hsl(var(--destructive))",
+          color: "#ef4444",
+          iconColor: "#ef4444",
         },
       },
     });
@@ -230,7 +234,10 @@ export default function PayInvoicePanel({
         const cleanValue = (val: any) => typeof val === "string" ? val.replace(/^"|"$/g, "") : String(val);
         const on = Object.keys(settings)
           .filter((key) => key.endsWith("_enabled") && cleanValue(settings[key]) === "true")
-          .map((key) => key.replace(/_enabled$/, ""))
+          .map((key) => {
+            const raw = key.replace(/_enabled$/, "");
+            return raw === "stripe_hosted" ? "stripe" : raw;
+          })
           .filter((g: string) => GATEWAYS.some((x) => x.id === g));
         setEnabled(on);
         if (on.length) {
