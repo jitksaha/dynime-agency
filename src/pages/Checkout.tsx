@@ -46,6 +46,7 @@ import { useExchangeRates } from "@/hooks/use-exchange-rates";
 import { computeTax, useTaxSettings } from "@/lib/tax";
 import { apiGet, apiPost } from "@/lib/api";
 import { getReferralCode } from '@/components/shared/ReferralTracker';
+import { COUNTRY_DIAL_CODES } from "@/data/country-dial-codes";
 
 type StepKey = "cart" | "contact" | "pay";
 type MilestoneStage = { label: string; percent: number; amount: number };
@@ -502,6 +503,8 @@ const Checkout = () => {
   const [emailExists, setEmailExists] = useState<boolean | null>(null);
 
   const [dialCode, setDialCode] = useState("+1");
+  const [selectedCountryCode, setSelectedCountryCode] = useState("US");
+  const [openDial, setOpenDial] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
 
   // Sync dialCode + phoneInput to details.phone
@@ -520,6 +523,9 @@ const Checkout = () => {
       .then((data) => {
         if (data.country_calling_code) {
           setDialCode(data.country_calling_code);
+          if (data.country) {
+            setSelectedCountryCode(data.country);
+          }
           if (data.country_name) {
             setDetails((d) => ({
               ...d,
@@ -530,6 +536,14 @@ const Checkout = () => {
       })
       .catch((err) => console.error("IP lookup failed:", err));
   }, []);
+
+  const currentCountry = useMemo(() => {
+    return COUNTRY_DIAL_CODES.find(
+      (c) => c.code.toUpperCase() === selectedCountryCode.toUpperCase()
+    ) || COUNTRY_DIAL_CODES.find(
+      (c) => c.dial_code === dialCode
+    ) || COUNTRY_DIAL_CODES[0];
+  }, [dialCode, selectedCountryCode]);
 
   // Debounced abandoned cart tracking
   useEffect(() => {
@@ -1880,27 +1894,48 @@ const Checkout = () => {
                         <div className="md:col-span-2">
                           <Label htmlFor="phone">Phone number *</Label>
                           <div className="flex mt-1 items-center rounded-md border border-primary/20 bg-background focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all overflow-hidden h-10 w-full">
-                            <Select value={dialCode} onValueChange={setDialCode}>
-                              <SelectTrigger className="w-[100px] h-full border-0 rounded-none bg-transparent px-3 py-2 text-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus-visible:outline-none shadow-none [&>span]:line-clamp-1">
-                                <SelectValue placeholder="Code" />
-                              </SelectTrigger>
-                              <SelectContent className="max-h-[300px]">
-                                <SelectItem value="+1">+1 (US/CA)</SelectItem>
-                                <SelectItem value="+44">+44 (GB)</SelectItem>
-                                <SelectItem value="+61">+61 (AU)</SelectItem>
-                                <SelectItem value="+880">+880 (BD)</SelectItem>
-                                <SelectItem value="+91">+91 (IN)</SelectItem>
-                                <SelectItem value="+92">+92 (PK)</SelectItem>
-                                <SelectItem value="+971">+971 (AE)</SelectItem>
-                                <SelectItem value="+65">+65 (SG)</SelectItem>
-                                <SelectItem value="+60">+60 (MY)</SelectItem>
-                                <SelectItem value="+49">+49 (DE)</SelectItem>
-                                <SelectItem value="+33">+33 (FR)</SelectItem>
-                                <SelectItem value="+966">+966 (SA)</SelectItem>
-                                <SelectItem value="+27">+27 (ZA)</SelectItem>
-                                <SelectItem value="+64">+64 (NZ)</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Popover open={openDial} onOpenChange={setOpenDial}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className="h-full px-3 gap-1.5 flex items-center justify-between text-sm hover:bg-muted/30 active:bg-muted/50 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none focus:outline-none select-none min-w-[85px] max-w-[110px]"
+                                >
+                                  <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                    <span className="text-base leading-none">{currentCountry?.flag}</span>
+                                    <span>{dialCode}</span>
+                                  </span>
+                                  <ChevronDown className="w-3.5 h-3.5 opacity-50 flex-shrink-0" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-[300px] p-0" align="start">
+                                <Command>
+                                  <CommandInput placeholder="Search country name or code..." className="h-9" />
+                                  <CommandList className="max-h-[250px] overflow-y-auto">
+                                    <CommandEmpty>No country found.</CommandEmpty>
+                                    <CommandGroup>
+                                      {COUNTRY_DIAL_CODES.map((c) => (
+                                        <CommandItem
+                                          key={`${c.code}-${c.dial_code}`}
+                                          value={`${c.name} ${c.dial_code} ${c.code}`}
+                                          onSelect={() => {
+                                            setDialCode(c.dial_code);
+                                            setSelectedCountryCode(c.code);
+                                            setOpenDial(false);
+                                          }}
+                                          className="flex items-center justify-between py-2 px-3 cursor-pointer hover:bg-accent text-sm"
+                                        >
+                                          <span className="flex items-center gap-2">
+                                            <span className="text-lg leading-none">{c.flag}</span>
+                                            <span className="font-medium">{c.name}</span>
+                                          </span>
+                                          <span className="text-muted-foreground font-semibold">{c.dial_code}</span>
+                                        </CommandItem>
+                                      ))}
+                                    </CommandGroup>
+                                  </CommandList>
+                                </Command>
+                              </PopoverContent>
+                            </Popover>
                             <div className="h-5 w-px bg-primary/20 flex-shrink-0" />
                             <Input
                               id="phone"
