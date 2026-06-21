@@ -94,7 +94,7 @@ jobs:
           fi
           
           echo "Executing file sync to $TARGET_DIR..."
-          lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --exclude '^dynime-api/' --exclude '^node_modules/' --exclude '^\.git/' --parallel=2 ./dist/ $TARGET_DIR; quit"
+          lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --exclude '^dynime-api/' --exclude '^node_modules/' --exclude '^\.git/' --parallel=1 ./dist/ $TARGET_DIR; quit"
 
       - name: 🚀 Commit and Push FTP Structure
         run: |
