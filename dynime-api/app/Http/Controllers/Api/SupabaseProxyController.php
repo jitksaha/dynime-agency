@@ -198,6 +198,67 @@ class SupabaseProxyController extends Controller
                         ->update(['status' => 'processing', 'order_id' => $params['_order_id'] ?? null]);
                     return response()->json(['data' => true, 'error' => null]);
 
+                case 'validate_coupon':
+                    $code = $params['_code'] ?? '';
+                    $subtotal = (double)($params['_order_total'] ?? 0);
+                    
+                    $coupon = DB::table('coupons')
+                        ->where('code', $code)
+                        ->where('is_active', true)
+                        ->first();
+
+                    $now = now();
+
+                    if (!$coupon) {
+                        return response()->json(['data' => ['valid' => false, 'error' => 'Coupon not found or inactive'], 'error' => null]);
+                    }
+
+                    if ($coupon->starts_at && $now->lt($coupon->starts_at)) {
+                        return response()->json(['data' => ['valid' => false, 'error' => 'Coupon not active yet'], 'error' => null]);
+                    }
+
+                    if ($coupon->expires_at && $now->gt($coupon->expires_at)) {
+                        return response()->json(['data' => ['valid' => false, 'error' => 'Coupon expired'], 'error' => null]);
+                    }
+
+                    if ($coupon->usage_limit && $coupon->usage_count >= $coupon->usage_limit) {
+                        return response()->json(['data' => ['valid' => false, 'error' => 'Coupon usage limit reached'], 'error' => null]);
+                    }
+
+                    if ($coupon->min_order_amount && $subtotal < $coupon->min_order_amount) {
+                        return response()->json(['data' => ['valid' => false, 'error' => 'Subtotal does not meet minimum requirement: $' . $coupon->min_order_amount], 'error' => null]);
+                    }
+
+                    if ($coupon->discount_type === 'percentage') {
+                        $discount = ($coupon->discount_value / 100) * $subtotal;
+                    } else {
+                        $discount = (double)$coupon->discount_value;
+                    }
+
+                    if ($coupon->max_discount_amount && $discount > $coupon->max_discount_amount) {
+                        $discount = (double)$coupon->max_discount_amount;
+                    }
+
+                    $computedStages = [];
+                    if ($coupon->is_milestone && $coupon->milestone_stages) {
+                        $decoded = json_decode($coupon->milestone_stages, true);
+                        if (is_array($decoded)) {
+                            $computedStages = $decoded;
+                        }
+                    }
+
+                    return response()->json([
+                        'data' => [
+                            'valid' => true,
+                            'code' => $coupon->code,
+                            'discount' => $discount,
+                            'is_milestone' => (bool)$coupon->is_milestone,
+                            'milestone_mode' => $coupon->milestone_mode,
+                            'milestone_stages' => $computedStages,
+                        ],
+                        'error' => null
+                    ]);
+
                 case 'flexpay_log_cvv_view':
                     DB::table('flexpay_card_audit_logs')->insert([
                         'card_id' => $params['_card_id'] ?? '',

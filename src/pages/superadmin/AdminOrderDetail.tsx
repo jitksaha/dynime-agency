@@ -71,6 +71,7 @@ type OrderRow = {
 
 const STATUS_OPTIONS = [
   "pending",
+  "paid",
   "confirmed",
   "processing",
   "completed",

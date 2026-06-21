@@ -224,17 +224,46 @@ export const useIncrementCareerViewBySlug = () => {
   });
 };
 
-// ── Coupons (stub — not in Laravel v1) ─────────────────────────────────
+// ── Coupons ──────────────────────────────────────────────────────────
 export const useCoupons = () =>
-  useQuery({ queryKey: ["coupons"], queryFn: () => Promise.resolve([] as any[]) });
+  useQuery({
+    queryKey: ["coupons"],
+    queryFn: () => apiGet<any[]>("/admin/coupons"),
+  });
 export const useCouponsAdmin = () =>
-  useQuery({ queryKey: ["coupons-admin"], queryFn: () => Promise.resolve([] as any[]) });
-export const useCouponByCode = (_code: string) =>
-  useQuery({ queryKey: ["coupon-code", _code], queryFn: () => Promise.resolve(null as any), enabled: false });
-export const useUpsertCoupon = () =>
-  useMutation({ mutationFn: (_c: any) => Promise.resolve({} as any) });
-export const useDeleteCoupon = () =>
-  useMutation({ mutationFn: (_id: string) => Promise.resolve({} as any) });
+  useQuery({
+    queryKey: ["coupons-admin"],
+    queryFn: () => apiGet<any[]>("/admin/coupons"),
+  });
+export const useCouponByCode = (code: string) =>
+  useQuery({
+    queryKey: ["coupon-code", code],
+    queryFn: () => apiGet<any>(`/admin/coupons/${code}`),
+    enabled: false,
+  });
+export const useUpsertCoupon = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (c: any) => {
+      if (c.id) return apiPatch<any>(`/admin/coupons/${c.id}`, c);
+      return apiPost<any>("/admin/coupons", c);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
+    },
+  });
+};
+export const useDeleteCoupon = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiDelete<any>(`/admin/coupons/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["coupons"] });
+      qc.invalidateQueries({ queryKey: ["coupons-admin"] });
+    },
+  });
+};
 
 // ── Office Locations ────────────────────────────────────────────────────
 export const useOfficeLocations = () => {

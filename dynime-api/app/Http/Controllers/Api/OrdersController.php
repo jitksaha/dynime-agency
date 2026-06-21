@@ -633,6 +633,7 @@ class OrdersController extends Controller
                 $orderId = $existingOrder ? $existingOrder->id : null;
                 if (!$orderId) {
                     $orderId = $preGeneratedOrderId;
+                    $invoiceNumber = $this->generateInvoiceNumber();
                     DB::table('orders')->insert([
                         'id' => $orderId,
                         'customer_name' => $customerName,
@@ -649,6 +650,7 @@ class OrdersController extends Controller
                         'status' => 'pending',
                         'currency' => 'USD',
                         'notes' => trim('bKash charge: ৳' . number_format($bdtTotal, 2) . ' BDT (rate 1 USD = ' . number_format($fxRate, 4) . ' BDT). ' . ($body['notes'] ?? '')),
+                        'invoice_number' => $invoiceNumber,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -773,6 +775,8 @@ class OrdersController extends Controller
                     ];
                 }
 
+                $invoiceNumber = $this->generateInvoiceNumber();
+
                 DB::table('orders')->insert(array_merge([
                     'id' => $finalOrderId,
                     'customer_name' => $customerName,
@@ -791,6 +795,7 @@ class OrdersController extends Controller
                     'currency' => $body['currency'] ?? 'USD',
                     'user_id' => $user_id,
                     'referral_code' => $body['referral_code'] ?? null,
+                    'invoice_number' => $invoiceNumber,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ], $taxFields));
@@ -1796,19 +1801,7 @@ class OrdersController extends Controller
         }
 
         // Generate invoice number
-        $lastOrder = DB::table('orders')
-            ->where('invoice_number', 'like', 'INV-%')
-            ->orderBy('invoice_number', 'desc')
-            ->first();
-        
-        $nextNum = 1001;
-        if ($lastOrder && preg_match('/INV-(\d+)/', $lastOrder->invoice_number, $matches)) {
-            $nextNum = ((int)$matches[1]) + 1;
-        } else {
-            $count = DB::table('orders')->count();
-            $nextNum = 1001 + $count;
-        }
-        $invoiceNumber = 'INV-' . $nextNum;
+        $invoiceNumber = $this->generateInvoiceNumber();
 
         // Insert into database
         DB::table('orders')->insert([
@@ -2076,5 +2069,22 @@ class OrdersController extends Controller
             'service_brief' => json_encode($brief),
             'updated_at' => now(),
         ]);
+    }
+
+    private function generateInvoiceNumber(): string
+    {
+        $lastOrder = DB::table('orders')
+            ->where('invoice_number', 'like', 'INV-%')
+            ->orderByRaw('CAST(SUBSTRING(invoice_number, 5) AS UNSIGNED) DESC')
+            ->first();
+        
+        $nextNum = 1001;
+        if ($lastOrder && preg_match('/INV-(\d+)/', $lastOrder->invoice_number, $matches)) {
+            $nextNum = ((int)$matches[1]) + 1;
+        } else {
+            $count = DB::table('orders')->count();
+            $nextNum = 1001 + $count;
+        }
+        return 'INV-' . $nextNum;
     }
 }

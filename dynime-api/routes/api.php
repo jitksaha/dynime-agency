@@ -190,6 +190,12 @@ Route::prefix('v1')->group(function () {
             Route::get('analytics/dashboard', [AnalyticsController::class, 'dashboard']);
             Route::get('analytics/pageviews', [AnalyticsController::class, 'pageviews']);
 
+            // Coupons
+            Route::get('coupons', [\App\Http\Controllers\Api\CouponsController::class, 'index']);
+            Route::post('coupons', [\App\Http\Controllers\Api\CouponsController::class, 'store']);
+            Route::patch('coupons/{id}', [\App\Http\Controllers\Api\CouponsController::class, 'update']);
+            Route::delete('coupons/{id}', [\App\Http\Controllers\Api\CouponsController::class, 'destroy']);
+
             // Blog
             Route::get('blog-posts',           [BlogController::class, 'adminIndex']);
             Route::get('blog-posts/{id}',      [BlogController::class, 'adminShow']);

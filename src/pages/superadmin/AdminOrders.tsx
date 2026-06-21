@@ -41,7 +41,7 @@ type VerificationMeta = {
   notes?: string;
 };
 
-const STATUS_OPTIONS = ["pending", "confirmed", "processing", "completed", "cancelled", "refunded"];
+const STATUS_OPTIONS = ["pending", "paid", "confirmed", "processing", "completed", "cancelled", "refunded"];
 
 const statusColor: Record<string, string> = {
   pending: "bg-amber-500/10 text-amber-600 border-amber-500/20 font-semibold",
