@@ -16,6 +16,7 @@ dms-illustration.png
 .gitignore
 nodejs-mern-ecommerce
 api-proxy-index.php
+debug-deploy.php
 read-log.php
 404.html
 saas-development
@@ -69,6 +70,7 @@ apple-touch-icon.png
 track
 sitemap.xml
 web.config
+test-migrations-exist.php
 dcs-illustration.png
 usa-business-formation
 website-redesign
@@ -109,7 +111,6 @@ react-mern-apps
 og-image-dark.jpg
 ai-software-illustration.png
 company-formation-illustration.png
-api_bak_1782054633
 marketing-ads-illustration.png
 dynime-icon-light.svg
 dss-illustration.png
