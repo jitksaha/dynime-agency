@@ -48,6 +48,23 @@ try {
         echo "{$row['Field']} - {$row['Type']} - Null: {$row['Null']} - Default: " . json_encode($row['Default']) . "\n";
     }
 
+    // Describe careers table columns
+    echo "--- CAREERS COLUMNS ---\n";
+    $stmt = $pdo->query("DESCRIBE careers");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        echo "{$row['Field']} - {$row['Type']} - Null: {$row['Null']} - Default: " . json_encode($row['Default']) . "\n";
+    }
+
+    echo "\n--- CAREER DETAIL (growth-revenue-lead) ---\n";
+    $stmt = $pdo->prepare("SELECT * FROM careers WHERE slug = ?");
+    $stmt->execute(['growth-revenue-lead']);
+    $career = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($career) {
+        print_r($career);
+    } else {
+        echo "Not found.\n";
+    }
+
     echo "\n--- MIGRATIONS TABLE ---\n";
     $stmt = $pdo->query("SELECT migration, batch FROM migrations ORDER BY batch DESC, migration DESC");
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
