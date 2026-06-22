@@ -13,17 +13,26 @@ $homeDir = dirname($docRoot);
 $apiDir = $homeDir . '/dynime-api';
 
 try {
+    if (function_exists('opcache_reset')) {
+        opcache_reset();
+    }
+    
     require $apiDir . '/vendor/autoload.php';
     $app = require_once $apiDir . '/bootstrap/app.php';
     
-    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
     
-    $request = Illuminate\Http\Request::create('/api/v1/careers/growth-revenue-lead', 'GET');
-    $response = $kernel->handle($request);
+    \Illuminate\Support\Facades\Cache::flush();
     
-    echo $response->getContent();
+    $careersCount = \App\Models\Career::count();
+    $applicationsCount = \App\Models\JobApplication::count();
     
-    $kernel->terminate($request, $response);
+    echo json_encode([
+        'success' => true,
+        'message' => 'OPcache reset and Laravel cache flushed successfully!',
+        'careers_count' => $careersCount,
+        'applications_count' => $applicationsCount
+    ]);
 } catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 }
