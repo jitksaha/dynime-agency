@@ -105,6 +105,123 @@ class CareerController extends Controller
         ], 201);
     }
 
+    public function uploadResume(Request $request): JsonResponse
+    {
+        $key = $request->query('key');
+        if (!$key) {
+            return response()->json(['message' => 'Key parameter is required.'], 400);
+        }
+
+        if (!$request->hasFile('file')) {
+            return response()->json(['message' => 'No file uploaded.'], 400);
+        }
+
+        $file = $request->file('file');
+        
+        // Store on public disk using the exact key (path) provided
+        $stored = Storage::disk('public')->put($key, file_get_contents($file));
+
+        if (!$stored) {
+            return response()->json(['message' => 'Failed to store resume.'], 500);
+        }
+
+        return response()->json([
+            'key' => $key,
+            'bucket' => 'job-applications',
+        ]);
+    }
+
+    public function applyPublic(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'career_id'        => 'nullable',
+            'career_slug'      => 'nullable|string|max:255',
+            'career_title'     => 'nullable|string|max:255',
+            'full_name'        => 'required|string|max:255',
+            'email'            => 'required|email|max:255',
+            'phone'            => 'nullable|string|max:50',
+            'country'          => 'nullable|string|max:100',
+            'current_position' => 'nullable|string|max:255',
+            'experience_years' => 'nullable|integer',
+            'expected_salary'  => 'nullable|string|max:255',
+            'linkedin_url'     => 'nullable|string|max:500',
+            'portfolio_url'    => 'nullable|string|max:500',
+            'cover_letter'     => 'nullable|string|max:5000',
+            'resume_url'       => 'nullable|string|max:500',
+        ]);
+
+        $resumeFilename = null;
+        if (!empty($data['resume_url'])) {
+            $resumeFilename = basename($data['resume_url']);
+        }
+
+        $application = JobApplication::create([
+            'career_id'        => $data['career_id'] ?? null,
+            'career_slug'      => $data['career_slug'] ?? null,
+            'career_title'     => $data['career_title'] ?? null,
+            'full_name'        => $data['full_name'],
+            'email'            => $data['email'],
+            'phone'            => $data['phone'] ?? null,
+            'country'          => $data['country'] ?? null,
+            'current_position' => $data['current_position'] ?? null,
+            'experience_years' => $data['experience_years'] ?? null,
+            'expected_salary'  => $data['expected_salary'] ?? null,
+            'linkedin_url'     => $data['linkedin_url'] ?? null,
+            'portfolio_url'    => $data['portfolio_url'] ?? null,
+            'cover_letter'     => $data['cover_letter'] ?? null,
+            'resume_path'      => $data['resume_url'] ?? null,
+            'resume_url'       => $data['resume_url'] ?? null,
+            'resume_filename'  => $resumeFilename,
+            'ip_address'       => $request->ip(),
+            'metadata'         => ['user_agent' => $request->userAgent()],
+        ]);
+
+        // Send mail alert to admin
+        try {
+            \App\Services\MailConfigurator::configure('careers');
+            Mail::html("
+                <div style='font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;'>
+                    <h2 style='color: #1e1b4b;'>New Job Application Received</h2>
+                    <p><strong>Name:</strong> {$application->full_name}</p>
+                    <p><strong>Email:</strong> {$application->email}</p>
+                    <p><strong>Role:</strong> " . ($application->career_title ?? $application->career_slug ?? 'General') . "</p>
+                    <p><strong>Expected Salary:</strong> {$application->expected_salary}</p>
+                    <p><strong>Experience:</strong> {$application->experience_years} years</p>
+                    <p><strong>Cover Letter:</strong></p>
+                    <p style='white-space: pre-wrap; background: #f8fafc; padding: 15px; border-radius: 6px; color: #334155;'>" . e($application->cover_letter) . "</p>
+                </div>
+            ", function ($message) use ($application) {
+                $message->to(config('mail.from.address') ?: 'contact@dynime.com')
+                    ->subject("New Job Application: {$application->full_name} - Dynime");
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Failed to send admin career alert email: " . $e->getMessage());
+        }
+
+        // Send confirmation email to applicant
+        try {
+            Mail::html("
+                <div style='font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;'>
+                    <h2 style='color: #1e1b4b;'>Application Received</h2>
+                    <p>Hi {$application->full_name},</p>
+                    <p>Thank you for applying for the <strong>" . ($application->career_title ?? $application->career_slug ?? 'General') . "</strong> position at Dynime.</p>
+                    <p>We have successfully received your application. Our hiring team will review your profile, and we will get back to you with an update soon.</p>
+                    <p style='color: #64748b; font-size: 14px;'>Best regards,<br>The Dynime Team</p>
+                </div>
+            ", function ($message) use ($application) {
+                $message->to($application->email)
+                    ->subject("Job Application Received - Dynime");
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Failed to send applicant confirmation email: " . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'applicationId' => $application->id,
+        ], 200);
+    }
+
     // ── Admin ────────────────────────────────────────────────────────────────
 
     public function adminIndex(): JsonResponse

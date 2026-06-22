@@ -72,7 +72,9 @@ Route::prefix('v1')->group(function () {
     Route::get('office-locations',       [ContactController::class, 'officeLocations']);
 
     // Job Applications (rate-limited)
-    Route::post('job-applications',      [CareerController::class, 'apply'])->middleware('throttle:5,1');
+    Route::post('job-applications',            [CareerController::class, 'apply'])->middleware('throttle:5,1');
+    Route::post('public/forms/upload-resume',  [CareerController::class, 'uploadResume']);
+    Route::post('public/forms/apply',          [CareerController::class, 'applyPublic'])->middleware('throttle:5,1');
 
     // SEO
     Route::get('seo',                    [SeoController::class, 'getByPath']);
