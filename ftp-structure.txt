@@ -12,7 +12,6 @@ portfolio
 index.html
 dms-illustration.png
 .replit
-dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -40,6 +39,7 @@ software-testing-qa
 view-env.php
 placeholder.svg
 us-company
+query-migrations.php
 components.json
 custom-software-development
 virtual-address
