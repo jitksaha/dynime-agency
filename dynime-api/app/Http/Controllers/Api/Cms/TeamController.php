@@ -46,7 +46,7 @@ class TeamController extends Controller
         return response()->json($member, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $member = TeamMember::findOrFail($id);
         $data = $request->validate([
@@ -67,7 +67,7 @@ class TeamController extends Controller
         return response()->json($member);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         TeamMember::findOrFail($id)->delete();
         Cache::flush();

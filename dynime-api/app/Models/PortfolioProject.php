@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasDynamicIdType;
 
 class PortfolioProject extends Model
 {
+    use HasDynamicIdType;
     protected $fillable = [
         'title', 'slug', 'category', 'description', 'content_html',
         'cover_image_url', 'gallery_images', 'client_name', 'project_url',

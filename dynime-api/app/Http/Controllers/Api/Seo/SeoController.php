@@ -24,7 +24,7 @@ class SeoController extends Controller
         return response()->json(SeoMeta::orderBy('path')->get());
     }
 
-    public function adminShow(int $id): JsonResponse
+    public function adminShow(string $id): JsonResponse
     {
         return response()->json(SeoMeta::findOrFail($id));
     }
@@ -54,7 +54,7 @@ class SeoController extends Controller
         return response()->json($seo, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $seo = SeoMeta::findOrFail($id);
         $data = $request->validate([
@@ -77,7 +77,7 @@ class SeoController extends Controller
         return response()->json($seo);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         $seo = SeoMeta::findOrFail($id);
         Cache::forget('seo_' . md5($seo->path));

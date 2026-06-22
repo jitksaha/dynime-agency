@@ -218,6 +218,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('job-applications/{id}',       [CareerController::class, 'applicationUpdate']);
             Route::delete('job-applications/{id}',      [CareerController::class, 'applicationDestroy']);
             Route::get('job-applications/{id}/resume',  [CareerController::class, 'resumeUrl']);
+            Route::post('job-applications/{id}/scan',    [CareerController::class, 'scan']);
 
             // Portfolio
             Route::get('portfolio',                     [PortfolioController::class, 'adminIndex']);
@@ -319,9 +320,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('job-applications/{id}',       [\App\Http\Controllers\Api\Cms\CareerController::class, 'applicationUpdate']);
             Route::delete('job-applications/{id}',      [\App\Http\Controllers\Api\Cms\CareerController::class, 'applicationDestroy']);
             Route::get('job-applications/{id}/resume-url', [\App\Http\Controllers\Api\Cms\CareerController::class, 'resumeUrl']);
-            Route::post('job-applications/{id}/scan',    function($id) {
-                return response()->json(['success' => true, 'status' => 'scanned', 'score' => 85, 'feedback' => 'Resume matched nicely.']);
-            });
+            Route::post('job-applications/{id}/scan',    [\App\Http\Controllers\Api\Cms\CareerController::class, 'scan']);
 
             // Blog Posts (alias)
             Route::get('blog-posts/admin',              [\App\Http\Controllers\Api\Cms\BlogController::class, 'adminIndex']);

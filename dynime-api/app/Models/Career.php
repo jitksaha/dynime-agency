@@ -3,9 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\HasDynamicIdType;
 
 class Career extends Model
 {
+    use HasDynamicIdType;
     protected $fillable = [
         'slug', 'title', 'department', 'location', 'employment_type',
         'experience_level', 'salary_range', 'description', 'content_html',

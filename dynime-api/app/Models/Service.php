@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasDynamicIdType;
 
 class Service extends Model
 {
+    use HasDynamicIdType;
     protected $fillable = [
         'slug', 'title', 'category', 'excerpt', 'description',
         'icon', 'cover_image_url', 'features', 'pricing',

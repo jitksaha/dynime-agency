@@ -73,7 +73,7 @@ class PortfolioController extends Controller
         return response()->json($project, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $project = PortfolioProject::findOrFail($id);
         $data = $request->validate([
@@ -97,7 +97,7 @@ class PortfolioController extends Controller
         return response()->json($project);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         PortfolioProject::findOrFail($id)->delete();
         Cache::flush();
@@ -108,7 +108,7 @@ class PortfolioController extends Controller
     {
         $data = $request->validate([
             'ids'         => 'required|array',
-            'ids.*'       => 'integer|exists:portfolio_projects,id',
+            'ids.*'       => 'exists:portfolio_projects,id',
             'is_published'=> 'nullable|boolean',
             'sort_order'  => 'nullable|integer',
         ]);
@@ -121,7 +121,7 @@ class PortfolioController extends Controller
 
     public function bulkDelete(Request $request): JsonResponse
     {
-        $data = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer']);
+        $data = $request->validate(['ids' => 'required|array', 'ids.*' => 'string']);
         PortfolioProject::whereIn('id', $data['ids'])->delete();
         Cache::flush();
         return response()->json(['message' => 'Deleted successfully.']);

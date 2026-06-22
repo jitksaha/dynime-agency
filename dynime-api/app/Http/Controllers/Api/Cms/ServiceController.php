@@ -67,7 +67,7 @@ class ServiceController extends Controller
         return response()->json($service, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $service = Service::findOrFail($id);
         $data = $request->validate([
@@ -91,7 +91,7 @@ class ServiceController extends Controller
         return response()->json($service);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         Service::findOrFail($id)->delete();
         Cache::flush();

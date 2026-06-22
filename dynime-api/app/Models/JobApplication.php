@@ -3,9 +3,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\HasDynamicIdType;
 
 class JobApplication extends Model
 {
+    use HasDynamicIdType;
     protected $fillable = [
         'career_id', 'career_slug', 'career_title', 'full_name', 'email', 'phone',
         'country', 'current_position', 'experience_years', 'expected_salary',
@@ -35,41 +37,7 @@ class JobApplication extends Model
         ];
     }
 
-    protected static function booted()
-    {
-        static::creating(function ($model) {
-            try {
-                $type = \Illuminate\Support\Facades\Schema::getColumnType($model->getTable(), 'id');
-                if (in_array($type, ['string', 'varchar', 'char'])) {
-                    if (empty($model->id)) {
-                        $model->id = (string) \Illuminate\Support\Str::uuid();
-                    }
-                }
-            } catch (\Exception $e) {}
-        });
-    }
 
-    public function getKeyType()
-    {
-        try {
-            $type = \Illuminate\Support\Facades\Schema::getColumnType($this->getTable(), 'id');
-            if (in_array($type, ['string', 'varchar', 'char'])) {
-                return 'string';
-            }
-        } catch (\Exception $e) {}
-        return parent::getKeyType();
-    }
-
-    public function getIncrementing()
-    {
-        try {
-            $type = \Illuminate\Support\Facades\Schema::getColumnType($this->getTable(), 'id');
-            if (in_array($type, ['string', 'varchar', 'char'])) {
-                return false;
-            }
-        } catch (\Exception $e) {}
-        return parent::getIncrementing();
-    }
 
     public function career(): BelongsTo {
         return $this->belongsTo(Career::class);

@@ -73,7 +73,7 @@ class ContactController extends Controller
         return response()->json($submissions);
     }
 
-    public function adminShow(int $id): JsonResponse
+    public function adminShow(string $id): JsonResponse
     {
         $submission = ContactSubmission::findOrFail($id);
         if ($submission->status === 'new') {
@@ -82,7 +82,7 @@ class ContactController extends Controller
         return response()->json($submission);
     }
 
-    public function adminUpdate(Request $request, int $id): JsonResponse
+    public function adminUpdate(Request $request, string $id): JsonResponse
     {
         $submission = ContactSubmission::findOrFail($id);
         $data = $request->validate([
@@ -93,7 +93,7 @@ class ContactController extends Controller
         return response()->json($submission);
     }
 
-    public function adminDestroy(int $id): JsonResponse
+    public function adminDestroy(string $id): JsonResponse
     {
         ContactSubmission::findOrFail($id)->delete();
         return response()->json(['message' => 'Deleted successfully.']);
@@ -123,7 +123,7 @@ class ContactController extends Controller
         return response()->json(OfficeLocation::create($data), 201);
     }
 
-    public function updateOfficeLocation(Request $request, int $id): JsonResponse
+    public function updateOfficeLocation(Request $request, string $id): JsonResponse
     {
         $location = OfficeLocation::findOrFail($id);
         $data = $request->validate([
@@ -141,7 +141,7 @@ class ContactController extends Controller
         return response()->json($location);
     }
 
-    public function destroyOfficeLocation(int $id): JsonResponse
+    public function destroyOfficeLocation(string $id): JsonResponse
     {
         OfficeLocation::findOrFail($id)->delete();
         return response()->json(['message' => 'Deleted successfully.']);

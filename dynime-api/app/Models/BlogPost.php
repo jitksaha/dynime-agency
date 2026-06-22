@@ -2,9 +2,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HasDynamicIdType;
 
 class BlogPost extends Model
 {
+    use HasDynamicIdType;
     protected $fillable = [
         'slug', 'title', 'excerpt', 'content', 'cover_image_url',
         'category', 'tags', 'author', 'read_minutes', 'is_published',

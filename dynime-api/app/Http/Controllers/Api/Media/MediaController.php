@@ -99,7 +99,7 @@ class MediaController extends Controller
         return response()->json($media, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $media = MediaFile::findOrFail($id);
         $data  = $request->validate([
@@ -110,7 +110,7 @@ class MediaController extends Controller
         return response()->json($media);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         $media = MediaFile::findOrFail($id);
         Storage::disk('public')->delete($media->path);

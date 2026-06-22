@@ -49,7 +49,7 @@ class BlogController extends Controller
         return response()->json($post);
     }
 
-    public function recordView(int $id): JsonResponse
+    public function recordView(string $id): JsonResponse
     {
         $post = BlogPost::findOrFail($id);
         $post->incrementView();
@@ -77,7 +77,7 @@ class BlogController extends Controller
         return response()->json($posts);
     }
 
-    public function adminShow(int $id): JsonResponse
+    public function adminShow(string $id): JsonResponse
     {
         return response()->json(BlogPost::findOrFail($id));
     }
@@ -111,7 +111,7 @@ class BlogController extends Controller
         return response()->json($post, 201);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $post = BlogPost::findOrFail($id);
         $data = $request->validate([
@@ -139,7 +139,7 @@ class BlogController extends Controller
         return response()->json($post);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         $post = BlogPost::findOrFail($id);
         $this->clearCache($post->slug);
