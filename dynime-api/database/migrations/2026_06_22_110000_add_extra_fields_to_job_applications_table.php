@@ -33,8 +33,14 @@ return new class extends Migration
             if (!Schema::hasColumn('job_applications', 'portfolio_url')) {
                 $table->string('portfolio_url', 500)->nullable()->after('linkedin_url');
             }
+            if (!Schema::hasColumn('job_applications', 'resume_path')) {
+                $table->string('resume_path', 500)->nullable()->after('portfolio_url');
+            }
+            if (!Schema::hasColumn('job_applications', 'resume_filename')) {
+                $table->string('resume_filename', 255)->nullable()->after('resume_path');
+            }
             if (!Schema::hasColumn('job_applications', 'resume_url')) {
-                $table->string('resume_url', 500)->nullable()->after('resume_path');
+                $table->string('resume_url', 500)->nullable();
             }
             if (!Schema::hasColumn('job_applications', 'ats_score')) {
                 $table->integer('ats_score')->nullable();
@@ -92,7 +98,7 @@ return new class extends Migration
         Schema::table('job_applications', function (Blueprint $table) {
             $table->dropColumn([
                 'career_title', 'country', 'current_position', 'experience_years',
-                'expected_salary', 'linkedin_url', 'portfolio_url', 'resume_url',
+                'expected_salary', 'linkedin_url', 'portfolio_url', 'resume_path', 'resume_filename', 'resume_url',
                 'ats_score', 'ats_match_level', 'ats_matched_keywords', 'ats_missing_keywords',
                 'ats_summary', 'ats_scanned_at', 'ats_resume_chars', 'ats_detected_skills',
                 'ats_detected_titles', 'ats_detected_experience_years', 'ats_education',
