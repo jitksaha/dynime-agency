@@ -12,6 +12,7 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -66,6 +67,7 @@ netlify.toml
 public
 backend
 favicon-dark-32.png
+list-migrations.php
 apple-touch-icon.png
 track
 sitemap.xml
