@@ -88,6 +88,7 @@ class CareerController extends Controller
             'resume_filename' => $resume->getClientOriginalName(),
             'ip_address'      => $request->ip(),
             'source'          => 'career-page',
+            'status'          => 'new',
             'metadata'        => ['user_agent' => $request->userAgent()],
         ]);
 
@@ -175,6 +176,7 @@ class CareerController extends Controller
             'resume_filename'  => $resumeFilename,
             'ip_address'       => $request->ip(),
             'source'           => 'career-page',
+            'status'           => 'new',
             'metadata'         => ['user_agent' => $request->userAgent()],
         ]);
 

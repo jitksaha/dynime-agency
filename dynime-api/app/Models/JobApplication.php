@@ -17,6 +17,10 @@ class JobApplication extends Model
         'ats_red_flags', 'ats_recommendation', 'ats_contact_links', 'ats_highlights',
     ];
 
+    protected $attributes = [
+        'status' => 'new',
+    ];
+
     protected function casts(): array {
         return [
             'metadata' => 'array',
