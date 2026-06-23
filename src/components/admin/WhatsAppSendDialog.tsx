@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { db } from "@/integrations/db/client";
 import { Send, Loader2, MessageSquare } from "lucide-react";
+import { sendWhatsAppTemplate } from "@/lib/whatsapp-direct";
 
 export interface WhatsAppTemplate {
   key: string;
@@ -156,24 +157,32 @@ export default function WhatsAppSendDialog({
 
     setSending(true);
     try {
-      const payload = {
-        phone: phone,
-        templateName: selectedTemplateKey,
-        message: customBody,
-        vars: selectedTemplateKey === "custom" ? [] : Object.keys(varValues).sort((a, b) => Number(a) - Number(b)).map(k => varValues[Number(k)]),
-      };
+      const vars = selectedTemplateKey === "custom"
+        ? []
+        : Object.keys(varValues)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(k => varValues[Number(k)]);
 
-      const res = await db.functions.invoke("send-whatsapp-test", {
-        body: payload,
-      });
+      const result = await sendWhatsAppTemplate(
+        phone,
+        selectedTemplateKey,
+        vars,
+        selectedTemplateKey === "custom" ? customBody : undefined
+      );
 
-      if (res.error) {
-        toast.error("Failed to send message: " + (res.error.message || "Unknown error"));
-      } else if (res.data?.success === false) {
-        toast.error("WhatsApp Cloud API failed: " + (res.data.error || "Unknown API response error"));
-      } else {
-        toast.success("WhatsApp message sent successfully!");
+      if (result.success) {
+        // Log to whatsapp_send_log
+        await db.from("whatsapp_send_log").upsert({
+          message_id: result.messageId || null,
+          template_name: selectedTemplateKey,
+          recipient_phone: phone,
+          status: "dispatched",
+          error_message: null,
+        });
+        toast.success("WhatsApp message sent successfully! ✓");
         onClose();
+      } else {
+        toast.error(result.error || "Failed to send WhatsApp message.");
       }
     } catch (e: any) {
       toast.error("Send error: " + e.message);

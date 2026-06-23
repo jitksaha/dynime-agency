@@ -16,6 +16,7 @@ import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, S
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SectionHelp from "@/components/admin/SectionHelp";
+import { sendWhatsAppTemplate } from "@/lib/whatsapp-direct";
 
 interface WhatsAppConfig {
   enabled: boolean;
@@ -235,32 +236,45 @@ export default function AdminWhatsAppPortal() {
 
     setSending(true);
     try {
-      const payload = {
-        phone: sendPhone,
-        templateName: selectedTemplateKey,
-        message: customBody,
-        vars: selectedTemplateKey === "custom" ? [] : Object.values(varValues),
-      };
+      const vars = selectedTemplateKey === "custom"
+        ? []
+        : Object.keys(varValues)
+            .sort((a, b) => Number(a) - Number(b))
+            .map(k => varValues[k]);
 
-      const res = await db.functions.invoke("send-whatsapp-test", {
-        body: payload,
-      });
+      const result = await sendWhatsAppTemplate(
+        sendPhone,
+        selectedTemplateKey,
+        vars,
+        selectedTemplateKey === "custom" ? customBody : undefined
+      );
 
-      if (res.error) {
-        toast.error("Failed to send message: " + (res.error.message || "Unknown error"));
-      } else if (res.data?.success === false) {
-        toast.error("Delivery failed: " + (res.data.error || "Unknown response error"));
-      } else {
-        toast.success("WhatsApp message dispatched successfully!");
-        // Fetch logs fresh
+      if (result.success) {
+        toast.success("WhatsApp message dispatched successfully! ✓");
+        // Log to DB and refresh logs panel
+        await db.from("whatsapp_send_log").insert({
+          message_id: result.messageId || null,
+          template_name: selectedTemplateKey,
+          recipient_phone: sendPhone,
+          status: "dispatched",
+          error_message: null,
+        });
         const { data: logsRows } = await db
           .from("whatsapp_send_log")
           .select("*")
           .order("created_at", { ascending: false })
           .limit(200);
-        if (logsRows) {
-          setLogs(logsRows as WhatsAppLog[]);
-        }
+        if (logsRows) setLogs(logsRows as WhatsAppLog[]);
+      } else {
+        // Log failure too
+        await db.from("whatsapp_send_log").insert({
+          message_id: null,
+          template_name: selectedTemplateKey,
+          recipient_phone: sendPhone,
+          status: "failed",
+          error_message: result.error || "Unknown error",
+        });
+        toast.error(result.error || "WhatsApp send failed.");
       }
     } catch (e: any) {
       toast.error("Dispatch error: " + e.message);
