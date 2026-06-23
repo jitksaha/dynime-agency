@@ -10,19 +10,21 @@ import VerificationBadge from "@/components/verification/VerificationBadge";
 import {
   Copy, ExternalLink, Loader2, Send, Shield, Building2, Eye,
   RefreshCw, CheckCircle2, Clock, Check, AlertCircle, ShieldAlert,
-  ArrowRight, Activity, Terminal
+  ArrowRight, Activity, Terminal, MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 
 const AdminVerifications = () => {
   const qc = useQueryClient();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [filterType, setFilterType] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [page, setPage] = useState(1);
   const [syncingAll, setSyncingAll] = useState(false);
+  const [whatsAppTarget, setWhatsAppTarget] = useState<any>(null);
 
   // 1. Fetch dashboard aggregated stats & activity logs
   const { data: dashboard, isLoading: statsLoading } = useQuery({
@@ -92,6 +94,7 @@ const AdminVerifications = () => {
   });
 
   return (
+    <>
     <SuperAdminLayout>
       <div className="space-y-6">
         {/* Header */}
@@ -367,6 +370,15 @@ const AdminVerifications = () => {
                                   <Button
                                     size="icon"
                                     variant="ghost"
+                                    onClick={() => setWhatsAppTarget(r)}
+                                    title="Send WhatsApp notification"
+                                    className="h-8 w-8 hover:bg-emerald-500/10 text-emerald-600 hover:text-emerald-700"
+                                  >
+                                    <MessageSquare className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
                                     asChild
                                     title="View details dossier"
                                     className="h-8 w-8 hover:bg-muted text-primary hover:text-primary/80"
@@ -513,6 +525,20 @@ const AdminVerifications = () => {
         </div>
       </div>
     </SuperAdminLayout>
+
+    {/* WhatsApp Notification Dialog */}
+    <WhatsAppSendDialog
+      isOpen={!!whatsAppTarget}
+      onClose={() => setWhatsAppTarget(null)}
+      recipientPhone={whatsAppTarget?.phone || ""}
+      recipientName={whatsAppTarget?.customer_name || ""}
+      defaultTemplateKey="id_verification"
+      defaultVars={{
+        0: whatsAppTarget?.customer_name || "",
+        1: whatsAppTarget?.status || "",
+      }}
+    />
+    </>
   );
 };
 

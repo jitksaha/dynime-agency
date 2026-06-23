@@ -13,10 +13,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Package, Eye, ExternalLink, Search, Filter, Plus, Download, Pencil,
   ShieldCheck, ShieldAlert, ShieldQuestion, ServerCog, RefreshCw, Clock, Trash2, X, Link2,
-  Receipt, Undo2, Send, Loader2, Copy, Check, Upload,
+  Receipt, Undo2, Send, Loader2, Copy, Check, Upload, MessageSquare,
 } from "lucide-react";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { formatCurrency } from "@/lib/currency";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
 const buildPublicInvoiceUrl = (ref: string) => `${PUBLIC_INVOICE_HOST}/invoice/${ref}`;
@@ -141,6 +142,7 @@ const AdminOrders = () => {
   const qc = useQueryClient();
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [whatsAppTarget, setWhatsAppTarget] = useState<any>(null);
 
   const handleExportOrders = async () => {
     try {
@@ -672,6 +674,15 @@ const AdminOrders = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-7 w-7 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                          title="Send WhatsApp notification"
+                          onClick={() => setWhatsAppTarget(order)}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete order"
                           onClick={() => setDeleteTarget(order)}
@@ -993,6 +1004,20 @@ const AdminOrders = () => {
       <section id="recurring-section" className="mt-8 scroll-mt-20">
         <RecurringHealthWidget />
       </section>
+
+      {/* WhatsApp Notification Dialog */}
+      <WhatsAppSendDialog
+        isOpen={!!whatsAppTarget}
+        onClose={() => setWhatsAppTarget(null)}
+        recipientPhone={whatsAppTarget?.billing_address?.phone || ""}
+        recipientName={whatsAppTarget?.customer_name || ""}
+        defaultTemplateKey="order_update"
+        defaultVars={{
+          0: whatsAppTarget?.customer_name || "",
+          1: whatsAppTarget?.invoice_number || whatsAppTarget?.id || "",
+          2: whatsAppTarget?.status || "",
+        }}
+      />
     </SuperAdminLayout>
   );
 };

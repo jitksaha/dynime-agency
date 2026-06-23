@@ -13,6 +13,7 @@ import {
   Shield, Building2, Calendar, ClipboardList, Info, History, Code, CheckCircle, Check
 } from "lucide-react";
 import { toast } from "sonner";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 
 const VerificationDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const VerificationDetails = () => {
   const [copied, setCopied] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
 
   const { data: request, isLoading, error } = useQuery({
     queryKey: ["verification-details", id],
@@ -108,13 +110,7 @@ const VerificationDetails = () => {
     }
   };
 
-  const handleSimulateWhatsApp = () => {
-    setSendingMessage(true);
-    setTimeout(() => {
-      toast.success(`Simulated WhatsApp notification sent with verification link to customer.`);
-      setSendingMessage(false);
-    }, 1000);
-  };
+  // WhatsApp dialog is now handled by the real WhatsAppSendDialog component
 
   if (isLoading) {
     return (
@@ -145,6 +141,7 @@ const VerificationDetails = () => {
   }
 
   return (
+    <>
     <SuperAdminLayout>
       <div className="space-y-6 max-w-6xl mx-auto pb-12">
         {/* Back Link */}
@@ -414,13 +411,13 @@ const VerificationDetails = () => {
                 </Button>
 
                 <Button
-                  onClick={handleSimulateWhatsApp}
-                  disabled={sendingMessage || !request.verification_url}
+                  onClick={() => setWhatsAppOpen(true)}
+                  disabled={!request.verification_url}
                   variant="outline"
-                  className="w-full justify-start h-10 text-xs border-muted/40 hover:bg-muted font-medium"
+                  className="w-full justify-start h-10 text-xs border-emerald-500/30 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 font-medium"
                 >
                   <MessageSquare className="h-4 w-4 mr-2 text-emerald-500" />
-                  {sendingMessage ? "Simulating WhatsApp..." : "Send via WhatsApp"}
+                  Send via WhatsApp
                 </Button>
               </CardContent>
             </Card>
@@ -475,6 +472,20 @@ const VerificationDetails = () => {
         </div>
       </div>
     </SuperAdminLayout>
+
+    {/* WhatsApp Notification Dialog */}
+    <WhatsAppSendDialog
+      isOpen={whatsAppOpen}
+      onClose={() => setWhatsAppOpen(false)}
+      recipientPhone={request?.phone || ""}
+      recipientName={request?.customer_name || ""}
+      defaultTemplateKey="id_verification"
+      defaultVars={{
+        0: request?.customer_name || "",
+        1: request?.status || "",
+      }}
+    />
+    </>
   );
 };
 

@@ -199,6 +199,7 @@ const navGroupsSystem: NavGroup = {
       children: [
         { to: "/superadmin/settings", label: "General Settings", icon: Settings },
         { to: "/superadmin/whatsapp-portal?tab=config", label: "WhatsApp Config", icon: MessageSquare },
+        { to: "/superadmin/whatsapp-portal", label: "WhatsApp Portal", icon: MessageSquare },
       ],
     },
     { to: "/superadmin/product-urls", label: "Product URLs", icon: Link2 },
@@ -216,7 +217,6 @@ const navGroupsSystem: NavGroup = {
         { to: "/superadmin/email-portal?tab=suppressed", label: "Suppressed", icon: Ban },
       ],
     },
-    { to: "/superadmin/whatsapp-portal", label: "WhatsApp Portal", icon: MessageSquare },
   ],
 };
 
