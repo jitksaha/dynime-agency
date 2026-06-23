@@ -148,14 +148,18 @@ class SupabaseProxyController extends Controller
                 case 'insert':
                     if (is_array($payload) && isset($payload[0])) {
                         // Batch insert
-                        $encodedPayload = array_map(fn($p) => $this->encodeRow($p), $payload);
+                        $encodedPayload = array_map(fn($p) => $this->prepareRowForInsertOrUpsert($table, $p), $payload);
                         DB::table($table)->insert($encodedPayload);
                         $data = $payload; // Return input
                     } else {
-                        $encoded = $this->encodeRow($payload);
-                        $id = DB::table($table)->insertGetId($encoded);
-                        if ($id) {
-                            $encoded['id'] = $id;
+                        $encoded = $this->prepareRowForInsertOrUpsert($table, $payload);
+                        if (isset($encoded['id'])) {
+                            DB::table($table)->insert($encoded);
+                        } else {
+                            $id = DB::table($table)->insertGetId($encoded);
+                            if ($id) {
+                                $encoded['id'] = $id;
+                            }
                         }
                         $data = $this->decodeRow((object)$encoded);
                     }
@@ -164,6 +168,37 @@ class SupabaseProxyController extends Controller
                 case 'update':
                     $encoded = $this->encodeRow($payload);
                     $query->update($encoded);
+                    $data = $payload;
+                    break;
+
+                case 'upsert':
+                    if (is_array($payload) && isset($payload[0])) {
+                        $encodedPayloads = array_map(fn($p) => $this->prepareRowForInsertOrUpsert($table, $p), $payload);
+                    } else {
+                        $encodedPayloads = [$this->prepareRowForInsertOrUpsert($table, $payload)];
+                    }
+                    
+                    foreach ($encodedPayloads as $row) {
+                        $matchCriteria = [];
+                        if ($table === 'notification_settings' && isset($row['key'])) {
+                            $matchCriteria = ['key' => $row['key']];
+                        } elseif (isset($row['id'])) {
+                            $matchCriteria = ['id' => $row['id']];
+                        } elseif (isset($row['key'])) {
+                            $matchCriteria = ['key' => $row['key']];
+                        }
+
+                        if (!empty($matchCriteria)) {
+                            $exists = DB::table($table)->where($matchCriteria)->exists();
+                            if ($exists) {
+                                DB::table($table)->where($matchCriteria)->update($row);
+                            } else {
+                                DB::table($table)->insert($row);
+                            }
+                        } else {
+                            DB::table($table)->insert($row);
+                        }
+                    }
                     $data = $payload;
                     break;
 
@@ -386,6 +421,20 @@ class SupabaseProxyController extends Controller
                 'error' => ['message' => $e->getMessage()]
             ], 500);
         }
+    }
+
+    private function prepareRowForInsertOrUpsert(string $table, array $row): array
+    {
+        $row = $this->encodeRow($row);
+        
+        if (Schema::hasColumn($table, 'id') && !isset($row['id'])) {
+            $colType = Schema::getColumnType($table, 'id');
+            if ($colType === 'string' || $colType === 'varchar' || $colType === 'guid') {
+                $row['id'] = (string) \Illuminate\Support\Str::uuid();
+            }
+        }
+        
+        return $row;
     }
 
     private function encodeRow(array $row): array

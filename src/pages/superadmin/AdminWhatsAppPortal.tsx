@@ -514,19 +514,22 @@ export default function AdminWhatsAppPortal() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
+                   <div className="grid grid-cols-1 gap-5">
+                    <div className="space-y-1">
                       <Label htmlFor="wa-phone-id">Phone Number ID *</Label>
                       <Input
                         id="wa-phone-id"
                         value={config.phone_number_id}
                         onChange={(e) => setConfig((prev) => ({ ...prev, phone_number_id: e.target.value }))}
                         placeholder="e.g. 104294191983020"
-                        className="mt-1.5"
+                        className="mt-1"
                       />
+                      <p className="text-[11px] text-muted-foreground leading-normal">
+                        To get this: Go to <strong>Meta for Developers</strong> &rarr; <strong>My Apps</strong> &rarr; select/create your App &rarr; <strong>WhatsApp</strong> (setup/configured) &rarr; <strong>API Setup</strong>. Look for the <strong>Phone number ID</strong> field.
+                      </p>
                     </div>
 
-                    <div>
+                    <div className="space-y-1">
                       <Label htmlFor="wa-token">Permanent System User Access Token *</Label>
                       <Input
                         id="wa-token"
@@ -534,8 +537,12 @@ export default function AdminWhatsAppPortal() {
                         value={config.access_token}
                         onChange={(e) => setConfig((prev) => ({ ...prev, access_token: e.target.value }))}
                         placeholder="EAAB..."
-                        className="mt-1.5"
+                        className="mt-1"
                       />
+                      <p className="text-[11px] text-muted-foreground leading-normal">
+                        To generate: Go to <strong>Meta Business Suite Settings</strong> &rarr; <strong>Users</strong> &rarr; <strong>System Users</strong>. Select (or create) an Admin system user. Click <strong>Generate New Token</strong>, select your App, and check the <strong>whatsapp_business_messaging</strong> permission. 
+                        <span className="text-amber-600 dark:text-amber-400 font-medium"> Note: Do not use a temporary 24-hour developer token, as it will expire.</span>
+                      </p>
                     </div>
                   </div>
                 </div>
