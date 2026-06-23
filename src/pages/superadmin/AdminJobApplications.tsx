@@ -21,6 +21,7 @@ import {
 import { streamCsvExport, type CsvColumn } from "@/lib/csv-export";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
+import SectionHelp from "@/components/admin/SectionHelp";
 
 interface AtsContactLinks {
   emails?: string[];
@@ -485,6 +486,31 @@ const AdminJobApplications = () => {
             Review and manage candidates who applied directly through the careers site.
           </p>
         </div>
+
+        <SectionHelp
+          storageKey="job-applications"
+          title="How to use Job Applications & ATS Scanner"
+          subtitle="Review applications, run AI scoring, update status, send WhatsApp. Click to expand."
+          steps={[
+            "Filter applications by status (New, Reviewing, Shortlisted, Interview, Offer, Hired, Rejected) using the tabs or stat cards at the top.",
+            "Click any applicant row to open their full detail panel on the right — this shows their CV, contact links, skills, and ATS score.",
+            "Click 'ATS Scan' on any application to run the AI-powered resume scanner. It matches the CV against the job description and returns a score, match level, detected skills, and red flags.",
+            "Change the application status using the dropdown in the detail panel. Status changes are saved in real-time.",
+            "Click the green WhatsApp button to send a pre-filled notification to the applicant about their application status.",
+            "Use the Export button to download all applications as a CSV file for offline review or reporting.",
+            "Use the search bar and country filter to narrow down applicants by name, email, or country.",
+          ]}
+          tips={[
+            "ATS scores above 75% are shown in green (Strong Match). 50–75% is amber (Partial Match). Below 50% is red (Weak Match).",
+            "Applications come in with status 'New' by default. Bulk-filter 'New' to review unprocessed candidates first.",
+            "The stat cards at the top are clickable — tap any one to instantly filter the list to that status.",
+            "LinkedIn, GitHub, and Portfolio links are auto-extracted from the CV and shown as quick-access buttons.",
+          ]}
+          warnings={[
+            "ATS scores are AI-generated estimates and should be used as a guide, not a definitive pass/fail decision.",
+            "Deleting an application is permanent. Make sure to export first if you need an archive.",
+          ]}
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">

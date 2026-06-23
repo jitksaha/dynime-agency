@@ -18,6 +18,7 @@ import {
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
 import { formatCurrency } from "@/lib/currency";
 import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
+import SectionHelp from "@/components/admin/SectionHelp";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
 const buildPublicInvoiceUrl = (ref: string) => `${PUBLIC_INVOICE_HOST}/invoice/${ref}`;
@@ -349,12 +350,38 @@ const AdminOrders = () => {
 
   return (
     <SuperAdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="font-heading text-2xl font-bold text-foreground">Order Management</h1>
         <Button asChild variant="hero" size="sm" className="gap-1.5">
           <Link to="/superadmin/orders/new"><Plus className="w-4 h-4" /> New manual invoice</Link>
         </Button>
       </div>
+
+      <SectionHelp
+        storageKey="orders-main"
+        title="How to manage orders"
+        subtitle="Click 'Show guide' to learn about filters, WhatsApp notifications, and invoice tools."
+        steps={[
+          "Use the search bar to find orders by invoice number, order ID, customer name, or email.",
+          "Filter by status (Pending, Paid, Completed, etc.) using the dropdown next to the search bar.",
+          "Click the eye icon (👁) on any row to get a quick-view panel — no need to leave this page.",
+          "Use the status dropdown on each row to update an order's status. Changing to 'processing' or 'completed' auto-sends an email to the customer.",
+          "Click the green WhatsApp button (💬) on a row to send a WhatsApp notification pre-filled with the customer's name, invoice, and status.",
+          "Use the pencil (✏) icon to open the full invoice editor, or the external link icon to open the full order detail page.",
+          "Export all orders as a JSON backup using the Export button. Re-import later using the Import button.",
+          "Scroll down past the orders table to view the Recurring Services health panel.",
+        ]}
+        tips={[
+          "Selecting multiple orders with the checkboxes enables bulk delete.",
+          "Click any stat card at the top (Total, Pending, Completed, Revenue) to instantly filter the list.",
+          "Click the link icon on a row to copy the public invoice URL (dynime.com/invoice/INV-…) for direct sharing.",
+          "The verification icon on each row shows KYC/KYB and payment signature status at a glance.",
+        ]}
+        warnings={[
+          "Bulk delete is permanent — there is no undo. Use with caution.",
+          "Import will overwrite existing orders if their ID or invoice number matches.",
+        ]}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">

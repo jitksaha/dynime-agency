@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, Send, Save, Loader2, ListFilter } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import SectionHelp from "@/components/admin/SectionHelp";
 
 interface WhatsAppConfig {
   enabled: boolean;
@@ -79,6 +80,9 @@ export default function AdminWhatsAppPortal() {
   const [sending, setSending] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
   const [savingTemplates, setSavingTemplates] = useState(false);
+  // Tracks what was last successfully saved (for the saved-info card)
+  const [savedSnapshot, setSavedSnapshot] = useState<WhatsAppConfig | null>(null);
+  const [showToken, setShowToken] = useState(false);
 
   // Configurations state
   const [config, setConfig] = useState<WhatsAppConfig>({
@@ -118,7 +122,10 @@ export default function AdminWhatsAppPortal() {
         .maybeSingle();
 
       if (configRow?.value) {
-        setConfig((prev) => ({ ...prev, ...(configRow.value as any) }));
+        const loaded = { ...{ enabled: true, access_token: "", phone_number_id: "" }, ...(configRow.value as any) };
+        setConfig(loaded);
+        // Show saved-info card for already-persisted config on load
+        if (loaded.phone_number_id || loaded.access_token) setSavedSnapshot(loaded);
       }
 
       // 2. Fetch templates
@@ -164,6 +171,8 @@ export default function AdminWhatsAppPortal() {
         );
 
       if (error) throw error;
+      setSavedSnapshot({ ...config }); // capture what was just saved
+      setShowToken(false);             // re-mask the token on save
       toast.success("WhatsApp configuration saved successfully.");
     } catch (e: any) {
       toast.error("Failed to save configuration: " + e.message);
@@ -293,6 +302,29 @@ export default function AdminWhatsAppPortal() {
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
         </div>
+
+        <SectionHelp
+          storageKey="whatsapp-portal"
+          title="How to set up & use the WhatsApp Notification Portal"
+          subtitle="API Config → Templates → Send. Click to expand the full guide."
+          steps={[
+            "Go to the 'API Config' tab first. Paste your Meta Business Phone Number ID and your Permanent System User Access Token, then toggle 'Enable WhatsApp Notifications' ON and click Save.",
+            "Go to 'Templates Settings' to customise the message body for each notification type (order updates, payment links, ID verification, etc.). Variables like {{1}}, {{2}} are auto-filled when sending from a record page.",
+            "Use the 'Send Message' tab to manually broadcast a message to any phone number. Select a template, fill in the variables, or switch to Custom Message for free-text.",
+            "Every sent message is logged under 'Delivery Logs' with timestamp, template used, recipient, status (Dispatched/Failed), and Meta's message ID.",
+            "To send from a specific record, click the green WhatsApp icon on any Orders, Verifications, Job Applications, or Credit row — the dialog opens pre-filled.",
+          ]}
+          tips={[
+            "You can get the Phone Number ID from your WhatsApp Business app in Meta for Developers → My Apps → WhatsApp → API Setup.",
+            "Always use a Permanent System User Token (from Business Settings → System Users), NOT a temporary user token — it expires after 60 days.",
+            "Template variables {{1}}, {{2}} map to the order they are listed under each template in the Templates tab.",
+            "Use the 'Custom Message' template key when you need to send a one-off message that doesn't fit a standard template.",
+          ]}
+          warnings={[
+            "Never share your Access Token. It grants full send access to your WhatsApp Business number.",
+            "If 'Enable WhatsApp Notifications' is OFF, the Send button will still show on record pages but messages will not be dispatched.",
+          ]}
+        />
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-muted/40 p-1 rounded-lg border border-border/60">
@@ -495,7 +527,75 @@ export default function AdminWhatsAppPortal() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* ── Saved Configuration Info Card ───────────────────────── */}
+            {savedSnapshot && (savedSnapshot.phone_number_id || savedSnapshot.access_token) && (
+              <Card className="border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span className="font-semibold text-sm text-emerald-700 dark:text-emerald-400">
+                      Saved Configuration
+                    </span>
+                    <Badge className="ml-auto bg-emerald-500/15 text-emerald-600 border-emerald-400/30 text-[10px]">
+                      {savedSnapshot.enabled ? "✓ Active" : "Disabled"}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Phone Number ID */}
+                    <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-1">
+                        Phone Number ID
+                      </p>
+                      <p className="text-sm font-mono font-medium text-foreground break-all">
+                        {savedSnapshot.phone_number_id || (
+                          <span className="text-muted-foreground italic">Not set</span>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Access Token */}
+                    <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">
+                          Access Token
+                        </p>
+                        {savedSnapshot.access_token && (
+                          <button
+                            type="button"
+                            onClick={() => setShowToken((v) => !v)}
+                            className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                          >
+                            {showToken ? (
+                              <><Ban className="w-3 h-3" /> Hide</>
+                            ) : (
+                              <><CheckCircle2 className="w-3 h-3" /> View</>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-sm font-mono break-all text-foreground">
+                        {!savedSnapshot.access_token ? (
+                          <span className="text-muted-foreground italic">Not set</span>
+                        ) : showToken ? (
+                          savedSnapshot.access_token
+                        ) : (
+                          "•".repeat(Math.min(savedSnapshot.access_token.length, 44))
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    These credentials are stored securely in your database. To update them,
+                    edit the fields above and click <strong>Save Configuration</strong> again.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
+
 
           {/* 4. Logs Tab */}
           <TabsContent value="logs" className="space-y-6 mt-4">

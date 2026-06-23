@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
+import SectionHelp from "@/components/admin/SectionHelp";
 
 const AdminVerifications = () => {
   const qc = useQueryClient();
@@ -123,6 +124,29 @@ const AdminVerifications = () => {
             </Button>
           </div>
         </div>
+
+        <SectionHelp
+          storageKey="verifications-main"
+          title="How to use Identity Verification (KYC / KYB)"
+          subtitle="Review sessions, sync status with Didit, send WhatsApp updates. Click to expand."
+          steps={[
+            "The stats cards at the top show totals for KYC (individual), KYB (business), Approved, Pending, Declined, and Expired sessions.",
+            "Filter the table by type (All / KYC / KYB) and by status (All / Verified / Pending / Declined) using the filter buttons above the table.",
+            "Click the Copy icon to copy the Didit verification link to clipboard for manual sharing with the customer.",
+            "Click the External Link icon to open the verification session in Didit's portal for review.",
+            "Click the green WhatsApp button (💬) to send a WhatsApp notification to the customer pre-filled with their name and verification status.",
+            "Click the arrow (→) button to open the full Verification Dossier, which includes audit trail, QR code, and sync controls.",
+            "Use 'Sync Pending Sessions' (top right) to bulk-refresh all pending sessions against the Didit API at once.",
+          ]}
+          tips={[
+            "'In Review' means the session was submitted and is being checked by Didit. 'Pending' means the customer hasn't completed it yet.",
+            "The Webhook Event Log (in the stats section) shows the last 10 Didit webhook events received — useful for debugging missed status updates.",
+            "After a customer completes verification, their order's verification badge will automatically update on the Orders page.",
+          ]}
+          warnings={[
+            "Verification sessions cannot be manually approved or rejected from this panel — the status is set exclusively by the Didit compliance engine.",
+          ]}
+        />
 
         {/* Metrics Cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
