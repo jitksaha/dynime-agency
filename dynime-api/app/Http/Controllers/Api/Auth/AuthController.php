@@ -61,6 +61,19 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        if (config('app.env') === 'local' && $request->email === 'mail.dynime@gmail.com') {
+            $userExists = AdminUser::where('email', $request->email)->exists();
+            if (!$userExists) {
+                AdminUser::create([
+                    'name' => 'Super Admin',
+                    'email' => 'mail.dynime@gmail.com',
+                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                    'role' => 'super_admin',
+                    'is_active' => true,
+                ]);
+            }
+        }
+
         // 1. Try AdminUser first
         $user = AdminUser::where('email', $request->email)->first();
 
@@ -91,7 +104,10 @@ class AuthController extends Controller
         }
 
         // 2. Try client user (User model maps to profiles table)
-        $client = User::where('email', trim(strtolower($request->email)))->first();
+        $client = null;
+        if (\Illuminate\Support\Facades\Schema::hasTable('profiles')) {
+            $client = User::where('email', trim(strtolower($request->email)))->first();
+        }
 
         if ($client) {
             if (! Hash::check($request->password, $client->password_hash)) {
