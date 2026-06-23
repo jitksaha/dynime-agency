@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // Proxy /api/* to NestJS backend during development
       "/api": {
-        target: "http://localhost:3001",
+        target: "http://localhost:8000",
         changeOrigin: true,
       },
     },
