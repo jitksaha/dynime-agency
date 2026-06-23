@@ -33,14 +33,15 @@ try {
     
     $siteSettingsCount = \Illuminate\Support\Facades\DB::table('site_settings')->count();
     
+    $notificationSettings = \Illuminate\Support\Facades\DB::table('notification_settings')->get();
+    
     echo json_encode([
         'success' => true,
         'message' => 'OPcache reset and Laravel cache flushed successfully!',
-        'tables' => $tablesList,
-        'has_notification_settings' => $hasNotificationSettings,
-        'site_settings_count' => $siteSettingsCount
+        'notification_settings' => $notificationSettings,
     ]);
 } catch (Exception $e) {
     echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 }
+
 
