@@ -36,7 +36,7 @@ Route::prefix('v1')->group(function () {
 
 
         // Auth
-    Route::post('auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('auth/login', [AuthController::class, 'login'])->middleware(app()->environment('local') ? 'throttle:100,1' : 'throttle:10,1');
     Route::get('auth/check-email', [AuthController::class, 'checkEmail']);
     Route::post('auth/register', [AuthController::class, 'register']);
     Route::post('auth/password/reset-request', [AuthController::class, 'passwordResetRequest']);
