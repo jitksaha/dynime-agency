@@ -31,7 +31,7 @@ class CareerController extends Controller
             if ($request->department) {
                 $query->where('department', $request->department);
             }
-            return $query->get();
+            return $query->get()->toArray();
         });
 
         return response()->json($careers);
@@ -40,10 +40,10 @@ class CareerController extends Controller
     public function show(string $slug): JsonResponse
     {
         $career = Cache::remember('career_' . $slug, 3600, function () use ($slug) {
-            return Career::where('slug', $slug)->where('is_active', true)->firstOrFail();
+            return Career::where('slug', $slug)->where('is_active', true)->firstOrFail()->toArray();
         });
-        $data = $career->toArray();
-        $data['applicant_count'] = JobApplication::where('career_id', $career->id)
+        $data = $career;
+        $data['applicant_count'] = JobApplication::where('career_id', $career['id'])
             ->orWhere('career_slug', $slug)
             ->count();
         return response()->json($data);

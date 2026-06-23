@@ -17,7 +17,7 @@ class ServiceController extends Controller
             Service::active()->select([
                 'id', 'slug', 'title', 'category', 'excerpt',
                 'icon', 'cover_image_url', 'is_featured',
-            ])->get()
+            ])->get()->toArray()
         );
         return response()->json($services);
     }
@@ -25,7 +25,7 @@ class ServiceController extends Controller
     public function show(string $slug): JsonResponse
     {
         $service = Cache::remember('service_' . $slug, 3600, fn() =>
-            Service::where('slug', $slug)->where('is_active', true)->firstOrFail()
+            Service::where('slug', $slug)->where('is_active', true)->firstOrFail()->toArray()
         );
         return response()->json($service);
     }

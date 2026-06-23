@@ -34,7 +34,7 @@ class BlogController extends Controller
                 'id', 'slug', 'title', 'excerpt', 'cover_image_url',
                 'category', 'tags', 'author', 'read_minutes',
                 'is_featured', 'view_count', 'published_at',
-            ])->limit($request->integer('limit', 100))->get();
+            ])->limit($request->integer('limit', 100))->get()->toArray();
         });
 
         return response()->json($posts);
@@ -43,7 +43,7 @@ class BlogController extends Controller
     public function show(string $slug): JsonResponse
     {
         $post = Cache::remember('blog_post_' . $slug, 3600, function () use ($slug) {
-            return BlogPost::where('slug', $slug)->where('is_published', true)->firstOrFail();
+            return BlogPost::where('slug', $slug)->where('is_published', true)->firstOrFail()->toArray();
         });
 
         return response()->json($post);

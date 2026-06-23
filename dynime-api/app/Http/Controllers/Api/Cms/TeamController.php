@@ -16,7 +16,7 @@ class TeamController extends Controller
             TeamMember::active()->select([
                 'id', 'name', 'role', 'department', 'bio',
                 'photo_url', 'linkedin_url', 'twitter_url', 'is_featured',
-            ])->get()
+            ])->get()->toArray()
         );
         return response()->json($team);
     }

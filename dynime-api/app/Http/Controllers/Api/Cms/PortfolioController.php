@@ -23,7 +23,7 @@ class PortfolioController extends Controller
                 'id', 'title', 'slug', 'category', 'description',
                 'cover_image_url', 'gallery_images', 'client_name',
                 'project_url', 'tags', 'is_featured', 'completed_at',
-            ])->get();
+            ])->get()->toArray();
         });
         return response()->json($projects);
     }
@@ -31,7 +31,7 @@ class PortfolioController extends Controller
     public function show(string $slug): JsonResponse
     {
         $project = Cache::remember('portfolio_' . $slug, 3600, fn() =>
-            PortfolioProject::where('slug', $slug)->where('is_published', true)->firstOrFail()
+            PortfolioProject::where('slug', $slug)->where('is_published', true)->firstOrFail()->toArray()
         );
         return response()->json($project);
     }
