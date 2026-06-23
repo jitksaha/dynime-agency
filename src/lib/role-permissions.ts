@@ -59,6 +59,9 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/superadmin/hr-extras": ["super_admin", "manager", "hr"],
   "/superadmin/payroll": ["super_admin", "manager", "hr"],
   "/superadmin/crm": ["super_admin", "manager", "sales", "support"],
+
+  // Documentation — accessible by all staff roles
+  "/superadmin/docs": ["super_admin", "manager", "editor", "support", "hr", "sales"],
 };
 
 export const STAFF_ROLES: AppRole[] = ["super_admin", "manager", "editor", "support", "hr", "sales"];

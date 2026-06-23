@@ -175,6 +175,7 @@ const AdminFxOrders = lazy(() => import("./pages/superadmin/AdminFxOrders.tsx"))
 const AdminVerifications = lazy(() => import("./pages/superadmin/AdminVerifications.tsx"));
 const VerificationDetails = lazy(() => import("./pages/superadmin/VerificationDetails.tsx"));
 const AdminCredit = lazy(() => import("./pages/superadmin/AdminCredit.tsx"));
+const AdminDocs = lazy(() => import("./pages/superadmin/AdminDocs.tsx"));
 const AccountVerification = lazy(() => import("./pages/account/AccountVerification.tsx"));
 
 // Partner Portal
@@ -419,6 +420,7 @@ const App = () => (
                   <Route path="/superadmin/email-portal" element={<ProtectedRoute><AdminEmailPortal /></ProtectedRoute>} />
                   <Route path="/superadmin/whatsapp-portal" element={<ProtectedRoute><AdminWhatsAppPortal /></ProtectedRoute>} />
                   <Route path="/superadmin/country-eligibility" element={<ProtectedRoute><AdminCountryEligibility /></ProtectedRoute>} />
+                  <Route path="/superadmin/docs" element={<ProtectedRoute><AdminDocs /></ProtectedRoute>} />
 
                   {/* Legacy /admin/* redirects → all go to superadmin */}
                   <Route path="/admin/login" element={<Navigate to="/superadmin/login" replace />} />

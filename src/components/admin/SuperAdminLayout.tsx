@@ -13,7 +13,7 @@ import {
   Globe, PanelTop, CreditCard, Tag, DollarSign, Mail, Search, Bell, Sun, Moon,
   ChevronDown, ChevronRight, ChevronsLeft, ChevronsRight, Sparkles, Home, Share2, Wand2, Sliders, Lock, LineChart, Link2, TrendingUp,
   IdCard, Layers, Banknote, PieChart, UserCog, ScrollText, Receipt, Rocket, Wallet, Building2, GitMerge,
-  Server, ShieldCheck, Ban,
+  Server, ShieldCheck, Ban, BookOpen,
 } from "lucide-react";
 
 import SiteLogo from "@/components/shared/SiteLogo";
@@ -41,6 +41,7 @@ const navGroupsOverview: NavGroup = {
   label: "Overview",
   items: [
     { to: "/superadmin", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/superadmin/docs", label: "Documentation", icon: BookOpen, badge: "New" },
   ],
 };
 
