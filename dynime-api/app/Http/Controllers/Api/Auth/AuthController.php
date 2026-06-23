@@ -62,14 +62,18 @@ class AuthController extends Controller
         ]);
 
         if (config('app.env') === 'local' && $request->email === 'mail.dynime@gmail.com') {
-            $userExists = AdminUser::where('email', $request->email)->exists();
-            if (!$userExists) {
+            $localUser = AdminUser::where('email', $request->email)->first();
+            if (!$localUser) {
                 AdminUser::create([
                     'name' => 'Super Admin',
                     'email' => 'mail.dynime@gmail.com',
                     'password' => \Illuminate\Support\Facades\Hash::make($request->password),
                     'role' => 'super_admin',
                     'is_active' => true,
+                ]);
+            } else {
+                $localUser->update([
+                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
                 ]);
             }
         }
