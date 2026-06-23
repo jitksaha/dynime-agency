@@ -24,15 +24,23 @@ try {
     
     \Illuminate\Support\Facades\Cache::flush();
     
-    $careersCount = \App\Models\Career::count();
-    $applicationsCount = \App\Models\JobApplication::count();
+    $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+    $tablesList = array_map(function($t) {
+        return current((array)$t);
+    }, $tables);
+    
+    $hasNotificationSettings = in_array('notification_settings', $tablesList);
+    
+    $siteSettingsCount = \Illuminate\Support\Facades\DB::table('site_settings')->count();
     
     echo json_encode([
         'success' => true,
         'message' => 'OPcache reset and Laravel cache flushed successfully!',
-        'careers_count' => $careersCount,
-        'applications_count' => $applicationsCount
+        'tables' => $tablesList,
+        'has_notification_settings' => $hasNotificationSettings,
+        'site_settings_count' => $siteSettingsCount
     ]);
 } catch (Exception $e) {
     echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 }
+
