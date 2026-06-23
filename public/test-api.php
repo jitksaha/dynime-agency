@@ -33,51 +33,108 @@ try {
     
     $siteSettingsCount = \Illuminate\Support\Facades\DB::table('site_settings')->count();
     
-    \Illuminate\Support\Facades\DB::table('notification_settings')->updateOrInsert(
-        ['key' => 'email_routing'],
-        ['value' => json_encode([
-            'general_receive' => 'contact@dynime.com',
-            'general_from' => 'noreply@dynime.com',
-            'general_reply_to' => 'support@dynime.com',
-            'orders_receive' => 'orders@dynime.com',
-            'orders_from' => 'orders@dynime.com',
-            'orders_reply_to' => 'support@dynime.com',
-            'jobs_receive' => 'careers@dynime.com',
-            'jobs_from' => 'careers@dynime.com',
-            'jobs_reply_to' => 'hr@dynime.com'
-        ]), 'updated_at' => now()]
-    );
+    $routingExists = \Illuminate\Support\Facades\DB::table('notification_settings')->where('key', 'email_routing')->exists();
+    if ($routingExists) {
+        \Illuminate\Support\Facades\DB::table('notification_settings')->where('key', 'email_routing')->update([
+            'value' => json_encode([
+                'general_receive' => 'contact@dynime.com',
+                'general_from' => 'noreply@dynime.com',
+                'general_reply_to' => 'support@dynime.com',
+                'orders_receive' => 'orders@dynime.com',
+                'orders_from' => 'orders@dynime.com',
+                'orders_reply_to' => 'support@dynime.com',
+                'jobs_receive' => 'careers@dynime.com',
+                'jobs_from' => 'careers@dynime.com',
+                'jobs_reply_to' => 'hr@dynime.com'
+            ]),
+            'updated_at' => now()
+        ]);
+    } else {
+        \Illuminate\Support\Facades\DB::table('notification_settings')->insert([
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'key' => 'email_routing',
+            'value' => json_encode([
+                'general_receive' => 'contact@dynime.com',
+                'general_from' => 'noreply@dynime.com',
+                'general_reply_to' => 'support@dynime.com',
+                'orders_receive' => 'orders@dynime.com',
+                'orders_from' => 'orders@dynime.com',
+                'orders_reply_to' => 'support@dynime.com',
+                'jobs_receive' => 'careers@dynime.com',
+                'jobs_from' => 'careers@dynime.com',
+                'jobs_reply_to' => 'hr@dynime.com'
+            ]),
+            'updated_at' => now()
+        ]);
+    }
 
-    \Illuminate\Support\Facades\DB::table('notification_settings')->updateOrInsert(
-        ['key' => 'email_identities'],
-        ['value' => json_encode([
-            '*' => [
-                'from_email' => 'notifications@dynime.com',
-                'from_name' => 'Dynime',
-                'reply_to' => 'support@dynime.com'
-            ],
-            'admin-new-submission' => [
-                'from_email' => 'notifications@dynime.com',
-                'from_name' => 'Dynime',
-                'reply_to' => 'support@dynime.com'
-            ],
-            'contact-confirmation' => [
-                'from_email' => 'noreply@dynime.com',
-                'from_name' => 'Dynime',
-                'reply_to' => 'support@dynime.com'
-            ],
-            'order-status-update' => [
-                'from_email' => 'orders@dynime.com',
-                'from_name' => 'Dynime',
-                'reply_to' => 'support@dynime.com'
-            ],
-            'service-renewal-reminder' => [
-                'from_email' => 'notifications@dynime.com',
-                'from_name' => 'Dynime',
-                'reply_to' => 'support@dynime.com'
-            ]
-        ]), 'updated_at' => now()]
-    );
+    $identitiesExists = \Illuminate\Support\Facades\DB::table('notification_settings')->where('key', 'email_identities')->exists();
+    if ($identitiesExists) {
+        \Illuminate\Support\Facades\DB::table('notification_settings')->where('key', 'email_identities')->update([
+            'value' => json_encode([
+                '*' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'admin-new-submission' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'contact-confirmation' => [
+                    'from_email' => 'noreply@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'order-status-update' => [
+                    'from_email' => 'orders@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'service-renewal-reminder' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ]
+            ]),
+            'updated_at' => now()
+        ]);
+    } else {
+        \Illuminate\Support\Facades\DB::table('notification_settings')->insert([
+            'id' => \Illuminate\Support\Str::uuid()->toString(),
+            'key' => 'email_identities',
+            'value' => json_encode([
+                '*' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'admin-new-submission' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'contact-confirmation' => [
+                    'from_email' => 'noreply@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'order-status-update' => [
+                    'from_email' => 'orders@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ],
+                'service-renewal-reminder' => [
+                    'from_email' => 'notifications@dynime.com',
+                    'from_name' => 'Dynime',
+                    'reply_to' => 'support@dynime.com'
+                ]
+            ]),
+            'updated_at' => now()
+        ]);
+    }
+
 
     $notificationSettings = \Illuminate\Support\Facades\DB::table('notification_settings')->get();
     
