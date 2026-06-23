@@ -1597,6 +1597,22 @@ model email_send_log {
   @@schema("public")
 }
 
+model whatsapp_send_log {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  message_id      String
+  template_name   String
+  recipient_phone String
+  status          String
+  error_message   String?
+  metadata        Json     @default("{}")
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)])
+  @@index([message_id])
+  @@schema("public")
+}
+
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model employees {

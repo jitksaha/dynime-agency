@@ -208,6 +208,7 @@ const navGroupsSystem: NavGroup = {
         { to: "/superadmin/email-portal?tab=suppressed", label: "Suppressed", icon: Ban },
       ],
     },
+    { to: "/superadmin/whatsapp-portal", label: "WhatsApp Portal", icon: MessageSquare },
   ],
 };
 

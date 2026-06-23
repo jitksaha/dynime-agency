@@ -362,6 +362,18 @@ class SupabaseProxyController extends Controller
                         'error' => null
                     ]);
 
+                case 'send-whatsapp-test':
+                    $phone = $body['phone'] ?? '';
+                    $templateName = $body['templateName'] ?? 'custom';
+                    $message = $body['message'] ?? '';
+                    $vars = $body['vars'] ?? [];
+
+                    $res = \App\Services\WhatsAppService::send($phone, $message, $vars, $templateName);
+                    return response()->json([
+                        'data' => $res,
+                        'error' => null
+                    ]);
+
                 default:
                     return response()->json([
                         'data' => ['success' => true, 'message' => "Function '{$name}' invoked successfully."],

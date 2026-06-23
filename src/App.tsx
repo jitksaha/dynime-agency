@@ -148,6 +148,7 @@ const AdminUSAStatePricing = lazy(() => import("./pages/superadmin/AdminUSAState
 const AdminBlog = lazy(() => import("./pages/superadmin/AdminBlog.tsx"));
 const AdminNotifications = lazy(() => import("./pages/superadmin/AdminNotifications.tsx"));
 const AdminEmailPortal = lazy(() => import("./pages/superadmin/AdminEmailPortal.tsx"));
+const AdminWhatsAppPortal = lazy(() => import("./pages/superadmin/AdminWhatsAppPortal.tsx"));
 const AdminCountryEligibility = lazy(() => import("./pages/superadmin/AdminCountryEligibility.tsx"));
 const AdminCustomerServices = lazy(() => import("./pages/superadmin/AdminCustomerServices.tsx"));
 const SearchConsole = lazy(() => import("./pages/superadmin/SearchConsole.tsx"));
@@ -416,6 +417,7 @@ const App = () => (
                   <Route path="/superadmin/blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />
                   <Route path="/superadmin/notifications" element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>} />
                   <Route path="/superadmin/email-portal" element={<ProtectedRoute><AdminEmailPortal /></ProtectedRoute>} />
+                  <Route path="/superadmin/whatsapp-portal" element={<ProtectedRoute><AdminWhatsAppPortal /></ProtectedRoute>} />
                   <Route path="/superadmin/country-eligibility" element={<ProtectedRoute><AdminCountryEligibility /></ProtectedRoute>} />
 
                   {/* Legacy /admin/* redirects → all go to superadmin */}

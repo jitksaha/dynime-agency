@@ -24,6 +24,23 @@ try {
     
     \Illuminate\Support\Facades\Cache::flush();
     
+    if (!\Illuminate\Support\Facades\Schema::hasTable('whatsapp_send_log')) {
+        \Illuminate\Support\Facades\Schema::create('whatsapp_send_log', function ($table) {
+            $table->string('id', 36)->primary();
+            $table->string('message_id', 255);
+            $table->string('template_name', 50);
+            $table->string('recipient_phone', 50);
+            $table->string('status', 20);
+            $table->text('error_message')->nullable();
+            $table->json('metadata')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            
+            $table->index('created_at');
+            $table->index('message_id');
+        });
+    }
+
+    
     $careersCount = \App\Models\Career::count();
     $applicationsCount = \App\Models\JobApplication::count();
     
