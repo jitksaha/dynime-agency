@@ -18,10 +18,11 @@ import { toast } from "sonner";
 import {
   IdCard, RefreshCw, Download, Upload, Search, Loader2, Sparkles,
   Mail, Phone, Globe, Shield, Users, TrendingUp, Palette, Save, RotateCcw,
-  Grid3x3, Square, Printer, FileDown, Layers,
+  Grid3x3, Square, Printer, FileDown, Layers, MessageSquare,
 } from "lucide-react";
 import { useHomeSections } from "@/hooks/use-home-sections";
 import { useIdCardBrand } from "@/hooks/use-id-card-brand";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 import { useSiteSettings } from "@/hooks/use-data";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -461,6 +462,7 @@ const AdminIdCards = () => {
   const [brand, setBrand] = useState<IdCardBrand>(brandData ?? DEFAULT_ID_CARD_BRAND);
   const [brandDirty, setBrandDirty] = useState(false);
   const [savingBrand, setSavingBrand] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
 
   useEffect(() => {
     if (brandData && !brandDirty) setBrand(brandData);
@@ -1104,6 +1106,14 @@ const AdminIdCards = () => {
             <Button variant="outline" onClick={printCard} disabled={!subject}>
               <Printer className="w-4 h-4 mr-2" /> Print PDF
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => setWhatsAppOpen(true)}
+              disabled={!subject}
+              className="border-emerald-500/30 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 gap-1.5"
+            >
+              <MessageSquare className="w-4 h-4" /> Send WhatsApp
+            </Button>
             <Button onClick={download} disabled={!subject}>
               <Download className="w-4 h-4 mr-2" /> Download PNG
             </Button>
@@ -1536,6 +1546,19 @@ const AdminIdCards = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {subject && (
+        <WhatsAppSendDialog
+          isOpen={whatsAppOpen}
+          onClose={() => setWhatsAppOpen(false)}
+          recipientPhone={subject.phone || ""}
+          recipientName={subject.name}
+          defaultTemplateKey="id_verification"
+          defaultVars={{
+            0: subject.name,
+            1: "Active",
+          }}
+        />
+      )}
     </SuperAdminLayout>
   );
 };

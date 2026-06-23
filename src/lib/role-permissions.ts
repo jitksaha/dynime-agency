@@ -54,6 +54,7 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   // System
   "/superadmin/product-urls": ["super_admin", "manager"],
   "/superadmin/settings": ["super_admin"],
+  "/superadmin/whatsapp-portal": ["super_admin", "manager"],
   "/superadmin/hr-requests": ["super_admin", "manager", "hr"],
   "/superadmin/hr-extras": ["super_admin", "manager", "hr"],
   "/superadmin/payroll": ["super_admin", "manager", "hr"],

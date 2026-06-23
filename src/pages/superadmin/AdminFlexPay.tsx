@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, FileText, Download, CheckCircle2, XCircle, ChevronDown, ChevronRight, Pencil } from "lucide-react";
+import { Plus, Trash2, FileText, Download, CheckCircle2, XCircle, ChevronDown, ChevronRight, Pencil, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 
 const fmt = (n: number, cur = "USD") =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: cur }).format(Number(n) || 0);
@@ -331,6 +332,8 @@ const ApplicationsTab = () => {
   const [maxTenure, setMaxTenure] = useState("12");
   const [risk, setRisk] = useState("standard");
   const [docsApp, setDocsApp] = useState<any>(null);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
+  const [whatsAppTarget, setWhatsAppTarget] = useState<any>(null);
 
   const reject = async (id: string) => {
     const reason = window.prompt("Rejection reason?");
@@ -385,6 +388,22 @@ const ApplicationsTab = () => {
                 <TableCell><Badge variant={a.status === "approved" ? "default" : a.status === "rejected" ? "destructive" : "secondary"} className="capitalize">{a.status}</Badge></TableCell>
                 <TableCell className="text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</TableCell>
                 <TableCell className="text-right space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-emerald-500/30 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+                    onClick={() => {
+                      setWhatsAppTarget({
+                        phone: a.phone || "",
+                        name: a.full_name || "",
+                        status: a.status,
+                      });
+                      setWhatsAppOpen(true);
+                    }}
+                    title="Send WhatsApp update"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </Button>
                   <Button size="sm" variant="secondary" onClick={() => setDocsApp(a)}>
                     <FileText className="w-3.5 h-3.5 mr-1" /> Documents
                   </Button>
@@ -421,6 +440,19 @@ const ApplicationsTab = () => {
           </DialogContent>
         </Dialog>
         <AdminDocumentsDialog app={docsApp} onClose={() => setDocsApp(null)} />
+        {whatsAppTarget && (
+          <WhatsAppSendDialog
+            isOpen={whatsAppOpen}
+            onClose={() => { setWhatsAppOpen(false); setWhatsAppTarget(null); }}
+            recipientPhone={whatsAppTarget.phone}
+            recipientName={whatsAppTarget.name}
+            defaultTemplateKey="credit_application"
+            defaultVars={{
+              0: whatsAppTarget.name,
+              1: whatsAppTarget.status,
+            }}
+          />
+        )}
       </CardContent>
     </Card>
   );

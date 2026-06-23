@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/integrations/db/client";
 import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,7 @@ import {
   ShieldQuestion,
   Link2,
   RotateCcw,
+  MessageSquare,
 } from "lucide-react";
 
 const PUBLIC_INVOICE_HOST = "https://dynime.com";
@@ -112,6 +114,7 @@ const AdminOrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
 
   useOrdersRealtime(`admin-order-detail-${id ?? "none"}`, [
     ["admin-order", id],
@@ -341,6 +344,15 @@ const AdminOrderDetail = () => {
           >
             <RotateCcw className="w-4 h-4" /> Refund
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 border-emerald-500/30 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+            onClick={() => setWhatsAppOpen(true)}
+            title="Send status notification via WhatsApp"
+          >
+            <MessageSquare className="w-4 h-4" /> WhatsApp
+          </Button>
           <Button asChild variant="hero" size="sm" className="gap-1.5">
             <a href={`/invoice/${(order as any).invoice_number || order.id}?print=1`} target="_blank" rel="noopener noreferrer">
               <Download className="w-4 h-4" /> PDF
@@ -435,6 +447,19 @@ const AdminOrderDetail = () => {
           <VerificationCard meta={verification} order={order} />
         </div>
       </div>
+
+      <WhatsAppSendDialog
+        isOpen={whatsAppOpen}
+        onClose={() => setWhatsAppOpen(false)}
+        recipientPhone={((order as any).billing_address?.phone) || ""}
+        recipientName={order.customer_name || ""}
+        defaultTemplateKey="order_update"
+        defaultVars={{
+          0: order.customer_name || "",
+          1: (order as any).invoice_number || order.id || "",
+          2: order.status,
+        }}
+      />
     </SuperAdminLayout>
   );
 };

@@ -16,10 +16,11 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   Search, Inbox, Mail, Phone, Globe, Linkedin, ExternalLink, FileText, Trash2, Download, FileDown,
-  Sparkles, RefreshCw, AlertTriangle, UserX, Filter, Gauge,
+  Sparkles, RefreshCw, AlertTriangle, UserX, Filter, Gauge, MessageSquare,
 } from "lucide-react";
 import { streamCsvExport, type CsvColumn } from "@/lib/csv-export";
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api";
+import WhatsAppSendDialog from "@/components/admin/WhatsAppSendDialog";
 
 interface AtsContactLinks {
   emails?: string[];
@@ -232,6 +233,7 @@ const AdminJobApplications = () => {
   const [atsFilter, setAtsFilter] = useState<string>("all");
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [selected, setSelected] = useState<JobApplication | null>(null);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeMeta, setResumeMeta] = useState<{ name: string; type: string } | null>(null);
   const [rescanning, setRescanning] = useState(false);
@@ -1066,7 +1068,15 @@ const AdminJobApplications = () => {
                   />
                 </div>
 
-                <div className="flex justify-end pt-2">
+                <div className="flex justify-between items-center pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-emerald-500/30 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 gap-1.5"
+                    onClick={() => setWhatsAppOpen(true)}
+                  >
+                    <MessageSquare className="w-4 h-4" /> Send WhatsApp
+                  </Button>
                   <Button
                     variant="destructive"
                     size="sm"
@@ -1154,6 +1164,20 @@ const AdminJobApplications = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {selected && (
+        <WhatsAppSendDialog
+          isOpen={whatsAppOpen}
+          onClose={() => setWhatsAppOpen(false)}
+          recipientPhone={selected.phone || ""}
+          recipientName={selected.full_name}
+          defaultTemplateKey="job_confirmation"
+          defaultVars={{
+            0: selected.full_name,
+            1: selected.career_title || "",
+          }}
+        />
+      )}
     </SuperAdminLayout>
   );
 };

@@ -192,7 +192,15 @@ const navGroupsCommerce: NavGroup = {
 const navGroupsSystem: NavGroup = {
   label: "System",
   items: [
-    { to: "/superadmin/settings", label: "Site Settings", icon: Settings },
+    {
+      key: "site-settings",
+      label: "Site Settings",
+      icon: Settings,
+      children: [
+        { to: "/superadmin/settings", label: "General Settings", icon: Settings },
+        { to: "/superadmin/whatsapp-portal?tab=config", label: "WhatsApp Config", icon: MessageSquare },
+      ],
+    },
     { to: "/superadmin/product-urls", label: "Product URLs", icon: Link2 },
     {
       key: "email-portal",
