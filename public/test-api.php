@@ -22,8 +22,14 @@ try {
     
     $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
     
-    \Illuminate\Support\Facades\Cache::flush();
+    $action = $_GET['action'] ?? '';
+    $migrationOutput = '';
+    if ($action === 'migrate') {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrationOutput = \Illuminate\Support\Facades\Artisan::output();
+    }
     
+    \Illuminate\Support\Facades\Cache::flush();
     
     $careersCount = \App\Models\Career::count();
     $applicationsCount = \App\Models\JobApplication::count();
@@ -31,6 +37,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'OPcache reset and Laravel cache flushed successfully!',
+        'migration_output' => $migrationOutput,
         'careers_count' => $careersCount,
         'applications_count' => $applicationsCount
     ]);
