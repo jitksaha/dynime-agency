@@ -1553,10 +1553,10 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   }, [employee, extraEarnings, extraDeductions]);
 
   const issueAndEmail = async (sendEmail: boolean) => {
-    if (!employee) { toast.error("Pick an employee first"); return; }
+    if (!employee) { toast.error("Pick an employee first"); return null; }
     sendEmail ? setEmailing(true) : setIssuing(true);
     try {
-      const data = await apiPost('/hrm/issue-document', {
+      const data = await apiPost<any>('/hrm/issue-document', {
         employee_id: employee.id,
         kind,
         issue_date: issueDate && issueDate.trim() !== "" ? issueDate : todayStr(),
@@ -1578,8 +1578,10 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
         ? `Document ${data?.doc_number || ""} issued and emailed`
         : `Document ${data?.doc_number || ""} saved`);
       onIssued();
+      return data;
     } catch (e: any) {
       toast.error(e.message || "Failed to issue document");
+      return null;
     } finally {
       setEmailing(false); setIssuing(false);
     }
@@ -1916,7 +1918,11 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
               if (!employee) return;
               setDownloading(true);
               try {
-                const fname = `${employee.full_name.replace(/\s+/g, "_")}-${kind}.pdf`;
+                // Auto-save to history first
+                const docData = await issueAndEmail(false);
+                if (!docData) throw new Error("Auto-save to history failed");
+                const docNum = docData.doc_number || "doc";
+                const fname = `${kind}_${docNum}_${employee.full_name.toLowerCase().replace(/\s+/g, "_")}.pdf`;
                 await downloadHRDocumentPdf(fname);
               } catch (e: any) {
                 toast.error(e?.message || "Download failed");
@@ -1929,7 +1935,18 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
             {downloading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Download className="w-4 h-4 mr-1.5" />}
             Download PDF
           </Button>
-          <Button onClick={() => printWithSignatureFonts()} variant="outline" disabled={!employee}>
+          <Button
+            onClick={async () => {
+              if (!employee) return;
+              try {
+                // Auto-save to history first
+                await issueAndEmail(false);
+              } catch {}
+              printWithSignatureFonts();
+            }}
+            variant="outline"
+            disabled={!employee}
+          >
             <Printer className="w-4 h-4 mr-1.5" /> Print
           </Button>
           <Button onClick={() => issueAndEmail(false)} variant="secondary" disabled={!employee || issuing}>
