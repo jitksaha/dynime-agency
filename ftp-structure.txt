@@ -69,6 +69,7 @@ backend
 favicon-dark-32.png
 list-migrations.php
 apple-touch-icon.png
+get-migrations-list.php
 track
 sitemap.xml
 web.config
@@ -122,6 +123,7 @@ dynime-api
 deploy-api.php
 wordpress-woocommerce
 describe-table.php
+query-wa-db.php
 get-logs.php
 test-mail.php
 contact
