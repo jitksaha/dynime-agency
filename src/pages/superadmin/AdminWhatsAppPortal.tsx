@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, Send, Save, Loader2, ListFilter } from "lucide-react";
+import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, Send, Save, Loader2, ListFilter, Trash2, Plus, RotateCcw, X } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SectionHelp from "@/components/admin/SectionHelp";
@@ -54,6 +55,100 @@ export default function AdminWhatsAppPortal() {
 
   // Templates state
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>(TEMPLATE_DEFAULTS);
+  const [templateSearch, setTemplateSearch] = useState("");
+
+  // Create Template Modal State
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newKey, setNewKey] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [newVarsStr, setNewVarsStr] = useState("");
+
+  const handleCreateTemplate = () => {
+    const key = newKey.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (!key) {
+      toast.error("Template key is required and must contain only letters, numbers, and underscores.");
+      return;
+    }
+    if (templates.some((t) => t.key === key)) {
+      toast.error("A template with this key already exists.");
+      return;
+    }
+    if (!newLabel.trim()) {
+      toast.error("Template label is required.");
+      return;
+    }
+    const variables = newVarsStr
+      .split(",")
+      .map((v) => v.trim())
+      .filter((v) => v.length > 0);
+
+    const newTpl: WhatsAppTemplate = {
+      key,
+      label: newLabel.trim(),
+      body: newBody.trim(),
+      variables,
+    };
+
+    setTemplates((prev) => [...prev, newTpl]);
+    setIsCreateOpen(false);
+    setNewKey("");
+    setNewLabel("");
+    setNewBody("");
+    setNewVarsStr("");
+    toast.success(`Custom template '${newLabel}' added! Don't forget to click Save Templates to persist.`);
+  };
+
+  const handleDeleteTemplate = (key: string) => {
+    setTemplates((prev) => prev.filter((t) => t.key !== key));
+    toast.success("Template deleted from list. Click 'Save Templates' to persist the deletion.");
+  };
+
+  const handleResetTemplate = (key: string) => {
+    const original = TEMPLATE_DEFAULTS.find((t) => t.key === key);
+    if (original) {
+      setTemplates((prev) =>
+        prev.map((t) => (t.key === key ? { ...original } : t))
+      );
+      toast.success(`Reset template '${original.label}' to default values.`);
+    }
+  };
+
+  const handleVariableNameChange = (key: string, idx: number, val: string) => {
+    setTemplates((prev) =>
+      prev.map((t) => {
+        if (t.key === key) {
+          const variables = [...t.variables];
+          variables[idx] = val;
+          return { ...t, variables };
+        }
+        return t;
+      })
+    );
+  };
+
+  const handleDeleteVariable = (key: string, idx: number) => {
+    setTemplates((prev) =>
+      prev.map((t) => {
+        if (t.key === key) {
+          const variables = t.variables.filter((_, i) => i !== idx);
+          return { ...t, variables };
+        }
+        return t;
+      })
+    );
+  };
+
+  const handleAddVariable = (key: string, val: string) => {
+    setTemplates((prev) =>
+      prev.map((t) => {
+        if (t.key === key) {
+          return { ...t, variables: [...t.variables, val] };
+        }
+        return t;
+      })
+    );
+  };
 
   // Send Direct Message State
   const [sendPhone, setSendPhone] = useState("");
@@ -424,31 +519,185 @@ export default function AdminWhatsAppPortal() {
                   </Button>
                 </div>
 
-                <div className="space-y-4">
-                  {templates.filter(t => t.key !== "custom").map((t) => (
-                    <div key={t.key} className="rounded-xl border border-border p-4 space-y-3 bg-muted/20">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-foreground">{t.label}</span>
-                        <code className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded">{t.key}</code>
-                      </div>
-                      <div>
-                        <Label htmlFor={`t-body-${t.key}`} className="text-xs">Template Body</Label>
-                        <Textarea
-                          id={`t-body-${t.key}`}
-                          value={t.body}
-                          onChange={(e) => handleTemplateBodyChange(t.key, e.target.value)}
-                          className="mt-1.5 min-h-[80px]"
-                        />
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {t.variables.map((vName, idx) => (
-                            <Badge key={idx} variant="outline" className="text-[10px] font-mono">
-                              {"{{"}{idx + 1}{"}}"} : {vName}
-                            </Badge>
-                          ))}
+                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between pt-1">
+                  <Input
+                    placeholder="Search templates by name, key, content..."
+                    value={templateSearch}
+                    onChange={(e) => setTemplateSearch(e.target.value)}
+                    className="max-w-xs h-9 text-xs"
+                  />
+                  <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="gap-1.5 h-9 text-xs border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10">
+                        <Plus className="w-3.5 h-3.5" /> Create Custom Template
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md border-border bg-card/95 backdrop-blur-md">
+                      <DialogHeader>
+                        <DialogTitle>Create Custom Template</DialogTitle>
+                        <DialogDescription>
+                          Define a new notification template for manual sends or dynamic integrations.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div className="space-y-1">
+                          <Label htmlFor="tpl-key">Unique Template Key *</Label>
+                          <Input
+                            id="tpl-key"
+                            value={newKey}
+                            onChange={(e) => setNewKey(e.target.value)}
+                            placeholder="e.g. discount_alert (lowercase, no spaces)"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="tpl-label">Template Friendly Name *</Label>
+                          <Input
+                            id="tpl-label"
+                            value={newLabel}
+                            onChange={(e) => setNewLabel(e.target.value)}
+                            placeholder="e.g. Discount Code Alert"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="tpl-body">Template Body Text</Label>
+                          <Textarea
+                            id="tpl-body"
+                            value={newBody}
+                            onChange={(e) => setNewBody(e.target.value)}
+                            placeholder="e.g. Hello {{1}}, your discount code for {{2}} is ready: {{3}}"
+                            className="min-h-[90px]"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor="tpl-vars">Variables (comma-separated labels)</Label>
+                          <Input
+                            id="tpl-vars"
+                            value={newVarsStr}
+                            onChange={(e) => setNewVarsStr(e.target.value)}
+                            placeholder="e.g. Customer Name, Promo Value, Code"
+                          />
+                          <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                            Placeholders in body must map sequentially to these labels: <code>{"{{"}1{"}}"}</code> &rarr; Customer Name, etc.
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                        <Button onClick={handleCreateTemplate} className="bg-emerald-600 hover:bg-emerald-700 text-white">Create Template</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="space-y-4">
+                  {templates
+                    .filter((t) => t.key !== "custom")
+                    .filter((t) =>
+                      t.label.toLowerCase().includes(templateSearch.toLowerCase()) ||
+                      t.key.toLowerCase().includes(templateSearch.toLowerCase()) ||
+                      t.body.toLowerCase().includes(templateSearch.toLowerCase())
+                    )
+                    .map((t) => {
+                      const isSystemDefault = TEMPLATE_DEFAULTS.some((d) => d.key === t.key);
+                      return (
+                        <div key={t.key} className="rounded-xl border border-border p-4 space-y-3 bg-muted/20">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-foreground">{t.label}</span>
+                              <code className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">{t.key}</code>
+                              {isSystemDefault ? (
+                                <Badge variant="outline" className="text-[9px] bg-indigo-500/5 text-indigo-500 border-indigo-500/20 shrink-0">System Default</Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-[9px] bg-emerald-500/5 text-emerald-500 border-emerald-500/20 shrink-0">Custom</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              {isSystemDefault ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleResetTemplate(t.key)}
+                                  className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                  title="Reset template body and variables to default system values"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" /> Reset
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTemplate(t.key)}
+                                  className="h-7 text-xs gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  title="Delete custom template"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor={`t-body-${t.key}`} className="text-xs">Template Body</Label>
+                              <Textarea
+                                id={`t-body-${t.key}`}
+                                value={t.body}
+                                onChange={(e) => handleTemplateBodyChange(t.key, e.target.value)}
+                                className="mt-1.5 min-h-[80px]"
+                              />
+                            </div>
+                            
+                            <div className="flex flex-col gap-2 mt-2">
+                              <Label className="text-xs text-muted-foreground font-medium">Template Variables Mappings</Label>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                {t.variables.map((vName, idx) => (
+                                  <div key={idx} className="flex items-center gap-1.5 bg-muted/40 p-1.5 rounded-lg border border-border/40">
+                                    <span className="text-[10px] font-mono font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                                      {"{{"}{idx + 1}{"}}"}
+                                    </span>
+                                    <Input
+                                      value={vName}
+                                      onChange={(e) => handleVariableNameChange(t.key, idx, e.target.value)}
+                                      className="h-6 text-xs bg-transparent border-none focus-visible:ring-0 px-1 py-0 shadow-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteVariable(t.key, idx)}
+                                      className="text-muted-foreground hover:text-destructive shrink-0 p-0.5"
+                                      title="Delete variable"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                                {/* Add Variable input */}
+                                <div className="flex items-center gap-1 bg-emerald-500/5 p-1.5 rounded-lg border border-emerald-500/20">
+                                  <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
+                                    {"{{"}{t.variables.length + 1}{"}}"}
+                                  </span>
+                                  <Input
+                                    placeholder="Add variable label..."
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        const val = e.currentTarget.value.trim();
+                                        if (val) {
+                                          handleAddVariable(t.key, val);
+                                          e.currentTarget.value = "";
+                                        }
+                                      }
+                                    }}
+                                    className="h-6 text-xs bg-transparent border-none focus-visible:ring-0 px-1 py-0 shadow-none placeholder:text-muted-foreground/50"
+                                  />
+                                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold px-1 shrink-0 cursor-default" title="Press Enter to add">
+                                    ↵
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               </CardContent>
             </Card>
