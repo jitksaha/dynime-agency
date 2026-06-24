@@ -675,7 +675,8 @@ button:hover .text-muted-foreground,
   
   /* Hide sidebar, top-bar, dialogs, and button elements */
   aside,
-  header,
+  header:not(.hr-doc *),
+  footer:not(.hr-doc *),
   nav,
   .print\:hidden,
   [class*="print:hidden"],
