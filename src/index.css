@@ -670,7 +670,7 @@ button:hover .text-muted-foreground,
 
 /* Print: only show the HR document, hide app chrome */
 @media print {
-  @page { size: A4; margin: 14mm 14mm 16mm 14mm !important; }
+  @page { size: A4; margin: 0 !important; }
   html, body { background: #fff !important; }
 
   /* Hide elements that don't contain, aren't, and aren't inside the document */
@@ -703,11 +703,12 @@ button:hover .text-muted-foreground,
     position: relative !important;
     width: 100% !important;
     min-height: 0 !important;
-    padding: 0 !important;
+    padding: 12mm 14mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
+    box-sizing: border-box !important;
   }
 }
 
