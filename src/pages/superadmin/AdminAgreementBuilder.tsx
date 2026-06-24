@@ -58,6 +58,19 @@ export default function AdminAgreementBuilder() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return history;
+    const q = searchQuery.toLowerCase();
+    return history.filter(
+      (ag) =>
+        (ag.title || "").toLowerCase().includes(q) ||
+        (ag.reference || "").toLowerCase().includes(q) ||
+        (ag.client_name || "").toLowerCase().includes(q) ||
+        (ag.client_company || "").toLowerCase().includes(q)
+    );
+  }, [history, searchQuery]);
 
   const items = useMemo(
     () =>
@@ -440,9 +453,17 @@ export default function AdminAgreementBuilder() {
           <div className="glass-card p-4 space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <h2 className="text-lg font-semibold">Agreement History</h2>
-              <Button onClick={fetchHistory} variant="ghost" size="sm" disabled={loadingHistory}>
-                {loadingHistory ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null} Refresh
-              </Button>
+              <div className="flex items-center gap-2 print:hidden">
+                <Input
+                  placeholder="Search client, title, ref..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-xs h-9 text-sm"
+                />
+                <Button onClick={fetchHistory} variant="ghost" size="sm" disabled={loadingHistory}>
+                  {loadingHistory ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null} Refresh
+                </Button>
+              </div>
             </div>
 
             <div className="border border-border rounded-lg overflow-hidden">
@@ -466,14 +487,14 @@ export default function AdminAgreementBuilder() {
                           Loading history...
                         </td>
                       </tr>
-                    ) : history.length === 0 ? (
+                    ) : filteredHistory.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                          No agreements saved yet.
+                          {searchQuery ? "No matching agreements found." : "No agreements saved yet."}
                         </td>
                       </tr>
                     ) : (
-                      history.map((ag) => (
+                      filteredHistory.map((ag) => (
                         <tr key={ag.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                           <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                             {new Date(ag.created_at || ag.effective_date).toLocaleDateString()}
@@ -505,8 +526,9 @@ export default function AdminAgreementBuilder() {
                                 setActiveTab("builder");
                                 toast.success("Loaded agreement details into builder form");
                               }}
+                              className="text-primary hover:bg-primary/10"
                             >
-                              Load
+                              <PenLine className="w-3.5 h-3.5 mr-1" /> Edit
                             </Button>
                             <Button
                               variant="ghost"
