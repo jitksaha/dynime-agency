@@ -670,13 +670,44 @@ button:hover .text-muted-foreground,
 
 /* Print: only show the HR document, hide app chrome */
 @media print {
-  @page { size: A4; margin: 15mm 14mm; }
+  @page { size: A4; margin: 0mm !important; }
   html, body { background: #fff !important; }
+  
+  /* Hide sidebar, top-bar, dialogs, and button elements */
+  aside,
+  header,
+  nav,
+  .print\:hidden,
+  [class*="print:hidden"],
+  button {
+    display: none !important;
+  }
+
+  /* Reset layout wrappers to prevent clipping and blank pages */
+  .min-h-screen,
+  .h-screen,
+  .overflow-hidden,
+  .overflow-y-auto,
+  .overflow-x-hidden,
+  main {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
   body * { visibility: hidden !important; }
   .hr-doc, .hr-doc * { visibility: visible !important; }
+
+  /* Reset body padding for print to act as page margins */
+  body {
+    padding: 16mm 14mm !important;
+    margin: 0 !important;
+  }
+
   .hr-doc {
-    position: absolute !important;
-    left: 0; top: 0;
+    position: relative !important;
     width: 100% !important;
     min-height: 0 !important;
     padding: 0 !important;

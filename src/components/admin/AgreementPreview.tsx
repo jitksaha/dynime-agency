@@ -105,7 +105,7 @@ const ClientSignatureBlock = ({
   return (
     <div>
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Client</p>
-      <div className="relative h-16">
+      <div className="relative h-28">
         {firstName && (
           <span
             className={`absolute left-1 bottom-1 ${signatureSize} text-foreground select-none pointer-events-none`}
@@ -162,7 +162,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
 
   let n = 0;
   return (
-    <article className="bg-card border border-border rounded-xl shadow-sm text-foreground">
+    <article className="hr-doc bg-card border border-border rounded-xl shadow-sm text-foreground print:border-0 print:shadow-none print:rounded-none mx-auto max-w-3xl">
       {/* Off-screen preloader so every signature font is fetched + decoded
           before the user prints/saves as PDF — guarantees consistent rendering. */}
       <div aria-hidden="true" className="absolute -left-[9999px] -top-[9999px] opacity-0 pointer-events-none" style={{ position: "absolute" }}>
@@ -172,7 +172,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
           </span>
         ))}
       </div>
-      <header className="px-6 pt-6 pb-4 border-b border-border flex items-start justify-between gap-4 flex-wrap">
+      <header className="px-8 pt-8 pb-6 border-b border-border flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-1">{title}</p>
           <h1 className="text-xl font-bold tracking-tight">{title}</h1>
@@ -190,7 +190,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
         </div>
       </header>
 
-      <section className="px-6 py-5 grid sm:grid-cols-2 gap-6 border-b border-border">
+      <section className="px-8 py-6 grid sm:grid-cols-2 gap-6 border-b border-border">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5 flex items-center gap-1">
             <Building2 className="w-3 h-3" /> Service Provider
@@ -233,7 +233,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
         </div>
       </section>
 
-      <section className="px-6 py-5 text-xs leading-relaxed">
+      <section className="px-8 py-6 text-xs leading-relaxed">
         <p>
           This {title} (the “Agreement”) is entered into on{" "}
           <span className="font-medium">{effectiveDateLabel}</span> between{" "}
@@ -243,7 +243,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
         </p>
       </section>
 
-      <section className="px-6 pb-6 space-y-5 text-xs leading-relaxed">
+      <section className="px-8 pb-8 space-y-5 text-xs leading-relaxed">
         {p.scope && (
           <Clause n={++n} title="Scope of Work">
             <p className="whitespace-pre-wrap">{p.scope}</p>
@@ -300,18 +300,18 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
         )}
       </section>
 
-      <section className="px-6 pb-8 grid sm:grid-cols-2 gap-6 border-t border-border pt-6">
+      <section className="px-8 pb-10 grid sm:grid-cols-2 gap-6 border-t border-border pt-8">
         {/* Service Provider — formal block, no signature */}
         <div>
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
             Service Provider
           </p>
-          <div className="relative h-16 flex items-end">
+          <div className="relative h-28 flex items-end">
             {!issuerIsEmployee || providerName === "Dynime Inc." ? (
               <img
                 src="/dynime-seal.png"
                 alt="Dynime Seal"
-                className="absolute left-1 -bottom-4 h-24 w-24 object-contain pointer-events-none select-none"
+                className="absolute left-1 bottom-0 h-24 w-24 object-contain pointer-events-none select-none"
               />
             ) : (
               <p className="font-heading text-lg font-bold tracking-tight">{providerName}</p>
@@ -340,7 +340,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
       </section>
 
       {/* Branded footer */}
-      <footer className="px-6 py-4 border-t border-border text-center text-[11px] text-muted-foreground space-y-0.5">
+      <footer className="px-8 py-6 border-t border-border text-center text-[11px] text-muted-foreground space-y-0.5">
         <div className="flex items-center justify-center gap-2">
           <SiteLogo variant="light" className="h-4 w-auto opacity-80" />
           <span className="font-semibold text-foreground">Dynime Inc.</span>
