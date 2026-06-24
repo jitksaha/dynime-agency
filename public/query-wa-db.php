@@ -6,7 +6,7 @@ if (!isset($_GET['token']) || $_GET['token'] !== $deployToken) {
     exit;
 }
 
-header('Content-Type: application/json');
+header('Content-Type: text/plain');
 
 try {
     $apiDir = dirname(__DIR__) . '/dynime-api';
@@ -15,13 +15,8 @@ try {
     $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
     $kernel->bootstrap();
 
-    $settings = DB::table('notification_settings')->get();
-    $migrations = DB::table('migrations')->get()->pluck('migration')->toArray();
-
-    echo json_encode([
-        'settings' => $settings,
-        'migrations' => $migrations
-    ], JSON_PRETTY_PRINT);
+    \Illuminate\Support\Facades\Artisan::call('migrate:status');
+    echo \Illuminate\Support\Facades\Artisan::output();
 } catch (\Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    echo "Error: " . $e->getMessage() . "\n" . $e->getTraceAsString();
 }
