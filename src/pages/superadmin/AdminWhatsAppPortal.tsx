@@ -16,19 +16,12 @@ import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, S
 import { toast } from "sonner";
 import { format } from "date-fns";
 import SectionHelp from "@/components/admin/SectionHelp";
-import { sendWhatsAppTemplate } from "@/lib/whatsapp-direct";
+import { sendWhatsAppTemplate, TEMPLATE_DEFAULTS, type WhatsAppTemplate } from "@/lib/whatsapp-direct";
 
 interface WhatsAppConfig {
   enabled: boolean;
   access_token: string;
   phone_number_id: string;
-}
-
-interface WhatsAppTemplate {
-  key: string;
-  label: string;
-  body: string;
-  variables: string[]; // e.g. ["customer_name", "order_id"]
 }
 
 interface WhatsAppLog {
@@ -40,39 +33,6 @@ interface WhatsAppLog {
   error_message: string | null;
   created_at: string;
 }
-
-const TEMPLATE_DEFAULTS: WhatsAppTemplate[] = [
-  {
-    key: "custom",
-    label: "Custom Message (No Template)",
-    body: "",
-    variables: [],
-  },
-  {
-    key: "order_update",
-    label: "Order Status Update",
-    body: "Hello {{1}}, your order {{2}} status is now: {{3}}. Thank you for choosing Dynime!",
-    variables: ["Customer Name", "Order ID", "Status"],
-  },
-  {
-    key: "payment_link",
-    label: "Payment Link / Invoice",
-    body: "Hi {{1}}, here is your payment link for invoice {{2}} of amount {{3}}: {{4}}",
-    variables: ["Customer Name", "Invoice Number", "Amount", "Link"],
-  },
-  {
-    key: "recurring_service",
-    label: "Recurring Service Renewal Alert",
-    body: "Hello {{1}}, this is a reminder that your recurring service '{{2}}' is due for renewal on {{3}}. Amount: {{4}}.",
-    variables: ["Customer Name", "Service Name", "Renewal Date", "Amount"],
-  },
-  {
-    key: "job_confirmation",
-    label: "Job Application Update",
-    body: "Hi {{1}}, thank you for applying for the '{{2}}' role. We have received your application and will review it shortly.",
-    variables: ["Applicant Name", "Job Role"],
-  },
-];
 
 export default function AdminWhatsAppPortal() {
   const [logs, setLogs] = useState<WhatsAppLog[]>([]);
@@ -137,7 +97,17 @@ export default function AdminWhatsAppPortal() {
         .maybeSingle();
 
       if (templateRow?.value && Array.isArray(templateRow.value)) {
-        setTemplates(templateRow.value as WhatsAppTemplate[]);
+        const dbTemplates = templateRow.value as WhatsAppTemplate[];
+        const merged = [...TEMPLATE_DEFAULTS];
+        dbTemplates.forEach((dt) => {
+          const idx = merged.findIndex((m) => m.key === dt.key);
+          if (idx !== -1) {
+            merged[idx] = dt;
+          } else {
+            merged.push(dt);
+          }
+        });
+        setTemplates(merged);
       }
 
       // 3. Fetch logs

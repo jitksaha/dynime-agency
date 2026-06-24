@@ -110,6 +110,58 @@ export async function sendWhatsAppMessage(
   }
 }
 
+export interface WhatsAppTemplate {
+  key: string;
+  label: string;
+  body: string;
+  variables: string[];
+}
+
+export const TEMPLATE_DEFAULTS: WhatsAppTemplate[] = [
+  {
+    key: "custom",
+    label: "Custom Message (No Template)",
+    body: "",
+    variables: [],
+  },
+  {
+    key: "order_update",
+    label: "Order Status Update",
+    body: "Hello {{1}}, your order {{2}} status is now: {{3}}. Thank you for choosing Dynime!",
+    variables: ["Customer Name", "Order ID", "Status"],
+  },
+  {
+    key: "payment_link",
+    label: "Payment Link / Invoice",
+    body: "Hi {{1}}, here is your payment link for invoice {{2}} of amount {{3}}: {{4}}",
+    variables: ["Customer Name", "Invoice Number", "Amount", "Link"],
+  },
+  {
+    key: "recurring_service",
+    label: "Recurring Service Renewal Alert",
+    body: "Hello {{1}}, this is a reminder that your recurring service '{{2}}' is due for renewal on {{3}}. Amount: {{4}}.",
+    variables: ["Customer Name", "Service Name", "Renewal Date", "Amount"],
+  },
+  {
+    key: "job_confirmation",
+    label: "Job Application Update",
+    body: "Hi {{1}}, thank you for applying for the '{{2}}' role. We have received your application and will review it shortly.",
+    variables: ["Applicant Name", "Job Role"],
+  },
+  {
+    key: "id_verification",
+    label: "ID Card Verification",
+    body: "Hello {{1}}, your ID Card assignment status is now: {{2}}.",
+    variables: ["Subject Name", "Status"],
+  },
+  {
+    key: "credit_application",
+    label: "Credit Application Update",
+    body: "Hi {{1}}, your credit application/FlexPay status is now: {{2}}.",
+    variables: ["Applicant Name", "Status"],
+  },
+];
+
 /**
  * Send a WhatsApp message using a named template from notification_settings.
  * Replaces {{1}}, {{2}}, ... with the provided vars array.
@@ -133,15 +185,23 @@ export async function sendWhatsAppTemplate(
     .maybeSingle();
 
   let messageBody = customMessage || "";
+  let matchedTemplate: WhatsAppTemplate | undefined;
 
+  // Try custom templates from database first
   if (tplRow?.value && Array.isArray(tplRow.value)) {
-    const tpl = (tplRow.value as any[]).find((t: any) => t.key === templateKey);
-    if (tpl?.body) {
-      messageBody = tpl.body;
-      vars.forEach((val, idx) => {
-        messageBody = messageBody.replace(`{{${idx + 1}}}`, val);
-      });
-    }
+    matchedTemplate = (tplRow.value as any[]).find((t: any) => t.key === templateKey);
+  }
+
+  // Fallback to default templates if not found in DB
+  if (!matchedTemplate) {
+    matchedTemplate = TEMPLATE_DEFAULTS.find((t) => t.key === templateKey);
+  }
+
+  if (matchedTemplate?.body) {
+    messageBody = matchedTemplate.body;
+    vars.forEach((val, idx) => {
+      messageBody = messageBody.replace(`{{${idx + 1}}}`, val);
+    });
   }
 
   if (!messageBody) {
