@@ -16,11 +16,11 @@ try {
     $kernel->bootstrap();
 
     $settings = DB::table('notification_settings')->get();
-    $logs = DB::table('whatsapp_send_log')->orderBy('created_at', 'desc')->limit(20)->get();
+    $migrations = DB::table('migrations')->get()->pluck('migration')->toArray();
 
     echo json_encode([
         'settings' => $settings,
-        'logs' => $logs
+        'migrations' => $migrations
     ], JSON_PRETTY_PRINT);
 } catch (\Exception $e) {
     echo json_encode(['error' => $e->getMessage()]);
