@@ -1962,18 +1962,51 @@ class OrdersController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        $brief = json_decode($order->service_brief, true) ?: [];
+        $requestId = (string) Str::uuid();
+        $sessionId = 'mock-session-' . Str::random(12);
+
         $verification = [
             'status' => 'pending',
             'type' => $type,
-            'session_id' => 'mock_session_' . Str::random(8),
+            'session_id' => $sessionId,
             'verification_url' => url("/api/v1/orders/public/{$id}/verification/mock-complete"),
         ];
 
+        $brief = json_decode($order->service_brief, true) ?: [];
         $brief['identity_verification'] = $verification;
+        
         DB::table('orders')->where('id', $id)->update([
             'service_brief' => json_encode($brief),
             'updated_at' => now(),
+        ]);
+
+        $isValidUuid = false;
+        if ($order->user_id) {
+            $isValidUuid = preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $order->user_id);
+        }
+
+        DB::table('verification_requests')->insert([
+            'id' => $requestId,
+            'type' => $type,
+            'customer_id' => $isValidUuid ? $order->user_id : null,
+            'service_order_id' => $id,
+            'didit_session_id' => $sessionId,
+            'workflow_id' => 'mock-workflow',
+            'verification_url' => $verification['verification_url'],
+            'qr_code_url' => $verification['verification_url'],
+            'status' => 'pending',
+            'customer_name' => $order->customer_name,
+            'customer_email' => $order->customer_email,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('verification_logs')->insert([
+            'id' => (string) Str::uuid(),
+            'verification_request_id' => $requestId,
+            'action' => 'session_created',
+            'description' => "Mock verification session initiated successfully for customer {$order->customer_email}.",
+            'created_at' => now(),
         ]);
 
         return response()->json($verification);

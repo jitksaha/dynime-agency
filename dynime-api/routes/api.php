@@ -182,6 +182,11 @@ Route::prefix('v1')->group(function () {
         Route::patch('orders/{id}', [\App\Http\Controllers\Api\OrdersController::class, 'adminUpdate'])->middleware('admin');
         Route::delete('orders/{id}', [\App\Http\Controllers\Api\OrdersController::class, 'adminDestroy'])->middleware('admin');
         Route::post('verification/admin/request', [\App\Http\Controllers\Api\OrdersController::class, 'requestVerification'])->middleware('admin');
+        Route::get('verification/admin/dashboard', [\App\Http\Controllers\Api\VerificationController::class, 'dashboard'])->middleware('admin');
+        Route::get('verification/admin/requests', [\App\Http\Controllers\Api\VerificationController::class, 'requests'])->middleware('admin');
+        Route::get('verification/admin/requests/{id}', [\App\Http\Controllers\Api\VerificationController::class, 'show'])->middleware('admin');
+        Route::post('verification/admin/requests/{id}/sync', [\App\Http\Controllers\Api\VerificationController::class, 'syncSingle'])->middleware('admin');
+        Route::post('verification/admin/sync-all', [\App\Http\Controllers\Api\VerificationController::class, 'syncAll'])->middleware('admin');
         Route::get('users/by-email/{email}', [\App\Http\Controllers\Api\Auth\AuthController::class, 'getByEmail'])->middleware('admin');
 
         // ── ADMIN ROUTES ───────────────────────────────────────────────────
