@@ -202,6 +202,7 @@ Route::prefix('v1')->group(function () {
             Route::get('agreements', [\App\Http\Controllers\Api\CustomAgreementController::class, 'index']);
             Route::post('agreements', [\App\Http\Controllers\Api\CustomAgreementController::class, 'store']);
             Route::get('agreements/{id}', [\App\Http\Controllers\Api\CustomAgreementController::class, 'show']);
+            Route::patch('agreements/{id}', [\App\Http\Controllers\Api\CustomAgreementController::class, 'update']);
             Route::delete('agreements/{id}', [\App\Http\Controllers\Api\CustomAgreementController::class, 'destroy']);
 
             // Blog

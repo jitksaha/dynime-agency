@@ -57,6 +57,7 @@ export default function AdminAgreementBuilder() {
   const [history, setHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
 
   const items = useMemo(
     () =>
@@ -97,6 +98,34 @@ export default function AdminAgreementBuilder() {
     fetchHistory();
   }, []);
 
+  const resetForm = () => {
+    setLoadedId(null);
+    setTitle("Service Agreement");
+    setReference("");
+    setEffectiveDate(new Date().toISOString().slice(0, 10));
+    setScope("");
+    setTerm("This agreement remains in effect until all deliverables are completed and accepted.");
+    setPaymentTerms("50% advance, 50% on delivery. Invoices are payable within 14 days of issuance.");
+    setJurisdiction("Bangladesh");
+    setClauses(
+      "Confidentiality: Both parties agree to keep all shared information confidential.\nIntellectual Property: All deliverables transfer to the Client upon full payment.\nTermination: Either party may terminate this agreement with 14 days written notice."
+    );
+    setCustomerName("");
+    setCustomerEmail("");
+    setCustomerCompany("");
+    setCustomerPhone("");
+    setCurrency("USD");
+    setTotal(0);
+    setItemsRaw("");
+    setPSigner("");
+    setPDate(new Date().toISOString().slice(0, 10));
+    setCSigner("");
+    setCDate("");
+    setIssuerMode("company");
+    setIssuerKey("");
+    toast.success("Cleared builder fields to start a new agreement");
+  };
+
   const saveAgreement = async (silent = false) => {
     if (!customerName) {
       if (!silent) {
@@ -128,9 +157,20 @@ export default function AdminAgreementBuilder() {
         client_signed_date: cDate || null,
       };
 
-      const result = await apiPost<any>('/admin/agreements', payload);
-      if (!silent) {
-        toast.success("Agreement saved to history");
+      let result;
+      if (loadedId) {
+        result = await api.patch<any>(`/admin/agreements/${loadedId}`, payload).then((r) => r.data);
+        if (!silent) {
+          toast.success("Agreement updated successfully");
+        }
+      } else {
+        result = await apiPost<any>('/admin/agreements', payload);
+        if (result?.id) {
+          setLoadedId(result.id);
+        }
+        if (!silent) {
+          toast.success("Agreement saved to history");
+        }
       }
       fetchHistory();
       return result;
@@ -146,6 +186,7 @@ export default function AdminAgreementBuilder() {
   };
 
   const loadAgreement = (agreement: any) => {
+    setLoadedId(agreement.id);
     setTitle(agreement.title || "");
     setReference(agreement.reference || "");
     setEffectiveDate(agreement.effective_date || "");
@@ -183,6 +224,9 @@ export default function AdminAgreementBuilder() {
     try {
       await apiDelete(`/admin/agreements/${id}`);
       toast.success("Agreement deleted");
+      if (loadedId === id) {
+        setLoadedId(null);
+      }
       fetchHistory();
     } catch (e: any) {
       toast.error(e.message || "Failed to delete agreement");
@@ -201,12 +245,24 @@ export default function AdminAgreementBuilder() {
   return (
     <SuperAdminLayout>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-        <h1 className="font-heading text-2xl font-bold flex items-center gap-2">
-          <ScrollText className="w-5 h-5 text-primary" /> Agreement Builder
-        </h1>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="font-heading text-2xl font-bold flex items-center gap-2">
+            <ScrollText className="w-5 h-5 text-primary" /> Agreement Builder
+          </h1>
+          {loadedId && (
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/20 animate-pulse">
+              Editing Saved Document
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 print:hidden">
+          {loadedId && (
+            <Button onClick={resetForm} variant="ghost" className="text-muted-foreground hover:text-foreground">
+              New Agreement
+            </Button>
+          )}
           <Button onClick={() => saveAgreement(false)} variant="secondary" className="gap-1.5" disabled={saving || !customerName}>
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} {loadedId ? "Update" : "Save"}
           </Button>
           <Button onClick={handlePrint} variant="outline" className="gap-1.5" disabled={saving || !customerName}>
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />} Print / Save as PDF
