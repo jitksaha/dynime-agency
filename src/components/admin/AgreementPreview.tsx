@@ -18,6 +18,7 @@ export interface AgreementPreviewItem {
 
 export interface AgreementPreviewProps {
   title: string;
+  documentType?: "agreement" | "quotation";
   effectiveDate: string;
   scope: string;
   term: string;
@@ -157,7 +158,10 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
     : "—";
 
   const services = p.items.filter((it) => it && it.name);
-  const title = p.title || "Service Agreement";
+  const isQuotation = p.documentType === "quotation";
+  const defaultTitle = isQuotation ? "Service Quotation" : "Service Agreement";
+  const title = p.title || defaultTitle;
+  const smallTitle = isQuotation ? "SERVICE QUOTATION" : "SERVICE AGREEMENT";
   const ref = p.referenceLabel || "DRAFT";
 
   let n = 0;
@@ -174,7 +178,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
       </div>
       <header className="px-8 pt-8 pb-6 border-b border-border flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-1">{title}</p>
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-1">{smallTitle}</p>
           <h1 className="text-xl font-bold tracking-tight">{title}</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Reference: <span className="font-mono">{ref}</span>
@@ -329,14 +333,16 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
         </div>
 
         {/* Client — auto-signed using first name in a random handwriting font */}
-        <ClientSignatureBlock
-          fallbackName={clientName}
-          signerName={p.clientSignerName}
-          signedDate={p.clientSignedDate}
-          onSignerNameChange={p.onClientSignerNameChange}
-          onSignedDateChange={p.onClientSignedDateChange}
-          seed={`${p.referenceLabel || ""}|${clientName}`}
-        />
+        {!isQuotation && (
+          <ClientSignatureBlock
+            fallbackName={clientName}
+            signerName={p.clientSignerName}
+            signedDate={p.clientSignedDate}
+            onSignerNameChange={p.onClientSignerNameChange}
+            onSignedDateChange={p.onClientSignedDateChange}
+            seed={`${p.referenceLabel || ""}|${clientName}`}
+          />
+        )}
       </section>
 
       {/* Branded footer */}

@@ -16,6 +16,7 @@ class CustomAgreement extends Model
 
     protected $fillable = [
         'title',
+        'document_type',
         'reference',
         'effective_date',
         'client_name',

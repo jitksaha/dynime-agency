@@ -19,6 +19,7 @@ class CustomAgreementController extends Controller
     {
         $data = $request->validate([
             'title'                => 'required|string|max:255',
+            'document_type'        => 'nullable|string|in:agreement,quotation',
             'reference'            => 'nullable|string|max:100',
             'effective_date'       => 'required|date_format:Y-m-d',
             'client_name'          => 'required|string|max:255',
@@ -58,6 +59,7 @@ class CustomAgreementController extends Controller
 
         $data = $request->validate([
             'title'                => 'required|string|max:255',
+            'document_type'        => 'nullable|string|in:agreement,quotation',
             'reference'            => 'nullable|string|max:100',
             'effective_date'       => 'required|date_format:Y-m-d',
             'client_name'          => 'required|string|max:255',

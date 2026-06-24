@@ -30,6 +30,16 @@ export default function AdminAgreementBuilder() {
   );
 
   const [title, setTitle] = useState("Service Agreement");
+  const [documentType, setDocumentType] = useState<"agreement" | "quotation">("agreement");
+
+  const handleTypeChange = (type: "agreement" | "quotation") => {
+    setDocumentType(type);
+    if (type === "quotation" && title === "Service Agreement") {
+      setTitle("Service Quotation");
+    } else if (type === "agreement" && title === "Service Quotation") {
+      setTitle("Service Agreement");
+    }
+  };
   const [reference, setReference] = useState("");
   const [effectiveDate, setEffectiveDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [scope, setScope] = useState("");
@@ -334,6 +344,30 @@ export default function AdminAgreementBuilder() {
                     </SelectContent>
                   </Select>
                 )}
+
+                <div className="flex items-start justify-between gap-3 flex-wrap pt-2 border-t border-border/50">
+                  <Label className="text-sm font-semibold">Document Type</Label>
+                  <div className="inline-flex rounded-md border border-border bg-background p-0.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange("agreement")}
+                      className={`px-3 py-1.5 rounded inline-flex items-center gap-1.5 ${
+                        documentType === "agreement" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Agreement
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleTypeChange("quotation")}
+                      className={`px-3 py-1.5 rounded inline-flex items-center gap-1.5 ${
+                        documentType === "quotation" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Quotation
+                    </button>
+                  </div>
+                </div>
               </section>
 
               <section className="glass-card p-4 grid sm:grid-cols-2 gap-3">
@@ -421,6 +455,7 @@ export default function AdminAgreementBuilder() {
             <div className="lg:sticky lg:top-4 self-start print:static">
               <AgreementPreview
                 title={title}
+                documentType={documentType}
                 effectiveDate={effectiveDate}
                 scope={scope}
                 term={term}
