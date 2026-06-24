@@ -101,6 +101,7 @@ uk-company
 nginx
 wordpress-ecommerce
 email-marketing
+dynime-seal.png
 shopify-illustration.png
 _redirects
 payment-gateway
