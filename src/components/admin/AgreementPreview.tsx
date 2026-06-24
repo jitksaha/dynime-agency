@@ -246,7 +246,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
       <section className="px-6 pb-6 space-y-5 text-xs leading-relaxed">
         {p.scope && (
           <Clause n={++n} title="Scope of Work">
-            <p>{p.scope}</p>
+            <p className="whitespace-pre-wrap">{p.scope}</p>
             {services.length > 0 && (
               <ul className="mt-2 list-disc pl-5 space-y-1">
                 {services.map((s, i) => (
@@ -262,13 +262,13 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
 
         {p.term && (
           <Clause n={++n} title="Term">
-            <p>{p.term}</p>
+            <p className="whitespace-pre-wrap">{p.term}</p>
           </Clause>
         )}
 
         {p.paymentTerms && (
           <Clause n={++n} title="Fees & Payment">
-            <p>{p.paymentTerms}</p>
+            <p className="whitespace-pre-wrap">{p.paymentTerms}</p>
             <p className="mt-2 text-muted-foreground">
               Total agreed value:{" "}
               <span className="font-medium text-foreground">
@@ -285,7 +285,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
           const num = ++n;
           return (
             <Clause key={i} n={num} title={hasHead ? head.trim() : `Clause ${num}`}>
-              <p>{hasHead ? rest.join(":").trim() : c}</p>
+              <p className="whitespace-pre-wrap">{hasHead ? rest.join(":").trim() : c}</p>
             </Clause>
           );
         })}
