@@ -672,45 +672,26 @@ button:hover .text-muted-foreground,
 @media print {
   @page { size: A4; margin: 0mm !important; }
   html, body { background: #fff !important; }
-  
-  /* Hide sidebar, top-bar, dialogs, and button elements */
-  aside,
-  header:not(.hr-doc *),
-  footer:not(.hr-doc *),
-  nav,
-  .print\:hidden,
-  [class*="print:hidden"],
-  button {
+
+  /* Hide elements that don't contain, aren't, and aren't inside the document */
+  body *:not(:has(.hr-doc)):not(.hr-doc):not(.hr-doc *) {
     display: none !important;
   }
 
-  /* Reset layout wrappers to prevent clipping and blank pages */
-  .min-h-screen,
-  .h-screen,
-  .overflow-hidden,
-  .overflow-y-auto,
-  .overflow-x-hidden,
-  main {
+  /* Ancestors of .hr-doc: strip all spacing so they're invisible pass-throughs */
+  *:has(.hr-doc) {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
     overflow: visible !important;
     position: static !important;
   }
-
-  /* Ensure the active/inactive tab panels containing the document are displayed during print */
-  [data-state="inactive"] {
-    display: block !important;
-  }
-
-  /* Reset outer layout structures to block to avoid columns or layout breaks */
-  .grid:not(.hr-doc, .hr-doc *),
-  .flex:not(.hr-doc, .hr-doc *) {
-    display: block !important;
-  }
-
-  body * { visibility: hidden !important; }
-  .hr-doc, .hr-doc * { visibility: visible !important; }
 
   /* Reset body padding for print to act as page margins */
   body {
@@ -719,12 +700,15 @@ button:hover .text-muted-foreground,
   }
 
   .hr-doc {
+    display: block !important;
     position: relative !important;
     width: 100% !important;
     min-height: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
   }
 }
 
