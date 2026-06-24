@@ -670,7 +670,7 @@ button:hover .text-muted-foreground,
 
 /* Print: only show the HR document, hide app chrome */
 @media print {
-  @page { size: A4; margin: 0mm !important; }
+  @page { size: A4; margin: 14mm 14mm 16mm 14mm !important; }
   html, body { background: #fff !important; }
 
   /* Hide elements that don't contain, aren't, and aren't inside the document */
@@ -693,9 +693,8 @@ button:hover .text-muted-foreground,
     position: static !important;
   }
 
-  /* Reset body padding for print to act as page margins */
   body {
-    padding: 16mm 14mm !important;
+    padding: 0 !important;
     margin: 0 !important;
   }
 
