@@ -306,8 +306,16 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
             Service Provider
           </p>
-          <div className="h-16 flex items-end">
-            <p className="font-heading text-lg font-bold tracking-tight">{providerName}</p>
+          <div className="relative h-16 flex items-end">
+            {!issuerIsEmployee || providerName === "Dynime Inc." ? (
+              <img
+                src="/dynime-seal.png"
+                alt="Dynime Seal"
+                className="absolute left-1 -bottom-4 h-24 w-24 object-contain pointer-events-none select-none"
+              />
+            ) : (
+              <p className="font-heading text-lg font-bold tracking-tight">{providerName}</p>
+            )}
           </div>
           <div className="border-t border-foreground/40 pt-2 text-sm space-y-0.5">
             <p className="font-medium">{providerName}</p>
