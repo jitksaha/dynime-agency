@@ -698,6 +698,17 @@ button:hover .text-muted-foreground,
     position: static !important;
   }
 
+  /* Ensure the active/inactive tab panels containing the document are displayed during print */
+  [data-state="inactive"] {
+    display: block !important;
+  }
+
+  /* Reset outer layout structures to block to avoid columns or layout breaks */
+  .grid:not(.hr-doc, .hr-doc *),
+  .flex:not(.hr-doc, .hr-doc *) {
+    display: block !important;
+  }
+
   body * { visibility: hidden !important; }
   .hr-doc, .hr-doc * { visibility: visible !important; }
 

@@ -12,7 +12,7 @@ import type { TeamMember } from "@/lib/home-sections-defaults";
 import { printWithSignatureFonts } from "@/lib/print-with-fonts";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { apiGet, apiPost, apiDelete, apiPatch } from "@/lib/api";
 
 type IssuerMode = "company" | "employee";
 
@@ -69,6 +69,17 @@ export default function AdminAgreementBuilder() {
   const [saving, setSaving] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [printPending, setPrintPending] = useState(false);
+
+  useEffect(() => {
+    if (printPending && activeTab === "builder") {
+      setPrintPending(false);
+      const timer = setTimeout(() => {
+        printWithSignatureFonts();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [printPending, activeTab]);
 
   const filteredHistory = useMemo(() => {
     if (!searchQuery.trim()) return history;
@@ -160,6 +171,7 @@ export default function AdminAgreementBuilder() {
     try {
       const payload = {
         title,
+        document_type: documentType,
         reference: reference || null,
         effective_date: effectiveDate,
         client_name: customerName,
@@ -182,7 +194,7 @@ export default function AdminAgreementBuilder() {
 
       let result;
       if (loadedId) {
-        result = await api.patch<any>(`/admin/agreements/${loadedId}`, payload).then((r) => r.data);
+        result = await apiPatch<any>(`/admin/agreements/${loadedId}`, payload);
         if (!silent) {
           toast.success("Agreement updated successfully");
         }
@@ -211,6 +223,7 @@ export default function AdminAgreementBuilder() {
   const loadAgreement = (agreement: any) => {
     setLoadedId(agreement.id);
     setTitle(agreement.title || "");
+    setDocumentType(agreement.document_type || "agreement");
     setReference(agreement.reference || "");
     setEffectiveDate(agreement.effective_date || "");
     setCustomerName(agreement.client_name || "");
@@ -262,7 +275,9 @@ export default function AdminAgreementBuilder() {
     } catch (err) {
       console.error("Silent auto-save failed", err);
     }
-    printWithSignatureFonts();
+    
+    setActiveTab("builder");
+    setPrintPending(true);
   };
 
   return (
@@ -570,9 +585,8 @@ export default function AdminAgreementBuilder() {
                               size="sm"
                               onClick={async () => {
                                 loadAgreement(ag);
-                                setTimeout(() => {
-                                  printWithSignatureFonts();
-                                }, 300);
+                                setActiveTab("builder");
+                                setPrintPending(true);
                               }}
                             >
                               <Printer className="w-3.5 h-3.5 mr-1" /> Print
