@@ -244,11 +244,16 @@ if ($zip->open($zipFile) === TRUE) {
         echo "<span style='color:green; font-weight:bold;'>Success!</span> Backend successfully extracted and deployed.<br/>";
         
         // Clear Laravel caches through Artisan so new routes are recognized on live.
-        echo "<h3>Clearing application cache and verifying routes...</h3>";
+        echo "<h3>Running migrations and clearing application cache...</h3>";
 
         if (!file_exists($extractTo . '/artisan')) {
             echo "<p><span style='color:red; font-weight:bold;'>Error:</span> Laravel artisan file not found at <code>" . htmlspecialchars($extractTo . '/artisan') . "</code>.</p>";
         } else {
+            // Run migrations first so new tables/columns are available
+            echo "<h4>Running database migrations...</h4>";
+            $migrateResult = runLaravelCommand($extractTo, 'migrate --force');
+            printLaravelCommandResult($migrateResult);
+
             $cacheCommands = [
                 'route:clear',
                 'config:clear',
