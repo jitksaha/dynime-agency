@@ -74,10 +74,9 @@ export default function AdminAgreementBuilder() {
   useEffect(() => {
     if (printPending && activeTab === "builder") {
       setPrintPending(false);
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         printWithSignatureFonts();
-      }, 150);
-      return () => clearTimeout(timer);
+      }, 200);
     }
   }, [printPending, activeTab]);
 
