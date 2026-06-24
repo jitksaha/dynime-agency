@@ -1,4 +1,4 @@
-import { Building2, UserRound, Mail, Phone, MapPin } from "lucide-react";
+import { Building2, UserRound, Mail, Phone, MapPin, Globe } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";
 
 export interface AgreementPreviewIssuer {
@@ -148,8 +148,9 @@ const ClientSignatureBlock = ({
 export default function AgreementPreview(p: AgreementPreviewProps) {
   const issuerIsEmployee = p.issuer.type === "employee" && !!p.issuer.name;
   const providerName = issuerIsEmployee ? p.issuer.name! : "Dynime Inc.";
-  const providerEmail = issuerIsEmployee ? p.issuer.email || "" : "support@dynime.com";
-  const providerPhone = issuerIsEmployee ? p.issuer.phone || "" : "";
+  const providerEmail = issuerIsEmployee ? p.issuer.email || "" : "contact@dynime.com";
+  const providerPhone = issuerIsEmployee ? p.issuer.phone || "" : "+1(646)8840271";
+  const providerWebsite = "dynime.com";
   const providerCountry = issuerIsEmployee ? p.issuer.country || "" : "";
 
   const clientName = p.customerName || p.customerCompany || "Client";
@@ -208,6 +209,11 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
           {providerPhone && (
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Phone className="w-3 h-3" /> {providerPhone}
+            </p>
+          )}
+          {providerWebsite && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+              <Globe className="w-3 h-3" /> {providerWebsite}
             </p>
           )}
           {providerCountry && (
