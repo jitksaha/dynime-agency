@@ -397,6 +397,67 @@ class SupabaseProxyController extends Controller
                         'error' => null
                     ]);
 
+                case 'admin-create-manual-investor':
+                    $email = trim($body['email'] ?? '');
+                    $fullName = trim($body['full_name'] ?? '');
+                    $phone = trim($body['phone'] ?? '');
+                    $country = trim($body['country'] ?? '');
+                    $sendInvite = $body['send_invite'] ?? false;
+
+                    // 1. Find or create profile
+                    $profile = DB::table('profiles')->where('email', $email)->first();
+                    $createdAccount = false;
+                    if (!$profile) {
+                        $profileId = (string) \Illuminate\Support\Str::uuid();
+                        DB::table('profiles')->insert([
+                            'id' => $profileId,
+                            'email' => $email,
+                            'full_name' => $fullName ?: null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                        $profile = DB::table('profiles')->where('id', $profileId)->first();
+                        $createdAccount = true;
+                    }
+
+                    // 2. Create investment
+                    $investmentId = (string) \Illuminate\Support\Str::uuid();
+                    $startedAt = isset($body['started_at']) ? date('Y-m-d H:i:s', strtotime($body['started_at'])) : now();
+                    
+                    DB::table('investments')->insert([
+                        'id' => $investmentId,
+                        'investor_id' => $profile->id,
+                        'plan_id' => $body['plan_id'] ?? null,
+                        'plan_slug' => $body['plan_slug'] ?? null,
+                        'plan_name' => $body['plan_name'] ?? 'Custom Plan',
+                        'amount' => (float) ($body['amount'] ?? 0),
+                        'currency' => $body['currency'] ?? 'USD',
+                        'status' => 'active',
+                        'agreement_status' => $body['agreement_status'] ?? 'signed',
+                        'agreement_signed_by_name' => $body['agreement_signed_by_name'] ?? null,
+                        'monthly_return_percent' => isset($body['monthly_return_percent']) ? (float) $body['monthly_return_percent'] : null,
+                        'bonus_percent_biannual' => isset($body['bonus_percent_biannual']) ? (float) $body['bonus_percent_biannual'] : null,
+                        'lock_period_months' => isset($body['lock_period_months']) ? (int) $body['lock_period_months'] : null,
+                        'payout_frequency' => $body['payout_frequency'] ?? 'monthly',
+                        'started_at' => $startedAt,
+                        'notes' => $body['notes'] ?? null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $inviteLink = null;
+                    if ($sendInvite) {
+                        $inviteLink = env('FRONTEND_URL', 'https://dynime.com') . '/investor/claim?email=' . urlencode($email) . '&token=' . bin2hex(random_bytes(16));
+                    }
+
+                    return response()->json([
+                        'data' => [
+                            'created_account' => $createdAccount,
+                            'invite_link' => $inviteLink,
+                        ],
+                        'error' => null
+                    ]);
+
                 case 'send-whatsapp-test':
                     $phone = $body['phone'] ?? '';
                     $templateName = $body['templateName'] ?? 'custom';
