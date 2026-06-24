@@ -115,6 +115,7 @@ export interface WhatsAppTemplate {
   label: string;
   body: string;
   variables: string[];
+  mode?: "text" | "template";
 }
 
 export const TEMPLATE_DEFAULTS: WhatsAppTemplate[] = [
@@ -123,42 +124,77 @@ export const TEMPLATE_DEFAULTS: WhatsAppTemplate[] = [
     label: "Custom Message (No Template)",
     body: "",
     variables: [],
+    mode: "text",
   },
   {
     key: "order_update",
     label: "Order Status Update",
     body: "Hello {{1}}, your order {{2}} status is now: {{3}}. Thank you for choosing Dynime!",
     variables: ["Customer Name", "Order ID", "Status"],
+    mode: "text",
   },
   {
     key: "payment_link",
     label: "Payment Link / Invoice",
     body: "Hi {{1}}, here is your payment link for invoice {{2}} of amount {{3}}: {{4}}",
     variables: ["Customer Name", "Invoice Number", "Amount", "Link"],
+    mode: "text",
   },
   {
     key: "recurring_service",
     label: "Recurring Service Renewal Alert",
     body: "Hello {{1}}, this is a reminder that your recurring service '{{2}}' is due for renewal on {{3}}. Amount: {{4}}.",
     variables: ["Customer Name", "Service Name", "Renewal Date", "Amount"],
+    mode: "text",
   },
   {
     key: "job_confirmation",
     label: "Job Application Update",
     body: "Hi {{1}}, thank you for applying for the '{{2}}' role. We have received your application and will review it shortly.",
     variables: ["Applicant Name", "Job Role"],
+    mode: "text",
   },
   {
     key: "id_verification",
     label: "ID Card Verification",
     body: "Hello {{1}}, your ID Card assignment status is now: {{2}}.",
     variables: ["Subject Name", "Status"],
+    mode: "text",
   },
   {
     key: "credit_application",
     label: "Credit Application Update",
     body: "Hi {{1}}, your credit application/FlexPay status is now: {{2}}.",
     variables: ["Applicant Name", "Status"],
+    mode: "text",
+  },
+  {
+    key: "verification_otp",
+    label: "Verification OTP Code",
+    body: "Your verification code is {{1}}. Valid for 10 minutes.",
+    variables: ["OTP Code"],
+    mode: "text",
+  },
+  {
+    key: "support_ticket",
+    label: "Support Ticket Update",
+    body: "Hi {{1}}, a new reply has been posted to your support ticket #{{2}}: {{3}}",
+    variables: ["Customer Name", "Ticket Number", "Message Excerpt"],
+    mode: "text",
+  },
+  {
+    key: "refund_update",
+    label: "Refund Update",
+    body: "Hello {{1}}, a refund of {{2}} has been processed for your order {{3}}.",
+    variables: ["Customer Name", "Refund Amount", "Order Reference"],
+    mode: "text",
+  },
+  {
+    key: "account_welcome",
+    label: "Onboarding Welcome Message",
+    body: "Welcome to Dynime, {{1}}! Your account has been activated. Log in here: {{2}}",
+    variables: ["Customer Name", "Login URL"],
+    mode: "text",
   },
 ];
 
@@ -197,7 +233,89 @@ export async function sendWhatsAppTemplate(
     matchedTemplate = TEMPLATE_DEFAULTS.find((t) => t.key === templateKey);
   }
 
-  if (matchedTemplate?.body) {
+  if (!matchedTemplate) {
+    return { success: false, error: "Template not found." };
+  }
+
+  // If the template mode is configured as a Meta-approved template, send as a template message
+  if (matchedTemplate.mode === "template") {
+    const config = await loadWhatsAppConfig();
+    if (!config) {
+      return { success: false, error: "WhatsApp configuration not found. Please save your API Config first." };
+    }
+    if (!config.enabled) {
+      return { success: false, error: "WhatsApp notifications are disabled. Enable them in the API Config tab." };
+    }
+    if (!config.access_token || !config.phone_number_id) {
+      return { success: false, error: "WhatsApp Cloud API token or Phone Number ID is missing. Please check API Config." };
+    }
+
+    const sanitizedPhone = phone.replace(/[\s\-\(\)]/g, "");
+    const url = `https://graph.facebook.com/v21.0/${config.phone_number_id}/messages`;
+
+    // Map vars array to parameters format
+    const parameters = vars.map((v) => ({
+      type: "text",
+      text: v,
+    }));
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${config.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: sanitizedPhone,
+          type: "template",
+          template: {
+            name: templateKey,
+            language: { code: "en_US" },
+            components: [
+              {
+                type: "body",
+                parameters: parameters,
+              },
+            ],
+          },
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data?.messages?.[0]?.id) {
+        // Log success
+        await db.from("whatsapp_send_log").insert({
+          message_id: data.messages[0].id,
+          template_name: templateKey,
+          recipient_phone: sanitizedPhone,
+          status: "dispatched",
+          error_message: null,
+        }).then(() => {});
+
+        return { success: true, messageId: data.messages[0].id };
+      }
+
+      const errMsg = data?.error?.message || "Meta API returned an error";
+      // Log failure
+      await db.from("whatsapp_send_log").insert({
+        message_id: null,
+        template_name: templateKey,
+        recipient_phone: sanitizedPhone,
+        status: "failed",
+        error_message: errMsg,
+      }).then(() => {});
+
+      return { success: false, error: errMsg };
+    } catch (e: any) {
+      return { success: false, error: e.message || "Network error contacting Meta API" };
+    }
+  }
+
+  // Otherwise, send as a direct plain text message (replaces variables locally)
+  if (matchedTemplate.body) {
     messageBody = matchedTemplate.body;
     vars.forEach((val, idx) => {
       messageBody = messageBody.replace(`{{${idx + 1}}}`, val);
@@ -205,7 +323,7 @@ export async function sendWhatsAppTemplate(
   }
 
   if (!messageBody) {
-    return { success: false, error: "Template not found or message body is empty." };
+    return { success: false, error: "Template body is empty." };
   }
 
   return sendWhatsAppMessage(phone, messageBody);

@@ -20,6 +20,24 @@ interface WhatsAppSendDialogProps {
   defaultVars?: Record<number, string>;
 }
 
+const normalizeLabel = (label: string) => {
+  return label.toLowerCase().replace(/[^a-z0-9]/g, "");
+};
+
+const getSemanticKey = (norm: string) => {
+  if (norm.includes("name")) return "name";
+  if (norm.includes("phone") || norm.includes("mobile") || norm.includes("number")) {
+    if (norm.includes("invoice") || norm.includes("order") || norm.includes("id")) {
+      return "id";
+    }
+    return "phone";
+  }
+  if (norm.includes("id") || norm.includes("invoice") || norm.includes("order") || norm.includes("ref")) return "id";
+  if (norm.includes("status")) return "status";
+  if (norm.includes("role") || norm.includes("job") || norm.includes("service")) return "service";
+  return norm;
+};
+
 export default function WhatsAppSendDialog({
   isOpen,
   onClose,
@@ -35,6 +53,9 @@ export default function WhatsAppSendDialog({
   const [customBody, setCustomBody] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Semantic Map state to store variables contextually
+  const [semanticMap, setSemanticMap] = useState<Record<string, string>>({});
 
   // Sync props when opening
   useEffect(() => {
@@ -45,6 +66,61 @@ export default function WhatsAppSendDialog({
       fetchTemplates();
     }
   }, [isOpen, recipientPhone, defaultTemplateKey, defaultVars]);
+
+  // Build semanticMap when dialog is open and templates are loaded
+  useEffect(() => {
+    if (isOpen && templates.length > 0) {
+      const initialMap: Record<string, string> = {
+        name: recipientName,
+        phone: recipientPhone,
+      };
+
+      const defaultTpl = templates.find((t) => t.key === defaultTemplateKey);
+      if (defaultTpl) {
+        defaultTpl.variables.forEach((vName, idx) => {
+          const val = defaultVars[idx];
+          if (val !== undefined && val !== null) {
+            const norm = normalizeLabel(vName);
+            initialMap[norm] = val;
+            const semKey = getSemanticKey(norm);
+            initialMap[semKey] = val;
+          }
+        });
+      }
+
+      setSemanticMap(initialMap);
+    }
+  }, [isOpen, defaultTemplateKey, defaultVars, templates, recipientName, recipientPhone]);
+
+  // Prefill variables semantically when template changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const activeTpl = templates.find((t) => t.key === selectedTemplateKey);
+    if (!activeTpl) return;
+
+    const newValues: Record<number, string> = {};
+    activeTpl.variables.forEach((vName, idx) => {
+      const norm = normalizeLabel(vName);
+      const semKey = getSemanticKey(norm);
+
+      if (semanticMap[norm] !== undefined) {
+        newValues[idx] = semanticMap[norm];
+      } else if (semanticMap[semKey] !== undefined) {
+        newValues[idx] = semanticMap[semKey];
+      } else if (selectedTemplateKey === defaultTemplateKey && defaultVars[idx] !== undefined) {
+        newValues[idx] = defaultVars[idx];
+      } else if (semKey === "name") {
+        newValues[idx] = recipientName;
+      } else if (semKey === "phone") {
+        newValues[idx] = phone || recipientPhone;
+      } else {
+        newValues[idx] = "";
+      }
+    });
+
+    setVarValues(newValues);
+  }, [selectedTemplateKey, templates, semanticMap, isOpen, defaultTemplateKey, defaultVars, recipientName, recipientPhone]);
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -95,6 +171,17 @@ export default function WhatsAppSendDialog({
 
   const handleVarChange = (idx: number, val: string) => {
     setVarValues((prev) => ({ ...prev, [idx]: val }));
+
+    const vName = activeTemplate?.variables?.[idx];
+    if (vName) {
+      const norm = normalizeLabel(vName);
+      const semKey = getSemanticKey(norm);
+      setSemanticMap((prev) => ({
+        ...prev,
+        [norm]: val,
+        [semKey]: val,
+      }));
+    }
   };
 
   const handleSend = async () => {
@@ -201,6 +288,11 @@ export default function WhatsAppSendDialog({
 
           <div>
             <Label htmlFor="wa-dialog-preview">Message Body Preview</Label>
+            {activeTemplate.mode === "template" && (
+              <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium my-0.5">
+                Note: This is registered as a Meta Approved Template. The body below is a preview; variables will be sent as structured parameters to Meta.
+              </p>
+            )}
             <Textarea
               id="wa-dialog-preview"
               value={customBody}

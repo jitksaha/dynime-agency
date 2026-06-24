@@ -63,6 +63,7 @@ export default function AdminWhatsAppPortal() {
   const [newLabel, setNewLabel] = useState("");
   const [newBody, setNewBody] = useState("");
   const [newVarsStr, setNewVarsStr] = useState("");
+  const [newMode, setNewMode] = useState<"text" | "template">("text");
 
   const handleCreateTemplate = () => {
     const key = newKey.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
@@ -88,6 +89,7 @@ export default function AdminWhatsAppPortal() {
       label: newLabel.trim(),
       body: newBody.trim(),
       variables,
+      mode: newMode,
     };
 
     setTemplates((prev) => [...prev, newTpl]);
@@ -96,6 +98,7 @@ export default function AdminWhatsAppPortal() {
     setNewLabel("");
     setNewBody("");
     setNewVarsStr("");
+    setNewMode("text");
     toast.success(`Custom template '${newLabel}' added! Don't forget to click Save Templates to persist.`);
   };
 
@@ -580,6 +583,24 @@ export default function AdminWhatsAppPortal() {
                             Placeholders in body must map sequentially to these labels: <code>{"{{"}1{"}}"}</code> &rarr; Customer Name, etc.
                           </p>
                         </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="tpl-mode">Send Mode</Label>
+                          <Select
+                            value={newMode}
+                            onValueChange={(val: "text" | "template") => setNewMode(val)}
+                          >
+                            <SelectTrigger id="tpl-mode" className="w-full">
+                              <SelectValue placeholder="Select send mode" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="text">Direct Text Message (Sends text body directly)</SelectItem>
+                              <SelectItem value="template">Meta Approved Template (Sends template key and parameters)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                            Use <strong>Meta Approved Template</strong> to bypass Meta's 24-hour response window limit. The Unique Template Key must match the approved name in Meta Business Suite.
+                          </p>
+                        </div>
                       </div>
                       <DialogFooter>
                         <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
@@ -601,8 +622,8 @@ export default function AdminWhatsAppPortal() {
                       const isSystemDefault = TEMPLATE_DEFAULTS.some((d) => d.key === t.key);
                       return (
                         <div key={t.key} className="rounded-xl border border-border p-4 space-y-3 bg-muted/20">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-4 flex-wrap">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-semibold text-foreground">{t.label}</span>
                               <code className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded font-mono">{t.key}</code>
                               {isSystemDefault ? (
@@ -610,6 +631,26 @@ export default function AdminWhatsAppPortal() {
                               ) : (
                                 <Badge variant="outline" className="text-[9px] bg-emerald-500/5 text-emerald-500 border-emerald-500/20 shrink-0">Custom</Badge>
                               )}
+                              
+                              <div className="flex items-center gap-1.5 ml-2">
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">Mode:</span>
+                                <Select
+                                  value={t.mode || "text"}
+                                  onValueChange={(val: "text" | "template") => {
+                                    setTemplates((prev) =>
+                                      prev.map((item) => (item.key === t.key ? { ...item, mode: val } : item))
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="h-6 text-[10px] w-[130px] px-2 bg-background border-border shadow-none">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="text">Direct Text</SelectItem>
+                                    <SelectItem value="template">Meta Template</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                             <div className="flex items-center gap-1.5">
                               {isSystemDefault ? (
@@ -644,6 +685,11 @@ export default function AdminWhatsAppPortal() {
                                 onChange={(e) => handleTemplateBodyChange(t.key, e.target.value)}
                                 className="mt-1.5 min-h-[80px]"
                               />
+                              {t.mode === "template" && (
+                                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium leading-normal bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10 mt-1">
+                                  Note: In Meta Template mode, this body text is used for client-side preview/autofill calculation. The actual message sent to the client will match the template '{t.key}' approved in your Meta Suite, with the variables below mapped in order.
+                                </p>
+                              )}
                             </div>
                             
                             <div className="flex flex-col gap-2 mt-2">
