@@ -885,9 +885,19 @@ const AdminSettings = () => {
 
       {/* Cloudflare R2 CDN Storage */}
       <div className="glass-card p-6 max-w-2xl mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Cloud className="w-4 h-4 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Cloudflare R2 Storage (CDN)</h2>
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <div className="flex items-center gap-2">
+            <Cloud className="w-4 h-4 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Cloudflare R2 Storage (CDN)</h2>
+          </div>
+          <a
+            href="https://dash.cloudflare.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline inline-flex items-center gap-1 font-medium"
+          >
+            Go to Cloudflare <ExternalLink className="w-3 h-3" />
+          </a>
         </div>
         <p className="text-xs text-muted-foreground mb-4">
           Connect Cloudflare R2 Object Storage for lightning-fast media delivery via CDN and decouple uploads from database paths.
