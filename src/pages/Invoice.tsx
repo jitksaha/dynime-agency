@@ -294,7 +294,7 @@ const Invoice = () => {
       </div>
 
       <section className="container-custom pb-16 print:pb-0">
-        <div className="mx-auto max-w-4xl bg-white dark:bg-card border border-border rounded-2xl shadow-lg print:shadow-none print:border-0 overflow-hidden relative print:rounded-none">
+        <div className="invoice-print mx-auto max-w-4xl bg-white dark:bg-card border border-border rounded-2xl shadow-lg print:shadow-none print:border-0 overflow-hidden relative print:rounded-none">
           {/* Top accent ribbon */}
           <div className={cn("h-1.5 w-full", meta.ribbon)} />
 
@@ -607,12 +607,8 @@ const Invoice = () => {
       </section>
 
       <style>{`
-        @page { size: auto; margin: 0mm; }
         @media print {
-          body * { visibility: visible !important; }
-          header, footer, nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
-          body { padding: 15mm !important; }
           main, .floating-header-main { padding-top: 0 !important; }
           section { background: #ffffff !important; color: #0a0a14 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }

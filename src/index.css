@@ -668,18 +668,18 @@ button:hover .text-muted-foreground,
   color: hsl(var(--foreground) / 0.85);
 }
 
-/* Print: only show the HR document, hide app chrome */
+/* Print: only show the HR document or Invoice, hide app chrome */
 @media print {
-  @page { size: A4; margin: 5mm 0 !important; }
+  @page { size: auto; margin: 10mm 0 !important; }
   html, body { background: #fff !important; }
 
-  /* Hide elements that don't contain, aren't, and aren't inside the document */
-  body *:not(:has(.hr-doc)):not(.hr-doc):not(.hr-doc *) {
+  /* Hide elements that don't contain, aren't, and aren't inside the document or invoice */
+  body *:not(:has(.hr-doc, .invoice-print)):not(.hr-doc, .invoice-print):not(.hr-doc *, .invoice-print *) {
     display: none !important;
   }
 
-  /* Ancestors of .hr-doc: strip all spacing so they're invisible pass-throughs */
-  *:has(.hr-doc) {
+  /* Ancestors of .hr-doc or .invoice-print: strip all spacing so they're invisible pass-throughs */
+  *:has(.hr-doc, .invoice-print) {
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -698,17 +698,26 @@ button:hover .text-muted-foreground,
     margin: 0 !important;
   }
 
-  .hr-doc {
+  .hr-doc, .invoice-print {
     display: block !important;
     position: relative !important;
     width: 100% !important;
     min-height: 0 !important;
-    padding: 7mm 14mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
     box-sizing: border-box !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .hr-doc {
+    padding: 7mm 14mm !important;
+  }
+
+  .invoice-print {
+    padding: 10mm 15mm !important;
   }
 }
 
