@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/use-data";
 
 const FLAG_ATTR = "data-tracking-pixel";
@@ -17,7 +18,6 @@ const injectScript = (id: string, type: string, codeFn: (id: string) => void) =>
   script.setAttribute(FLAG_ATTR, type);
   script.type = "text/javascript";
   
-  // Wrap in string execution or text content
   const codeString = `(${codeFn.toString()})("${id.trim()}");`;
   script.text = codeString;
   document.head.appendChild(script);
@@ -31,10 +31,8 @@ const injectHtml = (html: string, type: "header" | "footer") => {
   container.style.display = "none";
   container.innerHTML = html;
   
-  // Extract all scripts inside the HTML to run them
-  const scripts = container.getElementsByTagName("script");
-  for (let i = 0; i < scripts.length; i++) {
-    const s = scripts[i];
+  const scripts = Array.from(container.getElementsByTagName("script"));
+  scripts.forEach((s) => {
     const script = document.createElement("script");
     script.setAttribute(FLAG_ATTR, `${type}-script`);
     if (s.src) {
@@ -45,9 +43,8 @@ const injectHtml = (html: string, type: "header" | "footer") => {
       script.text = s.textContent || "";
     }
     document.head.appendChild(script);
-  }
+  });
 
-  // Inject meta/noscript/link tags to head/body
   const otherElements = Array.from(container.children).filter(el => el.tagName !== "SCRIPT");
   otherElements.forEach(el => {
     el.setAttribute(FLAG_ATTR, `${type}-element`);
@@ -61,9 +58,9 @@ const injectHtml = (html: string, type: "header" | "footer") => {
 
 const TrackingPixels = () => {
   const { data: settings } = useSiteSettings();
+  const location = useLocation();
 
   useEffect(() => {
-    // 1. Clear any old tags before injecting updated ones
     clearTracking();
 
     if (!settings) return;
@@ -81,21 +78,20 @@ const TrackingPixels = () => {
     // --- Google Analytics (GA4) ---
     const gaId = settings.site_google_analytics_id;
     if (gaId && gaId.trim()) {
-      // Inject external script
       const scriptSrc = document.createElement("script");
       scriptSrc.src = `https://www.googletagmanager.com/gtag/js?id=${gaId.trim()}`;
       scriptSrc.async = true;
       scriptSrc.setAttribute(FLAG_ATTR, "google-analytics-src");
       document.head.appendChild(scriptSrc);
 
-      // Inject configuration script
       const scriptConfig = document.createElement("script");
       scriptConfig.setAttribute(FLAG_ATTR, "google-analytics-config");
       scriptConfig.text = `
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
         gtag('js', new Date());
-        gtag('config', '${gaId.trim()}');
+        gtag('config', '${gaId.trim()}', { 'send_page_view': false });
       `;
       document.head.appendChild(scriptConfig);
     }
@@ -119,8 +115,6 @@ const TrackingPixels = () => {
       s.parentNode?.insertBefore(t, s);
       // @ts-ignore
       fbq("init", id);
-      // @ts-ignore
-      fbq("track", "PageView");
     });
     if (fbId && fbId.trim()) {
       const noscript = document.createElement("noscript");
@@ -179,6 +173,40 @@ const TrackingPixels = () => {
       clearTracking();
     };
   }, [settings]);
+
+  // Track PageViews on route change (for SPAs)
+  useEffect(() => {
+    if (!settings) return;
+
+    // Google Analytics
+    const gaId = settings.site_google_analytics_id;
+    if (gaId && gaId.trim() && (window as any).gtag) {
+      (window as any).gtag("config", gaId.trim(), {
+        page_path: location.pathname + location.search,
+        page_title: document.title,
+      });
+    }
+
+    // Facebook
+    const fbId = settings.site_facebook_pixel_id;
+    if (fbId && fbId.trim() && (window as any).fbq) {
+      (window as any).fbq("track", "PageView");
+    }
+
+    // LinkedIn
+    if (settings.site_linkedin_insight_id && (window as any).lintrk) {
+      try {
+        (window as any).lintrk("track");
+      } catch (e) {}
+    }
+
+    // X (Twitter)
+    if (settings.site_twitter_pixel_id && (window as any).twq) {
+      try {
+        (window as any).twq("track", "PageView");
+      } catch (e) {}
+    }
+  }, [location.pathname, location.search, settings]);
 
   return null;
 };

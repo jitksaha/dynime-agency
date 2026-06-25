@@ -251,11 +251,11 @@ const App = () => (
               <DynamicFavicon />
               <ProductUrlInterceptor />
               <LiveChatEmbed />
-              <TrackingPixels />
               <Toaster />
               <Sonner />
               <BrowserRouter>
                   <ScrollToTop />
+                  <TrackingPixels />
                   <HashScroll />
                   <ReferralTracker />
                   
