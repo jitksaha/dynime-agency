@@ -226,9 +226,7 @@ if (file_exists($extractTo . '/.env')) {
 
 // Delete old dynime-api folder to clean up removed packages/files (save inodes)
 if (is_dir($extractTo)) {
-    echo "Clearing old backend version in <code>$extractTo</code> to prevent inode accumulation... ";
-    rrmdir($extractTo);
-    echo "Done.<br/>";
+    echo "Clearing old backend version... (skipped slow recursive deletion to prevent timeouts)<br/>";
 }
 
 // Re-create extract directory
