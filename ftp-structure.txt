@@ -106,6 +106,7 @@ email-marketing
 dynime-seal.png
 shopify-illustration.png
 _redirects
+test-deploy-status.php
 payment-gateway
 seo-illustration.png
 speed-optimization
