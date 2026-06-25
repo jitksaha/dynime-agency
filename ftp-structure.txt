@@ -12,7 +12,6 @@ portfolio
 index.html
 dms-illustration.png
 .replit
-dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -60,6 +59,7 @@ create_symlink.php
 scratch
 check-routes.php
 inspect-db-rows.php
+check-settings.php
 nginx.conf.example
 .env.example
 facebook-ads
@@ -79,6 +79,7 @@ test-migrations-exist.php
 dcs-illustration.png
 usa-business-formation
 website-redesign
+show-tracking-settings.php
 .
 diagnose-db.php
 about
@@ -93,6 +94,7 @@ laravel-ecommerce
 social-media
 woocommerce
 google-ads
+check-files.php
 dws-illustration.png
 assets
 og-image.jpg
