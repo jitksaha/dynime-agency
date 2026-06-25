@@ -670,7 +670,7 @@ button:hover .text-muted-foreground,
 
 /* Print: only show the HR document or Invoice, hide app chrome */
 @media print {
-  @page { size: auto; margin: 10mm 0 !important; }
+  @page { size: auto; margin: 0 !important; }
   html, body { background: #fff !important; }
 
   /* Hide elements that don't contain, aren't, and aren't inside the document or invoice */
@@ -695,7 +695,7 @@ button:hover .text-muted-foreground,
 
   body {
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 10mm 15mm !important;
   }
 
   .hr-doc, .invoice-print {

@@ -151,7 +151,7 @@ const Agreement = () => {
       </div>
 
       <div className="container-custom pb-16 print:pb-0">
-        <article className="mx-auto max-w-3xl bg-card border border-border rounded-xl shadow-sm print:border-0 print:shadow-none print:rounded-none">
+        <article className="hr-doc mx-auto max-w-3xl bg-card border border-border rounded-xl shadow-sm print:border-0 print:shadow-none print:rounded-none">
           {/* Header */}
           <header className="px-8 md:px-10 pt-10 pb-6 border-b border-border flex items-start justify-between gap-6 flex-wrap">
             <div>
@@ -322,12 +322,9 @@ const Agreement = () => {
       </div>
 
       <style>{`
-        @page { size: auto; margin: 0mm; }
+        @page { size: auto; margin: 0 !important; }
         @media print {
-          body * { visibility: visible !important; }
-          header[role="banner"], nav, .print\\:hidden { display: none !important; }
           html, body { background: #ffffff !important; color: #0a0a14 !important; }
-          body { padding: 15mm !important; }
           main, .floating-header-main { padding-top: 0 !important; }
           article { background: #ffffff !important; color: #0a0a14 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
