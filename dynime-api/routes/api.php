@@ -82,6 +82,24 @@ Route::prefix('v1')->group(function () {
     // Settings (public only)
     Route::get('site-settings',          [SettingsController::class, 'publicIndex']);
     Route::get('sync-db-mismatch',       [SettingsController::class, 'syncDbMismatch']);
+    Route::get('storage/sync-r2', function (\Illuminate\Http\Request $request) {
+        if ($request->query('token') !== 'deploy_token_7782') {
+            abort(403, 'Invalid token.');
+        }
+        set_time_limit(0);
+        try {
+            \Illuminate\Support\Facades\Artisan::call('storage:sync-to-r2');
+            return response()->json([
+                'success' => true,
+                'output' => \Illuminate\Support\Facades\Artisan::output()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    });
 
     // CMS read-only public routes (needed for services pricing, state pricing, and addons)
     Route::prefix('cms')->group(function () {
