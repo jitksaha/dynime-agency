@@ -20,11 +20,12 @@ try {
         echo "R2 Config Key Exists: NO\n";
     }
     
-    $driver = env('FILESYSTEM_PUBLIC_DRIVER');
-    $url = env('FILESYSTEM_PUBLIC_URL');
-    echo "\nEnvironment Check:\n";
-    echo "FILESYSTEM_PUBLIC_DRIVER: " . ($driver ?: 'not set') . "\n";
-    echo "FILESYSTEM_PUBLIC_URL: " . ($url ?: 'not set') . "\n";
+    // Check runtime config (which was dynamically overridden in AppServiceProvider)
+    echo "\nRuntime Configuration Check:\n";
+    echo "filesystems.disks.public.driver: " . config('filesystems.disks.public.driver') . "\n";
+    echo "filesystems.disks.public.url: " . config('filesystems.disks.public.url') . "\n";
+    echo "filesystems.disks.public.bucket: " . config('filesystems.disks.public.bucket') . "\n";
+    echo "filesystems.disks.public.endpoint: " . config('filesystems.disks.public.endpoint') . "\n";
 } catch (\Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
 }
