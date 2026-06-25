@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Loader2, Download, Printer, ArrowLeft, CheckCircle2, Clock, XCircle,
   Mail, MapPin, Building2, Phone, Globe, Copy, Check, Share2, FileText, UserRound,
+  Truck, CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 import SiteLogo from "@/components/shared/SiteLogo";
@@ -42,6 +43,7 @@ interface InvoiceData {
   tax_percent?: number | null;
   tax_mode?: string | null;
   tax_label?: string | null;
+  estimated_delivery_date?: string | null;
 }
 
 const GATEWAY_LABELS: Record<string, string> = {
@@ -349,6 +351,17 @@ const Invoice = () => {
             <Row label="Currency" value={currency} />
             <Row label="Date of issue" value={new Date(data.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
             <Row label={paid ? "Date paid" : "Date due"} value={(paid ? new Date(data.updated_at) : dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
+            {data.estimated_delivery_date && (
+              <Row
+                label="Est. Delivery Date"
+                value={
+                  <span className="flex items-center gap-1 font-semibold text-primary">
+                    <Truck className="w-3.5 h-3.5" />
+                    {data.estimated_delivery_date}
+                  </span>
+                }
+              />
+            )}
             {data.coupon_code && <Row label="Coupon" value={<span className="font-mono">{data.coupon_code}</span>} />}
             {taxId && <Row label="Tax ID" value={taxId} />}
             {data.payment_gateway && <Row label="Payment method" value={GATEWAY_LABELS[data.payment_gateway] || data.payment_gateway} />}
@@ -436,6 +449,19 @@ const Invoice = () => {
               )}
             </div>
           </div>
+
+          {/* Estimated Delivery Date Banner */}
+          {data.estimated_delivery_date && (
+            <div className="mx-8 md:mx-10 my-4 p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-center gap-3 text-sm text-foreground print:my-2 print:p-3 print:mx-0">
+              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                <Truck className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Estimated Delivery Date</p>
+                <p className="font-bold text-primary">{data.estimated_delivery_date}</p>
+              </div>
+            </div>
+          )}
 
           {/* Booking */}
           {brief.booking && (

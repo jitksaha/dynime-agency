@@ -1821,6 +1821,7 @@ class OrdersController extends Controller
             'currency' => $data['currency'] ?? 'USD',
             'user_id' => $data['user_id'] ?? null,
             'invoice_number' => $invoiceNumber,
+            'estimated_delivery_date' => $data['estimated_delivery_date'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -1899,6 +1900,9 @@ class OrdersController extends Controller
         }
         if ($request->has('referral_code')) {
             $updateData['referral_code'] = $data['referral_code'];
+        }
+        if ($request->has('estimated_delivery_date')) {
+            $updateData['estimated_delivery_date'] = $data['estimated_delivery_date'];
         }
 
         // ── Status and refund fields ──────────────────────────────────────────

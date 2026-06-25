@@ -69,6 +69,7 @@ type OrderRow = {
   coupon_code?: string | null;
   discount_amount?: number | null;
   service_brief?: Record<string, any> | null;
+  estimated_delivery_date?: string | null;
 };
 
 const STATUS_OPTIONS = [
@@ -376,6 +377,12 @@ const AdminOrderDetail = () => {
               label="Last updated"
               value={format(new Date(order.updated_at), "MMM d, yyyy h:mm a")}
             />
+            {order.estimated_delivery_date && (
+              <Field
+                label="Estimated Delivery"
+                value={order.estimated_delivery_date}
+              />
+            )}
             <div className="col-span-2">
               <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">
                 Payment reference

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Loader2, FileText, ArrowLeft, Building2, UserRound, Eye, EyeOff, CheckCircle2, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { Plus, Trash2, Loader2, FileText, ArrowLeft, Building2, UserRound, Eye, EyeOff, CheckCircle2, Mail, Phone, MapPin, Globe, CalendarDays, Truck } from "lucide-react";
 import ServiceItemPicker from "@/components/admin/ServiceItemPicker";
 import { toast } from "sonner";
 import { db } from "@/integrations/db/client";
@@ -67,6 +67,34 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     d.setDate(d.getDate() + 14);
     return d.toISOString().split("T")[0];
   });
+  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState<string>("");
+  const [calcMode, setCalcMode] = useState<string>("days");
+  const [numDays, setNumDays] = useState<string>("");
+  const [singleDate, setSingleDate] = useState<string>("");
+  const [rangeStart, setRangeStart] = useState<string>("");
+  const [rangeEnd, setRangeEnd] = useState<string>("");
+
+  const calculateFromDays = (days: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    const formatted = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    setEstimatedDeliveryDate(formatted);
+  };
+
+  const updateRange = (start: string, end: string) => {
+    if (!start || !end) return;
+    const sDate = new Date(start);
+    const eDate = new Date(end);
+    const sFmt = sDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const eFmt = eDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    if (sDate.getFullYear() !== eDate.getFullYear()) {
+      const sFmtFull = sDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      setEstimatedDeliveryDate(`${sFmtFull} - ${eFmt}`);
+    } else {
+      setEstimatedDeliveryDate(`${sFmt} - ${eFmt}`);
+    }
+  };
+
   const [showPreview, setShowPreview] = useState(true);
   const [items, setItems] = useState<LineItem[]>([
     { name: "", description: "", price: 0, quantity: 1 },
@@ -163,9 +191,9 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     () => JSON.stringify({
       customerName, customerEmail, phone, company, currency, status,
       gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate,
-      partiallyPaid, partialPayments,
+      partiallyPaid, partialPayments, estimatedDeliveryDate,
     }),
-    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate, partiallyPaid, partialPayments]
+    [customerName, customerEmail, phone, company, currency, status, gateway, discount, notes, included, items, issuerMode, issuerEmployeeKey, referralCode, dueDate, partiallyPaid, partialPayments, estimatedDeliveryDate]
   );
   // --- autosave (new mode only) ---
   const AUTOSAVE_KEY = "admin:manual-invoice:draft:v1";
@@ -193,6 +221,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
       if (Array.isArray(d.items) && d.items.length) setItems(d.items);
       if (typeof d.referralCode === "string") setReferralCode(d.referralCode);
       if (typeof d.dueDate === "string") setDueDate(d.dueDate);
+      if (typeof d.estimatedDeliveryDate === "string") setEstimatedDeliveryDate(d.estimatedDeliveryDate);
       if (d.savedAt) setAutosavedAt(new Date(d.savedAt));
       toast.info("Restored unsaved draft");
     } catch { /* ignore */ }
@@ -231,6 +260,12 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
     const defaultD = new Date();
     defaultD.setDate(defaultD.getDate() + 14);
     setDueDate(defaultD.toISOString().split("T")[0]);
+    setEstimatedDeliveryDate("");
+    setCalcMode("days");
+    setNumDays("");
+    setSingleDate("");
+    setRangeStart("");
+    setRangeEnd("");
     setItems([{ name: "", description: "", price: 0, quantity: 1 }]);
     skipGuardRef.current = true;
     requestAnimationFrame(() => { baselineRef.current = null; skipGuardRef.current = false; });
@@ -404,6 +439,32 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           setIssuerMode("company");
           setIssuerEmployeeKey("");
         }
+        const estDelDate = o.estimated_delivery_date || "";
+        setEstimatedDeliveryDate(estDelDate);
+        if (estDelDate) {
+          if (estDelDate.includes(" - ")) {
+            setCalcMode("range");
+            const parts = estDelDate.split(" - ");
+            if (parts.length === 2) {
+              const startParsed = new Date(parts[0]);
+              const endParsed = new Date(parts[1]);
+              if (!isNaN(startParsed.getTime())) {
+                setRangeStart(startParsed.toISOString().split("T")[0]);
+              }
+              if (!isNaN(endParsed.getTime())) {
+                setRangeEnd(endParsed.toISOString().split("T")[0]);
+              }
+            }
+          } else {
+            const parsed = new Date(estDelDate);
+            if (!isNaN(parsed.getTime())) {
+              setCalcMode("single");
+              setSingleDate(parsed.toISOString().split("T")[0]);
+            } else {
+              setCalcMode("days");
+            }
+          }
+        }
         setReferralCode((o.referral_code as string) || "");
         const its: LineItem[] = Array.isArray(o.items) && o.items.length
           ? o.items.map((it: any) => ({
@@ -438,6 +499,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
             })(),
             partiallyPaid: sb.partially_paid || false,
             partialPayments: sb.partial_payments && Array.isArray(sb.partial_payments) ? sb.partial_payments.map((p: any) => ({ amount: Number(p.amount) || 0, date: p.date })) : [{ amount: Number(sb.amount_paid || 0), date: sb.due_date || (o.created_at ? new Date(o.created_at).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]) }],
+            estimatedDeliveryDate: estDelDate,
           });
         });
       } catch (err) {
@@ -531,6 +593,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           billing_address,
           service_brief,
           referral_code: referralCode.trim().toUpperCase() || null,
+          estimated_delivery_date: estimatedDeliveryDate.trim() || null,
         });
         toast.success("Invoice updated");
         qc.invalidateQueries({ queryKey: ["admin-order", id] });
@@ -581,6 +644,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           billing_address,
           service_brief,
           referral_code: referralCode.trim().toUpperCase() || null,
+          estimated_delivery_date: estimatedDeliveryDate.trim() || null,
         });
 
         toast.success(`Invoice ${data?.invoice_number || "created"}`);
@@ -905,6 +969,143 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
             />
+          </div>
+        </section>
+
+        {/* Estimated Delivery Date Manager */}
+        <section className="glass-card p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <Truck className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-sm">Estimated Delivery Date</h3>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="md:col-span-1 space-y-2 border-r border-border/40 pr-2">
+              <Label className="text-xs font-semibold">Calculation Mode</Label>
+              <div className="flex flex-col gap-1 mt-1">
+                {[
+                  { value: "days", label: "By Number of Days" },
+                  { value: "single", label: "Exact Date (Single)" },
+                  { value: "range", label: "Date Range" },
+                ].map((modeOpt) => (
+                  <label key={modeOpt.value} className="flex items-center gap-2 text-xs font-medium cursor-pointer p-2 rounded hover:bg-accent/40 border border-transparent hover:border-border/30">
+                    <input
+                      type="radio"
+                      name="delivery_mode"
+                      value={modeOpt.value}
+                      checked={calcMode === modeOpt.value}
+                      onChange={() => setCalcMode(modeOpt.value)}
+                      className="text-primary focus:ring-primary"
+                    />
+                    {modeOpt.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="md:col-span-2 space-y-3">
+              {calcMode === "days" && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Days from today</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      value={numDays}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNumDays(val);
+                        calculateFromDays(Number(val) || 0);
+                      }}
+                      placeholder="e.g. 5"
+                      className="max-w-[120px]"
+                    />
+                    <span className="text-xs text-muted-foreground">days</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {[3, 5, 7, 10, 14, 21, 30].map((days) => (
+                      <Button
+                        key={days}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setNumDays(String(days));
+                          calculateFromDays(days);
+                        }}
+                        className="text-[10px] h-7 px-2"
+                      >
+                        +{days} days
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {calcMode === "single" && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Select target delivery date</Label>
+                  <Input
+                    type="date"
+                    value={singleDate}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSingleDate(val);
+                      if (val) {
+                        const formatted = new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+                        setEstimatedDeliveryDate(formatted);
+                      } else {
+                        setEstimatedDeliveryDate("");
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {calcMode === "range" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs font-semibold">Start Date</Label>
+                    <Input
+                      type="date"
+                      value={rangeStart}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setRangeStart(val);
+                        updateRange(val, rangeEnd);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold">End Date</Label>
+                    <Input
+                      type="date"
+                      value={rangeEnd}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setRangeEnd(val);
+                        updateRange(rangeStart, val);
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-border/50">
+                <Label className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold">Resulting Display Value</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value={estimatedDeliveryDate}
+                    onChange={(e) => setEstimatedDeliveryDate(e.target.value)}
+                    placeholder="e.g. Jun 28 - Jun 30, 2026 or Jun 30, 2026"
+                    className="font-medium text-sm"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  This exact value will be displayed on the client-facing invoice page and printed PDF.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
