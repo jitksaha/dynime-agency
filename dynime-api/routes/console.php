@@ -50,3 +50,48 @@ Schedule::command('email:send-abandoned')
     ->everyThirtyMinutes()
     ->withoutOverlapping();
 
+Artisan::command('storage:sync-to-r2', function () {
+    $this->info('Starting migration of local public files to Cloudflare R2...');
+
+    $localPath = storage_path('app/public');
+    if (!\Illuminate\Support\Facades\File::exists($localPath)) {
+        $this->error('Local public storage directory does not exist.');
+        return;
+    }
+
+    $files = \Illuminate\Support\Facades\File::allFiles($localPath);
+    $count = count($files);
+    $this->info("Found {$count} files to sync.");
+
+    $bar = $this->output->createProgressBar($count);
+    $bar->start();
+
+    $success = 0;
+    $failed = 0;
+
+    foreach ($files as $file) {
+        $filePath = $file->getRealPath();
+        $relativePath = str_replace($localPath . DIRECTORY_SEPARATOR, '', $filePath);
+        
+        // Normalize slashes for S3/R2 compatibility
+        $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+
+        try {
+            $content = \Illuminate\Support\Facades\File::get($filePath);
+            
+            // Upload to the public disk (configured as R2/S3 on live)
+            \Illuminate\Support\Facades\Storage::disk('public')->put($relativePath, $content);
+            $success++;
+        } catch (\Exception $e) {
+            $this->error("\nFailed to sync: {$relativePath}. Error: " . $e->getMessage());
+            $failed++;
+        }
+
+        $bar->advance();
+    }
+
+    $bar->finish();
+    $this->info("\nSync completed. Success: {$success}, Failed: {$failed}");
+})->purpose('Sync all existing local public storage files to Cloudflare R2 bucket');
+
+

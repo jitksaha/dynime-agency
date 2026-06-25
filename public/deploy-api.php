@@ -186,6 +186,18 @@ function verifyOrderRoutes($extractTo) {
     return true;
 }
 
+// Check for custom action trigger
+if (isset($_GET['action']) && $_GET['action'] === 'sync-r2') {
+    echo "<h3>Triggering Storage Sync to Cloudflare R2...</h3>";
+    if (!file_exists($extractTo . '/artisan')) {
+        echo "<p><span style='color:red; font-weight:bold;'>Error:</span> Laravel artisan file not found at <code>" . htmlspecialchars($extractTo . '/artisan') . "</code>.</p>";
+    } else {
+        $result = runLaravelCommand($extractTo, 'storage:sync-to-r2');
+        printLaravelCommandResult($result);
+    }
+    exit;
+}
+
 // --- 2. Extract backend ZIP ---
 echo "<h3>Extracting Backend Package...</h3>";
 
