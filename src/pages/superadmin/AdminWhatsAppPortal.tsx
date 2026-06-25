@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, Send, Save, Loader2, ListFilter, Trash2, Plus, RotateCcw, X } from "lucide-react";
+import { MessageSquare, Settings, RefreshCw, AlertTriangle, CheckCircle2, Ban, Send, Save, Loader2, ListFilter, Trash2, Plus, RotateCcw, X, ExternalLink } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -296,6 +296,18 @@ export default function AdminWhatsAppPortal() {
     );
   };
 
+  const triggerWaMeMessage = () => {
+    if (!sendPhone.trim()) {
+      toast.error("Phone number is required.");
+      return;
+    }
+    const cleanPhone = sendPhone.replace(/\D/g, "");
+    const text = encodeURIComponent(customBody);
+    const url = `https://wa.me/${cleanPhone}?text=${text}`;
+    window.open(url, "_blank");
+    toast.success("Opened WhatsApp Web/App direct link! ✓");
+  };
+
   const triggerSendMessage = async () => {
     if (!sendPhone.trim()) {
       toast.error("Phone number is required.");
@@ -494,10 +506,24 @@ export default function AdminWhatsAppPortal() {
                       />
                     </div>
 
-                    <Button onClick={triggerSendMessage} disabled={sending || !config.enabled} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium gap-2">
-                      {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      Send WhatsApp Message
-                    </Button>
+                    <div className="flex gap-2.5">
+                      <Button 
+                        variant="outline" 
+                        onClick={triggerWaMeMessage} 
+                        className="flex-1 border-emerald-600/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 gap-2 font-medium"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        wa.me (Manual)
+                      </Button>
+                      <Button 
+                        onClick={triggerSendMessage} 
+                        disabled={sending || !config.enabled} 
+                        className="flex-[1.5] bg-emerald-600 hover:bg-emerald-700 text-white font-medium gap-2"
+                      >
+                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        Send Message (API)
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>

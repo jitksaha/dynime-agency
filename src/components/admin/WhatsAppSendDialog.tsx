@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { db } from "@/integrations/db/client";
-import { Send, Loader2, MessageSquare } from "lucide-react";
+import { Send, Loader2, MessageSquare, ExternalLink } from "lucide-react";
 import { sendWhatsAppTemplate, TEMPLATE_DEFAULTS, type WhatsAppTemplate } from "@/lib/whatsapp-direct";
 
 interface WhatsAppSendDialogProps {
@@ -184,6 +184,18 @@ export default function WhatsAppSendDialog({
     }
   };
 
+  const handleWaMeClick = () => {
+    if (!phone.trim()) {
+      toast.error("Recipient phone number is required.");
+      return;
+    }
+    const cleanPhone = phone.replace(/\D/g, "");
+    const text = encodeURIComponent(customBody);
+    const url = `https://wa.me/${cleanPhone}?text=${text}`;
+    window.open(url, "_blank");
+    toast.success("Opened WhatsApp Web/App direct link! ✓");
+  };
+
   const handleSend = async () => {
     if (!phone.trim()) {
       toast.error("Recipient phone number is required.");
@@ -304,14 +316,24 @@ export default function WhatsAppSendDialog({
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={onClose} disabled={sending}>
+        <DialogFooter className="gap-2 sm:gap-0 flex-wrap sm:flex-nowrap">
+          <Button variant="outline" onClick={onClose} disabled={sending} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button onClick={handleSend} disabled={sending || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            Send Message
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
+            <Button 
+              variant="outline" 
+              onClick={handleWaMeClick} 
+              className="border-emerald-600/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 w-full sm:w-auto gap-2"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open wa.me (Manual)
+            </Button>
+            <Button onClick={handleSend} disabled={sending || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto gap-2">
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Send Message (API)
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
