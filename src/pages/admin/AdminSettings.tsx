@@ -934,6 +934,9 @@ const AdminSettings = () => {
                     placeholder="e.g. 5a1b..."
                     className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Generate at the <a href="https://dash.cloudflare.com/?to=/:account/r2/api-tokens" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Cloudflare API Tokens page</a>. Use Admin Read/Write.
+                  </p>
                 </div>
 
                 <div>
@@ -954,6 +957,9 @@ const AdminSettings = () => {
                       {showR2Secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Your generated token's secret key (shown only once upon token creation).
+                  </p>
                 </div>
               </div>
 
@@ -967,6 +973,9 @@ const AdminSettings = () => {
                     placeholder="e.g. dynime"
                     className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Your bucket name under <a href="https://dash.cloudflare.com/?to=/:account/r2" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">R2 Overview</a>.
+                  </p>
                 </div>
 
                 <div>
@@ -978,6 +987,9 @@ const AdminSettings = () => {
                     placeholder="e.g. auto"
                     className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
                   />
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Keep as <code>auto</code> for R2 storage.
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 pt-6">
@@ -1003,6 +1015,9 @@ const AdminSettings = () => {
                   placeholder="https://<account-id>.r2.cloudflarestorage.com"
                   className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Copy the <strong>S3 API Endpoint</strong> from your bucket settings (e.g. <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code>). Find this in your <a href="https://dash.cloudflare.com/?to=/:account/r2" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">R2 Bucket page</a> under the Settings tab.
+                </p>
               </div>
 
               <div>
@@ -1015,7 +1030,7 @@ const AdminSettings = () => {
                   className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Dynamic URL mapped to R2 Public Bucket access (e.g. <code>https://pub-...r2.dev</code> or custom domain <code>https://cdn.dynime.com</code>).
+                  Either the default <strong>R2.dev subdomain</strong> under Bucket Settings ➔ Public Access (e.g. <code>https://pub-xxx.r2.dev</code>) or your connected custom CDN domain (e.g. <code>https://cdn.dynime.com</code>).
                 </p>
               </div>
             </div>
