@@ -1803,8 +1803,16 @@ class OrdersController extends Controller
         // Generate invoice number
         $invoiceNumber = $this->generateInvoiceNumber();
 
+        // Merge estimated_delivery_date into service_brief for dual-storage compatibility
+        // (ensures the field is accessible even if the DB column migration hasn't run)
+        $estDeliveryDate = $data['estimated_delivery_date'] ?? null;
+        $serviceBriefArr = is_array($data['service_brief']) ? $data['service_brief'] : (json_decode($data['service_brief'] ?? '{}', true) ?: []);
+        if ($estDeliveryDate !== null) {
+            $serviceBriefArr['estimated_delivery_date'] = $estDeliveryDate;
+        }
+
         // Insert into database
-        DB::table('orders')->insert([
+        $insertData = [
             'id' => $id,
             'customer_name' => $data['customer_name'] ?? null,
             'customer_email' => $data['customer_email'],
@@ -1816,15 +1824,25 @@ class OrdersController extends Controller
             'discount_amount' => $data['discount_amount'] ?? 0.00,
             'notes' => $data['notes'] ?? null,
             'billing_address' => is_array($data['billing_address']) ? json_encode($data['billing_address']) : json_encode([]),
-            'service_brief' => is_array($data['service_brief']) ? json_encode($data['service_brief']) : json_encode([]),
+            'service_brief' => json_encode($serviceBriefArr),
             'referral_code' => $data['referral_code'] ?? null,
             'currency' => $data['currency'] ?? 'USD',
             'user_id' => $data['user_id'] ?? null,
             'invoice_number' => $invoiceNumber,
-            'estimated_delivery_date' => $data['estimated_delivery_date'] ?? null,
             'created_at' => now(),
             'updated_at' => now(),
-        ]);
+        ];
+
+        // Only include estimated_delivery_date column if it exists in the schema
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'estimated_delivery_date')) {
+                $insertData['estimated_delivery_date'] = $estDeliveryDate;
+            }
+        } catch (\Exception $e) {
+            // Schema check failed — skip column
+        }
+
+        DB::table('orders')->insert($insertData);
 
         $newOrder = DB::table('orders')->where('id', $id)->first();
         if ($newOrder) {
@@ -1902,7 +1920,29 @@ class OrdersController extends Controller
             $updateData['referral_code'] = $data['referral_code'];
         }
         if ($request->has('estimated_delivery_date')) {
-            $updateData['estimated_delivery_date'] = $data['estimated_delivery_date'];
+            // Also persist into service_brief for dual-storage compatibility
+            $estDeliveryDateVal = $data['estimated_delivery_date'];
+            $existingSB = json_decode($order->service_brief ?? '{}', true) ?: [];
+            if (isset($updateData['service_brief'])) {
+                $existingSB = is_array($updateData['service_brief'])
+                    ? $updateData['service_brief']
+                    : (json_decode($updateData['service_brief'], true) ?: []);
+            }
+            if ($estDeliveryDateVal !== null) {
+                $existingSB['estimated_delivery_date'] = $estDeliveryDateVal;
+            } else {
+                unset($existingSB['estimated_delivery_date']);
+            }
+            $updateData['service_brief'] = json_encode($existingSB);
+
+            // Also update top-level column if it exists
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'estimated_delivery_date')) {
+                    $updateData['estimated_delivery_date'] = $estDeliveryDateVal;
+                }
+            } catch (\Exception $e) {
+                // Schema check failed — skip column
+            }
         }
 
         // ── Status and refund fields ──────────────────────────────────────────

@@ -246,6 +246,12 @@ const Invoice = () => {
     ? new Date(brief.due_date as string)
     : new Date(new Date(data.created_at).getTime() + 14 * 86400000);
 
+  // Read estimated delivery date from top-level DB column OR service_brief JSON (dual-storage fallback)
+  const estDeliveryDate: string | null =
+    (data.estimated_delivery_date && data.estimated_delivery_date.trim()) ||
+    (brief.estimated_delivery_date && typeof brief.estimated_delivery_date === "string" && brief.estimated_delivery_date.trim()) ||
+    null;
+
   // Optional per-invoice issuer override — when an admin issues a manual
   // invoice under a specific employee's name (rather than the company), the
   // "From" block and header swap out the Dynime branding for that person.
@@ -351,13 +357,13 @@ const Invoice = () => {
             <Row label="Currency" value={currency} />
             <Row label="Date of issue" value={new Date(data.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
             <Row label={paid ? "Date paid" : "Date due"} value={(paid ? new Date(data.updated_at) : dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
-            {data.estimated_delivery_date && (
+            {estDeliveryDate && (
               <Row
                 label="Est. Delivery Date"
                 value={
                   <span className="flex items-center gap-1 font-semibold text-primary">
                     <Truck className="w-3.5 h-3.5" />
-                    {data.estimated_delivery_date}
+                    {estDeliveryDate}
                   </span>
                 }
               />
@@ -451,14 +457,14 @@ const Invoice = () => {
           </div>
 
           {/* Estimated Delivery Date Banner */}
-          {data.estimated_delivery_date && (
+          {estDeliveryDate && (
             <div className="mx-8 md:mx-10 my-4 p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-center gap-3 text-sm text-foreground print:my-2 print:p-3 print:mx-0">
               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                 <Truck className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Estimated Delivery Date</p>
-                <p className="font-bold text-primary">{data.estimated_delivery_date}</p>
+                <p className="font-bold text-primary text-base">{estDeliveryDate}</p>
               </div>
             </div>
           )}

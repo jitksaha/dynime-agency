@@ -439,7 +439,11 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
           setIssuerMode("company");
           setIssuerEmployeeKey("");
         }
-        const estDelDate = o.estimated_delivery_date || "";
+        // Read from top-level DB column first, then fall back to service_brief (dual-storage)
+        const estDelDate: string =
+          o.estimated_delivery_date?.trim() ||
+          (sb.estimated_delivery_date && typeof sb.estimated_delivery_date === "string" ? sb.estimated_delivery_date.trim() : "") ||
+          "";
         setEstimatedDeliveryDate(estDelDate);
         if (estDelDate) {
           if (estDelDate.includes(" - ")) {
