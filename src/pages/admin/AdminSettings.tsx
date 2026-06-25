@@ -6,7 +6,7 @@ import { useSiteSettings } from "@/hooks/use-data";
 import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign, Cloud, CheckCircle2, AlertTriangle, Database, Mail, Eye, EyeOff } from "lucide-react";
+import { Save, ShieldAlert, X, ExternalLink, CreditCard, Sun, Moon, Share2, MessageCircle, Building2, Plus, Trash2, Languages, DollarSign, Cloud, CheckCircle2, AlertTriangle, Database, Mail, Eye, EyeOff, Code } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiPost, apiGet } from "@/lib/api";
@@ -210,7 +210,14 @@ const AdminSettings = () => {
         "referral_cooling_period_days",
         "maintenance_mode",
         "zoho_credentials",
-        "r2_storage_config"
+        "r2_storage_config",
+        "site_google_analytics_id",
+        "site_facebook_pixel_id",
+        "site_linkedin_insight_id",
+        "site_twitter_pixel_id",
+        "site_google_site_verification",
+        "site_custom_header_scripts",
+        "site_custom_footer_scripts"
       ];
       const rows: { key: string; value: any }[] = keysToSave
         .filter((k) => values[k] !== undefined)
@@ -1039,6 +1046,121 @@ const AdminSettings = () => {
       </div>
 
 
+
+      {/* Tracking & Analytics Connections */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Code className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Tracking & Connections</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Configure tracking pixels, verification IDs, and custom header/footer injection scripts.
+        </p>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Google Analytics ID (GA4)</label>
+              <input
+                type="text"
+                value={values.site_google_analytics_id || ""}
+                onChange={(e) => setValues({ ...values, site_google_analytics_id: e.target.value })}
+                placeholder="e.g. G-XXXXXX"
+                className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Google Analytics 4 measurement ID.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Facebook Pixel ID</label>
+              <input
+                type="text"
+                value={values.site_facebook_pixel_id || ""}
+                onChange={(e) => setValues({ ...values, site_facebook_pixel_id: e.target.value })}
+                placeholder="e.g. 1234567890"
+                className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Facebook / Meta Pixel ID for event tracking.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">LinkedIn Partner ID</label>
+              <input
+                type="text"
+                value={values.site_linkedin_insight_id || ""}
+                onChange={(e) => setValues({ ...values, site_linkedin_insight_id: e.target.value })}
+                placeholder="e.g. 123456"
+                className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                LinkedIn Insight Tag partner ID.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">X (Twitter) Pixel ID</label>
+              <input
+                type="text"
+                value={values.site_twitter_pixel_id || ""}
+                onChange={(e) => setValues({ ...values, site_twitter_pixel_id: e.target.value })}
+                placeholder="e.g. tw-xxxxx"
+                className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                X / Twitter Ads tracking pixel ID.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Google Site Verification</label>
+              <input
+                type="text"
+                value={values.site_google_site_verification || ""}
+                onChange={(e) => setValues({ ...values, site_google_site_verification: e.target.value })}
+                placeholder="e.g. abc123xyz..."
+                className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Verification content code for Google Search Console.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Custom Header Scripts (Inject into &lt;head&gt;)</label>
+            <textarea
+              value={values.site_custom_header_scripts || ""}
+              onChange={(e) => setValues({ ...values, site_custom_header_scripts: e.target.value })}
+              placeholder="<!-- Add raw tags/scripts to inject in <head> -->"
+              rows={3}
+              className="w-full text-sm bg-background border border-border rounded-md p-3 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+            />
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Allows injecting custom verification tags, stylesheets, or integrations (e.g. TikTok, Pinterest, Hotjar) directly in header.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Custom Footer Scripts (Inject before &lt;/body&gt;)</label>
+            <textarea
+              value={values.site_custom_footer_scripts || ""}
+              onChange={(e) => setValues({ ...values, site_custom_footer_scripts: e.target.value })}
+              placeholder="<!-- Add raw tags/scripts to inject before </body> -->"
+              rows={3}
+              className="w-full text-sm bg-background border border-border rounded-md p-3 focus:outline-none focus:ring-1 focus:ring-primary font-mono"
+            />
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Allows injecting custom helper scripts, chats, or tracking pixels directly at the bottom of the page.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Maintenance Mode toggle */}
       <div className="glass-card p-6 max-w-2xl mb-6 border-red-500/25 bg-red-950/5">

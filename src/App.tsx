@@ -17,6 +17,7 @@ import { useRealtimeSync } from "@/hooks/use-realtime-sync";
 import DynamicFavicon from "@/components/shared/DynamicFavicon";
 import ProductUrlInterceptor from "@/components/shared/ProductUrlInterceptor";
 import LiveChatEmbed from "@/components/shared/LiveChatEmbed";
+import TrackingPixels from "@/components/shared/TrackingPixels";
 import { useHashScroll } from "@/hooks/use-hash-scroll";
 import ReferralTracker from "@/components/shared/ReferralTracker";
 
@@ -250,6 +251,7 @@ const App = () => (
               <DynamicFavicon />
               <ProductUrlInterceptor />
               <LiveChatEmbed />
+              <TrackingPixels />
               <Toaster />
               <Sonner />
               <BrowserRouter>
