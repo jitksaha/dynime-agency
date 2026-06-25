@@ -56,6 +56,7 @@ const AdminSettings = () => {
   const [savingConfig, setSavingConfig] = useState(false);
   const [showZohoSecret, setShowZohoSecret] = useState(false);
   const [showZohoRefreshToken, setShowZohoRefreshToken] = useState(false);
+  const [showR2Secret, setShowR2Secret] = useState(false);
   const qc = useQueryClient();
 
   const getZohoVal = (field: string): string => {
@@ -79,6 +80,31 @@ const AdminSettings = () => {
     } catch {}
     current[field] = val;
     setValues({ ...values, zoho_credentials: JSON.stringify(current) });
+  };
+
+  const getR2Val = (field: string): any => {
+    try {
+      if (!values.r2_storage_config) {
+        return field === "enabled" ? false : field === "use_path_style_endpoint" ? true : field === "region" ? "auto" : "";
+      }
+      const parsed = typeof values.r2_storage_config === "string" ? JSON.parse(values.r2_storage_config) : values.r2_storage_config;
+      if (field === "enabled") return parsed.enabled === true || parsed.enabled === "true";
+      if (field === "use_path_style_endpoint") return parsed.use_path_style_endpoint !== false && parsed.use_path_style_endpoint !== "false";
+      return parsed[field] || (field === "region" ? "auto" : "");
+    } catch {
+      return field === "enabled" ? false : field === "use_path_style_endpoint" ? true : field === "region" ? "auto" : "";
+    }
+  };
+
+  const handleR2Change = (field: string, val: any) => {
+    let current: Record<string, any> = {};
+    try {
+      if (values.r2_storage_config) {
+        current = typeof values.r2_storage_config === "string" ? JSON.parse(values.r2_storage_config) : values.r2_storage_config;
+      }
+    } catch {}
+    current[field] = val;
+    setValues({ ...values, r2_storage_config: JSON.stringify(current) });
   };
 
   const loadBackupStatus = async () => {
@@ -183,7 +209,8 @@ const AdminSettings = () => {
         "auto_language_switcher_enabled",
         "referral_cooling_period_days",
         "maintenance_mode",
-        "zoho_credentials"
+        "zoho_credentials",
+        "r2_storage_config"
       ];
       const rows: { key: string; value: any }[] = keysToSave
         .filter((k) => values[k] !== undefined)
@@ -854,6 +881,136 @@ const AdminSettings = () => {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Cloudflare R2 CDN Storage */}
+      <div className="glass-card p-6 max-w-2xl mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Cloud className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">Cloudflare R2 Storage (CDN)</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-4">
+          Connect Cloudflare R2 Object Storage for lightning-fast media delivery via CDN and decouple uploads from database paths.
+        </p>
+
+        <div className="space-y-4">
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-secondary/10 p-3 cursor-pointer hover:border-border/80 transition-colors">
+            <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${getR2Val("enabled") ? "bg-emerald-500/20 text-emerald-400" : "bg-secondary text-muted-foreground"}`}>
+              <Cloud className="w-4 h-4" />
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-sm font-medium text-foreground">Enable Cloudflare R2</span>
+              <span className="block text-xs text-muted-foreground">Serve and upload all website media files using Cloudflare R2 CDN storage.</span>
+            </span>
+            <input
+              type="checkbox"
+              checked={getR2Val("enabled")}
+              onChange={(e) => handleR2Change("enabled", e.target.checked)}
+              className="mt-1 w-4 h-4 accent-primary"
+            />
+          </label>
+
+          {getR2Val("enabled") && (
+            <div className="space-y-3 p-4 rounded-lg border border-border bg-secondary/5 text-left">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">R2 S3-Compatible Connection</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">R2 Access Key ID</label>
+                  <input
+                    type="text"
+                    value={getR2Val("access_key_id")}
+                    onChange={(e) => handleR2Change("access_key_id", e.target.value)}
+                    placeholder="e.g. 5a1b..."
+                    className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">R2 Secret Access Key</label>
+                  <div className="relative">
+                    <input
+                      type={showR2Secret ? "text" : "password"}
+                      value={getR2Val("secret_access_key")}
+                      onChange={(e) => handleR2Change("secret_access_key", e.target.value)}
+                      placeholder="••••••••••••••••"
+                      className="w-full text-sm h-9 bg-background border border-border rounded-md pl-3 pr-10 focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowR2Secret(!showR2Secret)}
+                      className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+                    >
+                      {showR2Secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">Bucket Name</label>
+                  <input
+                    type="text"
+                    value={getR2Val("bucket") || "dynime"}
+                    onChange={(e) => handleR2Change("bucket", e.target.value)}
+                    placeholder="e.g. dynime"
+                    className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">Region</label>
+                  <input
+                    type="text"
+                    value={getR2Val("region") || "auto"}
+                    onChange={(e) => handleR2Change("region", e.target.value)}
+                    placeholder="e.g. auto"
+                    className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="r2-path-style"
+                    checked={getR2Val("use_path_style_endpoint")}
+                    onChange={(e) => handleR2Change("use_path_style_endpoint", e.target.checked)}
+                    className="w-4 h-4 accent-primary cursor-pointer"
+                  />
+                  <label htmlFor="r2-path-style" className="text-xs text-muted-foreground cursor-pointer">
+                    Use Path-Style Endpoint
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">R2 Endpoint URL</label>
+                <input
+                  type="url"
+                  value={getR2Val("endpoint")}
+                  onChange={(e) => handleR2Change("endpoint", e.target.value)}
+                  placeholder="https://<account-id>.r2.cloudflarestorage.com"
+                  className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Public CDN / Custom URL Domain</label>
+                <input
+                  type="url"
+                  value={getR2Val("public_url")}
+                  onChange={(e) => handleR2Change("public_url", e.target.value)}
+                  placeholder="https://cdn.dynime.com"
+                  className="w-full text-sm h-9 bg-background border border-border rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Dynamic URL mapped to R2 Public Bucket access (e.g. <code>https://pub-...r2.dev</code> or custom domain <code>https://cdn.dynime.com</code>).
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
 
