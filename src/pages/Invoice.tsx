@@ -351,28 +351,40 @@ const Invoice = () => {
             </div>
           </div>
 
-          {/* Meta grid */}
+          {/* Meta grid — 2-column: left col / right col pairs */}
           <div className="px-8 md:px-10 pb-6 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-x-10 gap-y-2 text-sm relative">
+            {/* Row 1 */}
             <Row label="Invoice number" value={<span className="font-mono">{data.invoice_number || data.id.slice(0, 8).toUpperCase()}</span>} />
             <Row label="Currency" value={currency} />
+
+            {/* Row 2 */}
             <Row label="Date of issue" value={new Date(data.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
             <Row label={paid ? "Date paid" : "Date due"} value={(paid ? new Date(data.updated_at) : dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} />
-            {estDeliveryDate && (
+
+            {/* Row 3 — Payment method (left) | Est. Delivery Date (right) */}
+            {data.payment_gateway && (
+              <Row label="Payment method" value={GATEWAY_LABELS[data.payment_gateway] || data.payment_gateway} />
+            )}
+            {estDeliveryDate ? (
               <Row
                 label="Est. Delivery Date"
                 value={
-                  <span className="flex items-center gap-1 font-semibold text-primary">
-                    <Truck className="w-3.5 h-3.5" />
+                  <span className="flex items-center justify-end gap-1 font-semibold text-primary">
+                    <Truck className="w-3.5 h-3.5 shrink-0" />
                     {estDeliveryDate}
                   </span>
                 }
               />
+            ) : (
+              data.payment_gateway && <div /> /* empty cell to keep grid alignment */
             )}
+
+            {/* Remaining optional rows */}
+            {data.stripe_session_id && <Row label="Payment reference" value={<span className="font-mono text-xs break-all">{data.stripe_session_id}</span>} />}
             {data.coupon_code && <Row label="Coupon" value={<span className="font-mono">{data.coupon_code}</span>} />}
             {taxId && <Row label="Tax ID" value={taxId} />}
-            {data.payment_gateway && <Row label="Payment method" value={GATEWAY_LABELS[data.payment_gateway] || data.payment_gateway} />}
-            {data.stripe_session_id && <Row label="Payment reference" value={<span className="font-mono text-xs break-all">{data.stripe_session_id}</span>} />}
           </div>
+
 
           {/* From / Bill to */}
           <div className="px-8 md:px-10 py-6 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-8 border-t border-border relative">
