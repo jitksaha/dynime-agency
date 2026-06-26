@@ -1,9 +1,15 @@
 # React SPA .htaccess — place in public_html/ root (document root)
 # Handles client-side routing for React Router
 
+# Explicitly set document root index — prevents cPanel /cgi-sys/defaultwebpage.cgi redirect
+DirectoryIndex index.html index.php
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Block cPanel's default page redirect from being served
+    RewriteRule ^cgi-sys/defaultwebpage\.cgi$ /index.html [R=301,L]
 
     # Don't rewrite files or directories that exist
     RewriteCond %{REQUEST_FILENAME} !-f
