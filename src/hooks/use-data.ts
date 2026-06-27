@@ -37,12 +37,38 @@ export const useSiteSettings = () => {
     queryKey: ["site-settings"],
     initialData: readCachedSiteSettings,
     queryFn: async () => {
-      // Use the public endpoint (/public-settings) so this works for ALL visitors,
-      // not just authenticated admins. The CMS endpoint (/cms/site-settings) returns
-      // 500 for unauthenticated requests, causing switcher settings to silently fail.
-      const data = await apiGet<any[]>("/public-settings");
+      // Prefer /public-settings (array format, no auth) when available.
+      // Falls back to /site-settings (flat dict, no auth) for compatibility
+      // with the currently deployed backend until /public-settings is live.
+      // NEVER uses /cms/site-settings — that endpoint requires admin auth and
+      // returns 500 for public visitors, causing the switcher toggles to silently
+      // default to 'true' regardless of what the admin saved.
+      let data: any[] | null = null;
+
+      try {
+        const res = await apiGet<any>("/public-settings");
+        // /public-settings returns [{key, value}] array
+        if (Array.isArray(res)) {
+          data = res;
+        } else if (res && typeof res === "object") {
+          // Flat dict fallback — convert to array
+          data = Object.entries(res).map(([key, value]) => ({ key, value }));
+        }
+      } catch {
+        // /public-settings not yet deployed — fall back to /site-settings
+        try {
+          const fallback = await apiGet<Record<string, any>>("/site-settings");
+          if (fallback && typeof fallback === "object" && !Array.isArray(fallback)) {
+            data = Object.entries(fallback).map(([key, value]) => ({ key, value }));
+          }
+        } catch {
+          // both failed — return whatever is in localStorage
+          return readCachedSiteSettings() ?? {};
+        }
+      }
+
       const map: Record<string, string> = {};
-      data?.forEach((s) => {
+      data?.forEach((s: any) => {
         // Unwrap JSON value — could be a raw string, quoted string, or nested JSON
         let val = s.value;
         while (typeof val === "string") {
