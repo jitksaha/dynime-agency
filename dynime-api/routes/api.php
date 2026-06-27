@@ -81,6 +81,8 @@ Route::prefix('v1')->group(function () {
 
     // Settings (public only)
     Route::get('site-settings',          [SettingsController::class, 'publicIndex']);
+    // Public settings as [{key,value}] array \u2014 consumed by useSiteSettings() on all pages
+    Route::get('public-settings',        [SettingsController::class, 'publicIndexArray']);
     Route::get('sync-db-mismatch',       [SettingsController::class, 'syncDbMismatch']);
     Route::get('storage/sync-r2', function (\Illuminate\Http\Request $request) {
         if ($request->query('token') !== 'deploy_token_7782') {

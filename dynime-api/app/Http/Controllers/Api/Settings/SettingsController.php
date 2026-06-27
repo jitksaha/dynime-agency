@@ -13,7 +13,9 @@ class SettingsController extends Controller
 {
     public function publicIndex(): JsonResponse
     {
-        $settings = Cache::remember('site_settings_public', 86400, fn() =>
+        // Short TTL (30s) so admin changes propagate quickly to visitors.
+        // Cache is also explicitly cleared in upsert/bulkUpsert/destroy.
+        $settings = Cache::remember('site_settings_public', 30, fn() =>
             SiteSetting::where('is_public', true)
                 ->orWhereIn('key', [
                     'stripe_enabled',
@@ -24,16 +26,52 @@ class SettingsController extends Controller
                     'keeal_enabled',
                     'keeal_sandbox',
                     'keeal_currency',
-                    'gateway_order'
+                    'gateway_order',
+                    // Auto-switcher toggles — must always be public so visitors
+                    // see the correct geo-detect behaviour without needing auth
+                    'auto_currency_switcher_enabled',
+                    'auto_language_switcher_enabled',
                 ])
                 ->orWhere('key', 'like', '%_enabled')
                 ->orWhere('key', 'like', 'gateway_%')
+                ->orWhere('key', 'like', 'site_%')
                 ->get()
                 ->keyBy('key')
                 ->map(fn($s) => $s->value)
                 ->toArray()
         );
         return response()->json($settings);
+    }
+
+    /**
+     * Public settings as an array of {key, value} objects — the format
+     * that the frontend useSiteSettings() hook expects.
+     * No auth required. Short-lived cache so admin changes propagate fast.
+     */
+    public function publicIndexArray(): JsonResponse
+    {
+        $map = Cache::remember('site_settings_public', 30, fn() =>
+            SiteSetting::where('is_public', true)
+                ->orWhereIn('key', [
+                    'auto_currency_switcher_enabled',
+                    'auto_language_switcher_enabled',
+                    'maintenance_mode',
+                    'default_theme',
+                    'live_chat_enabled',
+                ])
+                ->orWhere('key', 'like', '%_enabled')
+                ->orWhere('key', 'like', 'gateway_%')
+                ->orWhere('key', 'like', 'site_%')
+                ->orWhere('key', 'like', 'social_%')
+                ->get()
+                ->keyBy('key')
+                ->map(fn($s) => $s->value)
+                ->toArray()
+        );
+
+        // Convert flat map to [{key, value}] array so the CMS mapper can handle it
+        $rows = collect($map)->map(fn($v, $k) => ['key' => $k, 'value' => $v])->values();
+        return response()->json($rows);
     }
 
     public function syncDbMismatch(Request $request): JsonResponse

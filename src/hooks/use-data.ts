@@ -37,7 +37,10 @@ export const useSiteSettings = () => {
     queryKey: ["site-settings"],
     initialData: readCachedSiteSettings,
     queryFn: async () => {
-      const data = await apiGet<any[]>("/cms/site-settings");
+      // Use the public endpoint (/public-settings) so this works for ALL visitors,
+      // not just authenticated admins. The CMS endpoint (/cms/site-settings) returns
+      // 500 for unauthenticated requests, causing switcher settings to silently fail.
+      const data = await apiGet<any[]>("/public-settings");
       const map: Record<string, string> = {};
       data?.forEach((s) => {
         // Unwrap JSON value — could be a raw string, quoted string, or nested JSON
@@ -50,7 +53,13 @@ export const useSiteSettings = () => {
       writeCachedSiteSettings(map);
       return map;
     },
-    staleTime: 5000,
+    // 15s staleTime: admin changes propagate in ≤ 15s for returning visitors.
+    // Server-side cache is 30s, so the effective lag is ≤ 45s total.
+    staleTime: 15_000,
+    // Don't keep stale data in memory indefinitely — force a fresh fetch on remount.
+    gcTime: 60_000,
+    // Refetch when the window regains focus so admins see their own changes immediately.
+    refetchOnWindowFocus: true,
   });
 };
 

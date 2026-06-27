@@ -3,6 +3,7 @@ import SuperAdminLayout from "@/components/admin/SuperAdminLayout";
 import SiteLogoUploader, { FaviconUploader } from "@/components/admin/SiteLogoUploader";
 import OgImageUploader from "@/components/admin/OgImageUploader";
 import { useSiteSettings } from "@/hooks/use-data";
+import { SITE_SETTINGS_CACHE_KEY } from "@/lib/site-settings-cache";
 import { db } from "@/integrations/db/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -228,6 +229,10 @@ const AdminSettings = () => {
       
       await apiPost("/cms/site-settings/bulk", { settings: rows });
       toast.success("Settings saved.");
+      // Clear localStorage cache so visitors (and this admin) see the new values
+      // within the next staleTime window (15s), without needing a hard refresh.
+      try { localStorage.removeItem(SITE_SETTINGS_CACHE_KEY); } catch { /* ignore */ }
+      // Invalidate the React Query cache so LocationContext refetches immediately
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     } catch (err: any) {
       const message = err?.message || "Save failed";
