@@ -1,34 +1,44 @@
-# React SPA .htaccess — place in public_html/ root (document root)
-# Handles client-side routing for React Router
+# React SPA .htaccess — Hostinger LiteSpeed + Apache compatible
+# Handles client-side routing for React Router (fixes intermittent 404 on SPA routes)
 
-# Explicitly set document root index — prevents cPanel /cgi-sys/defaultwebpage.cgi redirect
+# Explicitly set document root index
 DirectoryIndex index.html index.php
 
+# ─── LiteSpeed SPA Fallback ───────────────────────────────────────────────────
+# FallbackResource is processed BEFORE mod_rewrite on LiteSpeed.
+# This is the primary fix for "404 Not Found" on SPA routes (/invoice, /careers, etc.)
+# It tells LiteSpeed: if the requested path doesn't exist as a file/dir, serve index.html
+FallbackResource /index.html
+
+# ─── Error Document ───────────────────────────────────────────────────────────
+# Catches any 404 that LiteSpeed generates before mod_rewrite fires.
+# Works as a second safety net alongside FallbackResource.
+ErrorDocument 404 /index.html
+
+# ─── Rewrite Rules ────────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # Block cPanel's default page redirect from being served
+    # Block cPanel's default page redirect
     RewriteRule ^cgi-sys/defaultwebpage\.cgi$ /index.html [R=301,L]
 
-    # Don't rewrite files or directories that exist
+    # ── API passthrough — MUST be before SPA catch-all ──────────────────────
+    # Laravel API requests must reach PHP, not be served index.html
+    RewriteCond %{REQUEST_URI} ^/api/ [NC]
+    RewriteRule ^ - [L]
+
+    # ── PHP scripts — execute directly ──────────────────────────────────────
+    RewriteCond %{REQUEST_URI} \.php$ [NC]
+    RewriteRule ^ - [L]
+
+    # ── SPA catch-all — serve index.html for all non-file/dir routes ─────────
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Don't rewrite requests to the /api/ subdirectory (Laravel)
-    RewriteCond %{REQUEST_URI} !^/api/
-
-    # Don't rewrite PHP scripts — they should be executed directly
-    RewriteCond %{REQUEST_URI} !\.php$
-
-    # Don't rewrite static assets
-    RewriteCond %{REQUEST_URI} !\.(js|css|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|map|txt|xml|pdf)$
-
-    # Send everything else to index.html (React SPA)
     RewriteRule ^ /index.html [L]
 </IfModule>
 
-# Cache static assets aggressively
+# ─── Cache Headers ────────────────────────────────────────────────────────────
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/jpg "access plus 1 year"
@@ -45,20 +55,22 @@ DirectoryIndex index.html index.php
     ExpiresByType font/woff "access plus 1 year"
 </IfModule>
 
-# Gzip compression
+# ─── Gzip Compression ─────────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/css text/javascript
     AddOutputFilterByType DEFLATE application/javascript application/json
     AddOutputFilterByType DEFLATE image/svg+xml font/woff font/woff2
 </IfModule>
 
-# Security Headers
+# ─── Security & Cache Headers ─────────────────────────────────────────────────
 <IfModule mod_headers.c>
-    # Cache-Control for HTML (no cache — React SPA entry)
+    # HTML entry point — never cache (ensures users always get latest SPA shell)
     <FilesMatch "index\.html$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires 0
+        # Disable LiteSpeed caching for the SPA entry point
+        Header set X-LiteSpeed-Cache-Control "no-cache"
     </FilesMatch>
 
     # Security headers
@@ -66,15 +78,16 @@ DirectoryIndex index.html index.php
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
-    # Immutable cache for hashed assets (Vite generates content-hashed filenames)
+    # Immutable cache for Vite content-hashed assets
     <FilesMatch "\.[0-9a-f]{8}\.(js|css|woff2?)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
 </IfModule>
 
-# Block sensitive file access
+# ─── Block Sensitive Files ─────────────────────────────────────────────────────
 <FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
     Order allow,deny
     Deny from all
     Satisfy All
 </FilesMatch>
+
