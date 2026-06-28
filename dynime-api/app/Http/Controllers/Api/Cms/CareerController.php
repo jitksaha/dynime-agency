@@ -125,19 +125,71 @@ class CareerController extends Controller
         }
 
         $file = $request->file('file');
-        
-        // Store on public disk using the exact key (path) provided
-        $stored = Storage::disk('public')->put($key, file_get_contents($file));
 
-        if (!$stored) {
-            return response()->json(['message' => 'Failed to store resume.'], 500);
+        // Server-side mime validation (defence in depth)
+        $allowedMimes = ['application/pdf', 'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            return response()->json(['message' => 'Only PDF and Word documents are allowed.'], 422);
+        }
+
+        if ($file->getSize() > 8 * 1024 * 1024) {
+            return response()->json(['message' => 'File must be under 8 MB.'], 422);
+        }
+
+        // Build a safe storage path under storage/app/private/resumes/
+        // We use the 'local' disk (always writable on Hostinger) instead of
+        // the 'public' disk which relies on R2/S3 credentials that may not be set.
+        $ext  = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+        $safe = preg_replace('/[^A-Za-z0-9_-]+/', '-', $key);
+        $storagePath = 'resumes/' . $safe;
+
+        try {
+            // Try the configured public disk first (works when R2 is set up).
+            // Fall back to the always-available local disk if it fails.
+            $stored = false;
+
+            if (config('filesystems.disks.public.driver') === 's3'
+                && !empty(config('filesystems.disks.public.key'))
+                && !empty(config('filesystems.disks.public.secret'))
+                && !empty(config('filesystems.disks.public.bucket'))
+            ) {
+                // R2/S3 is configured — try it
+                $stored = Storage::disk('public')->put($key, file_get_contents($file));
+            }
+
+            if (!$stored) {
+                // Fall back to local disk (always works on shared hosting)
+                $stored = Storage::disk('local')->put($storagePath, file_get_contents($file));
+                if ($stored) {
+                    // Mark path so admin panel knows it's local
+                    $key = 'local:' . $storagePath;
+                }
+            }
+
+            if (!$stored) {
+                \Illuminate\Support\Facades\Log::error('Resume upload failed: both public and local storage returned false', [
+                    'key' => $key,
+                    'file_size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                    'public_driver' => config('filesystems.disks.public.driver'),
+                ]);
+                return response()->json(['message' => 'Failed to store resume. Please try again.'], 500);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Resume upload exception: ' . $e->getMessage(), [
+                'key' => $key,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['message' => 'Upload error: ' . $e->getMessage()], 500);
         }
 
         return response()->json([
-            'key' => $key,
+            'key'    => $key,
             'bucket' => 'job-applications',
         ]);
     }
+
 
     public function applyPublic(Request $request): JsonResponse
     {
