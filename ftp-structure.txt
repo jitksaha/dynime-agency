@@ -12,7 +12,6 @@ portfolio
 index.html
 dms-illustration.png
 .replit
-dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -88,6 +87,7 @@ run-admin-setup.php
 webflow-development
 analytics
 wordpress-design
+origin-fallback.php
 shopify
 deploy
 test-folder.php
