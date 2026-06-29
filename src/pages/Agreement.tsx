@@ -8,7 +8,8 @@ import SiteLogo from "@/components/shared/SiteLogo";
 import { useSEO } from "@/hooks/use-seo";
 import { printWithSignatureFonts } from "@/lib/print-with-fonts";
 import { apiGet } from "@/lib/api";
-import { BUSINESS_CONFIG } from "@/lib/business-config";
+import { BUSINESS_CONFIG, getPrimaryOffice } from "@/lib/business-config";
+import { useContactInfo } from "@/hooks/use-data";
 
 interface AgreementRow {
   id: string;
@@ -32,6 +33,8 @@ const Agreement = () => {
   const [data, setData] = useState<AgreementRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { data: contacts } = useContactInfo();
+  const primaryOffice = useMemo(() => getPrimaryOffice(contacts), [contacts]);
 
   const ref = useMemo(() => {
     const raw = routeId || splat || location.pathname.match(/^\/agreement\/(.+)$/)?.[1];
@@ -211,15 +214,15 @@ const Agreement = () => {
                 </>
               ) : (
                 <>
-                  <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
-                    <Mail className="w-3 h-3" /> {BUSINESS_CONFIG.email}
+                  <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5 font-sans">
+                    <Mail className="w-3 h-3 shrink-0" /> {BUSINESS_CONFIG.email}
                   </p>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                    <Phone className="w-3 h-3" /> {BUSINESS_CONFIG.phone}
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5 font-sans">
+                    <Phone className="w-3 h-3 shrink-0" /> {primaryOffice.phone || BUSINESS_CONFIG.phone}
                   </p>
-                  <p className="text-sm text-muted-foreground flex items-start gap-1.5 whitespace-pre-line mt-1">
+                  <p className="text-sm text-muted-foreground flex items-start gap-1.5 font-sans whitespace-pre-line mt-1">
                     <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
-                    {BUSINESS_CONFIG.offices[0].address}
+                    {primaryOffice.address}
                   </p>
                 </>
               )}

@@ -8,7 +8,7 @@ import ContactForm from "@/components/shared/ContactForm";
 import { useContactInfo } from "@/hooks/use-data";
 import { Mail, Phone, MapPin, MessageCircle, Sparkles, Clock, Globe2 } from "lucide-react";
 import SocialIcons from "@/components/shared/SocialIcons";
-import { BUSINESS_CONFIG } from "@/lib/business-config";
+import { BUSINESS_CONFIG, getActiveOffices } from "@/lib/business-config";
 import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
@@ -30,6 +30,7 @@ const Contact = () => {
 
   const emails = contacts?.filter((c) => c.type === "email") || [];
   const addresses = contacts?.filter((c) => c.type === "address") || [];
+  const offices = getActiveOffices(contacts);
   const whatsapps =
     contacts?.filter(
       (c) => c.type === "whatsapp" || (c.type === "phone" && /whatsapp/i.test(c.label || "")),
@@ -289,7 +290,7 @@ const Contact = () => {
                   <ul className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
                     {(() => {
                       const query = officeSearchTerm.toLowerCase().trim();
-                      const filtered = BUSINESS_CONFIG.offices.filter((o) => {
+                      const filtered = offices.filter((o) => {
                         if (!query) return true;
                         return (
                           o.name.toLowerCase().includes(query) ||
@@ -432,9 +433,9 @@ const Contact = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {BUSINESS_CONFIG.offices.map((office) => {
+            {offices.map((office) => {
               const digits = office.whatsapp.replace(/[^0-9]/g, "");
-              const isHq = office.type.toLowerCase().includes("headquarters");
+              const isHq = office.type.toLowerCase().includes("headquarters") || !!office.is_primary;
               
               return (
                 <ScrollReveal key={office.name}>

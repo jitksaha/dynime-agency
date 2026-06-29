@@ -19,7 +19,8 @@ import PayInvoicePanel from "@/components/invoice/PayInvoicePanel";
 import InvoiceCurrencyConverter from "@/components/invoice/InvoiceCurrencyConverter";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { BUSINESS_CONFIG } from "@/lib/business-config";
+import { BUSINESS_CONFIG, getPrimaryOffice } from "@/lib/business-config";
+import { useContactInfo } from "@/hooks/use-data";
 
 interface InvoiceData {
   id: string;
@@ -82,6 +83,8 @@ const Invoice = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { data: contacts } = useContactInfo();
+  const primaryOffice = useMemo(() => getPrimaryOffice(contacts), [contacts]);
 
   useSEO({
     title: data?.invoice_number ? `Invoice ${data.invoice_number} | Dynime` : "Invoice | Dynime",
@@ -421,11 +424,11 @@ const Invoice = () => {
                     <Mail className="w-3 h-3 shrink-0" /> {BUSINESS_CONFIG.email}
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-1.5 font-sans">
-                    <Phone className="w-3 h-3 shrink-0" /> {BUSINESS_CONFIG.phone}
+                    <Phone className="w-3 h-3 shrink-0" /> {primaryOffice.phone || BUSINESS_CONFIG.phone}
                   </p>
                   <p className="text-sm text-muted-foreground flex items-start gap-1.5 font-sans whitespace-pre-line mt-1">
                     <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
-                    {BUSINESS_CONFIG.offices[0].address}
+                    {primaryOffice.address}
                   </p>
                 </>
               )}
