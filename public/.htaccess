@@ -64,14 +64,23 @@ ErrorDocument 404 /index.html
 
 # ─── Security & Cache Headers ─────────────────────────────────────────────────
 <IfModule mod_headers.c>
-    # HTML entry point — never cache (ensures users always get latest SPA shell)
-    <FilesMatch "index\.html$">
+    # ─── Disable Cache for HTML, SPA Routes & Entry Points ────────────────────
+    # Ensures users always get the latest build references and never get stale chunks (404/ChunkLoadErrors)
+    
+    # 1. Match physical HTML files
+    <FilesMatch "\.(html|htm)$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires 0
-        # Disable LiteSpeed caching for the SPA entry point
         Header set X-LiteSpeed-Cache-Control "no-cache"
     </FilesMatch>
+
+    # 2. Match SPA routes (any request URL path without a file extension, e.g. /superadmin/whatsapp-portal)
+    SetEnvIf Request_URI "^/[^.]+$" no_cache_path
+    Header set Cache-Control "no-cache, no-store, must-revalidate" env=no_cache_path
+    Header set Pragma "no-cache" env=no_cache_path
+    Header set Expires 0 env=no_cache_path
+    Header set X-LiteSpeed-Cache-Control "no-cache" env=no_cache_path
 
     # Security headers
     Header always set X-Frame-Options "SAMEORIGIN"

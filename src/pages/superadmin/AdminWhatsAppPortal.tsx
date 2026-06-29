@@ -944,7 +944,19 @@ export default function AdminWhatsAppPortal() {
                     ) : filteredLogs.map((l) => (
                       <TableRow key={l.id}>
                         <TableCell className="whitespace-nowrap text-xs">
-                          {format(new Date(l.created_at), "MMM d, HH:mm")}
+                          {(() => {
+                            try {
+                              if (!l.created_at) return "N/A";
+                              // Normalize space to T for browser parser compatibility (Safari/Firefox)
+                              const normalized = l.created_at.includes(" ") 
+                                ? l.created_at.replace(" ", "T") 
+                                : l.created_at;
+                              const d = new Date(normalized);
+                              return isNaN(d.getTime()) ? "N/A" : format(d, "MMM d, HH:mm");
+                            } catch {
+                              return "N/A";
+                            }
+                          })()}
                         </TableCell>
                         <TableCell className="text-sm font-medium">{l.template_name}</TableCell>
                         <TableCell className="text-sm font-mono">{l.recipient_phone}</TableCell>
