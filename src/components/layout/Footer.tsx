@@ -234,7 +234,7 @@ const Footer = () => {
     settings?.footer_copyright ||
       copyrightBlock?.text ||
       `© 2019-{year} {company}. All rights reserved.`
-  );
+  ).replace(/\.\./g, ".");
   const trademarkText = renderPlaceholders(
     settings?.footer_trademark ||
       "All third-party ® / ™ marks belong to their respective owners."
@@ -571,33 +571,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Offices — dynamic */}
-        {offices.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-border/60 dark:border-white/[0.06]">
-            <SectionTitle>{locationsBlock?.title || "Our Offices"}</SectionTitle>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              {offices.map((loc) => (
-                <li
-                  key={loc.name}
-                  className="group flex gap-3 rounded-xl border border-border bg-background/60 dark:border-white/[0.08] dark:bg-white/[0.03] p-4 hover:border-primary/40 hover:bg-background dark:hover:bg-white/[0.06] transition-all"
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary shrink-0 ring-1 ring-primary/20">
-                    <MapPin className="w-4 h-4" />
-                  </span>
-                  <div className="leading-snug min-w-0">
-                    <p className="text-sm font-semibold text-foreground dark:text-white">
-                      {loc.flag} {loc.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground dark:text-slate-400 mt-1 whitespace-pre-line">{loc.address}</p>
-                    {loc.notice && (
-                      <p className="text-[11px] text-muted-foreground/70 dark:text-slate-500 mt-1">{loc.notice}</p>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Offices section removed per request */}
       </div>
 
       {/* ============================================================ */}

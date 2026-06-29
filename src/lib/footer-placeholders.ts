@@ -37,8 +37,8 @@ export const FOOTER_PLACEHOLDERS: PlaceholderDef[] = [
   {
     token: "company",
     label: "Company name",
-    example: "Dynime LLC.",
-    resolve: () => "Dynime LLC.",
+    example: "Dynime LLC",
+    resolve: () => "Dynime LLC",
   },
   {
     token: "brand",
