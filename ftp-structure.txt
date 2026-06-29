@@ -18,6 +18,7 @@ dynime-api.zip
 nodejs-mern-ecommerce
 api-proxy-index.php
 debug-deploy.php
+read-log.php
 404.html
 saas-development
 wordpress-design-illustration.png
@@ -98,7 +99,6 @@ woocommerce
 google-ads
 check-files.php
 dws-illustration.png
-.in.read-log.php.
 assets
 og-image.jpg
 inspect-inv-2083.php
