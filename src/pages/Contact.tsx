@@ -357,53 +357,53 @@ const Contact = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {BUSINESS_CONFIG.offices.map((office) => {
               const digits = office.whatsapp.replace(/[^0-9]/g, "");
               const isHq = office.type.toLowerCase().includes("headquarters");
               
               return (
                 <ScrollReveal key={office.name}>
-                  <div className="rounded-3xl border border-border/60 bg-card/60 backdrop-blur-sm p-6 shadow-sm flex flex-col justify-between h-full hover:border-primary/40 hover:-translate-y-0.5 transition-all">
-                    <div className="space-y-4">
+                  <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-4 md:p-5 shadow-sm flex flex-col justify-between h-full hover:border-primary/40 hover:-translate-y-0.5 transition-all">
+                    <div className="space-y-3">
                       {/* Flag + Name + Type */}
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-3xl" role="img" aria-label="flag">{office.flag}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl" role="img" aria-label="flag">{office.flag}</span>
                         <div>
-                          <h3 className="font-heading text-lg font-bold text-foreground flex items-center gap-2">
+                          <h3 className="font-heading text-base font-bold text-foreground flex items-center gap-1.5">
                             {office.name.replace(/,.*$/, "")}
                             {isHq && (
-                              <span className="text-[10px] uppercase font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                              <span className="text-[9px] uppercase font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
                                 HQ
                               </span>
                             )}
                           </h3>
-                          <p className="text-xs font-medium text-muted-foreground">{office.type}</p>
+                          <p className="text-[11px] font-medium text-muted-foreground">{office.type}</p>
                         </div>
                       </div>
 
                       {/* Address Box */}
-                      <div className="rounded-xl bg-muted/30 border border-border/40 p-4 min-h-[100px] flex items-center">
-                        <div className="text-sm leading-relaxed whitespace-pre-line text-foreground/80 font-sans">
+                      <div className="rounded-lg bg-muted/30 border border-border/40 p-3 min-h-[75px] flex items-center">
+                        <div className="text-xs leading-relaxed whitespace-pre-line text-foreground/80 font-sans">
                           {office.address}
                         </div>
                       </div>
 
                       {/* Status Badges */}
-                      <div className="flex flex-wrap gap-2 pt-1">
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {/* Appointment Badge */}
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/10">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/10">
+                          <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse" />
                           {office.visit}
                         </span>
 
                         {/* Mail Receiving Badge */}
                         {office.mailReceiving.available ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/10">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/10">
                             ✓ Receives Documents & Parcels
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-red-500/10 text-red-700 dark:text-red-400 px-2.5 py-1 rounded-full border border-red-500/10">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-red-500/10 text-red-700 dark:text-red-400 px-2 py-0.5 rounded-full border border-red-500/10">
                             ✕ Mail Receiving Not Available
                           </span>
                         )}
@@ -411,26 +411,26 @@ const Contact = () => {
 
                       {/* Notice */}
                       {office.notice && (
-                        <p className="text-[11px] text-muted-foreground italic leading-normal bg-muted/40 p-2.5 rounded-lg border border-border/30">
+                        <p className="text-[10px] text-muted-foreground italic leading-normal bg-muted/40 p-2 rounded-lg border border-border/30">
                           {office.notice}
                         </p>
                       )}
                     </div>
 
                     {/* Action buttons */}
-                    <div className="grid grid-cols-2 gap-3 pt-6 border-t border-border/40 mt-6">
+                    <div className="grid grid-cols-2 gap-2 pt-4 border-t border-border/40 mt-4">
                       <a
                         href={`https://wa.me/${digits}?text=${encodeURIComponent(office.whatsappPreFill)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-600/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 text-xs font-semibold h-9 transition-all"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-600/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 text-xs font-semibold h-10 px-3 py-2 transition-all"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         Book via WhatsApp
                       </a>
                       <a
                         href="#contact-form"
-                        className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:brightness-105 text-xs font-semibold h-9 transition-all"
+                        className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:brightness-105 text-xs font-semibold h-10 px-3 py-2 transition-all"
                       >
                         Contact Us
                       </a>
