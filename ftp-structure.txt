@@ -12,12 +12,12 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
 api-proxy-index.php
 debug-deploy.php
-read-log.php
 404.html
 saas-development
 wordpress-design-illustration.png
@@ -61,6 +61,7 @@ check-routes.php
 inspect-db-rows.php
 check-settings.php
 nginx.conf.example
+list-dist-files.php
 .env.example
 facebook-ads
 replit.nix
@@ -97,6 +98,7 @@ woocommerce
 google-ads
 check-files.php
 dws-illustration.png
+.in.read-log.php.
 assets
 og-image.jpg
 inspect-inv-2083.php
