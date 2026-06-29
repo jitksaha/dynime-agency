@@ -187,7 +187,7 @@ export const VirtualCard = ({
                   <div className="text-[8px] uppercase tracking-[0.18em] text-neutral-500 font-semibold">
                     Powered by
                   </div>
-                  <div className="text-[10px] font-bold tracking-wide">DYNIME INC.</div>
+                  <div className="text-[10px] font-bold tracking-wide">Dynime LLC.</div>
                 </div>
               </div>
             </div>

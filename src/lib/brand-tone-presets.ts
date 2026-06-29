@@ -25,7 +25,7 @@ type ToneCopy = {
 export const BRAND_TONE_PRESETS: Record<BrandTone, ToneCopy> = {
   premium: {
     hero: {
-      eyebrow: "Dynime Inc. — Crafted for visionary brands",
+      eyebrow: "Dynime LLC. — Crafted for visionary brands",
       headline: "Where Ambitious Brands Become {{Iconic}} — Engineered, Designed, Delivered.",
       subheadline: "We partner with founders and enterprises to design, build, and scale category-defining digital experiences. From bespoke web platforms to global growth — every detail, considered.",
       primary_cta_label: "Begin Your Project",
@@ -69,7 +69,7 @@ export const BRAND_TONE_PRESETS: Record<BrandTone, ToneCopy> = {
   },
   bold: {
     hero: {
-      eyebrow: "Dynime Inc. — Built to Dominate",
+      eyebrow: "Dynime LLC. — Built to Dominate",
       headline: "We Build What Others {{Can't}}. Period.",
       subheadline: "Stop settling. We engineer ruthlessly fast websites, growth machines, and global business structures that put you ahead — and keep you there.",
       primary_cta_label: "Launch My Project",
@@ -157,7 +157,7 @@ export const BRAND_TONE_PRESETS: Record<BrandTone, ToneCopy> = {
   },
   results: {
     hero: {
-      eyebrow: "Dynime Inc. — Engineered for ROI",
+      eyebrow: "Dynime LLC. — Engineered for ROI",
       headline: "Turn Digital Spend Into {{3-5x Returns}}. Measurably.",
       subheadline: "We've driven $40M+ in client revenue through high-converting websites, ROI-positive ad campaigns, and data-driven growth systems. Your numbers are next.",
       primary_cta_label: "Get a Growth Audit",

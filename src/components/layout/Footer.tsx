@@ -33,6 +33,7 @@ import {
 import { renderPlaceholders } from "@/lib/footer-placeholders";
 import { sanitizeRichText } from "@/lib/sanitize-html";
 import { serviceTabs } from "./nav-data";
+import { BUSINESS_CONFIG } from "@/lib/business-config";
 
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -270,17 +271,15 @@ const Footer = () => {
   ];
 
   // Dynamic offices: prefer footer_blocks "locations" → fallback to JSON in settings → empty
-  const offices: FooterLocation[] = useMemo(() => {
-    if (locationsBlock?.items?.length) return locationsBlock.items;
-    const raw = settings?.footer_offices;
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed as FooterLocation[];
-      } catch { /* ignore */ }
-    }
-    return [];
-  }, [locationsBlock, settings?.footer_offices]);
+  // Dynamic offices: pulled from centralized BUSINESS_CONFIG (excluding New Mexico placeholder)
+  const offices = useMemo(() => {
+    import("@/lib/business-config").then(m => {
+      // Dynamic import or static import? Since this file is bundled,
+      // it's cleaner to statically import it. Let's make sure it's statically imported at top.
+    });
+    // Statically imported at the top of the file
+    return BUSINESS_CONFIG.offices.filter(o => !o.isPlaceholder);
+  }, []);
 
   // Newsletter heading (admin-configurable)
   const newsletterTitle = renderPlaceholders(settings?.newsletter_title || "Get our best ideas, monthly");
@@ -576,10 +575,10 @@ const Footer = () => {
         {offices.length > 0 && (
           <div className="mt-10 pt-6 border-t border-border/60 dark:border-white/[0.06]">
             <SectionTitle>{locationsBlock?.title || "Our Offices"}</SectionTitle>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {offices.map((loc) => (
                 <li
-                  key={loc.id}
+                  key={loc.name}
                   className="group flex gap-3 rounded-xl border border-border bg-background/60 dark:border-white/[0.08] dark:bg-white/[0.03] p-4 hover:border-primary/40 hover:bg-background dark:hover:bg-white/[0.06] transition-all"
                 >
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary shrink-0 ring-1 ring-primary/20">
@@ -587,11 +586,11 @@ const Footer = () => {
                   </span>
                   <div className="leading-snug min-w-0">
                     <p className="text-sm font-semibold text-foreground dark:text-white">
-                      {loc.flag} {loc.city}
+                      {loc.flag} {loc.name}
                     </p>
-                    <p className="text-xs text-muted-foreground dark:text-slate-400 mt-1">{loc.address}</p>
-                    {loc.note && (
-                      <p className="text-[11px] text-muted-foreground/70 dark:text-slate-500 mt-1">{loc.note}</p>
+                    <p className="text-xs text-muted-foreground dark:text-slate-400 mt-1 whitespace-pre-line">{loc.address}</p>
+                    {loc.notice && (
+                      <p className="text-[11px] text-muted-foreground/70 dark:text-slate-500 mt-1">{loc.notice}</p>
                     )}
                   </div>
                 </li>

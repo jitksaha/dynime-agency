@@ -147,7 +147,7 @@ const ClientSignatureBlock = ({
 
 export default function AgreementPreview(p: AgreementPreviewProps) {
   const issuerIsEmployee = p.issuer.type === "employee" && !!p.issuer.name;
-  const providerName = issuerIsEmployee ? p.issuer.name! : "Dynime Inc.";
+  const providerName = issuerIsEmployee ? p.issuer.name! : "Dynime LLC.";
   const providerEmail = issuerIsEmployee ? p.issuer.email || "" : "contact@dynime.com";
   const providerPhone = issuerIsEmployee ? p.issuer.phone || "" : "+1(646)8840271";
   const providerWebsite = "dynime.com";
@@ -317,7 +317,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
             Service Provider
           </p>
           <div className="relative h-28 flex items-end">
-            {!issuerIsEmployee || providerName === "Dynime Inc." ? (
+            {!issuerIsEmployee || providerName === "Dynime LLC." ? (
               <img
                 src="/dynime-seal.png"
                 alt="Dynime Seal"
@@ -355,7 +355,7 @@ export default function AgreementPreview(p: AgreementPreviewProps) {
       <footer className="px-8 py-6 border-t border-border text-center text-[11px] text-muted-foreground space-y-0.5">
         <div className="flex items-center justify-center gap-2">
           <SiteLogo variant="light" className="h-4 w-auto opacity-80" />
-          <span className="font-semibold text-foreground">Dynime Inc.</span>
+          <span className="font-semibold text-foreground">Dynime LLC.</span>
         </div>
         <p>
           Questions? Email{" "}

@@ -180,7 +180,7 @@ const products: PageSEORegistryEntry[] = [
     path: "/investor",
     group: "Product",
     defaults: {
-      title: "Invest in Dynime Inc. — Shareholder Plans & Profit Calculator",
+      title: "Invest in Dynime LLC. — Shareholder Plans & Profit Calculator",
       description:
         "Invest in a profitable, audited global digital agency. Choose a shareholder plan, see projected returns with our profit calculator, and join 25+ existing investors.",
       keywords: [
@@ -202,7 +202,7 @@ const products: PageSEORegistryEntry[] = [
     defaults: {
       title: "Investor Relations — Reports, Governance & IR Contact",
       description:
-        "Investor Relations at Dynime Inc. — audited financials, quarterly shareholder reports, governance, voting rights and direct access to our IR team.",
+        "Investor Relations at Dynime LLC. — audited financials, quarterly shareholder reports, governance, voting rights and direct access to our IR team.",
       keywords: [
         "Dynime investor relations",
         "shareholder reports",
@@ -225,7 +225,7 @@ const legal: PageSEORegistryEntry[] = [
     defaults: {
       title: "Privacy Policy — How Dynime Protects Your Data",
       description:
-        "Read how Dynime Inc. collects, uses and protects personal data under GDPR, CCPA and global privacy laws. Cookies, retention, rights and contact for data requests.",
+        "Read how Dynime LLC. collects, uses and protects personal data under GDPR, CCPA and global privacy laws. Cookies, retention, rights and contact for data requests.",
       keywords: ["privacy policy", "GDPR compliance", "CCPA", "data protection", "Dynime privacy"],
     },
   },
@@ -235,9 +235,9 @@ const legal: PageSEORegistryEntry[] = [
     path: "/terms",
     group: "Legal",
     defaults: {
-      title: "Terms of Service — Dynime Inc. Customer Agreement",
+      title: "Terms of Service — Dynime LLC. Customer Agreement",
       description:
-        "The legal agreement between Dynime Inc. and customers using our digital services, software, FlexPay and investment products. Read scope, payments, liability and dispute terms.",
+        "The legal agreement between Dynime LLC. and customers using our digital services, software, FlexPay and investment products. Read scope, payments, liability and dispute terms.",
       keywords: ["terms of service", "customer agreement", "service terms", "Dynime terms"],
     },
   },
@@ -271,7 +271,7 @@ const legal: PageSEORegistryEntry[] = [
     path: "/aml",
     group: "Legal",
     defaults: {
-      title: "AML & KYC Compliance Policy — Dynime Inc.",
+      title: "AML & KYC Compliance Policy — Dynime LLC.",
       description:
         "Dynime's Anti-Money Laundering, KYC, sanctions-screening and counter-terrorism financing program. Country eligibility, ID checks and reporting obligations.",
       keywords: ["AML policy", "KYC compliance", "sanctions screening", "anti money laundering", "OFAC"],
@@ -323,9 +323,9 @@ const extras: PageSEORegistryEntry[] = [
     path: "/invest/apply",
     group: "Product",
     defaults: {
-      title: "Apply to Invest in Dynime Inc. — Shareholder Onboarding",
+      title: "Apply to Invest in Dynime LLC. — Shareholder Onboarding",
       description:
-        "Apply to become a Dynime Inc. shareholder. Choose a plan, submit KYC and complete onboarding in under 10 minutes. Audited financials and signed agreements.",
+        "Apply to become a Dynime LLC. shareholder. Choose a plan, submit KYC and complete onboarding in under 10 minutes. Audited financials and signed agreements.",
       keywords: [
         "apply to invest in startup",
         "become a shareholder",

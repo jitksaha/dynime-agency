@@ -12152,7 +12152,7 @@
         {
             "id": "6c3ec437-6069-452a-90b5-1a735ac3f4d0",
             "key": "site_name",
-            "value": "\"\\\"Dynime Inc.\\\"\"",
+            "value": "\"\\\"Dynime LLC.\\\"\"",
             "created_at": "2026-04-24 13:32:18.95099+00",
             "updated_at": "2026-05-31 12:13:56.171983+00"
         },
@@ -12243,7 +12243,7 @@
         {
             "id": "72f358de-d976-40e0-bce0-e50bd35f3ccd",
             "key": "registered_entities",
-            "value": "[{\"name\": \"Dynime Inc.\", \"label\": \"Main\", \"country\": \"United States\", \"license_number\": \"DYN-INC-00000000\"}, {\"name\": \"Dynime UK Ltd.\", \"label\": \"UK\", \"country\": \"United Kingdom\", \"license_number\": \"UK-00000000\"}, {\"name\": \"Dynime BD Ltd.\", \"label\": \"BD\", \"country\": \"Bangladesh\", \"license_number\": \"BD-00000000\"}]",
+            "value": "[{\"name\": \"Dynime LLC.\", \"label\": \"Main\", \"country\": \"United States\", \"license_number\": \"DYN-INC-00000000\"}, {\"name\": \"Dynime UK Ltd.\", \"label\": \"UK\", \"country\": \"United Kingdom\", \"license_number\": \"UK-00000000\"}, {\"name\": \"Dynime BD Ltd.\", \"label\": \"BD\", \"country\": \"Bangladesh\", \"license_number\": \"BD-00000000\"}]",
             "created_at": "2026-05-27 09:14:39.376291+00",
             "updated_at": "2026-05-31 12:13:56.171983+00"
         },

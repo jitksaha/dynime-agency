@@ -460,7 +460,7 @@ const EmployeeIdEditor = ({
     while (typeof brand === "string") {
       try { brand = JSON.parse(brand); } catch { break; }
     }
-    const companyName = brand.companyName || "Dynime Inc.";
+    const companyName = brand.companyName || "Dynime LLC.";
     const digits = Math.max(4, Math.min(8, Math.floor(Number(brand.idDigits) || 6)));
     const cleaned = companyName.replace(/[^A-Za-z0-9 ]/g, " ").trim();
     const words = cleaned.split(/\s+/).filter(Boolean);
@@ -508,7 +508,7 @@ const EmployeeIdEditor = ({
             e: member.email || undefined,
             c: member.country || undefined,
             i: new Date().toISOString().slice(0, 10),
-            o: "Dynime Inc.",
+            o: "Dynime LLC.",
             p: member.photoUrl || undefined,
             id: candidate,
           } as any,
@@ -642,7 +642,7 @@ const RebuildIdsButton = ({ items, onDone }: { items: TeamMember[]; onDone: () =
       while (typeof brand === "string") {
         try { brand = JSON.parse(brand); } catch { break; }
       }
-      const companyName = brand.companyName || "Dynime Inc.";
+      const companyName = brand.companyName || "Dynime LLC.";
       const digits = Math.max(4, Math.min(8, Math.floor(Number(brand.idDigits) || 6)));
       const cleaned = companyName.replace(/[^A-Za-z0-9 ]/g, " ").trim();
       const words = cleaned.split(/\s+/).filter(Boolean);

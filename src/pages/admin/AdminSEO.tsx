@@ -206,7 +206,7 @@ const AdminSEO = () => {
     return JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: settings?.org_name || "Dynime Inc.",
+      name: settings?.org_name || "Dynime LLC.",
       url: window.location.origin,
       logo: settings?.org_logo || "",
       description: settings?.ai_description || settings?.seo_default_description || "",
@@ -227,7 +227,7 @@ const AdminSEO = () => {
 
   // Generate llms.txt
   const generateLlmsTxt = () => {
-    const orgName = settings?.org_name || "Dynime Inc.";
+    const orgName = settings?.org_name || "Dynime LLC.";
     const desc = settings?.ai_description || "A digital agency specializing in web development, digital marketing, and business consulting.";
     const topics = settings?.ai_topics || "web development, digital marketing, SEO, e-commerce";
     const audience = settings?.ai_audience || "small businesses, startups, enterprises";
@@ -420,7 +420,7 @@ const AdminSEO = () => {
                 <Input
                   defaultValue={settings?.seo_title_suffix || ""}
                   onBlur={(e) => saveSetting.mutate({ key: "seo_title_suffix", value: e.target.value })}
-                  placeholder="| Dynime Inc."
+                  placeholder="| Dynime LLC."
                 />
                 <p className="text-xs text-muted-foreground mt-1">Appended to all page titles</p>
               </div>
@@ -522,7 +522,7 @@ const AdminSEO = () => {
                   <Input
                     defaultValue={settings?.org_name || ""}
                     onBlur={(e) => saveSetting.mutate({ key: "org_name", value: e.target.value })}
-                    placeholder="Dynime Inc."
+                    placeholder="Dynime LLC."
                   />
                 </div>
                 <div>

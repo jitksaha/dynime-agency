@@ -114,10 +114,10 @@ const CareerDetail = () => {
 
   // Build a clean text description from description or stripped HTML (max ~160 chars)
   const buildDescription = (j?: JobPost | null): string => {
-    if (!j) return "Open position at Dynime Inc. Apply now and join our remote-first global team.";
+    if (!j) return "Open position at Dynime LLC. Apply now and join our remote-first global team.";
     const raw = (j.description && j.description.trim())
       || (j.content_html ? j.content_html.replace(/<[^>]+>/g, " ") : "")
-      || `${j.title} — ${j.employment_type} role in ${j.department}, ${j.location}. Apply now at Dynime Inc.`;
+      || `${j.title} — ${j.employment_type} role in ${j.department}, ${j.location}. Apply now at Dynime LLC.`;
     const clean = raw.replace(/\s+/g, " ").trim();
     return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
   };
@@ -147,7 +147,7 @@ const CareerDetail = () => {
           employmentType: job.employment_type?.toUpperCase().replace(/[\s-]+/g, "_"),
           hiringOrganization: {
             "@type": "Organization",
-            name: "Dynime Inc.",
+            name: "Dynime LLC.",
             sameAs: typeof window !== "undefined" ? `${window.location.protocol}//${window.location.host}` : undefined,
           },
           jobLocation: {

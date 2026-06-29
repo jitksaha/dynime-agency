@@ -105,7 +105,7 @@ const UKFormationUpgrade = () => {
       "@context": "https://schema.org",
       "@type": "Service",
       name: "UK Company Formation",
-      provider: { "@type": "Organization", name: "Dynime Inc.", url: "https://dynime.com" },
+      provider: { "@type": "Organization", name: "Dynime LLC.", url: "https://dynime.com" },
       areaServed: "Worldwide",
       serviceType: "UK Limited Company Registration",
       description:

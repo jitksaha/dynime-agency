@@ -279,7 +279,7 @@ export const DEFAULT_HOME_SECTIONS: HomeSections = {
     headline: "Excellence Is Not a Standard. It's the Starting Point.",
     name: "Jit Kumar Saha",
     role: "Founder & CEO",
-    company: "Dynime Inc.",
+    company: "Dynime LLC.",
     bio: "Every brand has a story worth telling beautifully. At Dynime, we blend strategic clarity with creative craft to build digital experiences that don't just perform — they resonate. Let's create something timeless together.",
     badge: "CEO",
     cta_label: "Discover Our Story",

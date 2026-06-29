@@ -148,7 +148,7 @@ const AdminInvestmentPlans = () => {
               <Layers className="h-5 w-5 text-primary" /> Investment Plans
             </h1>
             <p className="text-sm text-muted-foreground">
-              Manage Dynime Inc. investment tiers shown on /invest.
+              Manage Dynime LLC. investment tiers shown on /invest.
             </p>
           </div>
           <Button onClick={startNew}><Plus className="h-4 w-4 mr-1" /> New plan</Button>
@@ -384,7 +384,7 @@ const InvestmentTargetsCard = () => {
         <div>
           <CardTitle className="text-base">Investment targets</CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Where investors can allocate capital (Dynime Inc., Dynime OS, upcoming products). Multipliers tweak each plan&apos;s profit % per target.
+            Where investors can allocate capital (Dynime LLC., Dynime OS, upcoming products). Multipliers tweak each plan&apos;s profit % per target.
           </p>
         </div>
         <Button size="sm" variant="outline" onClick={add}><Plus className="h-4 w-4 mr-1" /> Add target</Button>

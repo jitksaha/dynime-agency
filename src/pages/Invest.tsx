@@ -585,12 +585,12 @@ const Invest = () => {
 
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = "Invest in Dynime Inc. — Shareholder Portal";
+    document.title = "Invest in Dynime LLC. — Shareholder Portal";
     const meta = document.querySelector('meta[name="description"]');
     const prevDesc = meta?.getAttribute("content") ?? "";
     meta?.setAttribute(
       "content",
-      "Become a Dynime Inc. shareholder. Transparent revenue-sharing plans, monthly or quarterly payouts, lock-in protection, and full reporting.",
+      "Become a Dynime LLC. shareholder. Transparent revenue-sharing plans, monthly or quarterly payouts, lock-in protection, and full reporting.",
     );
     const ld = document.createElement("script");
     ld.type = "application/ld+json";
@@ -598,8 +598,8 @@ const Invest = () => {
       "@context": "https://schema.org",
       "@type": "FinancialProduct",
       name: "Dynime Investment & Shareholder Portal",
-      provider: { "@type": "Organization", name: "Dynime Inc." },
-      description: "Revenue-sharing investment plans for Dynime Inc. shareholders.",
+      provider: { "@type": "Organization", name: "Dynime LLC." },
+      description: "Revenue-sharing investment plans for Dynime LLC. shareholders.",
     });
     document.head.appendChild(ld);
     return () => {
@@ -622,7 +622,7 @@ const Invest = () => {
               {hero?.eyebrow ?? "Dynime Investment Portal"}
             </Badge>
             <h1 className="font-heading text-4xl md:text-6xl font-bold leading-tight">
-              {hero?.title ?? "Invest in Dynime Inc. Share the upside."}
+              {hero?.title ?? "Invest in Dynime LLC. Share the upside."}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {hero?.subtitle ??

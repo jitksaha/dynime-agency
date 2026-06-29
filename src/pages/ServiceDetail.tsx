@@ -143,7 +143,7 @@ const ServiceDetailPage = () => {
     description:
       service?.metaDescription ||
       service?.description ||
-      "Premium digital service by Dynime Inc. — explore features, process, and pricing.",
+      "Premium digital service by Dynime LLC. — explore features, process, and pricing.",
     keywords: service
       ? [
           service.title,
@@ -151,7 +151,7 @@ const ServiceDetailPage = () => {
           `${service.title} agency`,
           `${service.title} services`,
           `hire ${service.title}`,
-          "Dynime Inc.",
+          "Dynime LLC.",
           "digital agency",
         ]
       : undefined,
@@ -167,7 +167,7 @@ const ServiceDetailPage = () => {
             url: `https://dynime.com/${service.slug}`,
             provider: {
               "@type": "Organization",
-              name: "Dynime Inc.",
+              name: "Dynime LLC.",
               url: "https://dynime.com",
               logo: "https://dynime.com/favicon.png",
             },

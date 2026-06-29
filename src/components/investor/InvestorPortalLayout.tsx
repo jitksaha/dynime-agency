@@ -43,7 +43,7 @@ const InvestorPortalLayout = ({ title, description, children, actions }: Props) 
         <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="text-xs uppercase tracking-wider text-primary font-semibold mb-1">
-              Dynime Inc. · Investor Portal
+              Dynime LLC. · Investor Portal
             </div>
             <h1 className="font-heading text-3xl md:text-4xl font-bold">{title}</h1>
             {description && <p className="text-muted-foreground mt-2 max-w-2xl">{description}</p>}

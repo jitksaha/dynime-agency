@@ -337,7 +337,7 @@ const AdminPageSEO = () => {
               </h3>
               <div className="p-4 bg-white dark:bg-secondary/30 rounded-lg max-w-xl">
                 <p className="text-sm text-blue-600 dark:text-blue-400">
-                  {draft.title || activeEntry.defaults.title} | Dynime Inc.
+                  {draft.title || activeEntry.defaults.title} | Dynime LLC.
                 </p>
                 <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
                   {window.location.origin}

@@ -1,12 +1,12 @@
 /**
- * Centralized SEO copy for Dynime Inc. — rewritten for real commercial
+ * Centralized SEO copy for Dynime LLC. — rewritten for real commercial
  * search intent (Path A SEO pass).
  *
  * Each entry is tuned to terms users actually search for when hiring
  * an agency or buying business software — not navigational labels.
  *
  * Guidelines:
- *  - title: < 60 chars (brand name " | Dynime Inc." is appended by useSEO)
+ *  - title: < 60 chars (brand name " | Dynime LLC." is appended by useSEO)
  *  - description: < 160 chars, unique per page, benefit-led, primary KW early
  *  - keywords: ordered primary → secondary → long-tail; commercial > navigational
  */
@@ -34,7 +34,7 @@ export const SEO_DEFAULTS = {
       "ecommerce development services",
       "LLC formation services",
       "hire web developers",
-      "Dynime Inc.",
+      "Dynime LLC.",
     ],
   },
   about: {
@@ -117,7 +117,7 @@ export const SEO_DEFAULTS = {
   careers: {
     title: "Careers — Remote Engineering & Design Jobs",
     description:
-      "Remote-first careers at Dynime Inc. Open roles for senior engineers, designers, marketers and strategists who care about craft and the work they ship.",
+      "Remote-first careers at Dynime LLC. Open roles for senior engineers, designers, marketers and strategists who care about craft and the work they ship.",
     keywords: [
       "remote tech jobs",
       "remote developer jobs",

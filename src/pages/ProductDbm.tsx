@@ -98,7 +98,7 @@ const ProductDbm = () => {
   usePageSEO("product-dbm", {
     title: "Dynime OS — The AI-Powered Business Operating System",
     description:
-      "Dynime OS unifies CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support into one intelligent platform — built by Dynime Inc. for growing companies.",
+      "Dynime OS unifies CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support into one intelligent platform — built by Dynime LLC. for growing companies.",
     keywords: [
       "Dynime OS",
       "AI business operating system",
@@ -106,7 +106,7 @@ const ProductDbm = () => {
       "Dynime HRM",
       "Dynime Finance",
       "Dynime AI",
-      "Dynime Inc product",
+      "Dynime LLC product",
     ],
     jsonLd: {
       "@context": "https://schema.org",
@@ -129,7 +129,7 @@ const ProductDbm = () => {
           <div className="max-w-3xl mx-auto text-center">
             <ScrollReveal>
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                <Sparkles className="w-3.5 h-3.5" /> Product · Dynime Inc.
+                <Sparkles className="w-3.5 h-3.5" /> Product · Dynime LLC.
               </span>
             </ScrollReveal>
             <ScrollReveal delay={0.1}>

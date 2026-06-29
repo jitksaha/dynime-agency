@@ -27,7 +27,7 @@ type RegisteredEntity = {
 };
 
 const DEFAULT_ENTITIES: RegisteredEntity[] = [
-  { label: "Main", name: "Dynime Inc.", country: "United States", license_number: "DYN-INC-00000000" },
+  { label: "Main", name: "Dynime LLC.", country: "United States", license_number: "DYN-INC-00000000" },
   { label: "UK", name: "Dynime UK Ltd.", country: "United Kingdom", license_number: "UK-00000000" },
   { label: "BD", name: "Dynime BD Ltd.", country: "Bangladesh", license_number: "BD-00000000" },
 ];
@@ -373,7 +373,7 @@ const AdminSettings = () => {
               <input
                 value={e.name}
                 onChange={(ev) => updateEntity(idx, { name: ev.target.value })}
-                placeholder="Legal name (e.g. Dynime Inc.)"
+                placeholder="Legal name (e.g. Dynime LLC.)"
                 className="w-full px-3 py-2 mb-2 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <div className="flex items-center gap-2">

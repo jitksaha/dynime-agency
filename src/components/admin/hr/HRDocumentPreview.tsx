@@ -160,7 +160,7 @@ const HRDocumentPreview = ({
   bodyText,
   clauses = [],
   signatoryName = "Authorised Signatory",
-  signatoryTitle = "Director, Dynime Inc.",
+  signatoryTitle = "Director, Dynime LLC.",
   validityDate,
   signatureTypedName,
   signatureImageUrl,
@@ -172,7 +172,7 @@ const HRDocumentPreview = ({
   reason,
 }: HRDocPreviewProps) => {
   const { data: settings } = useSiteSettings();
-  const companyName = settings?.company_name || "Dynime Inc.";
+  const companyName = settings?.company_name || "Dynime LLC.";
   const companyAddress = settings?.company_address || "";
   const rawEmail = settings?.contact_email || "support@dynime.com";
   const companyEmail = /hello@dynime\.com/i.test(rawEmail) ? "support@dynime.com" : rawEmail;

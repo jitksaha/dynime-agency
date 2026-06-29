@@ -1,4 +1,4 @@
-// Profit / loss calculation helpers for the Dynime Inc.
+// Profit / loss calculation helpers for the Dynime LLC.
 // investment plans (sourced from the official investor brief).
 
 export interface PlanLike {

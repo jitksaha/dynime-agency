@@ -54,7 +54,7 @@ const Blog = () => {
       inLanguage: "en",
       publisher: {
         "@type": "Organization",
-        name: "Dynime Inc.",
+        name: "Dynime LLC.",
         url: "https://dynime.com",
         logo: { "@type": "ImageObject", url: "https://dynime.com/favicon.png" },
       },

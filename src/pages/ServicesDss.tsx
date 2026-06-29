@@ -67,7 +67,7 @@ const ServicesDss = () => {
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Service",
-      provider: { "@type": "Organization", name: "Dynime Inc." },
+      provider: { "@type": "Organization", name: "Dynime LLC." },
       areaServed: "Worldwide",
       serviceType: "Software Development & AI Services",
       name: "Dynime Software Services (DSS)",

@@ -34,12 +34,12 @@ echo <<<HTML
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dynime Inc.</title>
+  <title>Dynime LLC.</title>
   <meta http-equiv="refresh" content="0; url=https://dynime.com/" />
   <link rel="canonical" href="https://dynime.com/" />
 </head>
 <body>
-  <p>Loading <a href="https://dynime.com/">Dynime Inc.</a>…</p>
+  <p>Loading <a href="https://dynime.com/">Dynime LLC.</a>…</p>
 </body>
 </html>
 HTML;

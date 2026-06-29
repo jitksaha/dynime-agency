@@ -42,7 +42,7 @@ type LegalDoc = {
 };
 
 const COMPANY = {
-  name: "Dynime Inc.",
+  name: "Dynime LLC.",
   brand: "Dynime",
   email: "contact@dynime.com",
   supportEmail: "support@dynime.com",

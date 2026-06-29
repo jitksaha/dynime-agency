@@ -11,7 +11,7 @@ import { useHomeSections } from "@/hooks/use-home-sections";
 import { teamSectionSubjectKeys } from "@/hooks/use-team-card-ids";
 import { db } from "@/integrations/db/client";
 
-const FALLBACK_SITE_NAME = "Dynime Inc.";
+const FALLBACK_SITE_NAME = "Dynime LLC.";
 
 type Payload = {
   v: number;

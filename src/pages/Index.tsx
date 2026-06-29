@@ -38,9 +38,9 @@ const Index = () => {
         "@type": "WebPage",
         "@id": `${SITE_URL}/#webpage`,
         url: SITE_URL,
-        name: "Dynime Inc. — Web Development, Digital Marketing & Business Solutions",
+        name: "Dynime LLC. — Web Development, Digital Marketing & Business Solutions",
         description:
-          "Dynime Inc. helps companies grow online with web development, digital marketing, e-commerce & business registration services.",
+          "Dynime LLC. helps companies grow online with web development, digital marketing, e-commerce & business registration services.",
         inLanguage: "en",
         isPartOf: { "@id": `${SITE_URL}/#website` },
         about: { "@id": `${SITE_URL}/#organization` },
@@ -53,14 +53,14 @@ const Index = () => {
         "@context": "https://schema.org",
         "@type": "Organization",
         "@id": `${SITE_URL}/#organization`,
-        name: "Dynime Inc.",
+        name: "Dynime LLC.",
         url: SITE_URL,
         logo: {
           "@type": "ImageObject",
           url: `${SITE_URL}/favicon.png`,
         },
         description:
-          "Founded in 2020, Dynime Inc. delivers web development, digital marketing, e-commerce solutions and business registration services to clients across 25+ countries.",
+          "Founded in 2020, Dynime LLC. delivers web development, digital marketing, e-commerce solutions and business registration services to clients across 25+ countries.",
         foundingDate: "2020",
         numberOfEmployees: "25+",
         areaServed: "Worldwide",
@@ -82,7 +82,7 @@ const Index = () => {
       {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
-        name: "Dynime Inc.",
+        name: "Dynime LLC.",
         description:
           "Web development, digital marketing, e-commerce solutions and business registration services for companies worldwide.",
         areaServed: "Worldwide",

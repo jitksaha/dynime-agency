@@ -189,7 +189,7 @@ const VerifyOrderMockFlow = () => {
       {/* Footer */}
       <footer className="border-t border-slate-800/85 bg-slate-950/30 py-4 text-center">
         <span className="text-xs text-slate-500">
-          &copy; {new Date().getFullYear()} Dynime Inc. All rights reserved.
+          &copy; {new Date().getFullYear()} Dynime LLC. All rights reserved.
         </span>
       </footer>
     </div>

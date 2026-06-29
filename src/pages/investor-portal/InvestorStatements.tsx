@@ -59,7 +59,7 @@ const InvestorStatements = () => {
   return (
     <InvestorPortalLayout
       title="Statements & payouts"
-      description="Every monthly return, biannual bonus and profit-share distribution from Dynime Inc."
+      description="Every monthly return, biannual bonus and profit-share distribution from Dynime LLC."
     >
       {isLoading ? (
         <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>

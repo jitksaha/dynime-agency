@@ -631,7 +631,7 @@ Return:
     return {
       url,
       valid: true,
-      ogTitle: 'Dynime Inc. — Global Web & AI Agency',
+      ogTitle: 'Dynime LLC. — Global Web & AI Agency',
       ogDescription: 'Web, SEO, AI and formation agency. 500+ projects built.',
       ogImage: 'https://dynime.com/og-image.jpg',
       ogImageSecured: true,

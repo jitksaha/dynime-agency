@@ -683,7 +683,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
 
   // Live preview computed values
   const previewIssuerIsEmployee = issuerMode === "employee" && !!selectedEmployee;
-  const previewIssuerName = previewIssuerIsEmployee ? (selectedEmployee?.name ?? "") : "Dynime Inc.";
+  const previewIssuerName = previewIssuerIsEmployee ? (selectedEmployee?.name ?? "") : "Dynime LLC.";
   const previewIssuerEmail = previewIssuerIsEmployee ? (selectedEmployee?.email ?? "") : "support@dynime.com";
   const previewIssuerRole = previewIssuerIsEmployee ? "" : "Web · Marketing · Software · Consultancy";
   const previewDueDate = dueDate ? new Date(dueDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "—";
@@ -1159,7 +1159,7 @@ export default function AdminOrderNew({ mode = "new" }: Props) {
               {selectedEmployee && (
                 <div className="text-xs text-muted-foreground bg-background border border-border rounded p-2 space-y-0.5">
                   <p>
-                    Invoice will show <span className="font-semibold text-foreground">{selectedEmployee.name}</span> in the "From" section instead of Dynime Inc.
+                    Invoice will show <span className="font-semibold text-foreground">{selectedEmployee.name}</span> in the "From" section instead of Dynime LLC.
                   </p>
                   {selectedEmployee.email && <p>Contact: {selectedEmployee.email}</p>}
                 </div>

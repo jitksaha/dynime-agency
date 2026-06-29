@@ -33,7 +33,7 @@ const AdminLogin = () => {
             <Lock className="w-6 h-6 text-primary" />
           </div>
           <h1 className="font-heading text-2xl font-bold text-foreground">Admin Login</h1>
-          <p className="text-sm text-muted-foreground mt-1">Dynime Inc.</p>
+          <p className="text-sm text-muted-foreground mt-1">Dynime LLC.</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

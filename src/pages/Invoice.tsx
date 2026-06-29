@@ -19,6 +19,7 @@ import PayInvoicePanel from "@/components/invoice/PayInvoicePanel";
 import InvoiceCurrencyConverter from "@/components/invoice/InvoiceCurrencyConverter";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { BUSINESS_CONFIG } from "@/lib/business-config";
 
 interface InvoiceData {
   id: string;
@@ -258,7 +259,7 @@ const Invoice = () => {
   const issuerRaw = (brief as Record<string, unknown>).issuer;
   const issuer = issuerRaw && typeof issuerRaw === "object" ? (issuerRaw as Record<string, unknown>) : null;
   const issuerIsEmployee = issuer?.type === "employee" && toText(issuer.name).length > 0;
-  const issuerName = issuerIsEmployee ? toText(issuer!.name) : "Dynime Inc.";
+  const issuerName = issuerIsEmployee ? toText(issuer!.name) : "Dynime LLC.";
   const issuerRole = issuerIsEmployee ? "" : "Web · Marketing · Software · Consultancy";
   const issuerEmail = issuerIsEmployee ? toText(issuer!.email) : "support@dynime.com";
   const issuerPhone = issuerIsEmployee ? toText(issuer!.phone) : "";
@@ -393,16 +394,16 @@ const Invoice = () => {
                 {issuerIsEmployee ? <UserRound className="w-3 h-3" /> : <Building2 className="w-3 h-3" />} From
               </p>
               <p className="font-semibold">{issuerName}</p>
-              {issuerRole && (
-                <p className="text-sm text-muted-foreground">{issuerRole}</p>
-              )}
-              {issuerEmail && (
-                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
-                  <Mail className="w-3 h-3" /> {issuerEmail}
-                </p>
-              )}
               {issuerIsEmployee ? (
                 <>
+                  {issuerRole && (
+                    <p className="text-sm text-muted-foreground">{issuerRole}</p>
+                  )}
+                  {issuerEmail && (
+                    <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                      <Mail className="w-3 h-3" /> {issuerEmail}
+                    </p>
+                  )}
                   {issuerPhone && (
                     <p className="text-sm text-muted-foreground flex items-center gap-1.5">
                       <Phone className="w-3 h-3" /> {issuerPhone}
@@ -415,9 +416,18 @@ const Invoice = () => {
                   )}
                 </>
               ) : (
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Globe className="w-3 h-3" /> dynime.com
-                </p>
+                <>
+                  <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5 font-sans">
+                    <Mail className="w-3 h-3 shrink-0" /> {BUSINESS_CONFIG.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5 font-sans">
+                    <Phone className="w-3 h-3 shrink-0" /> {BUSINESS_CONFIG.phone}
+                  </p>
+                  <p className="text-sm text-muted-foreground flex items-start gap-1.5 font-sans whitespace-pre-line mt-1">
+                    <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
+                    {BUSINESS_CONFIG.offices[0].address}
+                  </p>
+                </>
               )}
             </div>
             <div>
@@ -630,7 +640,7 @@ const Invoice = () => {
           <div className="px-8 md:px-10 py-6 border-t border-border text-center text-xs text-muted-foreground space-y-1 relative">
             <div className="flex items-center justify-center gap-2">
               <SiteLogo variant="light" className="h-5 w-auto opacity-80" />
-              <span className="font-semibold text-foreground">Dynime Inc.</span>
+              <span className="font-semibold text-foreground">Dynime LLC.</span>
             </div>
             <p>Thank you for choosing <span className="font-semibold text-foreground">Dynime</span>.</p>
             <p>Questions? Email <a className="text-primary hover:underline" href="mailto:support@dynime.com">support@dynime.com</a> · Reference #{data.invoice_number || data.id.slice(0, 8).toUpperCase()}</p>

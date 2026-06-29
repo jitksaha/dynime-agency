@@ -27,7 +27,7 @@ export type IdCardBrand = {
 };
 
 export const DEFAULT_ID_CARD_BRAND: IdCardBrand = {
-  companyName: "Dynime Inc.",
+  companyName: "Dynime LLC.",
   siteUrl: "https://dynime.com",
   logoUrl: "",
   primaryColor: "#635bff",

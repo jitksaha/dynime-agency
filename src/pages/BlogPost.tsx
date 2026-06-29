@@ -89,7 +89,7 @@ const BlogPostPage = () => {
           image: post.cover_image_url,
           datePublished: post.published_at,
           author: { "@type": "Person", name: post.author },
-          publisher: { "@type": "Organization", name: "Dynime Inc." },
+          publisher: { "@type": "Organization", name: "Dynime LLC." },
           mainEntityOfPage: typeof window !== "undefined" ? window.location.href : undefined,
         }
       : undefined,

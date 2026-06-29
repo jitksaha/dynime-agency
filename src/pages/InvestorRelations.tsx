@@ -24,7 +24,7 @@ const governance = [
   { icon: Shield, title: "Audited financials", body: "Independent annual audits and quarterly internal reviews shared with all shareholders." },
   { icon: Users, title: "Shareholder voting", body: "Premium-tier shareholders vote on strategic decisions, dividend policy, and major investments." },
   { icon: FileText, title: "Transparent reporting", body: "Detailed P&L, cash flow, and portfolio updates published every quarter." },
-  { icon: Building2, title: "Legal structure", body: "Dynime Inc. — registered in the United Kingdom with full corporate compliance." },
+  { icon: Building2, title: "Legal structure", body: "Dynime LLC. — registered in the United Kingdom with full corporate compliance." },
 ];
 
 const InvestorRelations = () => {

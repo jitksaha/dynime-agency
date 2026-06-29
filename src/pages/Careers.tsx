@@ -133,7 +133,7 @@ const Careers = () => {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         url: "https://dynime.com/careers",
-        name: "Careers at Dynime Inc.",
+        name: "Careers at Dynime LLC.",
         description: SEO_DEFAULTS.careers.description,
         about: { "@id": "https://dynime.com/#organization" },
       },
@@ -146,7 +146,7 @@ const Careers = () => {
         employmentType: j.employment_type || "FULL_TIME",
         hiringOrganization: {
           "@type": "Organization",
-          name: "Dynime Inc.",
+          name: "Dynime LLC.",
           sameAs: "https://dynime.com",
         },
         jobLocationType: "TELECOMMUTE",

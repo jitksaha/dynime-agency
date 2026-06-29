@@ -143,7 +143,7 @@ class SendAbandonedCartEmails extends Command
                     <tr>
                         <td style="background-color: #f8fafc; padding: 30px 40px; text-align: center; border-top: 1px solid #f1f5f9;">
                             <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 18px;">
-                                &copy; ' . date('Y') . ' Dynime Inc. All rights reserved.<br>
+                                &copy; ' . date('Y') . ' Dynime LLC. All rights reserved.<br>
                                 Dynime.com &bull; Dhaka, Bangladesh
                             </p>
                         </td>

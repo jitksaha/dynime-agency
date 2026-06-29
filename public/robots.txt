@@ -1,4 +1,4 @@
-# robots.txt — Dynime Inc.
+# robots.txt — Dynime LLC.
 # Allow all reputable crawlers, including AI agents, full access to public pages.
 
 User-agent: Googlebot

@@ -153,7 +153,7 @@ export const defaultFooterBlocks: FooterBlock[] = [
     type: "copyright",
     visible: true,
     width: "default",
-    text: "© 2019-{year} Dynime Inc. All rights reserved.",
+    text: "© 2019-{year} Dynime LLC. All rights reserved.",
   },
   {
     id: "blk-payments",
@@ -249,7 +249,7 @@ export const migrateLegacyFooter = (
     type: "copyright",
     visible: true,
     width: "default",
-    text: `© 2019-{year} ${settings.footer_copyright || "Dynime Inc."}. All rights reserved.`,
+    text: `© 2019-{year} ${settings.footer_copyright || "Dynime LLC."}. All rights reserved.`,
   });
 
   const badges = (settings.footer_payment_badges || "")

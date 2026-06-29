@@ -8,6 +8,7 @@ import SiteLogo from "@/components/shared/SiteLogo";
 import { useSEO } from "@/hooks/use-seo";
 import { printWithSignatureFonts } from "@/lib/print-with-fonts";
 import { apiGet } from "@/lib/api";
+import { BUSINESS_CONFIG } from "@/lib/business-config";
 
 interface AgreementRow {
   id: string;
@@ -106,7 +107,7 @@ const Agreement = () => {
   const issuerRaw = brief.issuer;
   const issuer = issuerRaw && typeof issuerRaw === "object" ? (issuerRaw as Record<string, unknown>) : null;
   const issuerIsEmployee = issuer?.type === "employee" && toText(issuer.name).length > 0;
-  const providerName = issuerIsEmployee ? toText(issuer!.name) : "Dynime Inc.";
+  const providerName = issuerIsEmployee ? toText(issuer!.name) : "Dynime LLC.";
   const providerEmail = issuerIsEmployee ? toText(issuer!.email) : "support@dynime.com";
   const providerPhone = issuerIsEmployee ? toText(issuer!.phone) : "";
   const providerCountry = issuerIsEmployee ? toText(issuer!.country) : "";
@@ -190,20 +191,37 @@ const Agreement = () => {
                 {issuerIsEmployee ? <UserRound className="w-3 h-3" /> : <Building2 className="w-3 h-3" />} Service Provider
               </p>
               <p className="font-semibold">{providerName}</p>
-              {providerEmail && (
-                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
-                  <Mail className="w-3 h-3" /> {providerEmail}
-                </p>
-              )}
-              {providerPhone && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Phone className="w-3 h-3" /> {providerPhone}
-                </p>
-              )}
-              {providerCountry && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3" /> {providerCountry}
-                </p>
+              {issuerIsEmployee ? (
+                <>
+                  {providerEmail && (
+                    <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                      <Mail className="w-3 h-3" /> {providerEmail}
+                    </p>
+                  )}
+                  {providerPhone && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <Phone className="w-3 h-3" /> {providerPhone}
+                    </p>
+                  )}
+                  {providerCountry && (
+                    <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                      <MapPin className="w-3 h-3" /> {providerCountry}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                    <Mail className="w-3 h-3" /> {BUSINESS_CONFIG.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                    <Phone className="w-3 h-3" /> {BUSINESS_CONFIG.phone}
+                  </p>
+                  <p className="text-sm text-muted-foreground flex items-start gap-1.5 whitespace-pre-line mt-1">
+                    <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
+                    {BUSINESS_CONFIG.offices[0].address}
+                  </p>
+                </>
               )}
             </div>
             <div>
@@ -308,7 +326,7 @@ const Agreement = () => {
           <footer className="px-8 md:px-10 py-6 border-t border-border text-center text-xs text-muted-foreground space-y-1">
             <div className="flex items-center justify-center gap-2">
               <SiteLogo variant="light" className="h-5 w-auto opacity-80" />
-              <span className="font-semibold text-foreground">Dynime Inc.</span>
+              <span className="font-semibold text-foreground">Dynime LLC.</span>
             </div>
             <p>
               Questions? Email{" "}

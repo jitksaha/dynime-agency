@@ -77,7 +77,7 @@ const Portfolio = () => {
       ? {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: `${activeTab} Portfolio — Dynime Inc.`,
+          name: `${activeTab} Portfolio — Dynime LLC.`,
           mainEntity: { "@type": "ItemList", itemListElement: projectsLd },
         }
       : undefined,

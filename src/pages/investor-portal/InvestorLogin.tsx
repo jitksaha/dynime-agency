@@ -66,7 +66,7 @@ const InvestorLogin = () => {
         <div className="max-w-md mx-auto">
           <div className="text-center mb-6 space-y-2">
             <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" /> Dynime Inc.
+              <ShieldCheck className="h-3.5 w-3.5" /> Dynime LLC.
             </div>
             <h1 className="font-heading text-3xl md:text-4xl font-bold">Investor Portal</h1>
             <p className="text-sm text-muted-foreground">

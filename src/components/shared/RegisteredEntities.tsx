@@ -11,7 +11,7 @@ export type RegisteredEntity = {
 };
 
 const DEFAULT_ENTITIES: RegisteredEntity[] = [
-  { label: "Main", name: "Dynime Inc.", country: "United States", license_number: "DYN-INC-00000000" },
+  { label: "Main", name: "Dynime LLC.", country: "United States", license_number: "DYN-INC-00000000" },
   { label: "UK", name: "Dynime UK Ltd.", country: "United Kingdom", license_number: "UK-00000000" },
   { label: "BD", name: "Dynime BD Ltd.", country: "Bangladesh", license_number: "BD-00000000" },
 ];
