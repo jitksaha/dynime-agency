@@ -11,10 +11,23 @@ import SocialIcons from "@/components/shared/SocialIcons";
 import { BUSINESS_CONFIG } from "@/lib/business-config";
 import { Button } from "@/components/ui/button";
 
+import { useState } from "react";
+
 const Contact = () => {
   const { data: contacts } = useContactInfo();
+  const [officeSearchTerm, setOfficeSearchTerm] = useState("");
 
-  const phones = contacts?.filter((c) => c.type === "phone") || [];
+  const rawPhones = contacts?.filter((c) => c.type === "phone") || [];
+  // Filter out UK numbers (+44 or UK in label)
+  const phones = rawPhones
+    .filter((p) => !/uk/i.test(p.label || "") && !p.value.startsWith("+44"))
+    .map((p) => {
+      if (/secondary/i.test(p.label || "")) {
+        return { ...p, label: "Bangladesh Office Number" };
+      }
+      return p;
+    });
+
   const emails = contacts?.filter((c) => c.type === "email") || [];
   const addresses = contacts?.filter((c) => c.type === "address") || [];
   const whatsapps =
@@ -241,37 +254,98 @@ const Contact = () => {
             </ScrollReveal>
 
             <div className="lg:col-span-2 space-y-5">
-              {addresses.length > 0 && (
-                <ScrollReveal delay={0.1}>
-                  <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <h3 className="font-heading font-semibold text-sm uppercase tracking-wider text-muted-foreground">
-                        Our Offices
+              {/* Dynamic Office Locator Widget */}
+              <ScrollReveal delay={0.1}>
+                <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm p-5 space-y-4">
+                  <div className="flex items-center justify-between gap-2 border-b border-border/40 pb-2">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary animate-bounce" />
+                      <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-foreground">
+                        Office Locator
                       </h3>
                     </div>
-                    <ul className="space-y-3">
-                      {addresses.map((a) => (
-                        <li key={a.id} className="flex gap-3 text-sm">
-                          <Globe2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                          <div>
-                            <p className="font-medium text-foreground">{a.label}</p>
-                            <p className="text-muted-foreground text-xs leading-relaxed">{a.value}</p>
-                            <a
-                              href={mapLinkHref(a.value)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary text-xs font-medium hover:underline inline-flex items-center gap-1 mt-1"
-                            >
-                              View on map →
-                            </a>
+                  </div>
+
+                  {/* Search Input */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search by city, country, postal code..."
+                      value={officeSearchTerm}
+                      onChange={(e) => setOfficeSearchTerm(e.target.value)}
+                      className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3.5 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans"
+                    />
+                    {officeSearchTerm && (
+                      <button
+                        onClick={() => setOfficeSearchTerm("")}
+                        className="absolute right-3 top-2.5 text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filtered Offices List */}
+                  <ul className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                    {(() => {
+                      const query = officeSearchTerm.toLowerCase().trim();
+                      const filtered = BUSINESS_CONFIG.offices.filter((o) => {
+                        if (!query) return true;
+                        return (
+                          o.name.toLowerCase().includes(query) ||
+                          o.type.toLowerCase().includes(query) ||
+                          o.address.toLowerCase().includes(query)
+                        );
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="text-center py-4 text-xs text-muted-foreground">
+                            No matching offices found
+                          </div>
+                        );
+                      }
+
+                      return filtered.map((office) => (
+                        <li key={office.name} className="group rounded-xl border border-border/40 bg-muted/20 p-2.5 hover:border-primary/40 transition-all">
+                          <div className="flex items-start gap-2">
+                            <span className="text-lg mt-0.5 shrink-0" role="img" aria-label="flag">{office.flag}</span>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-xs text-foreground flex items-center justify-between">
+                                <span>{office.name.replace(/,.*$/, "")}</span>
+                                <span className="text-[9px] uppercase font-medium text-muted-foreground bg-muted/65 px-1.5 py-0.5 rounded-md shrink-0">
+                                  {office.visit}
+                                </span>
+                              </p>
+                              <p className="text-[11px] text-muted-foreground leading-normal mt-1 whitespace-pre-line">
+                                {office.address}
+                              </p>
+                              <a
+                                href={mapLinkHref(office.address)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary text-[10px] font-bold hover:underline inline-flex items-center gap-1 mt-1.5"
+                              >
+                                View on map →
+                              </a>
+                            </div>
                           </div>
                         </li>
-                      ))}
-                    </ul>
-                  </div>
-                </ScrollReveal>
-              )}
+                      ));
+                    })()}
+                  </ul>
+
+                  {/* Reset/Showcase All Button */}
+                  {officeSearchTerm && (
+                    <button
+                      onClick={() => setOfficeSearchTerm("")}
+                      className="w-full text-center text-xs font-semibold text-primary/95 hover:text-primary hover:underline pt-2 border-t border-border/30"
+                    >
+                      Showcase All Addresses
+                    </button>
+                  )}
+                </div>
+              </ScrollReveal>
 
               {(emails.length > 1 || phones.length > 1 || others.length > 0) && (
                 <ScrollReveal delay={0.12}>

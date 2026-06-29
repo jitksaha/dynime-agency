@@ -107,7 +107,7 @@ export const BUSINESS_CONFIG = {
       name: "Bangladesh Office",
       flag: "🇧🇩",
       type: "Bangladesh Office",
-      address: "Plot – 3 & 5\nBTI Celebration Point\nRoad 113/A\nGulshan\nDhaka 1212\nBangladesh",
+      address: "Plot – 3 & 5, bti Celebration Point, Rd No 113/A, Gulshan, Dhaka-1212, Bangladesh",
       mailReceiving: {
         available: true,
         details: "Receives Documents & Parcels"
