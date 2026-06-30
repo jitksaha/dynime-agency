@@ -45,7 +45,7 @@ export const STATIC_BUSINESS_DEFAULTS = {
       name: "New York, USA (Headquarters)",
       flag: "🇺🇸",
       type: "Corporate Headquarters",
-      address: "244 5th Ave\nSuite #1964\nNew York, NY 10001\nUSA",
+      address: "244 5th Ave, Suite #1964, New York, NY 10001, USA",
       mailReceiving: {
         available: false,
         details: "Mail Receiving Not Available"
@@ -77,7 +77,7 @@ export const STATIC_BUSINESS_DEFAULTS = {
       name: "Florida, USA",
       flag: "🇺🇸",
       type: "Mail & Parcel Receiving Center",
-      address: "4283 Express Lane\nSuite BD1724\nSarasota, FL 34249\nUSA",
+      address: "4283 Express Lane, Suite BD1724, Sarasota, FL 34249, USA",
       mailReceiving: {
         available: true,
         details: "Receives Documents & Parcels"
@@ -93,7 +93,7 @@ export const STATIC_BUSINESS_DEFAULTS = {
       name: "United Kingdom Office",
       flag: "🇬🇧",
       type: "UK Office",
-      address: "Unit 9\nSkyport Drive\nSuite BD1724\nWest Drayton\nMiddlesex\nUB7 0LB\nUnited Kingdom",
+      address: "Unit 9, Skyport Drive, Suite BD1724, West Drayton, Middlesex, UB7 0LB, United Kingdom",
       mailReceiving: {
         available: true,
         details: "Receives Documents & Parcels"

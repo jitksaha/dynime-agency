@@ -16,6 +16,7 @@ import { useState } from "react";
 const Contact = () => {
   const { data: contacts } = useContactInfo();
   const [officeSearchTerm, setOfficeSearchTerm] = useState("");
+  const [selectedOfficeName, setSelectedOfficeName] = useState("");
 
   const rawPhones = contacts?.filter((c) => c.type === "phone") || [];
   // Filter out UK numbers (+44 or UK in label)
@@ -267,11 +268,29 @@ const Contact = () => {
                     </div>
                   </div>
 
-                  {/* Search Input */}
+                  {/* Office Selector Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={selectedOfficeName || (offices[0]?.name || "")}
+                      onChange={(e) => {
+                        setSelectedOfficeName(e.target.value);
+                        setOfficeSearchTerm(""); // Clear search when dropdown is used
+                      }}
+                      className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans text-foreground"
+                    >
+                      {offices.map((o) => (
+                        <option key={o.name} value={o.name}>
+                          {o.flag} {o.name.replace(/,.*$/, "")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Or Search Input */}
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search by city, country, postal code..."
+                      placeholder="Or search by city, country..."
                       value={officeSearchTerm}
                       onChange={(e) => setOfficeSearchTerm(e.target.value)}
                       className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3.5 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans"
@@ -286,20 +305,24 @@ const Contact = () => {
                     )}
                   </div>
 
-                  {/* Filtered Offices List */}
-                  <ul className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                  {/* Filtered Single Office Card */}
+                  <div>
                     {(() => {
                       const query = officeSearchTerm.toLowerCase().trim();
                       const filtered = offices.filter((o) => {
-                        if (!query) return true;
-                        return (
-                          o.name.toLowerCase().includes(query) ||
-                          o.type.toLowerCase().includes(query) ||
-                          o.address.toLowerCase().includes(query)
-                        );
+                        if (query) {
+                          return (
+                            o.name.toLowerCase().includes(query) ||
+                            o.type.toLowerCase().includes(query) ||
+                            o.address.toLowerCase().includes(query)
+                          );
+                        }
+                        return o.name === (selectedOfficeName || offices[0]?.name);
                       });
 
-                      if (filtered.length === 0) {
+                      const activeOffice = filtered[0];
+
+                      if (!activeOffice) {
                         return (
                           <div className="text-center py-4 text-xs text-muted-foreground">
                             No matching offices found
@@ -307,34 +330,34 @@ const Contact = () => {
                         );
                       }
 
-                      return filtered.map((office) => (
-                        <li key={office.name} className="group rounded-xl border border-border/40 bg-muted/20 p-2.5 hover:border-primary/40 transition-all">
-                          <div className="flex items-start gap-2">
-                            <span className="text-lg mt-0.5 shrink-0" role="img" aria-label="flag">{office.flag}</span>
+                      return (
+                        <div className="rounded-xl border border-border/45 bg-muted/15 p-3 hover:border-primary/30 transition-all">
+                          <div className="flex items-start gap-2.5">
+                            <span className="text-xl mt-0.5 shrink-0" role="img" aria-label="flag">{activeOffice.flag}</span>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-xs text-foreground flex items-center justify-between">
-                                <span>{office.name.replace(/,.*$/, "")}</span>
-                                <span className="text-[9px] uppercase font-medium text-muted-foreground bg-muted/65 px-1.5 py-0.5 rounded-md shrink-0">
-                                  {office.visit}
+                              <p className="font-semibold text-xs text-foreground flex items-center justify-between gap-1">
+                                <span className="truncate">{activeOffice.name.replace(/,.*$/, "")}</span>
+                                <span className="text-[8px] uppercase font-bold text-muted-foreground bg-muted/65 px-1.5 py-0.5 rounded-md shrink-0">
+                                  {activeOffice.visit}
                                 </span>
                               </p>
                               <p className="text-[11px] text-muted-foreground leading-normal mt-1 whitespace-pre-line">
-                                {office.address}
+                                {activeOffice.address}
                               </p>
                               <a
-                                href={mapLinkHref(office.address)}
+                                href={mapLinkHref(activeOffice.address)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-primary text-[10px] font-bold hover:underline inline-flex items-center gap-1 mt-1.5"
+                                className="text-primary text-[10px] font-bold hover:underline inline-flex items-center gap-1 mt-2"
                               >
                                 View on map →
                               </a>
                             </div>
                           </div>
-                        </li>
-                      ));
+                        </div>
+                      );
                     })()}
-                  </ul>
+                  </div>
 
                   {/* Reset/Showcase All Button */}
                   {officeSearchTerm && (
@@ -342,7 +365,7 @@ const Contact = () => {
                       onClick={() => setOfficeSearchTerm("")}
                       className="w-full text-center text-xs font-semibold text-primary/95 hover:text-primary hover:underline pt-2 border-t border-border/30"
                     >
-                      Showcase All Addresses
+                      Reset Filter
                     </button>
                   )}
                 </div>
