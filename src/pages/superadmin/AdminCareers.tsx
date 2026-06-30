@@ -277,9 +277,11 @@ const AdminCareers = () => {
   });
 
   // ---- posting channel helpers ----
-  const addChannel = (id: string) => {
-    if (form.posting_channels.some((c) => c.id === id)) return;
-    setForm({ ...form, posting_channels: [...form.posting_channels, { id, url: "" }] });
+  const addNewChannelRow = () => {
+    // Find first channel in JOB_CHANNELS that hasn't been added yet, otherwise default to other
+    const unused = JOB_CHANNELS.find((c) => !form.posting_channels.some((x) => x.id === c.id));
+    const nextId = unused ? unused.id : "other";
+    setForm({ ...form, posting_channels: [...form.posting_channels, { id: nextId, url: "" }] });
   };
   const updateChannel = (idx: number, patch: Partial<PostingChannel>) => {
     const next = [...form.posting_channels];
@@ -480,16 +482,16 @@ const AdminCareers = () => {
                     <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} />
                   </div>
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label>Primary Apply URL *</Label>
+                    <Label>Flowmingo AI Application Link *</Label>
                     <Input
                       type="text"
                       inputMode="url"
                       required
                       value={form.apply_url}
                       onChange={(e) => setForm({ ...form, apply_url: e.target.value })}
-                      placeholder="https://forms.example.com/apply"
+                      placeholder="https://talent.flowmingo.ai/jobs/..."
                     />
-                    <p className="text-[11px] text-muted-foreground">Paste any URL — we'll add https:// automatically if missing.</p>
+                    <p className="text-[11px] text-muted-foreground">This is your primary application collection system. Enter your Flowmingo AI job link here.</p>
                   </div>
                   <div className="sm:col-span-2 space-y-1.5">
                     <Label className="flex items-center gap-2">
@@ -571,33 +573,43 @@ const AdminCareers = () => {
                       <Label className="text-base">Cross-posted on</Label>
                       <p className="text-xs text-muted-foreground">Track every platform where this job is published.</p>
                     </div>
-                    <Select onValueChange={addChannel}>
-                      <SelectTrigger className="w-[180px] h-9"><SelectValue placeholder="+ Add platform" /></SelectTrigger>
-                      <SelectContent>
-                        {JOB_CHANNELS.filter((c) => !form.posting_channels.some((x) => x.id === c.id)).map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addNewChannelRow}
+                    >
+                      + Add platform link
+                    </Button>
                   </div>
                   {form.posting_channels.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic px-1">No channels yet — add Bdjobs, LinkedIn, Indeed, etc.</p>
+                    <p className="text-xs text-muted-foreground italic px-1">No cross-posting links yet — add Bdjobs, LinkedIn, Indeed, etc. if needed.</p>
                   ) : (
                     <div className="space-y-2">
                       {form.posting_channels.map((ch, idx) => {
                         const def = findChannel(ch.id);
                         return (
-                          <div key={ch.id + idx} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
-                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold text-white shrink-0" style={{ backgroundColor: def.color }}>
-                              {def.name}
-                            </span>
+                          <div key={idx} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
+                            <Select
+                              value={ch.id}
+                              onValueChange={(val) => updateChannel(idx, { id: val })}
+                            >
+                              <SelectTrigger className="w-[160px] h-9 shrink-0">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {JOB_CHANNELS.map((c) => (
+                                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             <Input
                               value={ch.url}
                               onChange={(e) => updateChannel(idx, { url: e.target.value })}
-                              placeholder={def.hint}
+                              placeholder={def.hint || "https://..."}
                               className="h-9"
                             />
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeChannel(idx)} className="text-destructive hover:bg-destructive/10">
+                            <Button type="button" variant="ghost" size="sm" onClick={() => removeChannel(idx)} className="text-destructive hover:bg-destructive/10 shrink-0">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>

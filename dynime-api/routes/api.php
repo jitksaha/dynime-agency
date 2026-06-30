@@ -244,13 +244,6 @@ Route::prefix('v1')->group(function () {
             Route::patch('careers/{id}',       [CareerController::class, 'update']);
             Route::delete('careers/{id}',      [CareerController::class, 'destroy']);
 
-            // Job Applications
-            Route::get('job-applications',              [CareerController::class, 'applications']);
-            Route::get('job-applications/{id}',         [CareerController::class, 'applicationShow']);
-            Route::patch('job-applications/{id}',       [CareerController::class, 'applicationUpdate']);
-            Route::delete('job-applications/{id}',      [CareerController::class, 'applicationDestroy']);
-            Route::get('job-applications/{id}/resume',  [CareerController::class, 'resumeUrl']);
-            Route::post('job-applications/{id}/scan',    [CareerController::class, 'scan']);
 
             // Portfolio
             Route::get('portfolio',                     [PortfolioController::class, 'adminIndex']);
@@ -346,13 +339,6 @@ Route::prefix('v1')->group(function () {
             Route::post('service-addons/{serviceSlug}', [\App\Http\Controllers\Api\Cms\ServiceAddonController::class, 'store']);
             Route::delete('service-addons/{id}',        [\App\Http\Controllers\Api\Cms\ServiceAddonController::class, 'destroy']);
 
-            // Job Applications (alias)
-            Route::get('job-applications',              [\App\Http\Controllers\Api\Cms\CareerController::class, 'applications']);
-            Route::get('job-applications/{id}',         [\App\Http\Controllers\Api\Cms\CareerController::class, 'applicationShow']);
-            Route::patch('job-applications/{id}',       [\App\Http\Controllers\Api\Cms\CareerController::class, 'applicationUpdate']);
-            Route::delete('job-applications/{id}',      [\App\Http\Controllers\Api\Cms\CareerController::class, 'applicationDestroy']);
-            Route::get('job-applications/{id}/resume-url', [\App\Http\Controllers\Api\Cms\CareerController::class, 'resumeUrl']);
-            Route::post('job-applications/{id}/scan',    [\App\Http\Controllers\Api\Cms\CareerController::class, 'scan']);
 
             // Blog Posts (alias)
             Route::get('blog-posts/admin',              [\App\Http\Controllers\Api\Cms\BlogController::class, 'adminIndex']);

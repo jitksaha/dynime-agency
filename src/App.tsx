@@ -140,7 +140,6 @@ const AdminInvestLeads = lazy(() => import("./pages/superadmin/AdminInvestLeads.
 const AdminInvestmentPlans = lazy(() => import("./pages/superadmin/AdminInvestmentPlans.tsx"));
 const AdminInvestors = lazy(() => import("./pages/superadmin/AdminInvestors.tsx"));
 const AdminCareers = lazy(() => import("./pages/superadmin/AdminCareers.tsx"));
-const AdminJobApplications = lazy(() => import("./pages/superadmin/AdminJobApplications.tsx"));
 const AdminSocialLinks = lazy(() => import("./pages/superadmin/AdminSocialLinks.tsx"));
 const AdminBrandTone = lazy(() => import("./pages/superadmin/AdminBrandTone.tsx"));
 const AdminPageSEO = lazy(() => import("./pages/superadmin/AdminPageSEO.tsx"));
@@ -414,7 +413,6 @@ const App = () => (
                   <Route path="/superadmin/investment-plans" element={<ProtectedRoute><AdminInvestmentPlans /></ProtectedRoute>} />
                   <Route path="/superadmin/investors" element={<ProtectedRoute><AdminInvestors /></ProtectedRoute>} />
                   <Route path="/superadmin/careers" element={<ProtectedRoute><AdminCareers /></ProtectedRoute>} />
-                  <Route path="/superadmin/careers/applications" element={<ProtectedRoute><AdminJobApplications /></ProtectedRoute>} />
                   <Route path="/superadmin/social-links" element={<ProtectedRoute><AdminSocialLinks /></ProtectedRoute>} />
                   <Route path="/superadmin/brand-tone" element={<ProtectedRoute><AdminBrandTone /></ProtectedRoute>} />
                   <Route path="/superadmin/blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />

@@ -13,7 +13,7 @@ export interface JobChannelDef {
 }
 
 export const JOB_CHANNELS: JobChannelDef[] = [
-  { id: "dynime",   name: "Dynime Jobs",     hint: "Our business manager (internal)", color: "#6366f1" },
+  { id: "flowmingo", name: "Flowmingo AI",    hint: "https://talent.flowmingo.ai/jobs/...", color: "#4f46e5" },
   { id: "bdjobs",   name: "Bdjobs",          hint: "https://www.bdjobs.com/...",      color: "#ef4444" },
   { id: "linkedin", name: "LinkedIn",        hint: "https://www.linkedin.com/jobs/view/...", color: "#0a66c2" },
   { id: "indeed",   name: "Indeed",          hint: "https://www.indeed.com/viewjob?jk=...", color: "#2557a7" },
