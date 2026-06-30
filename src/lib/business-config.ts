@@ -129,9 +129,9 @@ export const BUSINESS_CONFIG = STATIC_BUSINESS_DEFAULTS;
 /**
  * Parses a serialized address string from database value.
  */
-export const parseDbAddress = (value: string, label: string): OfficeLocation => {
+export const parseDbAddress = (value: any, label: string): OfficeLocation => {
   try {
-    const data = JSON.parse(value);
+    const data = typeof value === "object" && value !== null ? value : JSON.parse(value);
     if (data && typeof data === "object" && ("address" in data || "office_type" in data)) {
       return {
         name: label || "Office",

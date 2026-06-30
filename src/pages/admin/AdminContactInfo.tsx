@@ -31,9 +31,9 @@ interface OfficeDetails {
   whatsappPreFill: string;
 }
 
-const parseAddressValue = (value: string): OfficeDetails => {
+const parseAddressValue = (value: any): OfficeDetails => {
   try {
-    const data = JSON.parse(value);
+    const data = typeof value === "object" && value !== null ? value : JSON.parse(value);
     if (data && typeof data === "object" && ("address" in data || "office_type" in data)) {
       return {
         address: data.address || "",
