@@ -246,7 +246,7 @@ export default function WhatsAppSendDialog({
             <MessageSquare className="w-5 h-5 text-emerald-500" /> Send WhatsApp Notification
           </DialogTitle>
           <DialogDescription>
-            Dispatch template alerts or direct messages to {recipientName || "recipient"} via Meta Cloud API.
+            Dispatch template alerts or direct messages to {recipientName || "recipient"} via Twilio API.
           </DialogDescription>
         </DialogHeader>
 
