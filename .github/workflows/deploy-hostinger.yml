@@ -1,6 +1,6 @@
 name: Deploy to Hostinger (Production)
 
-# Force build trigger
+# Force build trigger v2
 on:
   push:
     branches:
