@@ -571,7 +571,7 @@ const AdminCareers = () => {
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <Label className="text-base">Cross-posted on</Label>
-                      <p className="text-xs text-muted-foreground">Track every platform where this job is published.</p>
+                      <p className="text-xs text-muted-foreground">Add links to other platforms where you published this job.</p>
                     </div>
                     <Button
                       type="button"
@@ -579,34 +579,23 @@ const AdminCareers = () => {
                       size="sm"
                       onClick={addNewChannelRow}
                     >
-                      + Add platform link
+                      + Add another link
                     </Button>
                   </div>
                   {form.posting_channels.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic px-1">No cross-posting links yet — add Bdjobs, LinkedIn, Indeed, etc. if needed.</p>
+                    <p className="text-xs text-muted-foreground italic px-1">No cross-posting links yet.</p>
                   ) : (
                     <div className="space-y-2">
                       {form.posting_channels.map((ch, idx) => {
-                        const def = findChannel(ch.id);
                         return (
                           <div key={idx} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
-                            <Select
-                              value={ch.id}
-                              onValueChange={(val) => updateChannel(idx, { id: val })}
-                            >
-                              <SelectTrigger className="w-[160px] h-9 shrink-0">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {JOB_CHANNELS.map((c) => (
-                                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <span className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded shrink-0">
+                              Link {idx + 1}
+                            </span>
                             <Input
                               value={ch.url}
                               onChange={(e) => updateChannel(idx, { url: e.target.value })}
-                              placeholder={def.hint || "https://..."}
+                              placeholder="https://..."
                               className="h-9"
                             />
                             <Button type="button" variant="ghost" size="sm" onClick={() => removeChannel(idx)} className="text-destructive hover:bg-destructive/10 shrink-0">
