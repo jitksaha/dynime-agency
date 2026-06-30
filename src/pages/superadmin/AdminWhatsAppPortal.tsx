@@ -23,6 +23,7 @@ interface WhatsAppConfig {
   enabled: boolean;
   access_token: string;
   phone_number_id: string;
+  twilio_from?: string;
 }
 
 interface WhatsAppLog {
@@ -51,6 +52,7 @@ export default function AdminWhatsAppPortal() {
     enabled: true,
     access_token: "",
     phone_number_id: "",
+    twilio_from: "",
   });
 
   // Templates state
@@ -181,7 +183,7 @@ export default function AdminWhatsAppPortal() {
         .maybeSingle();
 
       if (configRow?.value) {
-        const loaded = { ...{ enabled: true, access_token: "", phone_number_id: "" }, ...(configRow.value as any) };
+        const loaded = { ...{ enabled: true, access_token: "", phone_number_id: "", twilio_from: "" }, ...(configRow.value as any) };
         setConfig(loaded);
         // Show saved-info card for already-persisted config on load
         if (loaded.phone_number_id || loaded.access_token) setSavedSnapshot(loaded);
@@ -783,8 +785,8 @@ export default function AdminWhatsAppPortal() {
                   <div className="flex items-center gap-2">
                     <Settings className="w-5 h-5 text-primary" />
                     <div>
-                      <h2 className="font-semibold text-lg">Meta Business Cloud API Configuration</h2>
-                      <p className="text-xs text-muted-foreground">Provide credentials of your Meta Graph API platform to initiate sending.</p>
+                      <h2 className="font-semibold text-lg">Twilio WhatsApp Configuration</h2>
+                      <p className="text-xs text-muted-foreground">Provide credentials of your Twilio Platform to initiate sending.</p>
                     </div>
                   </div>
                   <Button onClick={saveConfig} disabled={savingConfig} className="bg-primary hover:bg-primary/95 text-primary-foreground gap-2">
@@ -807,32 +809,45 @@ export default function AdminWhatsAppPortal() {
 
                    <div className="grid grid-cols-1 gap-5">
                     <div className="space-y-1">
-                      <Label htmlFor="wa-phone-id">Phone Number ID *</Label>
+                      <Label htmlFor="wa-phone-id">Twilio Account SID *</Label>
                       <Input
                         id="wa-phone-id"
                         value={config.phone_number_id}
                         onChange={(e) => setConfig((prev) => ({ ...prev, phone_number_id: e.target.value }))}
-                        placeholder="e.g. 104294191983020"
+                        placeholder="AC..."
                         className="mt-1"
                       />
                       <p className="text-[11px] text-muted-foreground leading-normal">
-                        To get this: Go to <strong>Meta for Developers</strong> &rarr; <strong>My Apps</strong> &rarr; select/create your App &rarr; <strong>WhatsApp</strong> (setup/configured) &rarr; <strong>API Setup</strong>. Look for the <strong>Phone number ID</strong> field.
+                        To get this: Go to your <strong>Twilio Console Dashboard</strong>. Copy the <strong>Account SID</strong>.
                       </p>
                     </div>
 
                     <div className="space-y-1">
-                      <Label htmlFor="wa-token">Permanent System User Access Token *</Label>
+                      <Label htmlFor="wa-token">Twilio Auth Token *</Label>
                       <Input
                         id="wa-token"
                         type="password"
                         value={config.access_token}
                         onChange={(e) => setConfig((prev) => ({ ...prev, access_token: e.target.value }))}
-                        placeholder="EAAB..."
+                        placeholder="Auth Token..."
                         className="mt-1"
                       />
                       <p className="text-[11px] text-muted-foreground leading-normal">
-                        To generate: Go to <strong>Meta Business Suite Settings</strong> &rarr; <strong>Users</strong> &rarr; <strong>System Users</strong>. Select (or create) an Admin system user. Click <strong>Generate New Token</strong>, select your App, and check the <strong>whatsapp_business_messaging</strong> permission. 
-                        <span className="text-amber-600 dark:text-amber-400 font-medium"> Note: Do not use a temporary 24-hour developer token, as it will expire.</span>
+                        To get this: Go to your <strong>Twilio Console Dashboard</strong>. Copy the <strong>Auth Token</strong>.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label htmlFor="wa-from">Twilio WhatsApp Sender Number *</Label>
+                      <Input
+                        id="wa-from"
+                        value={config.twilio_from || ""}
+                        onChange={(e) => setConfig((prev) => ({ ...prev, twilio_from: e.target.value }))}
+                        placeholder="e.g. whatsapp:+14155238886"
+                        className="mt-1"
+                      />
+                      <p className="text-[11px] text-muted-foreground leading-normal">
+                        To get this: Go to your <strong>Twilio Console</strong> &rarr; <strong>Messaging</strong> &rarr; <strong>Try it out</strong> &rarr; <strong>Send a WhatsApp Message</strong>, or use your approved WhatsApp sender. Format: <code>whatsapp:+[country_code][number]</code>.
                       </p>
                     </div>
                   </div>
@@ -854,11 +869,11 @@ export default function AdminWhatsAppPortal() {
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Phone Number ID */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Twilio Account SID */}
                     <div className="rounded-lg border border-border/60 bg-background/60 p-3">
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-1">
-                        Phone Number ID
+                        Twilio Account SID
                       </p>
                       <p className="text-sm font-mono font-medium text-foreground break-all">
                         {savedSnapshot.phone_number_id || (
@@ -867,11 +882,23 @@ export default function AdminWhatsAppPortal() {
                       </p>
                     </div>
 
-                    {/* Access Token */}
+                    {/* Twilio From Number */}
+                    <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-1">
+                        Twilio From Number
+                      </p>
+                      <p className="text-sm font-mono font-medium text-foreground break-all">
+                        {savedSnapshot.twilio_from || (
+                          <span className="text-muted-foreground italic">Not set</span>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Twilio Auth Token */}
                     <div className="rounded-lg border border-border/60 bg-background/60 p-3">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">
-                          Access Token
+                          Twilio Auth Token
                         </p>
                         {savedSnapshot.access_token && (
                           <button

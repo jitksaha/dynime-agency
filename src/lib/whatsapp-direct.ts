@@ -1,18 +1,16 @@
 /**
  * whatsapp-direct.ts
  *
- * Calls the Meta WhatsApp Cloud API directly from the browser
+ * Calls the Twilio Messages API directly from the browser
  * using credentials saved in notification_settings.
- *
- * This avoids reliance on an edge function and works as long as
- * the Meta token has been configured in the WhatsApp Config tab.
  */
 import { db } from "@/integrations/db/client";
 
 interface WhatsAppConfig {
   enabled: boolean;
-  access_token: string;
-  phone_number_id: string;
+  access_token: string;      // Twilio Auth Token
+  phone_number_id: string;   // Twilio Account SID
+  twilio_from?: string;      // Twilio WhatsApp From (e.g., whatsapp:+14155238886)
 }
 
 interface SendResult {
@@ -34,7 +32,7 @@ export async function loadWhatsAppConfig(): Promise<WhatsAppConfig | null> {
 }
 
 /**
- * Send a plain-text WhatsApp message via Meta Cloud API.
+ * Send a plain-text WhatsApp message via Twilio Messages API.
  *
  * @param phone    Recipient phone number including country code, e.g. "+8801711..."
  * @param message  The text body to send
@@ -53,47 +51,49 @@ export async function sendWhatsAppMessage(
     return { success: false, error: "WhatsApp notifications are disabled. Enable them in the API Config tab." };
   }
   if (!config.access_token || !config.phone_number_id) {
-    return { success: false, error: "WhatsApp Cloud API token or Phone Number ID is missing. Please check API Config." };
+    return { success: false, error: "Twilio Auth Token or Account SID is missing. Please check API Config." };
   }
 
   // 2. Sanitize phone — remove spaces/dashes but keep the leading +
   const sanitizedPhone = phone.replace(/[\s\-\(\)]/g, "");
 
-  // 3. Call Meta Graph API
-  const url = `https://graph.facebook.com/v21.0/${config.phone_number_id}/messages`;
+  // 3. Call Twilio Messages API
+  const accountSid = config.phone_number_id;
+  const authToken = config.access_token;
+  const fromNumber = config.twilio_from || "whatsapp:+14155238886"; // default sandbox number
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
 
   try {
+    const auth = btoa(`${accountSid}:${authToken}`);
     const res = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${config.access_token}`,
-        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to: sanitizedPhone,
-        type: "text",
-        text: { preview_url: false, body: message },
+      body: new URLSearchParams({
+        To: `whatsapp:${sanitizedPhone}`,
+        From: fromNumber.startsWith("whatsapp:") ? fromNumber : `whatsapp:${fromNumber}`,
+        Body: message
       }),
     });
 
     const data = await res.json();
 
-    if (res.ok && data?.messages?.[0]?.id) {
+    if (res.ok && data?.sid) {
       // 4. Log success to whatsapp_send_log
       await db.from("whatsapp_send_log").insert({
-        message_id: data.messages[0].id,
+        message_id: data.sid,
         template_name: "direct_text",
         recipient_phone: sanitizedPhone,
         status: "dispatched",
         error_message: null,
       }).then(() => {/* fire-and-forget */});
 
-      return { success: true, messageId: data.messages[0].id };
+      return { success: true, messageId: data.sid };
     }
 
-    const errMsg = data?.error?.message || "Meta API returned an error";
+    const errMsg = data?.message || data?.error_message || "Twilio API returned an error";
 
     // Log failure
     await db.from("whatsapp_send_log").insert({
@@ -106,7 +106,7 @@ export async function sendWhatsAppMessage(
 
     return { success: false, error: errMsg };
   } catch (e: any) {
-    return { success: false, error: e.message || "Network error contacting Meta API" };
+    return { success: false, error: e.message || "Network error contacting Twilio API" };
   }
 }
 
@@ -237,88 +237,11 @@ export async function sendWhatsAppTemplate(
     return { success: false, error: "Template not found." };
   }
 
-  // If the template mode is configured as a Meta-approved template, send as a template message
-  if (matchedTemplate.mode === "template") {
-    const config = await loadWhatsAppConfig();
-    if (!config) {
-      return { success: false, error: "WhatsApp configuration not found. Please save your API Config first." };
-    }
-    if (!config.enabled) {
-      return { success: false, error: "WhatsApp notifications are disabled. Enable them in the API Config tab." };
-    }
-    if (!config.access_token || !config.phone_number_id) {
-      return { success: false, error: "WhatsApp Cloud API token or Phone Number ID is missing. Please check API Config." };
-    }
-
-    const sanitizedPhone = phone.replace(/[\s\-\(\)]/g, "");
-    const url = `https://graph.facebook.com/v21.0/${config.phone_number_id}/messages`;
-
-    // Map vars array to parameters format
-    const parameters = vars.map((v) => ({
-      type: "text",
-      text: v,
-    }));
-
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${config.access_token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          recipient_type: "individual",
-          to: sanitizedPhone,
-          type: "template",
-          template: {
-            name: templateKey,
-            language: { code: "en_US" },
-            components: [
-              {
-                type: "body",
-                parameters: parameters,
-              },
-            ],
-          },
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data?.messages?.[0]?.id) {
-        // Log success
-        await db.from("whatsapp_send_log").insert({
-          message_id: data.messages[0].id,
-          template_name: templateKey,
-          recipient_phone: sanitizedPhone,
-          status: "dispatched",
-          error_message: null,
-        }).then(() => {});
-
-        return { success: true, messageId: data.messages[0].id };
-      }
-
-      const errMsg = data?.error?.message || "Meta API returned an error";
-      // Log failure
-      await db.from("whatsapp_send_log").insert({
-        message_id: null,
-        template_name: templateKey,
-        recipient_phone: sanitizedPhone,
-        status: "failed",
-        error_message: errMsg,
-      }).then(() => {});
-
-      return { success: false, error: errMsg };
-    } catch (e: any) {
-      return { success: false, error: e.message || "Network error contacting Meta API" };
-    }
-  }
-
-  // Otherwise, send as a direct plain text message (replaces variables locally)
+  // Twilio sends all template messages compile locally
   if (matchedTemplate.body) {
     messageBody = matchedTemplate.body;
     vars.forEach((val, idx) => {
-      messageBody = messageBody.replace(`{{${idx + 1}}}`, val);
+      messageBody = messageBody.replace(new RegExp(`\\{\\{${idx + 1}\\}\\}`, 'g'), val);
     });
   }
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class WhatsAppService
 {
     /**
-     * Sends a template or custom text message via WhatsApp Business Cloud API.
+     * Sends a text message via Twilio WhatsApp API.
      *
      * @param string $phone Target phone number
      * @param string $templateOrMessage Message content (or custom text if not a template)
@@ -30,16 +30,17 @@ class WhatsAppService
             }
         }
 
-        $token = $config['access_token'] ?? env('WHATSAPP_ACCESS_TOKEN');
-        $phoneId = $config['phone_number_id'] ?? env('WHATSAPP_PHONE_NUMBER_ID');
+        $authToken = $config['access_token'] ?? env('WHATSAPP_ACCESS_TOKEN'); // Twilio Auth Token
+        $accountSid = $config['phone_number_id'] ?? env('WHATSAPP_PHONE_NUMBER_ID'); // Twilio Account SID
+        $fromNumber = $config['twilio_from'] ?? env('WHATSAPP_FROM_NUMBER') ?? 'whatsapp:+14155238886'; // Twilio Sender
         $enabled = filter_var($config['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         if (!$enabled) {
             return ['success' => false, 'error' => 'WhatsApp service is disabled in settings.'];
         }
 
-        if (empty($token) || empty($phoneId)) {
-            return ['success' => false, 'error' => 'WhatsApp Cloud API token or Phone Number ID is missing.'];
+        if (empty($authToken) || empty($accountSid)) {
+            return ['success' => false, 'error' => 'Twilio Auth Token or Account SID is missing.'];
         }
 
         // Clean phone number (keep digits only)
@@ -50,56 +51,32 @@ class WhatsAppService
 
         $messageId = 'wa-' . Str::uuid()->toString();
 
-        // 2. Prepare payload
-        $isTemplate = ($templateName !== 'custom');
-        $payload = [];
-
-        if ($isTemplate) {
-            $components = [];
+        // 2. Compile message body locally if it is a template
+        $messageBody = $templateOrMessage;
+        if ($templateName !== 'custom') {
             if (!empty($vars)) {
-                $parameters = [];
-                foreach ($vars as $v) {
-                    $parameters[] = ['type' => 'text', 'text' => (string)$v];
+                foreach ($vars as $idx => $v) {
+                    $messageBody = str_replace('{{' . ($idx + 1) . '}}', $v, $messageBody);
                 }
-                $components[] = [
-                    'type' => 'body',
-                    'parameters' => $parameters
-                ];
             }
-
-            $payload = [
-                'messaging_product' => 'whatsapp',
-                'to' => $cleanPhone,
-                'type' => 'template',
-                'template' => [
-                    'name' => $templateName,
-                    'language' => ['code' => 'en_US'],
-                    'components' => $components
-                ]
-            ];
-        } else {
-            $payload = [
-                'messaging_product' => 'whatsapp',
-                'recipient_type' => 'individual',
-                'to' => $cleanPhone,
-                'type' => 'text',
-                'text' => [
-                    'preview_url' => false,
-                    'body' => $templateOrMessage
-                ]
-            ];
         }
 
-        // 3. Dispatch HTTP Post Request to Meta Graph API
+        // 3. Dispatch HTTP Post Request to Twilio API
         try {
-            $url = "https://graph.facebook.com/v19.0/{$phoneId}/messages";
-            $response = Http::withToken($token)
+            $url = "https://api.twilio.com/2010-04-01/Accounts/{$accountSid}/Messages.json";
+            
+            $response = Http::withBasicAuth($accountSid, $authToken)
+                ->asForm()
                 ->timeout(15)
-                ->post($url, $payload);
+                ->post($url, [
+                    'To' => 'whatsapp:+' . $cleanPhone,
+                    'From' => str_starts_with($fromNumber, 'whatsapp:') ? $fromNumber : 'whatsapp:' . $fromNumber,
+                    'Body' => $messageBody
+                ]);
 
             if ($response->successful()) {
                 $resData = $response->json();
-                $waMsgId = $resData['messages'][0]['id'] ?? $messageId;
+                $waMsgId = $resData['sid'] ?? $messageId;
                 
                 DB::table('whatsapp_send_log')->insert([
                     'id' => Str::uuid()->toString(),
@@ -115,7 +92,7 @@ class WhatsAppService
                 return ['success' => true, 'message_id' => $waMsgId];
             } else {
                 $errorMsg = $response->body();
-                Log::error("WhatsApp Cloud API failed. Response: " . $errorMsg);
+                Log::error("Twilio API failed. Response: " . $errorMsg);
                 
                 DB::table('whatsapp_send_log')->insert([
                     'id' => Str::uuid()->toString(),
@@ -124,14 +101,14 @@ class WhatsAppService
                     'recipient_phone' => $cleanPhone,
                     'status' => 'failed',
                     'error_message' => $errorMsg,
-                    'metadata' => json_encode(['payload' => $payload, 'response' => $response->json()]),
+                    'metadata' => json_encode(['payload' => ['To' => $cleanPhone, 'Body' => $messageBody], 'response' => $response->json()]),
                     'created_at' => now()
                 ]);
 
                 return ['success' => false, 'error' => $errorMsg];
             }
         } catch (\Exception $e) {
-            Log::error("WhatsApp delivery exception: " . $e->getMessage());
+            Log::error("Twilio WhatsApp exception: " . $e->getMessage());
 
             DB::table('whatsapp_send_log')->insert([
                 'id' => Str::uuid()->toString(),
@@ -140,7 +117,7 @@ class WhatsAppService
                 'recipient_phone' => $cleanPhone,
                 'status' => 'failed',
                 'error_message' => $e->getMessage(),
-                'metadata' => json_encode(['payload' => $payload, 'trace' => $e->getTraceAsString()]),
+                'metadata' => json_encode(['payload' => ['To' => $cleanPhone, 'Body' => $messageBody], 'trace' => $e->getTraceAsString()]),
                 'created_at' => now()
             ]);
 
