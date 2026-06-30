@@ -268,57 +268,39 @@ const Contact = () => {
                     </div>
                   </div>
 
-                  {/* Office Selector Dropdown */}
-                  <div className="relative">
-                    <select
-                      value={selectedOfficeName || (offices[0]?.name || "")}
-                      onChange={(e) => {
-                        setSelectedOfficeName(e.target.value);
-                        setOfficeSearchTerm(""); // Clear search when dropdown is used
-                      }}
-                      className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans text-foreground"
-                    >
-                      {offices.map((o) => (
-                        <option key={o.name} value={o.name}>
-                          {o.flag} {o.name.replace(/,.*$/, "")}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                   {/* Search Input */}
+                   <div className="relative">
+                     <input
+                       type="text"
+                       placeholder="Search by city, country, postal code..."
+                       value={officeSearchTerm}
+                       onChange={(e) => setOfficeSearchTerm(e.target.value)}
+                       className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3.5 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans"
+                     />
+                     {officeSearchTerm && (
+                       <button
+                         onClick={() => setOfficeSearchTerm("")}
+                         className="absolute right-3 top-2.5 text-xs text-muted-foreground hover:text-foreground"
+                       >
+                         ✕
+                       </button>
+                     )}
+                   </div>
 
-                  {/* Or Search Input */}
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Or search by city, country..."
-                      value={officeSearchTerm}
-                      onChange={(e) => setOfficeSearchTerm(e.target.value)}
-                      className="w-full text-xs bg-muted/40 border border-border/50 rounded-xl px-3.5 py-2.5 outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-sans"
-                    />
-                    {officeSearchTerm && (
-                      <button
-                        onClick={() => setOfficeSearchTerm("")}
-                        className="absolute right-3 top-2.5 text-xs text-muted-foreground hover:text-foreground"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Filtered Single Office Card */}
-                  <div>
-                    {(() => {
-                      const query = officeSearchTerm.toLowerCase().trim();
-                      const filtered = offices.filter((o) => {
-                        if (query) {
-                          return (
-                            o.name.toLowerCase().includes(query) ||
-                            o.type.toLowerCase().includes(query) ||
-                            o.address.toLowerCase().includes(query)
-                          );
-                        }
-                        return o.name === (selectedOfficeName || offices[0]?.name);
-                      });
+                   {/* Filtered Single Office Card */}
+                   <div>
+                     {(() => {
+                       const query = officeSearchTerm.toLowerCase().trim();
+                       const filtered = offices.filter((o) => {
+                         if (query) {
+                           return (
+                             o.name.toLowerCase().includes(query) ||
+                             o.type.toLowerCase().includes(query) ||
+                             o.address.toLowerCase().includes(query)
+                           );
+                         }
+                         return true; // Show first active office when search is empty
+                       });
 
                       const activeOffice = filtered[0];
 
