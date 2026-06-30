@@ -315,7 +315,7 @@ const Contact = () => {
                       return (
                         <div className="rounded-xl border border-border/45 bg-muted/15 p-3 hover:border-primary/30 transition-all">
                           <div className="flex items-start gap-2.5">
-                            <span className="text-xl mt-0.5 shrink-0" role="img" aria-label="flag">{activeOffice.flag}</span>
+                            <Globe2 className="w-4 h-4 text-primary mt-1 shrink-0" />
                             <div className="min-w-0 flex-1">
                               <p className="font-semibold text-xs text-foreground flex items-center justify-between gap-1">
                                 <span className="truncate">{activeOffice.name.replace(/,.*$/, "")}</span>
@@ -448,7 +448,9 @@ const Contact = () => {
                     <div className="space-y-3">
                       {/* Flag + Name + Type */}
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-label="flag">{office.flag}</span>
+                        <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0 text-primary">
+                          <Globe2 className="w-5 h-5" />
+                        </div>
                         <div>
                           <h3 className="font-heading text-base font-bold text-foreground flex items-center gap-1.5">
                             {office.name.replace(/,.*$/, "")}
