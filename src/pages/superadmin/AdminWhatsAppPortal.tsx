@@ -92,6 +92,7 @@ export default function AdminWhatsAppPortal() {
       body: newBody.trim(),
       variables,
       mode: newMode,
+      content_sid: "",
     };
 
     setTemplates((prev) => [...prev, newTpl]);
@@ -295,6 +296,12 @@ export default function AdminWhatsAppPortal() {
   const handleTemplateBodyChange = (key: string, body: string) => {
     setTemplates((prev) =>
       prev.map((t) => (t.key === key ? { ...t, body } : t))
+    );
+  };
+
+  const handleTemplateContentSidChange = (key: string, content_sid: string) => {
+    setTemplates((prev) =>
+      prev.map((t) => (t.key === key ? { ...t, content_sid } : t))
     );
   };
 
@@ -675,7 +682,7 @@ export default function AdminWhatsAppPortal() {
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectItem value="text">Direct Text</SelectItem>
-                                    <SelectItem value="template">Meta Template</SelectItem>
+                                    <SelectItem value="template">Twilio Premium Template</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -703,22 +710,34 @@ export default function AdminWhatsAppPortal() {
                                 </Button>
                               )}
                             </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div>
-                              <Label htmlFor={`t-body-${t.key}`} className="text-xs">Template Body</Label>
-                              <Textarea
-                                id={`t-body-${t.key}`}
-                                value={t.body}
-                                onChange={(e) => handleTemplateBodyChange(t.key, e.target.value)}
-                                className="mt-1.5 min-h-[80px]"
-                              />
+                                        <div className="space-y-3">
+                            <div className="grid grid-cols-1 gap-3">
+                              <div>
+                                <Label htmlFor={`t-body-${t.key}`} className="text-xs">Template Body (Plain-Text fallback or local preview)</Label>
+                                <Textarea
+                                  id={`t-body-${t.key}`}
+                                  value={t.body}
+                                  onChange={(e) => handleTemplateBodyChange(t.key, e.target.value)}
+                                  className="mt-1.5 min-h-[80px]"
+                                />
+                              </div>
+
                               {t.mode === "template" && (
-                                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium leading-normal bg-indigo-500/5 p-2 rounded-lg border border-indigo-500/10 mt-1">
-                                  Note: In Meta Template mode, this body text is used for client-side preview/autofill calculation. The actual message sent to the client will match the template '{t.key}' approved in your Meta Suite, with the variables below mapped in order.
-                                </p>
+                                <div className="space-y-1 bg-indigo-500/5 p-3 rounded-xl border border-indigo-500/10">
+                                  <Label htmlFor={`t-sid-${t.key}`} className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">Twilio Content SID *</Label>
+                                  <Input
+                                    id={`t-sid-${t.key}`}
+                                    value={t.content_sid || ""}
+                                    onChange={(e) => handleTemplateContentSidChange(t.key, e.target.value)}
+                                    placeholder="e.g. HXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                    className="h-8 text-xs bg-background mt-1"
+                                  />
+                                  <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium leading-normal mt-1.5">
+                                    Note: Create a custom template with premium buttons, quick-replies, or media in the **Twilio Console** &rarr; **Messaging** &rarr; **Content Editor**. Copy/paste its **Content SID** (starts with <code>HX</code>) here to send it dynamically.
+                                  </p>
+                                </div>
                               )}
-                            </div>
+                            </div>              </div>
                             
                             <div className="flex flex-col gap-2 mt-2">
                               <Label className="text-xs text-muted-foreground font-medium">Template Variables Mappings</Label>

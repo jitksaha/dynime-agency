@@ -39,7 +39,11 @@ export async function loadWhatsAppConfig(): Promise<WhatsAppConfig | null> {
  */
 export async function sendWhatsAppMessage(
   phone: string,
-  message: string
+  message: string,
+  options?: {
+    contentSid?: string;
+    variables?: Record<string, string>;
+  }
 ): Promise<SendResult> {
   // 1. Load config
   const config = await loadWhatsAppConfig();
@@ -65,17 +69,27 @@ export async function sendWhatsAppMessage(
 
   try {
     const auth = btoa(`${accountSid}:${authToken}`);
+    const postBody: Record<string, string> = {
+      To: `whatsapp:${sanitizedPhone}`,
+      From: fromNumber.startsWith("whatsapp:") ? fromNumber : `whatsapp:${fromNumber}`,
+    };
+
+    if (options?.contentSid) {
+      postBody.ContentSid = options.contentSid;
+      if (options.variables) {
+        postBody.ContentVariables = JSON.stringify(options.variables);
+      }
+    } else {
+      postBody.Body = message;
+    }
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
         Authorization: `Basic ${auth}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        To: `whatsapp:${sanitizedPhone}`,
-        From: fromNumber.startsWith("whatsapp:") ? fromNumber : `whatsapp:${fromNumber}`,
-        Body: message
-      }),
+      body: new URLSearchParams(postBody),
     });
 
     const data = await res.json();
@@ -84,7 +98,7 @@ export async function sendWhatsAppMessage(
       // 4. Log success to whatsapp_send_log
       await db.from("whatsapp_send_log").insert({
         message_id: data.sid,
-        template_name: "direct_text",
+        template_name: options?.contentSid ? `sid_${options.contentSid}` : "direct_text",
         recipient_phone: sanitizedPhone,
         status: "dispatched",
         error_message: null,
@@ -98,7 +112,7 @@ export async function sendWhatsAppMessage(
     // Log failure
     await db.from("whatsapp_send_log").insert({
       message_id: null,
-      template_name: "direct_text",
+      template_name: options?.contentSid ? `sid_${options.contentSid}` : "direct_text",
       recipient_phone: sanitizedPhone,
       status: "failed",
       error_message: errMsg,
@@ -116,6 +130,7 @@ export interface WhatsAppTemplate {
   body: string;
   variables: string[];
   mode?: "text" | "template";
+  content_sid?: string;
 }
 
 export const TEMPLATE_DEFAULTS: WhatsAppTemplate[] = [
@@ -237,7 +252,20 @@ export async function sendWhatsAppTemplate(
     return { success: false, error: "Template not found." };
   }
 
-  // Twilio sends all template messages compile locally
+  // If the template has a ContentSid configured, use Twilio Content API template format
+  if (matchedTemplate.content_sid) {
+    const variablesObj: Record<string, string> = {};
+    vars.forEach((val, idx) => {
+      variablesObj[String(idx + 1)] = val;
+    });
+
+    return sendWhatsAppMessage(phone, "", {
+      contentSid: matchedTemplate.content_sid,
+      variables: variablesObj
+    });
+  }
+
+  // Otherwise compile body text locally and send as plain text
   if (matchedTemplate.body) {
     messageBody = matchedTemplate.body;
     vars.forEach((val, idx) => {
