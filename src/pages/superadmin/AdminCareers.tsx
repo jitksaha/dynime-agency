@@ -278,10 +278,7 @@ const AdminCareers = () => {
 
   // ---- posting channel helpers ----
   const addNewChannelRow = () => {
-    // Find first channel in JOB_CHANNELS that hasn't been added yet, otherwise default to other
-    const unused = JOB_CHANNELS.find((c) => !form.posting_channels.some((x) => x.id === c.id));
-    const nextId = unused ? unused.id : "other";
-    setForm({ ...form, posting_channels: [...form.posting_channels, { id: nextId, url: "" }] });
+    setForm({ ...form, posting_channels: [...form.posting_channels, { id: `link-${Date.now()}`, url: "", label: "" }] });
   };
   const updateChannel = (idx: number, patch: Partial<PostingChannel>) => {
     const next = [...form.posting_channels];
@@ -588,17 +585,29 @@ const AdminCareers = () => {
                     <div className="space-y-2">
                       {form.posting_channels.map((ch, idx) => {
                         return (
-                          <div key={idx} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
-                            <span className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded shrink-0">
+                          <div key={idx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-lg border border-border bg-muted/30 p-2">
+                            <span className="text-xs font-semibold px-2 py-1 bg-primary/10 text-primary rounded shrink-0 self-start sm:self-auto text-center min-w-[50px]">
                               Link {idx + 1}
                             </span>
+                            <div className="w-full sm:w-[200px] shrink-0">
+                              <Input
+                                value={ch.label || ""}
+                                onChange={(e) => {
+                                  const label = e.target.value;
+                                  const id = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                                  updateChannel(idx, { label, id });
+                                }}
+                                placeholder="Platform Name (e.g. BDJobs)"
+                                className="h-9"
+                              />
+                            </div>
                             <Input
                               value={ch.url}
                               onChange={(e) => updateChannel(idx, { url: e.target.value })}
                               placeholder="https://..."
                               className="h-9"
                             />
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeChannel(idx)} className="text-destructive hover:bg-destructive/10 shrink-0">
+                            <Button type="button" variant="ghost" size="sm" onClick={() => removeChannel(idx)} className="text-destructive hover:bg-destructive/10 shrink-0 self-end sm:self-auto">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>

@@ -10,11 +10,10 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, ArrowUpRight, Briefcase, Clock, MapPin,
   Sparkles, CheckCircle2, Share2, Globe2, UserPlus, Calendar, BadgeDollarSign,
-  Eye, Users,
+  Eye, Users
 } from "lucide-react";
 import { findChannel, type PostingChannel } from "@/lib/job-channels";
 import { toast } from "sonner";
-import JobApplicationForm from "@/components/careers/JobApplicationForm";
 import { useCareer, useCareerStats as useSharedCareerStats, useIncrementCareerViewBySlug } from "@/hooks/use-cms-data";
 
 interface JobPost {
@@ -88,6 +87,15 @@ const useCareerStats = (slug: string | undefined, careerId: string | undefined) 
 
   return query;
 };
+
+const BUTTON_COLORS = [
+  "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10",
+  "bg-[#4f46e5] hover:bg-[#4338ca] text-white shadow-md shadow-[#4f46e5]/10",
+  "bg-[#059669] hover:bg-[#047857] text-white shadow-md shadow-[#059669]/10",
+  "bg-[#7c3aed] hover:bg-[#6d28d9] text-white shadow-md shadow-[#7c3aed]/10",
+  "bg-[#e11d48] hover:bg-[#be123c] text-white shadow-md shadow-[#e11d48]/10",
+  "bg-[#d97706] hover:bg-[#b45309] text-white shadow-md shadow-[#d97706]/10"
+];
 
 const CareerDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -389,54 +397,46 @@ const CareerDetail = () => {
                     </div>
                   </dl>
 
-                  <div className="mt-6 flex flex-col gap-2">
-                    <Button asChild size="lg" className="w-full group">
-                      <a href="#apply">
-                        Apply for this role
-                        <ArrowUpRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                      </a>
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={handleShare} className="w-full">
+                  <div className="mt-6 flex flex-col gap-2.5">
+                    {/* Main Apply Button */}
+                    <a
+                      href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-300 gap-1.5 group shadow-md shadow-primary/10"
+                    >
+                      Apply with Flowmingo AI
+                      <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                      </svg>
+                    </a>
+
+                    {/* Additional Apply Buttons */}
+                    {(Array.isArray(job.posting_channels) ? job.posting_channels : []).map((ch, idx) => {
+                      if (!ch.url) return null;
+                      const label = ch.label || `Platform ${idx + 1}`;
+                      const colorClass = BUTTON_COLORS[(idx + 1) % BUTTON_COLORS.length];
+                      return (
+                        <a
+                          key={idx}
+                          href={ch.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold transition-all duration-300 gap-1.5 group ${colorClass}`}
+                        >
+                          Apply with {label}
+                          <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                          </svg>
+                        </a>
+                      );
+                    })}
+
+                    <Button variant="outline" size="lg" onClick={handleShare} className="w-full mt-2 h-11 rounded-xl">
                       <Share2 className="w-4 h-4 mr-2" /> Share this role
                     </Button>
                   </div>
                 </div>
-
-                {job.posting_channels.length > 0 && (
-                  <div className="rounded-2xl border border-border/60 bg-card/60 p-5 mt-4">
-                    <h3 className="font-heading font-semibold text-sm mb-3 flex items-center gap-2">
-                      <Globe2 className="w-4 h-4 text-primary" /> Also posted on
-                    </h3>
-                    <ul className="space-y-2">
-                      {job.posting_channels.map((ch, i) => {
-                        const def = findChannel(ch.id);
-                        return (
-                          <li key={i}>
-                            <a
-                              href={ch.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-background/60 hover:bg-background hover:border-primary/40 px-3 py-2 transition-colors"
-                            >
-                              <span className="flex items-center gap-2 min-w-0">
-                                <span
-                                  className="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold text-white shrink-0"
-                                  style={{ backgroundColor: def.color }}
-                                >
-                                  {def.name.slice(0, 2).toUpperCase()}
-                                </span>
-                                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                                  {ch.label || def.name}
-                                </span>
-                              </span>
-                              <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
-                            </a>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
               </div>
             </ScrollReveal>
           </div>
@@ -526,23 +526,47 @@ const CareerDetail = () => {
               </h2>
               
               <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
-                We collect and process talent applications via our secure Flowmingo AI partner portal. Click the button below to start your application form.
+                We collect and process talent applications via our secure partner portals. Click any of the options below to submit your application form.
               </p>
 
-              <div className="pt-4">
+              <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3.5 pt-4">
+                {/* Main Apply Button */}
                 <a
                   href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 gap-2 group hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 gap-2 group hover:-translate-y-0.5"
                 >
-                  Apply via Flowmingo AI
-                  <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  Apply with Flowmingo AI
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                  </svg>
                 </a>
+
+                {/* Additional Apply Buttons */}
+                {(Array.isArray(job.posting_channels) ? job.posting_channels : []).map((ch, idx) => {
+                  if (!ch.url) return null;
+                  const label = ch.label || `Platform ${idx + 1}`;
+                  const colorClass = BUTTON_COLORS[(idx + 1) % BUTTON_COLORS.length];
+                  return (
+                    <a
+                      key={idx}
+                      href={ch.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold transition-all duration-300 gap-2 group hover:-translate-y-0.5 ${colorClass}`}
+                    >
+                      Apply with {label}
+                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                      </svg>
+                    </a>
+                  );
+                })}
               </div>
 
               <p className="text-[11px] text-muted-foreground mt-4">
-                You will be redirected to the secure Flowmingo application portal.
+                You will be redirected to the secure external application form page.
               </p>
             </div>
           </div>
