@@ -134,7 +134,7 @@ export class MailService {
     const html = this.buildTemplateHtml(opts.templateName, opts.templateData);
     const text = this.buildTemplateText(opts.templateName, opts.templateData);
 
-    return this.sendMail({
+    const emailResult = await this.sendMail({
       to: opts.to,
       subject: opts.subject,
       html,
@@ -142,6 +142,13 @@ export class MailService {
       templateName: opts.templateName,
       metadata: opts.metadata
     });
+
+    // Fire-and-forget matching WhatsApp notification
+    this.sendWhatsAppNotification(opts.to, opts.templateName, opts.templateData, opts.metadata).catch((err) => {
+      this.logger.error(`Error sending WhatsApp notification: ${err.message}`);
+    });
+
+    return emailResult;
   }
 
   private buildTemplateHtml(templateName: string, data: Record<string, any>): string {
@@ -380,5 +387,142 @@ export class MailService {
       </body>
       </html>
     `;
+  }
+
+  private async sendWhatsAppNotification(toEmail: string, templateName: string, data: Record<string, any>, metadata?: any) {
+    try {
+      // 1. Get WhatsApp settings
+      const setting = await this.prisma.notification_settings.findUnique({
+        where: { key: 'whatsapp_config' },
+      });
+      if (!setting || !setting.value) return;
+
+      const config = setting.value as any;
+      if (!config.enabled || !config.access_token || !config.phone_number_id) return;
+
+      const accountSid = config.phone_number_id; // Twilio Account SID
+      const authToken = config.access_token; // Twilio Auth Token
+      const fromNumber = config.twilio_from || 'whatsapp:+14155238886'; // Twilio From Number
+
+      // 2. Lookup phone number
+      let phoneNum = metadata?.phone || metadata?.phoneNumber || data?.phone || data?.phoneNumber || data?.recipient_phone;
+      
+      if (!phoneNum && toEmail) {
+        // Try looking up in employees
+        const employee = await this.prisma.employees.findFirst({
+          where: { email: toEmail },
+        });
+        if (employee?.phone) {
+          phoneNum = employee.phone;
+        }
+      }
+
+      if (!phoneNum && toEmail) {
+        // Try looking up in crm_leads
+        const lead = await this.prisma.crm_leads.findFirst({
+          where: { email: toEmail },
+        });
+        if (lead?.phone) {
+          phoneNum = lead.phone;
+        }
+      }
+
+      if (!phoneNum && toEmail) {
+        // Try looking up in job_applications
+        const application = await this.prisma.job_applications.findFirst({
+          where: { email: toEmail },
+        });
+        if (application?.phone) {
+          phoneNum = application.phone;
+        }
+      }
+
+      if (!phoneNum) {
+        this.logger.warn(`No phone number found for recipient email ${toEmail}. Skipping WhatsApp dispatch.`);
+        return;
+      }
+
+      // Clean phone number (keep digits only)
+      const cleanPhone = phoneNum.replace(/[^\d]/g, '');
+      if (!cleanPhone) return;
+
+      // 3. Compile body text based on templateName
+      let bodyText = '';
+      switch (templateName) {
+        case 'password-reset':
+          bodyText = `Hello ${data.name || 'User'},\n\nWe received a request to reset your password. Use the following link to choose a new one:\n\n${data.resetUrl}\n\nThis link is valid for 1 hour.`;
+          break;
+        case 'verification_required':
+          bodyText = `Hello ${data.name || 'Customer'},\n\nIdentity verification is required for order #${data.invoiceNumber || 'Update'}. Please complete your verification using the secure link below:\n\n${data.verificationUrl}`;
+          break;
+        case 'verification_approved':
+          bodyText = `Hello,\n\nWe are pleased to inform you that your identity verification has been approved. Your order is now being processed.`;
+          break;
+        case 'verification_declined':
+          bodyText = `Hello,\n\nUnfortunately, your identity verification request was declined. Please verify your details and submit again, or contact our support team.`;
+          break;
+        case 'contact-confirmation':
+          bodyText = `Hello ${data.name || 'there'},\n\nThanks for reaching out! We have received your ${data.formType || 'submission'} and our team will get back to you shortly.`;
+          break;
+        case 'job-application-received':
+          bodyText = `Hello ${data.name || 'Applicant'},\n\nThank you for applying for the ${data.role} position at Dynime! We have received your application and will review it shortly.`;
+          break;
+        case 'admin-new-submission':
+          bodyText = `New submission received for ${data.formType || 'Form'}.\nName: ${data.customerName || 'N/A'}\nEmail: ${data.customerEmail}\nView details: ${data.adminUrl}`;
+          break;
+        default:
+          return; // Unknown templates not dispatched via automated WhatsApp
+      }
+
+      this.logger.log(`Dispatching Twilio WhatsApp alert to +${cleanPhone} for template ${templateName}...`);
+
+      // 4. Dispatch Twilio WhatsApp Message
+      const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+      const basicAuth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          To: `whatsapp:+${cleanPhone}`,
+          From: fromNumber.startsWith('whatsapp:') ? fromNumber : `whatsapp:${fromNumber}`,
+          Body: bodyText,
+        }),
+      });
+
+      const resJson = await response.json();
+      if (response.ok && resJson.sid) {
+        this.logger.log(`Twilio WhatsApp alert successfully sent to +${cleanPhone}. SID: ${resJson.sid}`);
+        // Log in database send log
+        await this.prisma.whatsapp_send_log.create({
+          data: {
+            message_id: resJson.sid,
+            template_name: templateName,
+            recipient_phone: cleanPhone,
+            status: 'sent',
+            error_message: null,
+            metadata: resJson as any,
+          },
+        });
+      } else {
+        const errorMsg = resJson.message || resJson.error_message || 'Twilio Error';
+        this.logger.error(`Twilio WhatsApp send failed: ${errorMsg}`);
+        await this.prisma.whatsapp_send_log.create({
+          data: {
+            message_id: 'wa-failed-' + crypto.randomUUID(),
+            template_name: templateName,
+            recipient_phone: cleanPhone,
+            status: 'failed',
+            error_message: errorMsg,
+            metadata: resJson as any,
+          },
+        });
+      }
+    } catch (err) {
+      this.logger.error(`Failed to dispatch Twilio WhatsApp alert: ${err.message}`);
+    }
   }
 }
