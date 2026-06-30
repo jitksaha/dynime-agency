@@ -471,6 +471,14 @@ const Contact = () => {
                         </div>
                       </div>
 
+                      {/* Phone Number */}
+                      {office.phone && (
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 font-sans pt-1">
+                          <Phone className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <span>{office.phone}</span>
+                        </p>
+                      )}
+
                       {/* Status Badges */}
                       <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {/* Appointment Badge */}

@@ -571,7 +571,16 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Offices section removed per request */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 border-t border-border/60 pt-4 dark:border-white/[0.06] text-[11px] text-muted-foreground">
+          <span className="font-semibold text-foreground/80 dark:text-slate-300">Offices:</span>
+          <span>Headquarters (New York)</span>
+          <span className="text-muted-foreground/35">•</span>
+          <span>Bangladesh Office</span>
+          <span className="text-muted-foreground/35">•</span>
+          <span>UK Office</span>
+          <span className="text-muted-foreground/35">•</span>
+          <span>Florida Mail Center</span>
+        </div>
       </div>
 
       {/* ============================================================ */}
