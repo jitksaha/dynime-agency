@@ -398,39 +398,43 @@ const CareerDetail = () => {
                   </dl>
 
                   <div className="mt-6 flex flex-col gap-2.5">
-                    {/* Main Apply Button */}
-                    <a
-                      href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-300 gap-1.5 group shadow-md shadow-primary/10"
-                    >
-                      Apply with Flowmingo AI
-                      <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                      </svg>
-                    </a>
-
-                    {/* Additional Apply Buttons */}
-                    {(Array.isArray(job.posting_channels) ? job.posting_channels : []).map((ch, idx) => {
-                      if (!ch.url) return null;
-                      const label = ch.label || `Platform ${idx + 1}`;
-                      const colorClass = BUTTON_COLORS[(idx + 1) % BUTTON_COLORS.length];
-                      return (
-                        <a
-                          key={idx}
-                          href={ch.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold transition-all duration-300 gap-1.5 group ${colorClass}`}
-                        >
-                          Apply with {label}
-                          <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                          </svg>
-                        </a>
-                      );
-                    })}
+                    {/* Render buttons from posting_channels list */}
+                    {Array.isArray(job.posting_channels) && job.posting_channels.length > 0 ? (
+                      job.posting_channels.map((ch, idx) => {
+                        if (!ch.url) return null;
+                        const label = ch.label || `Platform ${idx + 1}`;
+                        const displayName = label.toLowerCase().startsWith("apply") ? label : `Apply with ${label}`;
+                        // Use sequential colors from BUTTON_COLORS starting with index 0
+                        const colorClass = BUTTON_COLORS[idx % BUTTON_COLORS.length];
+                        return (
+                          <a
+                            key={idx}
+                            href={ch.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold transition-all duration-300 gap-1.5 group ${colorClass}`}
+                          >
+                            {displayName}
+                            <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                            </svg>
+                          </a>
+                        );
+                      })
+                    ) : (
+                      /* Fallback default apply button if list is empty */
+                      <a
+                        href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center w-full h-11 px-5 rounded-xl font-bold bg-primary hover:bg-primary/95 text-primary-foreground transition-all duration-300 gap-1.5 group shadow-md shadow-primary/10"
+                      >
+                        Apply with Flowmingo AI
+                        <svg className="w-4 h-4 ml-0.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                        </svg>
+                      </a>
+                    )}
 
                     <Button variant="outline" size="lg" onClick={handleShare} className="w-full mt-2 h-11 rounded-xl">
                       <Share2 className="w-4 h-4 mr-2" /> Share this role
@@ -530,39 +534,42 @@ const CareerDetail = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3.5 pt-4">
-                {/* Main Apply Button */}
-                <a
-                  href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 gap-2 group hover:-translate-y-0.5"
-                >
-                  Apply with Flowmingo AI
-                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                  </svg>
-                </a>
-
-                {/* Additional Apply Buttons */}
-                {(Array.isArray(job.posting_channels) ? job.posting_channels : []).map((ch, idx) => {
-                  if (!ch.url) return null;
-                  const label = ch.label || `Platform ${idx + 1}`;
-                  const colorClass = BUTTON_COLORS[(idx + 1) % BUTTON_COLORS.length];
-                  return (
-                    <a
-                      key={idx}
-                      href={ch.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold transition-all duration-300 gap-2 group hover:-translate-y-0.5 ${colorClass}`}
-                    >
-                      Apply with {label}
-                      <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                      </svg>
-                    </a>
-                  );
-                })}
+                {/* Render buttons from posting_channels list */}
+                {Array.isArray(job.posting_channels) && job.posting_channels.length > 0 ? (
+                  job.posting_channels.map((ch, idx) => {
+                    if (!ch.url) return null;
+                    const label = ch.label || `Platform ${idx + 1}`;
+                    const displayName = label.toLowerCase().startsWith("apply") ? label : `Apply with ${label}`;
+                    const colorClass = BUTTON_COLORS[idx % BUTTON_COLORS.length];
+                    return (
+                      <a
+                        key={idx}
+                        href={ch.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center justify-center h-12 px-8 rounded-full font-semibold transition-all duration-300 gap-2 group hover:-translate-y-0.5 ${colorClass}`}
+                      >
+                        {displayName}
+                        <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                        </svg>
+                      </a>
+                    );
+                  })
+                ) : (
+                  /* Fallback default apply button if list is empty */
+                  <a
+                    href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 gap-2 group hover:-translate-y-0.5"
+                  >
+                    Apply with Flowmingo AI
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                  </a>
+                )}
               </div>
 
               <p className="text-[11px] text-muted-foreground mt-4">
