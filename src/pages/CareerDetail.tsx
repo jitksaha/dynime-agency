@@ -510,22 +510,42 @@ const CareerDetail = () => {
 
       {/* Application form */}
       <section className="pb-16 md:pb-24 bg-card/30 border-t border-border/60 pt-12 md:pt-16">
-        <div className="container-custom max-w-3xl">
-          <div className="text-center mb-8">
-            <span className="text-xs uppercase tracking-[0.18em] text-primary font-semibold">Apply now</span>
-            <h2 className="font-heading text-3xl md:text-4xl font-bold mt-3 mb-3">
-              Ready to join us as <span className="gradient-text">{job.title}</span>?
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Fill out the form below — our team reviews every application within 5 business days.
-            </p>
-          </div>
+        <div className="container-custom max-w-2xl">
+          <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card/50 to-indigo-500/5 p-8 md:p-10 text-center shadow-xl backdrop-blur-md relative overflow-hidden">
+            {/* Visual gradient orb */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl" />
 
-          <JobApplicationForm
-            careerId={job.id}
-            careerSlug={job.slug}
-            careerTitle={job.title}
-          />
+            <div className="relative z-10 space-y-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                <Sparkles className="w-3.5 h-3.5" /> Direct External Application
+              </span>
+              
+              <h2 className="font-heading text-3xl font-bold mt-2">
+                Apply for <span className="gradient-text">{job.title}</span>
+              </h2>
+              
+              <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+                We collect and process talent applications via our secure Flowmingo AI partner portal. Click the button below to start your application form.
+              </p>
+
+              <div className="pt-4">
+                <a
+                  href={job.apply_url && job.apply_url.startsWith("http") ? job.apply_url : `https://flowmingo.ai/apply/dynime?role=${encodeURIComponent(job.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 transition-all duration-300 gap-2 group hover:-translate-y-0.5"
+                >
+                  Apply via Flowmingo AI
+                  <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </a>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground mt-4">
+                You will be redirected to the secure Flowmingo application portal.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </Layout>
