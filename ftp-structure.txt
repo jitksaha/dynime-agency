@@ -12,6 +12,7 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -20,6 +21,7 @@ debug-deploy.php
 read-log.php
 404.html
 saas-development
+sync-offices-db.php
 wordpress-design-illustration.png
 shopify-ecommerce
 itin-services
