@@ -2061,6 +2061,7 @@ class OrdersController extends Controller
         $statusLabel = ucfirst($status);
         $link = env('FRONTEND_URL', 'https://dynime.com') . "/payment/status/" . urlencode($orderId);
 
+        // 1. Send Email
         try {
             \App\Services\MailConfigurator::configure('orders');
             \Illuminate\Support\Facades\Mail::html("
@@ -2080,6 +2081,35 @@ class OrdersController extends Controller
             });
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning("Failed to send order status update email: " . $e->getMessage());
+        }
+
+        // 2. Send matching WhatsApp notification via Twilio
+        try {
+            $order = DB::table('orders')->where('id', $orderId)->first();
+            $phoneNum = '';
+            
+            if ($order) {
+                if (!empty($order->billing_address)) {
+                    $addr = json_decode($order->billing_address, true);
+                    if (is_array($addr) && !empty($addr['phone'])) {
+                        $phoneNum = $addr['phone'];
+                    }
+                }
+                
+                if (empty($phoneNum) && !empty($order->customer_email)) {
+                    $lead = DB::table('crm_leads')->where('email', $order->customer_email)->first();
+                    if ($lead && !empty($lead->phone)) {
+                        $phoneNum = $lead->phone;
+                    }
+                }
+                
+                if (!empty($phoneNum)) {
+                    $vars = [$name ?: 'Valued Customer', $orderId, $statusLabel];
+                    \App\Services\WhatsAppService::send($phoneNum, '', $vars, 'order_update');
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Failed to send order status update WhatsApp: " . $e->getMessage());
         }
     }
 
