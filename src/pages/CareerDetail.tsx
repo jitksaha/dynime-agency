@@ -99,17 +99,23 @@ const BUTTON_COLORS = [
 
 const CareerDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { data: job, isLoading, isError } = useJob(slug);
-  const { data: stats } = useCareerStats(slug, job?.id);
+  
+  // Clean slug of any hidden characters, zero-width spaces, or social-media parameters
+  const cleanSlug = slug 
+    ? decodeURIComponent(slug).replace(/[^a-zA-Z0-9-_]/g, "").trim() 
+    : "";
+
+  const { data: job, isLoading, isError } = useJob(cleanSlug);
+  const { data: stats } = useCareerStats(cleanSlug, job?.id);
   const incrementView = useIncrementCareerViewBySlug();
 
   // Increment view count once per slug per session
   useEffect(() => {
-    if (!slug) return;
-    const key = `career-viewed:${slug}`;
+    if (!cleanSlug) return;
+    const key = `career-viewed:${cleanSlug}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
-    incrementView.mutateAsync(slug).then(() => {
+    incrementView.mutateAsync(cleanSlug).then(() => {
       // refresh stats after increment
       setTimeout(() => {
         // soft refetch via query key
