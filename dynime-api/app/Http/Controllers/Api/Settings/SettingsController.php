@@ -343,44 +343,40 @@ class SettingsController extends Controller
         $replace = $data['replace'];
 
         // Automatically fetch current company_name and site_name from settings
-        $currentCompanyName = \App\Models\SiteSetting::where('key', 'company_name')->value('value') ?? 'Dynime LLC.';
-        $currentSiteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value') ?? 'Dynime';
+        $companyNameSetting = \App\Models\SiteSetting::where('key', 'company_name')->first();
+        $currentCompanyName = 'Dynime LLC.';
+        if ($companyNameSetting) {
+            $val = $companyNameSetting->value;
+            $currentCompanyName = is_array($val) ? ($val['value'] ?? 'Dynime LLC.') : (is_string($val) ? $val : 'Dynime LLC.');
+        }
 
-        $replacementHelper = function($val) use ($currentCompanyName, $currentSiteName, $replace) {
-            if ($val === null || $val === '') return $val;
-            
-            // If the value is a JSON array or object, we recursively replace keys/values
-            $isJson = false;
+        $siteNameSetting = \App\Models\SiteSetting::where('key', 'site_name')->first();
+        $currentSiteName = 'Dynime';
+        if ($siteNameSetting) {
+            $val = $siteNameSetting->value;
+            $currentSiteName = is_array($val) ? ($val['value'] ?? 'Dynime') : (is_string($val) ? $val : 'Dynime');
+        }
+
+        $replaceRecursive = function($val) use (&$replaceRecursive, $currentCompanyName, $currentSiteName, $replace) {
+            if ($val === null) return null;
             if (is_array($val)) {
-                $isJson = true;
-            } elseif (is_string($val)) {
-                $trimmed = trim($val);
-                if ($trimmed !== '' && ($trimmed[0] === '[' || $trimmed[0] === '{')) {
-                    $isJson = true;
+                $newArr = [];
+                foreach ($val as $k => $v) {
+                    $newArr[$k] = $replaceRecursive($v);
                 }
+                return $newArr;
             }
-
-            if ($isJson) {
-                $decoded = is_array($val) ? $val : json_decode($val, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $decoded = array_map(function($v) use ($currentCompanyName, $currentSiteName, $replace) {
-                        if (is_string($v)) {
-                            return $this->performReplacement($v, $currentCompanyName, $currentSiteName, $replace);
-                        }
-                        return $v;
-                    }, $decoded);
-                    return json_encode($decoded);
-                }
+            if (is_string($val)) {
+                return $this->performReplacement($val, $currentCompanyName, $currentSiteName, $replace);
             }
-
-            return $this->performReplacement($val, $currentCompanyName, $currentSiteName, $replace);
+            return $val;
         };
 
         $updatedSettings = 0;
         // 1. Site Settings
-        \App\Models\SiteSetting::all()->each(function($s) use ($replacementHelper, &$updatedSettings) {
+        \App\Models\SiteSetting::all()->each(function($s) use ($replaceRecursive, &$updatedSettings) {
             $oldValue = $s->value;
-            $newValue = $replacementHelper($s->value);
+            $newValue = $replaceRecursive($s->value);
             if ($oldValue !== $newValue) {
                 $s->value = $newValue;
                 $s->save();
