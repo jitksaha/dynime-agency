@@ -543,7 +543,7 @@ const HRDocumentPreview = ({
             <img
               src="/dynime-seal.png"
               alt="Company Seal"
-              className="absolute left-4 bottom-16 h-24 w-24 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
+              className="absolute left-4 bottom-24 h-24 w-24 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
               crossOrigin="anonymous"
             />
             <div className="h-20 mb-4 flex items-end relative z-10">
