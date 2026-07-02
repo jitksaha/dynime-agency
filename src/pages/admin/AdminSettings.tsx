@@ -51,39 +51,6 @@ const AdminSettings = () => {
   const [maskLicenses, setMaskLicenses] = useState<boolean>(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<{ message: string; isRls: boolean } | null>(null);
-  const [replaceName, setReplaceName] = useState("");
-  const [replacing, setReplacing] = useState(false);
-
-  const handleGlobalReplace = async () => {
-    if (!replaceName.trim()) {
-      toast.error("Please enter the new replacement name.");
-      return;
-    }
-    if (replaceName.trim().length < 2) {
-      toast.error("Inputs must be at least 2 characters.");
-      return;
-    }
-    setReplacing(true);
-    try {
-      const res = await apiPost<any>("/cms/site-settings/global-replace", {
-        replace: replaceName.trim(),
-      });
-      toast.success(res?.message || "Replacement run completed successfully!");
-      if (res?.details) {
-        toast.info(
-          `Updated: ${res.details.site_settings} settings, ${res.details.services} services, ${res.details.blog_posts} posts, ${res.details.careers} careers`
-        );
-      }
-      qc.invalidateQueries({ queryKey: ["site-settings"] });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (e: any) {
-      toast.error(e.message || "Failed to execute global replacement");
-    } finally {
-      setReplacing(false);
-    }
-  };
 
   const [backupStatus, setBackupStatus] = useState<any>(null);
   const [backingUp, setBackingUp] = useState(false);
@@ -366,35 +333,7 @@ const AdminSettings = () => {
         ))}
       </div>
 
-      {/* Global Company Name Change Section */}
-      <div className="glass-card p-6 max-w-2xl mb-6 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Building2 className="w-4 h-4 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground font-heading">Global Company Name Change</h2>
-        </div>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Use this tool to replace a company name globally across the entire system. It will automatically detect your current site brand and company names, and perform case-insensitive replacements in website settings (headers, footers), generated official documents (payslips, experience/relieving letters), services, blog posts, and careers.
-        </p>
-        <div>
-          <label className="text-xs text-muted-foreground block mb-1 font-medium">New Company Name (e.g. Flamingo Inc.)</label>
-          <input
-            value={replaceName}
-            onChange={(e) => setReplaceName(e.target.value)}
-            placeholder="Enter the new company name"
-            className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <div className="flex justify-end pt-2">
-          <Button
-            variant="hero"
-            size="sm"
-            onClick={handleGlobalReplace}
-            disabled={replacing || !replaceName.trim()}
-          >
-            {replacing ? "Replacing Globally..." : "Run Global Replacement"}
-          </Button>
-        </div>
-      </div>
+
 
       {/* Registered entities — shown on the About page and used in legal copy */}
       <div className="glass-card p-6 max-w-2xl mb-6">

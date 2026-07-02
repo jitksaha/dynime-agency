@@ -1449,6 +1449,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   
   const [signatureTypedName, setSignatureTypedName] = useState("");
   const [signatureImageUrl, setSignatureImageUrl] = useState("");
+  const [customCompanyName, setCustomCompanyName] = useState("");
   const [issuing, setIssuing] = useState(false);
   const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -1607,6 +1608,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
           last_working_day: lastWorkingDay || null,
           payslip_earnings: kind === "payslip" ? earnings : null,
           payslip_deductions: kind === "payslip" ? deductions : null,
+          custom_company_name: customCompanyName || null,
         },
         send_email: sendEmail,
       });
@@ -1695,6 +1697,17 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label className="flex items-center gap-2">
+                Custom company name
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">optional</span>
+              </Label>
+              <Input
+                value={customCompanyName}
+                onChange={(e) => setCustomCompanyName(e.target.value)}
+                placeholder="e.g. Other Company LLC"
+              />
             </div>
             <div>
               <Label className="flex items-center gap-2">
@@ -2100,6 +2113,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
             reason={kind === "termination" ? reason : undefined}
             lastWorkingDay={lastWorkingDay || undefined}
             tillNow={tillNow}
+            customCompanyName={customCompanyName || undefined}
           />
         ) : (
           <div className="border border-dashed border-border rounded-lg p-10 text-center text-muted-foreground">
@@ -2218,6 +2232,7 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
                           reason={d.computed?.reason as string}
                           tillNow={Boolean(d.computed?.till_now)}
                           lastWorkingDay={d.computed?.last_working_day as string || undefined}
+                          customCompanyName={d.computed?.custom_company_name as string || undefined}
                         />
                       </div>
                       <DialogFooter className="print:hidden">

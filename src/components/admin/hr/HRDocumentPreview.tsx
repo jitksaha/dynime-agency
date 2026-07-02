@@ -114,6 +114,7 @@ export interface HRDocPreviewProps {
   noticePeriodDays?: number;
   severanceAmount?: number;
   reason?: string;
+  customCompanyName?: string;
 }
 
 const fmtDate = (s?: string | null) => {
@@ -164,7 +165,7 @@ const HRDocumentPreview = ({
   bodyText,
   clauses = [],
   signatoryName = "Authorised Signatory",
-  signatoryTitle = "Director, Dynime LLC.",
+  signatoryTitle,
   validityDate,
   signatureTypedName,
   signatureImageUrl,
@@ -174,9 +175,11 @@ const HRDocumentPreview = ({
   noticePeriodDays,
   severanceAmount,
   reason,
+  customCompanyName,
 }: HRDocPreviewProps) => {
   const { data: settings } = useSiteSettings();
-  const companyName = settings?.company_name || "Dynime LLC.";
+  const companyName = customCompanyName || settings?.company_name || "Dynime LLC.";
+  const resolvedSignatoryTitle = signatoryTitle || `Director, ${companyName}`;
   const companyAddress = settings?.company_address || "";
   const rawEmail = settings?.contact_email || "support@dynime.com";
   const companyEmail = /hello@dynime\.com/i.test(rawEmail) ? "support@dynime.com" : rawEmail;
@@ -550,7 +553,7 @@ const HRDocumentPreview = ({
             </div>
             <div className="border-t border-neutral-400 pt-2 relative z-10">
               <div className="text-xs font-semibold">{signatoryName}</div>
-              <div className="text-[11px] text-neutral-500">{signatoryTitle}</div>
+              <div className="text-[11px] text-neutral-500">{resolvedSignatoryTitle}</div>
               <div className="text-[11px] text-neutral-500">Date: {fmtDate(employee.joining_date || issueDate)}</div>
             </div>
           </div>
