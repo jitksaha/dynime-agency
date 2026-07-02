@@ -433,7 +433,24 @@ const HRDocumentPreview = ({
             <div><span className="text-neutral-500">Department:</span> <strong>{employee.department || "—"}</strong></div>
             <div><span className="text-neutral-500">Job type:</span> <strong>{employee.job_type || "—"}</strong></div>
             <div><span className="text-neutral-500">Joining date:</span> <strong>{fmtDate(employee.joining_date)}</strong></div>
-            <div><span className="text-neutral-500">Pay period:</span> <strong>{periodMonth ? fmtDate(periodMonth + "-01").replace(/\s\d+,\s/, " ") : fmtDate(issueDate)}</strong></div>
+            <div><span className="text-neutral-500">Pay period:</span> <strong>{(() => {
+              if (!periodMonth) return fmtDate(issueDate);
+              const formatSingleMonth = (mStr: string) => {
+                try {
+                  return new Date(mStr.trim() + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+                } catch {
+                  return mStr;
+                }
+              };
+              if (periodMonth.includes(" to ")) {
+                const parts = periodMonth.split(" to ");
+                const startPart = formatSingleMonth(parts[0]);
+                const endPart = tillNow ? "Till Now" : formatSingleMonth(parts[1]);
+                return `${startPart} to ${endPart}`;
+              }
+              const startPart = formatSingleMonth(periodMonth);
+              return tillNow ? `${startPart} to Till Now` : startPart;
+            })()}</strong></div>
             {employee.bank_name && <div><span className="text-neutral-500">Bank:</span> <strong>{employee.bank_name}</strong></div>}
             {employee.bank_account_number && <div><span className="text-neutral-500">A/C No:</span> <strong>{employee.bank_account_number}</strong></div>}
           </div>

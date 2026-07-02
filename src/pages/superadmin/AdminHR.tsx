@@ -1483,10 +1483,14 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
 
   const rawEmployee = useMemo(() => employees.find((e) => e.id === employeeId) || null, [employees, employeeId]);
   const monthRange = useMemo(() => {
-    if (!startMonth || !endMonth) return [];
+    if (!startMonth) return [];
+    const isPayslip = kind === "payslip";
+    const safeEndMonth = (isPayslip && tillNow) 
+      ? currentMonthStr() 
+      : (endMonth || startMonth);
     const res: string[] = [];
     let curr = new Date(startMonth + "-01");
-    const last = new Date(endMonth + "-01");
+    const last = new Date(safeEndMonth + "-01");
     let limit = 0;
     while (curr <= last && limit < 24) {
       res.push(curr.toISOString().slice(0, 7)); // YYYY-MM
@@ -1494,7 +1498,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
       limit++;
     }
     return res;
-  }, [startMonth, endMonth]);
+  }, [startMonth, endMonth, tillNow, kind]);
 
   useEffect(() => {
     if (!rawEmployee) return;
@@ -1801,9 +1805,23 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
                   <Label>Pay period (From month)</Label>
                   <Input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} />
                 </div>
-                <div>
-                  <Label>Pay period (To month)</Label>
-                  <Input type="month" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} />
+                {!tillNow && (
+                  <div>
+                    <Label>Pay period (To month)</Label>
+                    <Input type="month" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} />
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-2 col-span-2">
+                  <input
+                    type="checkbox"
+                    id="payslip-till-now-checkbox"
+                    checked={tillNow}
+                    onChange={(e) => setTillNow(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="payslip-till-now-checkbox" className="font-medium cursor-pointer">
+                    Till Now (Currently Working)
+                  </Label>
                 </div>
               </>
             )}
