@@ -2,6 +2,7 @@ import SiteLogo from "@/components/shared/SiteLogo";
 import { useSiteSettings } from "@/hooks/use-data";
 import type { PayslipBreakdown } from "@/lib/payslip-math";
 import { SIGNATURE_FONTS } from "@/components/admin/AgreementPreview";
+import { Mail, Globe, Phone } from "lucide-react";
 
 const sigHash = (s: string) => {
   let h = 0;
@@ -181,9 +182,9 @@ const HRDocumentPreview = ({
   const companyName = customCompanyName || settings?.company_name || "Dynime LLC.";
   const resolvedSignatoryTitle = signatoryTitle || `Director, ${companyName}`;
   const companyAddress = settings?.company_address || "";
-  const rawEmail = settings?.contact_email || "support@dynime.com";
-  const companyEmail = /hello@dynime\.com/i.test(rawEmail) ? "support@dynime.com" : rawEmail;
-  const companyWeb = settings?.site_url || "https://dynime.com";
+  const companyEmail = "contact@dynime.com";
+  const companyWeb = "dynime.com";
+  const companyPhone = "+16468840271";
   const currency = employee.currency || "USD";
   const base = Number(employee.gross_salary || 0);
   const allowanceRows = (employee.allowances || []).map((a) => ({
@@ -274,7 +275,22 @@ const HRDocumentPreview = ({
           <div>
             <div className="text-base font-bold tracking-tight">{companyName}</div>
             {companyAddress && <div className="text-[11px] text-neutral-500 max-w-[60ch]">{companyAddress}</div>}
-            <div className="text-[11px] text-neutral-500">{companyEmail} · {companyWeb}</div>
+            <div className="text-[10px] text-neutral-500 flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1">
+              <span className="flex items-center gap-1">
+                <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
+                {companyEmail}
+              </span>
+              <span className="text-neutral-300">·</span>
+              <span className="flex items-center gap-1">
+                <Globe className="w-3 h-3 text-neutral-400 shrink-0" />
+                {companyWeb}
+              </span>
+              <span className="text-neutral-300">·</span>
+              <span className="flex items-center gap-1">
+                <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
+                {companyPhone}
+              </span>
+            </div>
           </div>
         </div>
         <div className="text-right">
@@ -578,12 +594,22 @@ const HRDocumentPreview = ({
               <span className="text-[9.5px] text-neutral-500 leading-snug line-clamp-2">{companyAddress}</span>
             )}
           </div>
-          <div className="flex flex-col gap-0.5 items-center text-center">
-            <span className="text-[9px] uppercase tracking-[0.15em] text-neutral-400">Contact</span>
-            <a href={`mailto:${companyEmail}`} className="text-[11px] font-medium text-neutral-700 no-underline">
-              {companyEmail}
-            </a>
-            <span className="text-[9.5px] text-neutral-500">{companyWeb.replace(/^https?:\/\//, "")}</span>
+          <div className="flex flex-col gap-1 items-center text-center">
+            <span className="text-[9px] uppercase tracking-[0.15em] text-neutral-400 mb-0.5">Contact</span>
+            <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-700">
+              <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
+              <a href={`mailto:${companyEmail}`} className="no-underline text-neutral-700">
+                {companyEmail}
+              </a>
+            </div>
+            <div className="flex items-center gap-1 text-[9.5px] text-neutral-500">
+              <Globe className="w-3 h-3 text-neutral-400 shrink-0" />
+              <span>{companyWeb}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[9.5px] text-neutral-500">
+              <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
+              <span>{companyPhone}</span>
+            </div>
           </div>
           <div className="flex flex-col gap-0.5 items-end text-right">
             <span className="text-[9px] uppercase tracking-[0.15em] text-neutral-400">Reference</span>
