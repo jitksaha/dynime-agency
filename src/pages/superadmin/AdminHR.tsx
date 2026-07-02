@@ -2150,7 +2150,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
             kind={kind}
             issueDate={issueDate}
             effectiveDate={effectiveDate}
-            periodMonth={kind === "payslip" ? periodMonth : undefined}
+            periodMonth={kind === "payslip" ? (startMonth === endMonth ? startMonth : `${startMonth} to ${endMonth}`) : undefined}
             employee={employee}
             bodyText={bodyText}
             clauses={kind === "agreement" ? clauses : undefined}
