@@ -14,6 +14,7 @@ import { apiPost, apiGet } from "@/lib/api";
 
 const generalSettings = [
   { key: "site_name", label: "Site Name (Main brand — used everywhere)", type: "text" },
+  { key: "company_name", label: "Registered Company Name (Used on official letters, documents, invoices)", type: "text" },
   { key: "site_tagline", label: "Tagline", type: "text" },
   { key: "hero_headline", label: "Hero Headline", type: "text" },
   { key: "hero_subheadline", label: "Hero Subheadline", type: "textarea" },
