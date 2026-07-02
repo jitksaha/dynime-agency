@@ -502,15 +502,32 @@ const HRDocumentPreview = ({
             </div>
             <div className="text-3xl font-bold tabular-nums">{fmtMoney(payslip.net, currency)}</div>
           </div>
-          <p className="text-[10px] text-neutral-500 italic">This is a computer-generated payslip and does not require a signature.</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-[10px] text-neutral-500 italic max-w-[75%]">
+              This is an electronically generated payslip and is valid without a physical signature.
+            </p>
+            <img
+              src="/dynime-seal.png"
+              alt="Company Seal"
+              className="h-16 w-16 object-contain pointer-events-none select-none opacity-90 mix-blend-multiply mr-2"
+              crossOrigin="anonymous"
+            />
+          </div>
         </>
       )}
 
       {/* Signatures (non-payslip) */}
       {kind !== "payslip" && (
         <section className="mt-10 grid grid-cols-2 gap-8">
-          <div>
-            <div className="h-12 mb-2 flex items-end">
+          <div className="relative">
+            {/* Company Seal Stamp */}
+            <img
+              src="/dynime-seal.png"
+              alt="Company Seal"
+              className="absolute right-4 bottom-2 h-20 w-20 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
+              crossOrigin="anonymous"
+            />
+            <div className="h-12 mb-2 flex items-end relative z-10">
               {signatureImageUrl ? (
                 <img
                   src={signatureImageUrl}
@@ -531,7 +548,7 @@ const HRDocumentPreview = ({
                 </span>
               )}
             </div>
-            <div className="border-t border-neutral-400 pt-2">
+            <div className="border-t border-neutral-400 pt-2 relative z-10">
               <div className="text-xs font-semibold">{signatoryName}</div>
               <div className="text-[11px] text-neutral-500">{signatoryTitle}</div>
               <div className="text-[11px] text-neutral-500">Date: {fmtDate(employee.joining_date || issueDate)}</div>
