@@ -131,8 +131,25 @@ foreach (glob($homeDir . '/*.zip') as $file) {
     }
 }
 
+function isExecEnabled() {
+    if (!function_exists('exec')) {
+        return false;
+    }
+    $disabled = explode(',', ini_get('disable_functions'));
+    $disabled = array_map('trim', $disabled);
+    return !in_array('exec', $disabled);
+}
+
 // Helper: Run Laravel Artisan commands from the extracted app directory
 function runLaravelCommand($extractTo, $command) {
+    if (!isExecEnabled()) {
+        return [
+            'command' => $command,
+            'exit_code' => 1,
+            'output' => 'exec() function is disabled on this server.',
+        ];
+    }
+
     $oldCwd = getcwd();
     chdir($extractTo);
 
@@ -259,32 +276,51 @@ if ($zip->open($zipFile) === TRUE) {
         if (!file_exists($extractTo . '/artisan')) {
             echo "<p><span style='color:red; font-weight:bold;'>Error:</span> Laravel artisan file not found at <code>" . htmlspecialchars($extractTo . '/artisan') . "</code>.</p>";
         } else {
-            // Run migrations first so new tables/columns are available
-            echo "<h4>Running database migrations...</h4>";
-            $migrateResult = runLaravelCommand($extractTo, 'migrate --force');
-            printLaravelCommandResult($migrateResult);
-
-            $cacheCommands = [
-                'route:clear',
-                'config:clear',
-                'cache:clear',
-            ];
-
-            $cacheFailed = false;
-            foreach ($cacheCommands as $cacheCommand) {
-                $result = runLaravelCommand($extractTo, $cacheCommand);
-                printLaravelCommandResult($result);
-                if ($result['exit_code'] !== 0) {
-                    $cacheFailed = true;
+            if (!isExecEnabled()) {
+                echo "<p style='color:orange; font-weight:bold;'>exec() is disabled on this server. Manually clearing cache files directly...</p>";
+                $cacheFiles = [
+                    $extractTo . '/bootstrap/cache/routes-v7.php',
+                    $extractTo . '/bootstrap/cache/config.php',
+                    $extractTo . '/bootstrap/cache/services.php',
+                    $extractTo . '/bootstrap/cache/packages.php',
+                ];
+                foreach ($cacheFiles as $file) {
+                    if (file_exists($file)) {
+                        if (@unlink($file)) {
+                            echo "Deleted Laravel cache file: <code>" . basename($file) . "</code><br/>";
+                        } else {
+                            echo "<span style='color:red;'>Failed to delete cache file:</span> <code>" . basename($file) . "</code><br/>";
+                        }
+                    }
                 }
-            }
-
-            $routesVerified = verifyOrderRoutes($extractTo);
-
-            if ($cacheFailed || !$routesVerified) {
-                echo "<p><span style='color:red; font-weight:bold;'>Deployment warning:</span> Backend extracted, but cache clearing or route verification failed. Orders import/export may still return 404/405 until this is fixed.</p>";
             } else {
-                echo "<p><span style='color:green; font-weight:bold;'>Success!</span> Cache cleared and order import/export routes verified.</p>";
+                // Run migrations first so new tables/columns are available
+                echo "<h4>Running database migrations...</h4>";
+                $migrateResult = runLaravelCommand($extractTo, 'migrate --force');
+                printLaravelCommandResult($migrateResult);
+
+                $cacheCommands = [
+                    'route:clear',
+                    'config:clear',
+                    'cache:clear',
+                ];
+
+                $cacheFailed = false;
+                foreach ($cacheCommands as $cacheCommand) {
+                    $result = runLaravelCommand($extractTo, $cacheCommand);
+                    printLaravelCommandResult($result);
+                    if ($result['exit_code'] !== 0) {
+                        $cacheFailed = true;
+                    }
+                }
+
+                $routesVerified = verifyOrderRoutes($extractTo);
+
+                if ($cacheFailed || !$routesVerified) {
+                    echo "<p><span style='color:red; font-weight:bold;'>Deployment warning:</span> Backend extracted, but cache clearing or route verification failed. Orders import/export may still return 404/405 until this is fixed.</p>";
+                } else {
+                    echo "<p><span style='color:green; font-weight:bold;'>Success!</span> Cache cleared and order import/export routes verified.</p>";
+                }
             }
         }
     } else {
