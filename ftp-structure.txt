@@ -12,6 +12,7 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -45,6 +46,7 @@ query-migrations.php
 components.json
 custom-software-development
 virtual-address
+show-ip.php
 custom-web-apps
 brand-strategy
 inspect-order.php
