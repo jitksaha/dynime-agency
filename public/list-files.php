@@ -1,1 +1,1 @@
-<?php echo '<pre>'; print_r(glob(__DIR__ . '/*')); print_r(glob(dirname(__DIR__) . '/*')); echo '</pre>';
+<?php echo 'Exists: ' . (file_exists('/home/u740731947/domains/dynime.com/public_html/dynime-api.zip') ? 'YES' : 'NO') . '<br/>Readable: ' . (is_readable('/home/u740731947/domains/dynime.com/public_html/dynime-api.zip') ? 'YES' : 'NO');
