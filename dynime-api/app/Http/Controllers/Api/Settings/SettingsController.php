@@ -350,8 +350,18 @@ class SettingsController extends Controller
             if ($val === null || $val === '') return $val;
             
             // If the value is a JSON array or object, we recursively replace keys/values
-            if (is_array($val) || (is_string($val) && (str_starts_with($val, '[') || str_starts_with($val, '{')))) {
-                $decoded = json_decode($val, true);
+            $isJson = false;
+            if (is_array($val)) {
+                $isJson = true;
+            } elseif (is_string($val)) {
+                $trimmed = trim($val);
+                if ($trimmed !== '' && ($trimmed[0] === '[' || $trimmed[0] === '{')) {
+                    $isJson = true;
+                }
+            }
+
+            if ($isJson) {
+                $decoded = is_array($val) ? $val : json_decode($val, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
                     $decoded = array_map(function($v) use ($currentCompanyName, $currentSiteName, $replace) {
                         if (is_string($v)) {
