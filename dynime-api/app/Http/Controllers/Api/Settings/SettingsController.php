@@ -514,7 +514,15 @@ class SettingsController extends Controller
         $siteReplace = preg_replace('/\s+(llc|inc|ltd|limited|corp|co\.?)\b/i', '', $replace);
 
         $out = $subject;
-        // Replace full company name variations case-insensitively
+
+        // 1. If we have a base brand name (e.g. Dynime), match and replace all its company suffix variations case-insensitively
+        if (!empty($siteName)) {
+            // Match "Brand LLC", "Brand Inc.", "Brand Technologies Limited", etc.
+            $regexCompanyVariations = '/\b' . preg_quote($siteName, '/') . '\s+(llc|inc|technologies\s+limited|technologies|limited|ltd|corp|co|agency|studio)\.?\b/i';
+            $out = preg_replace($regexCompanyVariations, $replace, $out);
+        }
+
+        // 2. Also match the exact current company name if it's set
         if (!empty($companyName)) {
             $regexCompany = '/' . preg_quote($companyName, '/') . '/i';
             $out = preg_replace($regexCompany, $replace, $out);
@@ -526,7 +534,7 @@ class SettingsController extends Controller
             }
         }
 
-        // Replace site name brand variations case-insensitively
+        // 3. Replace any remaining standalone brand name variations case-insensitively
         if (!empty($siteName)) {
             $regexSite = '/' . preg_quote($siteName, '/') . '/i';
             $out = preg_replace($regexSite, $siteReplace, $out);
