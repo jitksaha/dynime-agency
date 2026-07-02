@@ -1433,12 +1433,22 @@ const EmployeesTab = ({ employees, refetch }: { employees: Employee[]; refetch: 
 //  Builder tab
 // ============================================================
 const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: () => void }) => {
+  const formatMonthLabel = (mStr: string) => {
+    try {
+      return new Date(mStr + "-01").toLocaleDateString("en-US", { month: "short", year: "numeric" }).toUpperCase();
+    } catch {
+      return mStr;
+    }
+  };
+
   const [employeeId, setEmployeeId] = useState<string>("");
   const [kind, setKind] = useState<HRDocKind>("offer");
   const [issueDate, setIssueDate] = useState(todayStr());
   // Effective date for offer/agreement is derived from the employee's joining date.
   // For other doc kinds it falls back to the issue date.
-  const [periodMonth, setPeriodMonth] = useState(currentMonthStr());
+  const [startMonth, setStartMonth] = useState(currentMonthStr());
+  const [endMonth, setEndMonth] = useState(currentMonthStr());
+  const [monthlySalaries, setMonthlySalaries] = useState<Record<string, number>>({});
   const [bodyText, setBodyText] = useState("");
   const [validityDate, setValidityDate] = useState("");
   const [clausesRaw, setClausesRaw] = useState(
@@ -1472,6 +1482,34 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   const setOverride = (k: OverrideKey, v: string) => setOverrides((p) => ({ ...p, [k]: v }));
 
   const rawEmployee = useMemo(() => employees.find((e) => e.id === employeeId) || null, [employees, employeeId]);
+  const monthRange = useMemo(() => {
+    if (!startMonth || !endMonth) return [];
+    const res: string[] = [];
+    let curr = new Date(startMonth + "-01");
+    const last = new Date(endMonth + "-01");
+    let limit = 0;
+    while (curr <= last && limit < 24) {
+      res.push(curr.toISOString().slice(0, 7)); // YYYY-MM
+      curr.setMonth(curr.getMonth() + 1);
+      limit++;
+    }
+    return res;
+  }, [startMonth, endMonth]);
+
+  useEffect(() => {
+    if (!rawEmployee) return;
+    const base = Number(rawEmployee.gross_salary || 0);
+    setMonthlySalaries((prev) => {
+      const next = { ...prev };
+      monthRange.forEach((m) => {
+        if (next[m] === undefined) {
+          next[m] = base;
+        }
+      });
+      return next;
+    });
+  }, [rawEmployee, monthRange]);
+
   useEffect(() => {
     if (!rawEmployee) {
       setEarnings([]);
@@ -1488,9 +1526,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
     });
 
     const base = Number(rawEmployee.gross_salary || 0);
-    const initialEarnings = [
-      { label: "Basic Salary", amount: base }
-    ];
+    const initialEarnings: { label: string; amount: number }[] = [];
     const allowances = Array.isArray(rawEmployee.allowances) ? (rawEmployee.allowances as any[]) : [];
     allowances.forEach((a: any) => {
       const val = Number(a.value) || 0;
@@ -1571,19 +1607,31 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
 
   const payslip = useMemo(() => {
     if (kind !== "payslip" || !employee) return undefined;
-    const gross = Math.round(earnings.reduce((s, e) => s + (Number(e.amount) || 0), 0) * 100) / 100;
+    
+    // Construct Basic Salary earnings for each month in the range
+    const basicEarnings = monthRange.map((m) => ({
+      label: `Basic Salary (${formatMonthLabel(m)})`,
+      amount: Math.round((Number(monthlySalaries[m]) || 0) * 100) / 100
+    }));
+
+    // Other earnings/allowances
+    const otherEarnings = earnings.map(e => ({ label: e.label, amount: Number(e.amount) || 0 }));
+    const combinedEarnings = [...basicEarnings, ...otherEarnings];
+
+    const gross = Math.round(combinedEarnings.reduce((s, e) => s + e.amount, 0) * 100) / 100;
     const totalDeductions = Math.round(deductions.reduce((s, d) => s + (Number(d.amount) || 0), 0) * 100) / 100;
     const net = Math.round((gross - totalDeductions) * 100) / 100;
+
     return {
-      basic: Number(earnings[0]?.amount || 0),
-      earnings: earnings.map(e => ({ label: e.label, amount: Number(e.amount) || 0 })),
+      basic: Number(monthlySalaries[monthRange[0] || ""] || 0),
+      earnings: combinedEarnings,
       deductions: deductions.map(d => ({ label: d.label, amount: Number(d.amount) || 0 })),
       gross,
       totalDeductions,
       net,
       netInWords: numberToWords(Math.floor(net)) + (net % 1 ? " and " + Math.round((net % 1) * 100) + "/100" : "") + " only",
     };
-  }, [kind, employee, earnings, deductions]);
+  }, [kind, employee, monthRange, monthlySalaries, earnings, deductions]);
 
   const issueAndEmail = async (sendEmail: boolean) => {
     if (!employee) { toast.error("Pick an employee first"); return null; }
@@ -1594,7 +1642,7 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
         kind,
         issue_date: issueDate && issueDate.trim() !== "" ? issueDate : todayStr(),
         effective_date: effectiveDate && String(effectiveDate).trim() !== "" ? effectiveDate : null,
-        period_month: kind === "payslip" ? periodMonth : null,
+        period_month: kind === "payslip" ? (startMonth === endMonth ? startMonth : `${startMonth} to ${endMonth}`) : null,
         computed: {
           body_text: bodyText || null,
           clauses: kind === "agreement" ? clauses : null,
@@ -1608,6 +1656,10 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
           last_working_day: lastWorkingDay || null,
           payslip_earnings: kind === "payslip" ? earnings : null,
           payslip_deductions: kind === "payslip" ? deductions : null,
+          start_month: kind === "payslip" ? startMonth : null,
+          end_month: kind === "payslip" ? endMonth : null,
+          monthly_salaries: kind === "payslip" ? monthlySalaries : null,
+          month_range: kind === "payslip" ? monthRange : null,
         },
         send_email: sendEmail,
       });
@@ -1744,10 +1796,16 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
               </>
             )}
             {kind === "payslip" && (
-              <div>
-                <Label>Pay period (month)</Label>
-                <Input type="month" value={periodMonth} onChange={(e) => setPeriodMonth(e.target.value)} />
-              </div>
+              <>
+                <div>
+                  <Label>Pay period (From month)</Label>
+                  <Input type="month" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Pay period (To month)</Label>
+                  <Input type="month" value={endMonth} onChange={(e) => setEndMonth(e.target.value)} />
+                </div>
+              </>
             )}
             {kind === "offer" && (
               <div>
@@ -1904,7 +1962,28 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
 
         {kind === "payslip" && employee && (
           <section className="border border-border rounded-lg p-4 bg-card space-y-4">
-            <div className="text-sm font-semibold">Earnings Breakdown (editable)</div>
+            <div className="text-sm font-semibold">Basic Salary per Month (editable)</div>
+            <div className="space-y-2">
+              {monthRange.map((m) => {
+                const label = formatMonthLabel(m);
+                return (
+                  <div key={m} className="flex gap-2 items-center">
+                    <span className="flex-1 text-xs font-semibold px-2.5 py-1.5 bg-primary/10 text-primary rounded shrink-0 self-start sm:self-auto text-left">
+                      Basic Salary ({label})
+                    </span>
+                    <Input 
+                      className="w-32" 
+                      type="number" 
+                      step="0.01" 
+                      value={monthlySalaries[m] !== undefined ? monthlySalaries[m] : Number(employee.gross_salary || 0)} 
+                      onChange={(e) => setMonthlySalaries((p) => ({ ...p, [m]: Number(e.target.value) || 0 }))} 
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="text-sm font-semibold pt-2 border-t border-border">Allowances / Other Earnings (editable)</div>
             <div className="space-y-2">
               {earnings.map((l, i) => (
                 <div key={i} className="flex gap-2 items-center">
@@ -1925,7 +2004,6 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
                     variant="ghost" 
                     size="icon" 
                     onClick={() => setEarnings((p) => p.filter((_, idx) => idx !== i))}
-                    disabled={i === 0} // Prevent deleting Basic Salary line
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
