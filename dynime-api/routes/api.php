@@ -316,6 +316,7 @@ Route::prefix('v1')->group(function () {
             Route::get('site-settings',                 [\App\Http\Controllers\Api\Settings\SettingsController::class, 'cmsIndex']);
             Route::post('site-settings',                [\App\Http\Controllers\Api\Settings\SettingsController::class, 'upsert']);
             Route::post('site-settings/bulk',           [\App\Http\Controllers\Api\Settings\SettingsController::class, 'bulkUpsert']);
+            Route::post('site-settings/global-replace', [\App\Http\Controllers\Api\Settings\SettingsController::class, 'globalReplaceCompanyName']);
             Route::post('site-settings/test-gateway',    [\App\Http\Controllers\Api\Settings\SettingsController::class, 'testGateway']);
             Route::get('site-settings/{key}',           [\App\Http\Controllers\Api\Settings\SettingsController::class, 'show']);
             Route::delete('site-settings/{key}',        [\App\Http\Controllers\Api\Settings\SettingsController::class, 'destroy']);

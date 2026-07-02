@@ -51,6 +51,42 @@ const AdminSettings = () => {
   const [maskLicenses, setMaskLicenses] = useState<boolean>(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<{ message: string; isRls: boolean } | null>(null);
+  const [searchName, setSearchName] = useState("");
+  const [replaceName, setReplaceName] = useState("");
+  const [replacing, setReplacing] = useState(false);
+
+  const handleGlobalReplace = async () => {
+    if (!searchName.trim() || !replaceName.trim()) {
+      toast.error("Please enter both target and replacement names.");
+      return;
+    }
+    if (searchName.trim().length < 2 || replaceName.trim().length < 2) {
+      toast.error("Inputs must be at least 2 characters.");
+      return;
+    }
+    setReplacing(true);
+    try {
+      const res = await apiPost<any>("/cms/site-settings/global-replace", {
+        search: searchName.trim(),
+        replace: replaceName.trim(),
+      });
+      toast.success(res?.message || "Replacement run completed successfully!");
+      if (res?.details) {
+        toast.info(
+          `Updated: ${res.details.site_settings} settings, ${res.details.services} services, ${res.details.blog_posts} posts, ${res.details.careers} careers`
+        );
+      }
+      qc.invalidateQueries({ queryKey: ["site-settings"] });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to execute global replacement");
+    } finally {
+      setReplacing(false);
+    }
+  };
+
   const [backupStatus, setBackupStatus] = useState<any>(null);
   const [backingUp, setBackingUp] = useState(false);
   const [clientIdInput, setClientIdInput] = useState("");
@@ -330,6 +366,47 @@ const AdminSettings = () => {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Global Company Name Change Section */}
+      <div className="glass-card p-6 max-w-2xl mb-6 space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Building2 className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground font-heading">Global Company Name Change</h2>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Use this tool to replace a company name globally across the entire system. It will dynamically search and replace the target string inside website settings (including headers, footers, and brand names), official documents (payslips, experience/relieving letters), services description/content, blog posts, and career postings.
+        </p>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1 font-medium">Current Name to Find (e.g. Dynime LLC.)</label>
+            <input
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              placeholder="Enter name to replace"
+              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1 font-medium">New Name to Replace with (e.g. Dynime Inc.)</label>
+            <input
+              value={replaceName}
+              onChange={(e) => setReplaceName(e.target.value)}
+              placeholder="Enter replacement name"
+              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end pt-2">
+          <Button
+            variant="hero"
+            size="sm"
+            onClick={handleGlobalReplace}
+            disabled={replacing || !searchName.trim() || !replaceName.trim()}
+          >
+            {replacing ? "Replacing Globally..." : "Run Global Replacement"}
+          </Button>
+        </div>
       </div>
 
       {/* Registered entities — shown on the About page and used in legal copy */}

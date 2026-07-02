@@ -334,6 +334,88 @@ class SettingsController extends Controller
         ]);
     }
 
+    public function globalReplaceCompanyName(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'search'  => 'required|string|min:2',
+            'replace' => 'required|string|min:2',
+        ]);
+
+        $search = $data['search'];
+        $replace = $data['replace'];
+
+        $updatedSettings = 0;
+        // 1. Site Settings
+        \App\Models\SiteSetting::all()->each(function($s) use ($search, $replace, &$updatedSettings) {
+            if (str_contains($s->value, $search)) {
+                $s->value = str_replace($search, $replace, $s->value);
+                $s->save();
+                Cache::forget('setting_' . $s->key);
+                $updatedSettings++;
+            }
+        });
+
+        // 2. Services
+        $updatedServices = 0;
+        \App\Models\Service::all()->each(function($s) use ($search, $replace, &$updatedServices) {
+            $changed = false;
+            foreach (['title', 'description', 'content'] as $col) {
+                if (str_contains($s->$col, $search)) {
+                    $s->$col = str_replace($search, $replace, $s->$col);
+                    $changed = true;
+                }
+            }
+            if ($changed) {
+                $s->save();
+                $updatedServices++;
+            }
+        });
+
+        // 3. Blog Posts
+        $updatedBlogs = 0;
+        \App\Models\BlogPost::all()->each(function($b) use ($search, $replace, &$updatedBlogs) {
+            $changed = false;
+            foreach (['title', 'content'] as $col) {
+                if (str_contains($b->$col, $search)) {
+                    $b->$col = str_replace($search, $replace, $b->$col);
+                    $changed = true;
+                }
+            }
+            if ($changed) {
+                $b->save();
+                $updatedBlogs++;
+            }
+        });
+
+        // 4. Careers
+        $updatedCareers = 0;
+        \App\Models\Career::all()->each(function($c) use ($search, $replace, &$updatedCareers) {
+            $changed = false;
+            foreach (['title', 'description', 'requirements', 'benefits'] as $col) {
+                if (str_contains($c->$col, $search)) {
+                    $c->$col = str_replace($search, $replace, $c->$col);
+                    $changed = true;
+                }
+            }
+            if ($changed) {
+                $c->save();
+                $updatedCareers++;
+            }
+        });
+
+        Cache::forget('site_settings_public');
+
+        return response()->json([
+            'message' => "Replacement completed successfully.",
+            'details' => [
+                'site_settings' => $updatedSettings,
+                'services' => $updatedServices,
+                'blog_posts' => $updatedBlogs,
+                'careers' => $updatedCareers,
+            ]
+        ]);
+    }
+
     public function destroy(string $key): JsonResponse
     {
         SiteSetting::where('key', $key)->delete();
