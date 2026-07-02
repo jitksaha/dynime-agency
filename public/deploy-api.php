@@ -49,16 +49,40 @@ function deleteFilesByPattern($pattern) {
     }
 }
 
-// Locate ZIP file paths
-$zipFile = __DIR__ . '/dynime-api.zip';
-if (!file_exists($zipFile)) {
-    $zipFile = dirname(__DIR__) . '/dynime-api.zip';
-}
-if (!file_exists($zipFile)) {
-    $zipFile = '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip';
+// Print server paths for diagnostics
+$docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/domains/dynime.com/public_html';
+echo "DOCUMENT_ROOT: " . htmlspecialchars($docRoot) . "<br/>";
+echo "Current directory: " . htmlspecialchars(__DIR__) . "<br/>";
+
+// Locate ZIP file paths across multiple possible directories
+$zipLocations = [
+    __DIR__ . '/dynime-api.zip',
+    dirname(__DIR__) . '/dynime-api.zip',
+    dirname(dirname(__DIR__)) . '/dynime-api.zip',
+    $docRoot . '/dynime-api.zip',
+    dirname($docRoot) . '/dynime-api.zip',
+    '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip',
+    '/home/u740731947/public_html/dynime-api.zip',
+];
+
+$zipFile = null;
+foreach ($zipLocations as $loc) {
+    if (file_exists($loc)) {
+        $zipFile = $loc;
+        echo "Found zip file at: <code>" . htmlspecialchars($loc) . "</code><br/>";
+        break;
+    }
 }
 
-$docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '/home/u740731947/domains/dynime.com/public_html';
+if (!$zipFile) {
+    echo "<span style='color:red; font-weight:bold;'>Error:</span> dynime-api.zip not found in any checked locations.<br/>";
+    echo "Checked locations list:<br/><ul>";
+    foreach ($zipLocations as $loc) {
+        echo "<li><code>" . htmlspecialchars($loc) . "</code></li>";
+    }
+    echo "</ul>";
+}
+
 $homeDir = dirname($docRoot);
 $extractTo = $homeDir . '/dynime-api';
 
@@ -218,8 +242,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'sync-r2') {
 // --- 2. Extract backend ZIP ---
 echo "<h3>Extracting Backend Package...</h3>";
 
-if (!file_exists($zipFile)) {
-    echo "Error: Zip file not found at <code>$zipFile</code>.<br/>";
+if (!$zipFile || !file_exists($zipFile)) {
+    echo "Error: Zip file not found.<br/>";
     exit;
 }
 
