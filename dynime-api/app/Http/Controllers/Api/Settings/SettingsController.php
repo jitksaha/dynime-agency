@@ -337,18 +337,42 @@ class SettingsController extends Controller
     public function globalReplaceCompanyName(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'search'  => 'required|string|min:2',
             'replace' => 'required|string|min:2',
         ]);
 
-        $search = $data['search'];
         $replace = $data['replace'];
+
+        // Automatically fetch current company_name and site_name from settings
+        $currentCompanyName = \App\Models\SiteSetting::where('key', 'company_name')->value('value') ?? 'Dynime LLC.';
+        $currentSiteName = \App\Models\SiteSetting::where('key', 'site_name')->value('value') ?? 'Dynime';
+
+        $replacementHelper = function($val) use ($currentCompanyName, $currentSiteName, $replace) {
+            if ($val === null || $val === '') return $val;
+            
+            // If the value is a JSON array or object, we recursively replace keys/values
+            if (is_array($val) || (is_string($val) && (str_starts_with($val, '[') || str_starts_with($val, '{')))) {
+                $decoded = json_decode($val, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $decoded = array_map(function($v) use ($currentCompanyName, $currentSiteName, $replace) {
+                        if (is_string($v)) {
+                            return $this->performReplacement($v, $currentCompanyName, $currentSiteName, $replace);
+                        }
+                        return $v;
+                    }, $decoded);
+                    return json_encode($decoded);
+                }
+            }
+
+            return $this->performReplacement($val, $currentCompanyName, $currentSiteName, $replace);
+        };
 
         $updatedSettings = 0;
         // 1. Site Settings
-        \App\Models\SiteSetting::all()->each(function($s) use ($search, $replace, &$updatedSettings) {
-            if (str_contains($s->value, $search)) {
-                $s->value = str_replace($search, $replace, $s->value);
+        \App\Models\SiteSetting::all()->each(function($s) use ($replacementHelper, &$updatedSettings) {
+            $oldValue = $s->value;
+            $newValue = $replacementHelper($s->value);
+            if ($oldValue !== $newValue) {
+                $s->value = $newValue;
                 $s->save();
                 Cache::forget('setting_' . $s->key);
                 $updatedSettings++;
@@ -357,12 +381,16 @@ class SettingsController extends Controller
 
         // 2. Services
         $updatedServices = 0;
-        \App\Models\Service::all()->each(function($s) use ($search, $replace, &$updatedServices) {
+        \App\Models\Service::all()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, &$updatedServices) {
             $changed = false;
             foreach (['title', 'description', 'content'] as $col) {
-                if (str_contains($s->$col, $search)) {
-                    $s->$col = str_replace($search, $replace, $s->$col);
-                    $changed = true;
+                $oldValue = $s->$col;
+                if ($oldValue) {
+                    $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+                    if ($oldValue !== $newValue) {
+                        $s->$col = $newValue;
+                        $changed = true;
+                    }
                 }
             }
             if ($changed) {
@@ -373,12 +401,16 @@ class SettingsController extends Controller
 
         // 3. Blog Posts
         $updatedBlogs = 0;
-        \App\Models\BlogPost::all()->each(function($b) use ($search, $replace, &$updatedBlogs) {
+        \App\Models\BlogPost::all()->each(function($b) use ($currentCompanyName, $currentSiteName, $replace, &$updatedBlogs) {
             $changed = false;
             foreach (['title', 'content'] as $col) {
-                if (str_contains($b->$col, $search)) {
-                    $b->$col = str_replace($search, $replace, $b->$col);
-                    $changed = true;
+                $oldValue = $b->$col;
+                if ($oldValue) {
+                    $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+                    if ($oldValue !== $newValue) {
+                        $b->$col = $newValue;
+                        $changed = true;
+                    }
                 }
             }
             if ($changed) {
@@ -389,12 +421,16 @@ class SettingsController extends Controller
 
         // 4. Careers
         $updatedCareers = 0;
-        \App\Models\Career::all()->each(function($c) use ($search, $replace, &$updatedCareers) {
+        \App\Models\Career::all()->each(function($c) use ($currentCompanyName, $currentSiteName, $replace, &$updatedCareers) {
             $changed = false;
             foreach (['title', 'description', 'requirements', 'benefits'] as $col) {
-                if (str_contains($c->$col, $search)) {
-                    $c->$col = str_replace($search, $replace, $c->$col);
-                    $changed = true;
+                $oldValue = $c->$col;
+                if ($oldValue) {
+                    $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+                    if ($oldValue !== $newValue) {
+                        $c->$col = $newValue;
+                        $changed = true;
+                    }
                 }
             }
             if ($changed) {
@@ -414,6 +450,35 @@ class SettingsController extends Controller
                 'careers' => $updatedCareers,
             ]
         ]);
+    }
+
+    private function performReplacement($subject, $companyName, $siteName, $replace)
+    {
+        if (empty($subject) || !is_string($subject)) return $subject;
+
+        // Strip LLC, Inc, Ltd, etc to get the base brand name
+        $siteReplace = preg_replace('/\s+(llc|inc|ltd|limited|corp|co\.?)\b/i', '', $replace);
+
+        $out = $subject;
+        // Replace full company name variations case-insensitively
+        if (!empty($companyName)) {
+            $regexCompany = '/' . preg_quote($companyName, '/') . '/i';
+            $out = preg_replace($regexCompany, $replace, $out);
+            
+            $companyNoPeriod = rtrim($companyName, '.');
+            if ($companyNoPeriod !== $companyName) {
+                $regexCompanyNoPeriod = '/' . preg_quote($companyNoPeriod, '/') . '/i';
+                $out = preg_replace($regexCompanyNoPeriod, $replace, $out);
+            }
+        }
+
+        // Replace site name brand variations case-insensitively
+        if (!empty($siteName)) {
+            $regexSite = '/' . preg_quote($siteName, '/') . '/i';
+            $out = preg_replace($regexSite, $siteReplace, $out);
+        }
+
+        return $out;
     }
 
     public function destroy(string $key): JsonResponse

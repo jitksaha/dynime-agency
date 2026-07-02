@@ -51,23 +51,21 @@ const AdminSettings = () => {
   const [maskLicenses, setMaskLicenses] = useState<boolean>(true);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<{ message: string; isRls: boolean } | null>(null);
-  const [searchName, setSearchName] = useState("");
   const [replaceName, setReplaceName] = useState("");
   const [replacing, setReplacing] = useState(false);
 
   const handleGlobalReplace = async () => {
-    if (!searchName.trim() || !replaceName.trim()) {
-      toast.error("Please enter both target and replacement names.");
+    if (!replaceName.trim()) {
+      toast.error("Please enter the new replacement name.");
       return;
     }
-    if (searchName.trim().length < 2 || replaceName.trim().length < 2) {
+    if (replaceName.trim().length < 2) {
       toast.error("Inputs must be at least 2 characters.");
       return;
     }
     setReplacing(true);
     try {
       const res = await apiPost<any>("/cms/site-settings/global-replace", {
-        search: searchName.trim(),
         replace: replaceName.trim(),
       });
       toast.success(res?.message || "Replacement run completed successfully!");
@@ -375,34 +373,23 @@ const AdminSettings = () => {
           <h2 className="text-lg font-semibold text-foreground font-heading">Global Company Name Change</h2>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Use this tool to replace a company name globally across the entire system. It will dynamically search and replace the target string inside website settings (including headers, footers, and brand names), official documents (payslips, experience/relieving letters), services description/content, blog posts, and career postings.
+          Use this tool to replace a company name globally across the entire system. It will automatically detect your current site brand and company names, and perform case-insensitive replacements in website settings (headers, footers), generated official documents (payslips, experience/relieving letters), services, blog posts, and careers.
         </p>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1 font-medium">Current Name to Find (e.g. Dynime LLC.)</label>
-            <input
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              placeholder="Enter name to replace"
-              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground block mb-1 font-medium">New Name to Replace with (e.g. Dynime Inc.)</label>
-            <input
-              value={replaceName}
-              onChange={(e) => setReplaceName(e.target.value)}
-              placeholder="Enter replacement name"
-              className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
+        <div>
+          <label className="text-xs text-muted-foreground block mb-1 font-medium">New Company Name (e.g. Flamingo Inc.)</label>
+          <input
+            value={replaceName}
+            onChange={(e) => setReplaceName(e.target.value)}
+            placeholder="Enter the new company name"
+            className="w-full px-4 py-2.5 bg-secondary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
         </div>
         <div className="flex justify-end pt-2">
           <Button
             variant="hero"
             size="sm"
             onClick={handleGlobalReplace}
-            disabled={replacing || !searchName.trim() || !replaceName.trim()}
+            disabled={replacing || !replaceName.trim()}
           >
             {replacing ? "Replacing Globally..." : "Run Global Replacement"}
           </Button>
