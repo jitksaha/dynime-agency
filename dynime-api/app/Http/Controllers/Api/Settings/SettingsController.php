@@ -387,12 +387,24 @@ class SettingsController extends Controller
 
         // 2. Services
         $updatedServices = 0;
-        \App\Models\Service::all()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, &$updatedServices) {
+        \App\Models\Service::all()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, $replaceRecursive, &$updatedServices) {
             $changed = false;
-            foreach (['title', 'description', 'content'] as $col) {
+            // String columns
+            foreach (['title', 'excerpt', 'description', 'meta_title', 'meta_desc'] as $col) {
                 $oldValue = $s->$col;
                 if ($oldValue) {
                     $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+                    if ($oldValue !== $newValue) {
+                        $s->$col = $newValue;
+                        $changed = true;
+                    }
+                }
+            }
+            // Array casted columns
+            foreach (['features', 'pricing'] as $col) {
+                $oldValue = $s->$col;
+                if ($oldValue) {
+                    $newValue = $replaceRecursive($oldValue);
                     if ($oldValue !== $newValue) {
                         $s->$col = $newValue;
                         $changed = true;
@@ -407,12 +419,24 @@ class SettingsController extends Controller
 
         // 3. Blog Posts
         $updatedBlogs = 0;
-        \App\Models\BlogPost::all()->each(function($b) use ($currentCompanyName, $currentSiteName, $replace, &$updatedBlogs) {
+        \App\Models\BlogPost::all()->each(function($b) use ($currentCompanyName, $currentSiteName, $replace, $replaceRecursive, &$updatedBlogs) {
             $changed = false;
-            foreach (['title', 'content'] as $col) {
+            // String columns
+            foreach (['title', 'excerpt', 'content', 'meta_title', 'meta_desc'] as $col) {
                 $oldValue = $b->$col;
                 if ($oldValue) {
                     $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+                    if ($oldValue !== $newValue) {
+                        $b->$col = $newValue;
+                        $changed = true;
+                    }
+                }
+            }
+            // Array casted columns
+            foreach (['tags'] as $col) {
+                $oldValue = $b->$col;
+                if ($oldValue) {
+                    $newValue = $replaceRecursive($oldValue);
                     if ($oldValue !== $newValue) {
                         $b->$col = $newValue;
                         $changed = true;
@@ -429,7 +453,11 @@ class SettingsController extends Controller
         $updatedCareers = 0;
         \App\Models\Career::all()->each(function($c) use ($currentCompanyName, $currentSiteName, $replace, &$updatedCareers) {
             $changed = false;
-            foreach (['title', 'description', 'requirements', 'benefits'] as $col) {
+            foreach ([
+                'title', 'department', 'location', 'employment_type', 
+                'experience_level', 'salary_range', 'description', 
+                'content_html', 'responsibilities', 'requirements'
+            ] as $col) {
                 $oldValue = $c->$col;
                 if ($oldValue) {
                     $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
