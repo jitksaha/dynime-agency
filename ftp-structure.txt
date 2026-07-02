@@ -12,6 +12,7 @@ portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -56,6 +57,7 @@ ui-ux-design
 favicon-16.png
 llms.txt
 career-heroes
+list-files.php
 src
 create_symlink.php
 scratch
