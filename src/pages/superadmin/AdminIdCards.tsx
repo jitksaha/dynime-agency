@@ -937,21 +937,66 @@ const AdminIdCards = () => {
       const W = portrait ? 54 : 85.6;
       const H = portrait ? 85.6 : 54;
 
-      const [{ jsPDF }, frontPng, backPng] = await Promise.all([
+      const [{ jsPDF }] = await Promise.all([
         import("jspdf"),
-        side !== "back"
-          ? captureCardFace(cardRef.current, "front")
-          : Promise.resolve(null),
-        side !== "front"
-          ? captureCardFace(cardRef.current, "back")
-          : Promise.resolve(null),
       ]);
 
       const pdf = new jsPDF({ unit: "mm", format: [W, H], orientation: portrait ? "portrait" : "landscape" });
-      if (frontPng) pdf.addImage(frontPng, "PNG", 0, 0, W, H, undefined, "FAST");
-      if (backPng) {
-        if (frontPng) pdf.addPage([W, H], portrait ? "portrait" : "landscape");
-        pdf.addImage(backPng, "PNG", 0, 0, W, H, undefined, "FAST");
+
+      const frontEl = side !== "back" ? cardRef.current.querySelector('[data-id-card-face="front"]') as HTMLElement : null;
+      const backEl = side !== "front" ? cardRef.current.querySelector('[data-id-card-face="back"]') as HTMLElement : null;
+
+      if (frontEl) {
+        const clone = frontEl.cloneNode(true) as HTMLElement;
+        clone.style.transform = "none";
+        clone.style.boxShadow = "none";
+        clone.style.border = "none";
+        clone.style.width = `${W}mm`;
+        clone.style.height = `${H}mm`;
+
+        await new Promise<void>((resolve) => {
+          pdf.html(clone, {
+            x: 0,
+            y: 0,
+            width: W,
+            windowWidth: W * 3.78,
+            callback: function () {
+              resolve();
+            },
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+            }
+          });
+        });
+      }
+
+      if (backEl) {
+        if (frontEl) pdf.addPage([W, H], portrait ? "portrait" : "landscape");
+        const clone = backEl.cloneNode(true) as HTMLElement;
+        clone.style.transform = "none";
+        clone.style.boxShadow = "none";
+        clone.style.border = "none";
+        clone.style.width = `${W}mm`;
+        clone.style.height = `${H}mm`;
+
+        await new Promise<void>((resolve) => {
+          pdf.html(clone, {
+            x: 0,
+            y: 0,
+            width: W,
+            windowWidth: W * 3.78,
+            callback: function () {
+              resolve();
+            },
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+            }
+          });
+        });
       }
 
       const slug = subject.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -1030,10 +1075,9 @@ const AdminIdCards = () => {
         const { id, qrValue } = await resolveBulkSubject(subj);
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         if (!bulkRef.current) throw new Error("Bulk card preview was not ready for PDF export");
-        const [frontPng, backPng] = await Promise.all([
-          includeFront ? captureCardFace(bulkRef.current, "front") : Promise.resolve(null),
-          includeBack ? captureCardFace(bulkRef.current, "back") : Promise.resolve(null),
-        ]);
+
+        const frontEl = includeFront ? bulkRef.current.querySelector('[data-id-card-face="front"]') as HTMLElement : null;
+        const backEl = includeBack ? bulkRef.current.querySelector('[data-id-card-face="back"]') as HTMLElement : null;
 
         const slotOnPage = i % perPage;
         if (i > 0 && slotOnPage === 0) pdf.addPage();
@@ -1052,12 +1096,44 @@ const AdminIdCards = () => {
         const x = marginX + col * (slotW + gapX);
         const y = marginY + row * (slotH + gapY);
 
-        if (includeFront) {
-          pdf.addImage(frontPng, "PNG", x, y, cardW, cardH, undefined, "FAST");
+        if (includeFront && frontEl) {
+          const clone = frontEl.cloneNode(true) as HTMLElement;
+          clone.style.transform = "none";
+          clone.style.boxShadow = "none";
+          clone.style.border = "none";
+          clone.style.width = `${cardW}mm`;
+          clone.style.height = `${cardH}mm`;
+
+          await new Promise<void>((resolve) => {
+            pdf.html(clone, {
+              x: x,
+              y: y,
+              width: cardW,
+              windowWidth: cardW * 3.78,
+              callback: function () { resolve(); },
+              html2canvas: { scale: 2, useCORS: true, logging: false }
+            });
+          });
         }
-        if (includeBack) {
+        if (includeBack && backEl) {
           const bx = includeFront ? x + cardW + 4 : x;
-          pdf.addImage(backPng, "PNG", bx, y, cardW, cardH, undefined, "FAST");
+          const clone = backEl.cloneNode(true) as HTMLElement;
+          clone.style.transform = "none";
+          clone.style.boxShadow = "none";
+          clone.style.border = "none";
+          clone.style.width = `${cardW}mm`;
+          clone.style.height = `${cardH}mm`;
+
+          await new Promise<void>((resolve) => {
+            pdf.html(clone, {
+              x: bx,
+              y: y,
+              width: cardW,
+              windowWidth: cardW * 3.78,
+              callback: function () { resolve(); },
+              html2canvas: { scale: 2, useCORS: true, logging: false }
+            });
+          });
         }
 
         pdf.setDrawColor(40);

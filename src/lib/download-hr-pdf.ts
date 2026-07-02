@@ -1,12 +1,7 @@
-// Renders the on-screen .hr-doc node to a clean, paginated A4 PDF — same
-// layout as the print stylesheet, but without the browser-generated print
-// header/footer (date, URL, page count, doc title) that show up when using
-// window.print().
 import { ensureSignatureFontsLoaded } from "./print-with-fonts";
 
 const A4_WIDTH_MM = 210;
-const A4_HEIGHT_MM = 297;
-const MARGIN_MM = 12;
+const MARGIN_MM = 15;
 
 export async function downloadHRDocumentPdf(filename = "hr-document.pdf"): Promise<void> {
   const node = document.querySelector<HTMLElement>(".hr-doc");
@@ -15,45 +10,37 @@ export async function downloadHRDocumentPdf(filename = "hr-document.pdf"): Promi
   await ensureSignatureFontsLoaded();
   if ("fonts" in document) await (document as any).fonts.ready;
 
-  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-    import("html2canvas-pro"),
+  const [{ jsPDF }] = await Promise.all([
     import("jspdf"),
   ]);
 
-  const canvas = await html2canvas(node, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    useCORS: true,
-    logging: false,
-    windowWidth: node.scrollWidth,
-  });
+  // Clone the node to clean up any interactive UI elements or styles for the PDF
+  const clone = node.cloneNode(true) as HTMLElement;
+  clone.style.width = "794px"; // Standard A4 width at 96 DPI
+  clone.style.padding = "0";
+  clone.style.margin = "0";
+  clone.style.backgroundColor = "#ffffff";
+  clone.style.boxShadow = "none";
+  clone.style.border = "none";
 
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-  const usableW = A4_WIDTH_MM - MARGIN_MM * 2;
-  const usableH = A4_HEIGHT_MM - MARGIN_MM * 2;
 
-  // Scale the rendered canvas to the usable width, then slice it into pages.
-  const pxPerMm = canvas.width / usableW;
-  const pageHeightPx = Math.floor(usableH * pxPerMm);
-
-  let renderedPx = 0;
-  let pageIndex = 0;
-  while (renderedPx < canvas.height) {
-    const sliceHeightPx = Math.min(pageHeightPx, canvas.height - renderedPx);
-    const pageCanvas = document.createElement("canvas");
-    pageCanvas.width = canvas.width;
-    pageCanvas.height = sliceHeightPx;
-    const ctx = pageCanvas.getContext("2d")!;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-    ctx.drawImage(canvas, 0, -renderedPx);
-    const imgData = pageCanvas.toDataURL("image/jpeg", 0.95);
-    const renderedHeightMm = sliceHeightPx / pxPerMm;
-    if (pageIndex > 0) pdf.addPage();
-    pdf.addImage(imgData, "JPEG", MARGIN_MM, MARGIN_MM, usableW, renderedHeightMm);
-    renderedPx += sliceHeightPx;
-    pageIndex += 1;
-  }
-
-  pdf.save(filename);
+  await new Promise<void>((resolve, reject) => {
+    pdf.html(clone, {
+      x: MARGIN_MM,
+      y: MARGIN_MM,
+      width: A4_WIDTH_MM - MARGIN_MM * 2, // 180mm usable width
+      windowWidth: 794,
+      autoPaging: "slice",
+      callback: function (doc) {
+        doc.save(filename);
+        resolve();
+      },
+      html2canvas: {
+        scale: 1,
+        useCORS: true,
+        logging: false,
+      }
+    });
+  });
 }
