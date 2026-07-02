@@ -543,10 +543,10 @@ const HRDocumentPreview = ({
             <img
               src="/dynime-seal.png"
               alt="Company Seal"
-              className="absolute right-4 bottom-2 h-20 w-20 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
+              className="absolute right-4 bottom-16 h-24 w-24 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
               crossOrigin="anonymous"
             />
-            <div className="h-12 mb-2 flex items-end relative z-10">
+            <div className="h-20 mb-4 flex items-end relative z-10">
               {signatureImageUrl ? (
                 <img
                   src={signatureImageUrl}
