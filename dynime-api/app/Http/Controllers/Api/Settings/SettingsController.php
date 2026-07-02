@@ -342,44 +342,48 @@ class SettingsController extends Controller
 
         $replace = $data['replace'];
 
-        // Automatically fetch current company_name and site_name from settings
-        $companyNameSetting = \App\Models\SiteSetting::where('key', 'company_name')->first();
+        // Automatically fetch raw current company_name and site_name from database to bypass any Eloquent casts/errors
+        $rawCompany = \Illuminate\Support\Facades\DB::table('site_settings')->where('key', 'company_name')->value('value');
         $currentCompanyName = 'Dynime LLC.';
-        if ($companyNameSetting) {
-            $val = $companyNameSetting->value;
-            $currentCompanyName = is_array($val) ? ($val['value'] ?? 'Dynime LLC.') : (is_string($val) ? $val : 'Dynime LLC.');
+        if (!empty($rawCompany)) {
+            $decoded = json_decode($rawCompany, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $currentCompanyName = is_array($decoded) ? ($decoded['value'] ?? $rawCompany) : $decoded;
+            } else {
+                $currentCompanyName = trim($rawCompany, '"');
+            }
         }
 
-        $siteNameSetting = \App\Models\SiteSetting::where('key', 'site_name')->first();
+        $rawSite = \Illuminate\Support\Facades\DB::table('site_settings')->where('key', 'site_name')->value('value');
         $currentSiteName = 'Dynime';
-        if ($siteNameSetting) {
-            $val = $siteNameSetting->value;
-            $currentSiteName = is_array($val) ? ($val['value'] ?? 'Dynime') : (is_string($val) ? $val : 'Dynime');
+        if (!empty($rawSite)) {
+            $decoded = json_decode($rawSite, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $currentSiteName = is_array($decoded) ? ($decoded['value'] ?? $rawSite) : $decoded;
+            } else {
+                $currentSiteName = trim($rawSite, '"');
+            }
         }
-
-        $replaceRecursive = function($val) use (&$replaceRecursive, $currentCompanyName, $currentSiteName, $replace) {
-            if ($val === null) return null;
-            if (is_array($val)) {
-                $newArr = [];
-                foreach ($val as $k => $v) {
-                    $newArr[$k] = $replaceRecursive($v);
-                }
-                return $newArr;
-            }
-            if (is_string($val)) {
-                return $this->performReplacement($val, $currentCompanyName, $currentSiteName, $replace);
-            }
-            return $val;
-        };
 
         $updatedSettings = 0;
-        // 1. Site Settings
-        \App\Models\SiteSetting::all()->each(function($s) use ($replaceRecursive, &$updatedSettings) {
+        // 1. Site Settings (via raw DB queries to prevent model casting errors)
+        \Illuminate\Support\Facades\DB::table('site_settings')->get()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, &$updatedSettings) {
             $oldValue = $s->value;
-            $newValue = $replaceRecursive($s->value);
+            if ($oldValue === null || $oldValue === '') return;
+
+            // Determine if the raw string is JSON-encoded
+            $decoded = json_decode($oldValue, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $newDecoded = $this->replaceRecursiveHelper($decoded, $currentCompanyName, $currentSiteName, $replace);
+                $newValue = json_encode($newDecoded);
+            } else {
+                $newValue = $this->performReplacement($oldValue, $currentCompanyName, $currentSiteName, $replace);
+            }
+
             if ($oldValue !== $newValue) {
-                $s->value = $newValue;
-                $s->save();
+                \Illuminate\Support\Facades\DB::table('site_settings')
+                    ->where('id', $s->id)
+                    ->update(['value' => $newValue]);
                 Cache::forget('setting_' . $s->key);
                 $updatedSettings++;
             }
@@ -387,7 +391,7 @@ class SettingsController extends Controller
 
         // 2. Services
         $updatedServices = 0;
-        \App\Models\Service::all()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, $replaceRecursive, &$updatedServices) {
+        \App\Models\Service::all()->each(function($s) use ($currentCompanyName, $currentSiteName, $replace, &$updatedServices) {
             $changed = false;
             // String columns
             foreach (['title', 'excerpt', 'description', 'meta_title', 'meta_desc'] as $col) {
@@ -404,7 +408,7 @@ class SettingsController extends Controller
             foreach (['features', 'pricing'] as $col) {
                 $oldValue = $s->$col;
                 if ($oldValue) {
-                    $newValue = $replaceRecursive($oldValue);
+                    $newValue = $this->replaceRecursiveHelper($oldValue, $currentCompanyName, $currentSiteName, $replace);
                     if ($oldValue !== $newValue) {
                         $s->$col = $newValue;
                         $changed = true;
@@ -419,7 +423,7 @@ class SettingsController extends Controller
 
         // 3. Blog Posts
         $updatedBlogs = 0;
-        \App\Models\BlogPost::all()->each(function($b) use ($currentCompanyName, $currentSiteName, $replace, $replaceRecursive, &$updatedBlogs) {
+        \App\Models\BlogPost::all()->each(function($b) use ($currentCompanyName, $currentSiteName, $replace, &$updatedBlogs) {
             $changed = false;
             // String columns
             foreach (['title', 'excerpt', 'content', 'meta_title', 'meta_desc'] as $col) {
@@ -436,7 +440,7 @@ class SettingsController extends Controller
             foreach (['tags'] as $col) {
                 $oldValue = $b->$col;
                 if ($oldValue) {
-                    $newValue = $replaceRecursive($oldValue);
+                    $newValue = $this->replaceRecursiveHelper($oldValue, $currentCompanyName, $currentSiteName, $replace);
                     if ($oldValue !== $newValue) {
                         $b->$col = $newValue;
                         $changed = true;
@@ -484,6 +488,22 @@ class SettingsController extends Controller
                 'careers' => $updatedCareers,
             ]
         ]);
+    }
+
+    private function replaceRecursiveHelper($val, $companyName, $siteName, $replace)
+    {
+        if ($val === null) return null;
+        if (is_array($val)) {
+            $newArr = [];
+            foreach ($val as $k => $v) {
+                $newArr[$k] = $this->replaceRecursiveHelper($v, $companyName, $siteName, $replace);
+            }
+            return $newArr;
+        }
+        if (is_string($val)) {
+            return $this->performReplacement($val, $companyName, $siteName, $replace);
+        }
+        return $val;
     }
 
     private function performReplacement($subject, $companyName, $siteName, $replace)
