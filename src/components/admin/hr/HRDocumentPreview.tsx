@@ -71,6 +71,8 @@ export interface HRDocPreviewProps {
   issueDate: string; // ISO date
   effectiveDate?: string;
   periodMonth?: string; // YYYY-MM for payslip
+  lastWorkingDay?: string;
+  tillNow?: boolean;
   employee: {
     full_name: string;
     employee_code?: string | null;
@@ -156,6 +158,8 @@ const HRDocumentPreview = ({
   issueDate,
   effectiveDate,
   periodMonth,
+  lastWorkingDay,
+  tillNow,
   employee,
   bodyText,
   clauses = [],
@@ -359,15 +363,15 @@ const HRDocumentPreview = ({
             {employee.employee_code ? ` (Employee Code: ${employee.employee_code})` : ""} was employed with {companyName} as
             {" "}<strong>{employee.designation || "—"}</strong>
             {employee.department ? ` in the ${employee.department} department` : ""} from
-            {" "}<strong>{fmtDate(employee.joining_date)}</strong> to <strong>{fmtDate(employee.last_working_day || issueDate)}</strong>,
-            a total tenure of <strong>{computeTenure(employee.joining_date, employee.last_working_day)}</strong>.
+            {" "}<strong>{fmtDate(employee.joining_date)}</strong> to <strong>{tillNow ? "Till Now" : fmtDate(lastWorkingDay || employee.last_working_day || issueDate)}</strong>,
+            a total tenure of <strong>{computeTenure(employee.joining_date, tillNow ? undefined : (lastWorkingDay || employee.last_working_day))}</strong>.
           </p>
           <p className="text-sm leading-relaxed mb-4">
             During their tenure, we found them to be sincere, hardworking and professional. Their conduct and performance throughout the period of service were satisfactory.
           </p>
           {kind === "relieving" && (
             <p className="text-sm leading-relaxed mb-4">
-              They have been duly relieved of all their duties and responsibilities with effect from <strong>{fmtDate(employee.last_working_day || issueDate)}</strong>. All company dues have been settled.
+              They have been duly relieved of all their duties and responsibilities with effect from <strong>{tillNow ? "Till Now" : fmtDate(lastWorkingDay || employee.last_working_day || issueDate)}</strong>. All company dues have been settled.
             </p>
           )}
           {bodyText && <p className="text-sm leading-relaxed whitespace-pre-line mb-4">{bodyText}</p>}

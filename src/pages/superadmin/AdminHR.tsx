@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HRDocumentPreview, { type HRDocKind } from "@/components/admin/hr/HRDocumentPreview";
-import { computePayslip, type PayLine } from "@/lib/payslip-math";
+import { computePayslip, numberToWords, type PayLine } from "@/lib/payslip-math";
 import { printWithSignatureFonts } from "@/lib/print-with-fonts";
 import { downloadHRDocumentPdf } from "@/lib/download-hr-pdf";
 import type { TeamMember } from "@/lib/home-sections-defaults";
@@ -1444,8 +1444,11 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   const [clausesRaw, setClausesRaw] = useState(
     DEFAULT_AGREEMENT_CLAUSES.map((c) => `${c.title}: ${c.body}`).join("\n\n"),
   );
-  const [extraEarnings, setExtraEarnings] = useState<{ label: string; amount: number }[]>([]);
-  const [extraDeductions, setExtraDeductions] = useState<{ label: string; amount: number }[]>([]);
+  const [earnings, setEarnings] = useState<{ label: string; amount: number }[]>([]);
+  const [deductions, setDeductions] = useState<{ label: string; amount: number }[]>([]);
+  const [tillNow, setTillNow] = useState(false);
+  const [lastWorkingDay, setLastWorkingDay] = useState("");
+  
   const [signatureTypedName, setSignatureTypedName] = useState("");
   const [signatureImageUrl, setSignatureImageUrl] = useState("");
   const [issuing, setIssuing] = useState(false);
@@ -1470,7 +1473,11 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
 
   const rawEmployee = useMemo(() => employees.find((e) => e.id === employeeId) || null, [employees, employeeId]);
   useEffect(() => {
-    if (!rawEmployee) return;
+    if (!rawEmployee) {
+      setEarnings([]);
+      setDeductions([]);
+      return;
+    }
     setOverrides({
       designation: rawEmployee.designation || "",
       department: rawEmployee.department || "",
@@ -1479,7 +1486,28 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
       work_location: rawEmployee.work_location || "",
       reporting_to: rawEmployee.reporting_to || "",
     });
-  }, [rawEmployee]);
+
+    const base = Number(rawEmployee.gross_salary || 0);
+    const initialEarnings = [
+      { label: "Basic Salary", amount: base }
+    ];
+    const allowances = Array.isArray(rawEmployee.allowances) ? (rawEmployee.allowances as any[]) : [];
+    allowances.forEach((a: any) => {
+      const val = Number(a.value) || 0;
+      const amt = a.type === "percent" ? (base * val) / 100 : val;
+      initialEarnings.push({ label: a.label, amount: Math.round(amt * 100) / 100 });
+    });
+    setEarnings(initialEarnings);
+
+    const initialDeductions: { label: string; amount: number }[] = [];
+    const de = Array.isArray(rawEmployee.deductions) ? (rawEmployee.deductions as any[]) : [];
+    de.forEach((d: any) => {
+      const val = Number(d.value) || 0;
+      const amt = d.type === "percent" ? (base * val) / 100 : val;
+      initialDeductions.push({ label: d.label, amount: Math.round(amt * 100) / 100 });
+    });
+    setDeductions(initialDeductions);
+  }, [rawEmployee, kind]);
 
   const employee = useMemo(() => {
     if (!rawEmployee) return null;
@@ -1542,15 +1570,20 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
   }, [clausesRaw]);
 
   const payslip = useMemo(() => {
-    if (!employee) return undefined;
-    return computePayslip(
-      Number(employee.gross_salary || 0),
-      employee.allowances || [],
-      employee.deductions || [],
-      extraEarnings,
-      extraDeductions,
-    );
-  }, [employee, extraEarnings, extraDeductions]);
+    if (kind !== "payslip" || !employee) return undefined;
+    const gross = Math.round(earnings.reduce((s, e) => s + (Number(e.amount) || 0), 0) * 100) / 100;
+    const totalDeductions = Math.round(deductions.reduce((s, d) => s + (Number(d.amount) || 0), 0) * 100) / 100;
+    const net = Math.round((gross - totalDeductions) * 100) / 100;
+    return {
+      basic: Number(earnings[0]?.amount || 0),
+      earnings: earnings.map(e => ({ label: e.label, amount: Number(e.amount) || 0 })),
+      deductions: deductions.map(d => ({ label: d.label, amount: Number(d.amount) || 0 })),
+      gross,
+      totalDeductions,
+      net,
+      netInWords: numberToWords(Math.floor(net)) + (net % 1 ? " and " + Math.round((net % 1) * 100) + "/100" : "") + " only",
+    };
+  }, [kind, employee, earnings, deductions]);
 
   const issueAndEmail = async (sendEmail: boolean) => {
     if (!employee) { toast.error("Pick an employee first"); return null; }
@@ -1562,17 +1595,21 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
         issue_date: issueDate && issueDate.trim() !== "" ? issueDate : todayStr(),
         effective_date: effectiveDate && String(effectiveDate).trim() !== "" ? effectiveDate : null,
         period_month: kind === "payslip" ? periodMonth : null,
-        body_text: bodyText || null,
-        clauses: kind === "agreement" ? clauses : null,
-        validity_date: kind === "offer" ? (validityDate && validityDate.trim() !== "" ? validityDate : null) : null,
-        extra_earnings: kind === "payslip" ? extraEarnings : null,
-        extra_deductions: kind === "payslip" ? extraDeductions : null,
+        computed: {
+          body_text: bodyText || null,
+          clauses: kind === "agreement" ? clauses : null,
+          validity_date: kind === "offer" ? (validityDate && validityDate.trim() !== "" ? validityDate : null) : null,
+          revised_designation: kind === "promotion" ? revisedDesignation : null,
+          revised_gross_salary: kind === "promotion" ? Number(revisedGrossSalary) || null : null,
+          notice_period_days: kind === "termination" ? Number(noticePeriodDays) || null : null,
+          severance_amount: kind === "termination" ? Number(severanceAmount) || null : null,
+          reason: kind === "termination" ? reason : null,
+          till_now: tillNow,
+          last_working_day: lastWorkingDay || null,
+          payslip_earnings: kind === "payslip" ? earnings : null,
+          payslip_deductions: kind === "payslip" ? deductions : null,
+        },
         send_email: sendEmail,
-        revised_designation: kind === "promotion" ? revisedDesignation : null,
-        revised_gross_salary: kind === "promotion" ? Number(revisedGrossSalary) || null : null,
-        notice_period_days: kind === "termination" ? Number(noticePeriodDays) || null : null,
-        severance_amount: kind === "termination" ? Number(severanceAmount) || null : null,
-        reason: kind === "termination" ? reason : null,
       });
       toast.success(sendEmail
         ? `Document ${data?.doc_number || ""} issued and emailed`
@@ -1677,6 +1714,35 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
                   : "Leave as today unless re-issuing for a past date."}
               </p>
             </div>
+            {(kind === "experience" || kind === "relieving") && (
+              <>
+                <div>
+                  <Label className="flex items-center gap-2">
+                    Last working day override
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">optional</span>
+                  </Label>
+                  <Input
+                    type="date"
+                    value={lastWorkingDay}
+                    onChange={(e) => setLastWorkingDay(e.target.value)}
+                    disabled={tillNow}
+                    placeholder="Defaults to employee last working day"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-2 col-span-2">
+                  <input
+                    type="checkbox"
+                    id="till-now-checkbox"
+                    checked={tillNow}
+                    onChange={(e) => setTillNow(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="till-now-checkbox" className="font-medium cursor-pointer">
+                    Till Now (Present / Ongoing)
+                  </Label>
+                </div>
+              </>
+            )}
             {kind === "payslip" && (
               <div>
                 <Label>Pay period (month)</Label>
@@ -1837,29 +1903,68 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
         )}
 
         {kind === "payslip" && employee && (
-          <section className="border border-border rounded-lg p-4 bg-card space-y-3">
-            <div className="text-sm font-semibold">Adjustments for this payslip</div>
-            <div>
-              <div className="text-xs font-medium mb-1.5">Extra earnings (bonus, overtime)</div>
-              {extraEarnings.map((l, i) => (
-                <div key={i} className="flex gap-2 mb-1.5">
-                  <Input className="flex-1" placeholder="Label" value={l.label} onChange={(e) => setExtraEarnings((p) => p.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} />
-                  <Input className="w-32" type="number" step="0.01" value={l.amount} onChange={(e) => setExtraEarnings((p) => p.map((x, idx) => idx === i ? { ...x, amount: Number(e.target.value) } : x))} />
-                  <Button variant="ghost" size="icon" onClick={() => setExtraEarnings((p) => p.filter((_, idx) => idx !== i))}><Trash2 className="w-4 h-4" /></Button>
+          <section className="border border-border rounded-lg p-4 bg-card space-y-4">
+            <div className="text-sm font-semibold">Earnings Breakdown (editable)</div>
+            <div className="space-y-2">
+              {earnings.map((l, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input 
+                    className="flex-1" 
+                    placeholder="Earning name" 
+                    value={l.label} 
+                    onChange={(e) => setEarnings((p) => p.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} 
+                  />
+                  <Input 
+                    className="w-32" 
+                    type="number" 
+                    step="0.01" 
+                    value={l.amount} 
+                    onChange={(e) => setEarnings((p) => p.map((x, idx) => idx === i ? { ...x, amount: Number(e.target.value) } : x))} 
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setEarnings((p) => p.filter((_, idx) => idx !== i))}
+                    disabled={i === 0} // Prevent deleting Basic Salary line
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => setExtraEarnings((p) => [...p, { label: "", amount: 0 }])}><Plus className="w-3 h-3 mr-1" /> Add earning</Button>
+              <Button variant="outline" size="sm" onClick={() => setEarnings((p) => [...p, { label: "", amount: 0 }])}>
+                <Plus className="w-3 h-3 mr-1" /> Add custom earning
+              </Button>
             </div>
-            <div>
-              <div className="text-xs font-medium mb-1.5">Extra deductions (LWP, advance)</div>
-              {extraDeductions.map((l, i) => (
-                <div key={i} className="flex gap-2 mb-1.5">
-                  <Input className="flex-1" placeholder="Label" value={l.label} onChange={(e) => setExtraDeductions((p) => p.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} />
-                  <Input className="w-32" type="number" step="0.01" value={l.amount} onChange={(e) => setExtraDeductions((p) => p.map((x, idx) => idx === i ? { ...x, amount: Number(e.target.value) } : x))} />
-                  <Button variant="ghost" size="icon" onClick={() => setExtraDeductions((p) => p.filter((_, idx) => idx !== i))}><Trash2 className="w-4 h-4" /></Button>
+
+            <div className="text-sm font-semibold pt-2 border-t border-border">Deductions Breakdown (editable)</div>
+            <div className="space-y-2">
+              {deductions.map((l, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input 
+                    className="flex-1" 
+                    placeholder="Deduction name" 
+                    value={l.label} 
+                    onChange={(e) => setDeductions((p) => p.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} 
+                  />
+                  <Input 
+                    className="w-32" 
+                    type="number" 
+                    step="0.01" 
+                    value={l.amount} 
+                    onChange={(e) => setDeductions((p) => p.map((x, idx) => idx === i ? { ...x, amount: Number(e.target.value) } : x))} 
+                  />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setDeductions((p) => p.filter((_, idx) => idx !== i))}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={() => setExtraDeductions((p) => [...p, { label: "", amount: 0 }])}><Plus className="w-3 h-3 mr-1" /> Add deduction</Button>
+              <Button variant="outline" size="sm" onClick={() => setDeductions((p) => [...p, { label: "", amount: 0 }])}>
+                <Plus className="w-3 h-3 mr-1" /> Add custom deduction
+              </Button>
             </div>
           </section>
         )}
@@ -1980,6 +2085,8 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
             noticePeriodDays={kind === "termination" ? Number(noticePeriodDays) || undefined : undefined}
             severanceAmount={kind === "termination" ? Number(severanceAmount) || undefined : undefined}
             reason={kind === "termination" ? reason : undefined}
+            lastWorkingDay={lastWorkingDay || undefined}
+            tillNow={tillNow}
           />
         ) : (
           <div className="border border-dashed border-border rounded-lg p-10 text-center text-muted-foreground">
@@ -2072,13 +2179,23 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
                           validityDate={d.computed?.validity_date as string}
                           payslip={
                             d.kind === "payslip"
-                              ? computePayslip(
-                                  Number(d.snapshot?.gross_salary || 0),
-                                  (d.snapshot?.allowances || []) as any,
-                                  (d.snapshot?.deductions || []) as any,
-                                  (d.computed?.extra_earnings || []) as any,
-                                  (d.computed?.extra_deductions || []) as any
-                                )
+                              ? (d.computed?.payslip_earnings
+                                ? {
+                                    basic: Number(d.computed?.payslip_earnings[0]?.amount || 0),
+                                    earnings: d.computed?.payslip_earnings,
+                                    deductions: d.computed?.payslip_deductions || [],
+                                    gross: Math.round(d.computed?.payslip_earnings.reduce((s: number, e: any) => s + (Number(e.amount) || 0), 0) * 100) / 100,
+                                    totalDeductions: Math.round((d.computed?.payslip_deductions || []).reduce((s: number, de: any) => s + (Number(de.amount) || 0), 0) * 100) / 100,
+                                    net: Math.round((d.computed?.payslip_earnings.reduce((s: number, e: any) => s + (Number(e.amount) || 0), 0) - (d.computed?.payslip_deductions || []).reduce((s: number, de: any) => s + (Number(de.amount) || 0), 0)) * 100) / 100,
+                                    netInWords: numberToWords(Math.floor(Math.round((d.computed?.payslip_earnings.reduce((s: number, e: any) => s + (Number(e.amount) || 0), 0) - (d.computed?.payslip_deductions || []).reduce((s: number, de: any) => s + (Number(de.amount) || 0), 0)) * 100) / 100)) + " only",
+                                  } as any
+                                : computePayslip(
+                                    Number(d.snapshot?.gross_salary || 0),
+                                    (d.snapshot?.allowances || []) as any,
+                                    (d.snapshot?.deductions || []) as any,
+                                    (d.computed?.extra_earnings || []) as any,
+                                    (d.computed?.extra_deductions || []) as any
+                                  ))
                               : undefined
                           }
                           revisedDesignation={d.computed?.revised_designation as string}
@@ -2086,6 +2203,8 @@ const HistoryTab = ({ employees, docs, refetch }: { employees: Employee[]; docs:
                           noticePeriodDays={d.computed?.notice_period_days as number}
                           severanceAmount={d.computed?.severance_amount as number}
                           reason={d.computed?.reason as string}
+                          tillNow={Boolean(d.computed?.till_now)}
+                          lastWorkingDay={d.computed?.last_working_day as string || undefined}
                         />
                       </div>
                       <DialogFooter className="print:hidden">
