@@ -1743,10 +1743,24 @@ const BuilderTab = ({ employees, onIssued }: { employees: Employee[]; onIssued: 
               </>
             )}
             {kind === "payslip" && (
-              <div>
-                <Label>Pay period (month)</Label>
-                <Input type="month" value={periodMonth} onChange={(e) => setPeriodMonth(e.target.value)} />
-              </div>
+              <>
+                <div>
+                  <Label>Pay period (month)</Label>
+                  <Input type="month" value={periodMonth} onChange={(e) => setPeriodMonth(e.target.value)} />
+                </div>
+                <div className="flex items-center gap-2 pt-2 col-span-2">
+                  <input
+                    type="checkbox"
+                    id="payslip-till-now-checkbox"
+                    checked={tillNow}
+                    onChange={(e) => setTillNow(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <Label htmlFor="payslip-till-now-checkbox" className="font-medium cursor-pointer">
+                    Till Now (Present / Ongoing)
+                  </Label>
+                </div>
+              </>
             )}
             {kind === "offer" && (
               <div>
