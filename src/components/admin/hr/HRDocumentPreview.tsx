@@ -543,7 +543,7 @@ const HRDocumentPreview = ({
             <img
               src="/dynime-seal.png"
               alt="Company Seal"
-              className="absolute right-4 bottom-16 h-24 w-24 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
+              className="absolute left-4 bottom-16 h-24 w-24 object-contain pointer-events-none select-none opacity-85 mix-blend-multiply"
               crossOrigin="anonymous"
             />
             <div className="h-20 mb-4 flex items-end relative z-10">
@@ -567,7 +567,7 @@ const HRDocumentPreview = ({
                 </span>
               )}
             </div>
-            <div className="border-t border-neutral-400 pt-2 relative z-10">
+            <div className={`${(!signatureImageUrl && !signatureTypedName) ? "" : "border-t border-neutral-400"} pt-2 relative z-10`}>
               <div className="text-xs font-semibold">{signatoryName}</div>
               <div className="text-[11px] text-neutral-500">{resolvedSignatoryTitle}</div>
               <div className="text-[11px] text-neutral-500">Date: {fmtDate(employee.joining_date || issueDate)}</div>
@@ -594,21 +594,25 @@ const HRDocumentPreview = ({
               <span className="text-[9.5px] text-neutral-500 leading-snug line-clamp-2">{companyAddress}</span>
             )}
           </div>
-          <div className="flex flex-col gap-1 items-center text-center">
+          <div className="flex flex-col gap-1.5 items-center text-center">
             <span className="text-[9px] uppercase tracking-[0.15em] text-neutral-400 mb-0.5">Contact</span>
-            <div className="flex items-center gap-1 text-[11px] font-medium text-neutral-700">
-              <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
-              <a href={`mailto:${companyEmail}`} className="no-underline text-neutral-700">
-                {companyEmail}
-              </a>
-            </div>
-            <div className="flex items-center gap-1 text-[9.5px] text-neutral-500">
-              <Globe className="w-3 h-3 text-neutral-400 shrink-0" />
-              <span>{companyWeb}</span>
-            </div>
-            <div className="flex items-center gap-1 text-[9.5px] text-neutral-500">
-              <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
-              <span>{companyPhone}</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5">
+              <div className="flex items-center gap-1 text-[10.5px] font-medium text-neutral-700">
+                <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
+                <a href={`mailto:${companyEmail}`} className="no-underline text-neutral-700">
+                  {companyEmail}
+                </a>
+              </div>
+              <span className="text-neutral-300">·</span>
+              <div className="flex items-center gap-1 text-[10.5px] text-neutral-500">
+                <Globe className="w-3 h-3 text-neutral-400 shrink-0" />
+                <span>{companyWeb}</span>
+              </div>
+              <span className="text-neutral-300">·</span>
+              <div className="flex items-center gap-1 text-[10.5px] text-neutral-500">
+                <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
+                <span>{companyPhone}</span>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-0.5 items-end text-right">
@@ -623,7 +627,7 @@ const HRDocumentPreview = ({
         </div>
         <div className="mt-2 pt-2 border-t border-dashed border-neutral-200 flex items-center justify-between text-[9px] text-neutral-400">
           <span>This is an electronically generated document and is valid without a physical signature.</span>
-          <span>© {new Date().getFullYear()} {companyName}. Confidential.</span>
+          <span>© {new Date().getFullYear()} {companyName.replace(/\.$/, "")}.</span>
         </div>
       </footer>
     </div>
