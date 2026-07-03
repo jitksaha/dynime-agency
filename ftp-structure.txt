@@ -70,8 +70,10 @@ list-dist-files.php
 facebook-ads
 replit.nix
 netlify.toml
+og-image-v2.jpg
 ..
 public
+og-image-dark-v2.jpg
 backend
 favicon-dark-32.png
 list-migrations.php
