@@ -108,16 +108,42 @@ const ProductDbm = () => {
       "Dynime AI",
       "Dynime LLC product",
     ],
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: "Dynime OS",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      description:
-        "The AI-powered business operating system for growing companies — CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support.",
-    },
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Dynime OS",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        description:
+          "The AI-powered business operating system for growing companies — CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support.",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://dynime.com"
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Products",
+            item: "https://dynime.com/services"
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: "Dynime OS",
+            item: "https://dynime.com/products/os"
+          }
+        ]
+      }
+    ],
   });
 
   return (

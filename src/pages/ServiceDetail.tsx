@@ -180,6 +180,46 @@ const ServiceDetailPage = () => {
               url: "https://dynime.com/contact",
             },
           },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://dynime.com"
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Services",
+                item: "https://dynime.com/services"
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: service.title,
+                item: `https://dynime.com/${service.slug}`
+              }
+            ]
+          },
+          ...(service.faqs && service.faqs.length > 0
+            ? [
+                {
+                  "@context": "https://schema.org",
+                  "@type": "FAQPage",
+                  mainEntity: service.faqs.map((faq) => ({
+                    "@type": "Question",
+                    name: faq.q,
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: faq.a
+                    }
+                  }))
+                }
+              ]
+            : [])
         ]
       : undefined,
   });

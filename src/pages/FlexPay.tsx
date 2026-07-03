@@ -60,7 +60,41 @@ export const getFeePercentForTenure = (
 };
 
 const FlexPay = () => {
-  usePageSEO("flexpay");
+  usePageSEO("flexpay", {
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "FlexPay",
+        "description": "Simplify business payments with FlexPay, a modern payment platform built for secure transactions and business growth.",
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "USD",
+          "price": "0.00",
+          "availability": "https://schema.org/InStock",
+          "url": "https://dynime.com/flexpay"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://dynime.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "FlexPay",
+            "item": "https://dynime.com/flexpay"
+          }
+        ]
+      }
+    ]
+  });
 
   const { data: settings } = useQuery<Settings | null>({
     queryKey: ["flexpay-settings-public"],

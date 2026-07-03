@@ -141,6 +141,26 @@ const USAFormation = () => {
       "incorporation cost USA",
       "best state to form LLC",
     ],
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://dynime.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "USA Business Formation",
+            "item": "https://dynime.com/usa-business-formation"
+          }
+        ]
+      }
+    ]
   });
 
   const [search, setSearch] = useState("");
