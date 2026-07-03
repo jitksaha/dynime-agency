@@ -5,6 +5,7 @@ ai-software-development
 services
 consulting
 check_id_card.php
+get-logs-advanced.php
 web-design-development
 blog
 robots.txt
