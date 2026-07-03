@@ -190,6 +190,83 @@ class CareerController extends Controller
         ]);
     }
 
+    public function uploadStudentProof(Request $request): JsonResponse
+    {
+        $key = $request->query('key');
+        if (!$key) {
+            return response()->json(['message' => 'Key parameter is required.'], 400);
+        }
+
+        if (!$request->hasFile('file')) {
+            return response()->json(['message' => 'No file uploaded.'], 400);
+        }
+
+        $file = $request->file('file');
+
+        // Server-side mime validation
+        $allowedMimes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/png',
+            'image/jpg',
+        ];
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            return response()->json(['message' => 'Only PDF, Word documents, and images (JPEG/PNG) are allowed.'], 422);
+        }
+
+        if ($file->getSize() > 10 * 1024 * 1024) {
+            return response()->json(['message' => 'File must be under 10 MB.'], 422);
+        }
+
+        $ext  = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+        $safe = preg_replace('/[^A-Za-z0-9_-]+/', '-', $key);
+        $storagePath = 'student-verification/' . $safe;
+
+        try {
+            $stored = false;
+
+            if (config('filesystems.disks.public.driver') === 's3'
+                && !empty(config('filesystems.disks.public.key'))
+                && !empty(config('filesystems.disks.public.secret'))
+                && !empty(config('filesystems.disks.public.bucket'))
+            ) {
+                // R2/S3 is configured — try it
+                $stored = Storage::disk('public')->put($key, file_get_contents($file));
+            }
+
+            if (!$stored) {
+                // Fall back to local disk (always works on shared hosting)
+                $stored = Storage::disk('local')->put($storagePath, file_get_contents($file));
+                if ($stored) {
+                    // Mark path so admin panel knows it's local
+                    $key = 'local:' . $storagePath;
+                }
+            }
+
+            if (!$stored) {
+                \Illuminate\Support\Facades\Log::error('Student proof upload failed: both public and local storage returned false', [
+                    'key' => $key,
+                    'file_size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ]);
+                return response()->json(['message' => 'Failed to store proof file. Please try again.'], 500);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Student proof upload exception: ' . $e->getMessage(), [
+                'key' => $key,
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['message' => 'Upload error: ' . $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'key'    => $key,
+            'bucket' => 'student-verification',
+        ]);
+    }
+
 
     public function applyPublic(Request $request): JsonResponse
     {

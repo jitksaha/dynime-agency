@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { apiPost } from "@/lib/api";
+import { apiPost, api } from "@/lib/api";
 import {
   GraduationCap, CheckCircle2, Award, Globe, ShieldCheck, Clock,
   ArrowRight, Upload, X, AlertCircle, Loader2, Sparkles, HelpCircle,
@@ -168,18 +168,17 @@ const StudentProgram = () => {
       const key = `${Date.now()}-${cleanName}`;
 
       setUploadProgress(50);
-      const res = await apiPost<{ key: string; bucket: string }>(
+      const res = await api.post<{ key: string; bucket: string }>(
         `/public/forms/upload-student-proof?key=${encodeURIComponent(key)}`,
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' }
         }
-      );
+      ).then(r => r.data);
 
       setUploadProgress(100);
       if (res?.key) {
-        const publicUrl = `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}/storage/student-verification/${res.key}`;
-        updateForm("documentUrl", publicUrl);
+        updateForm("documentUrl", res.key);
         toast.success("Document uploaded successfully!");
       } else {
         throw new Error("Invalid response from server");
