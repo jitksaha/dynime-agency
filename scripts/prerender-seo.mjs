@@ -81,17 +81,17 @@ const PAGE_OVERRIDES = (settings.page_seo && typeof settings.page_seo === "objec
 
 // ── Static route catalog (mirrors src/lib/seo-defaults.ts) ────────────────
 const STATIC_ROUTES = [
-  { path: "/", key: "home", title: "Premium Digital Studio for Iconic Brands", description: "Dynime Inc. partners with ambitious founders and enterprises to design, engineer and scale category-defining digital experiences worldwide." },
-  { path: "/about", key: "about", title: "About — A Studio Built on Quiet Craft", description: "A senior, multidisciplinary studio engineering refined digital products for visionary brands — 500+ projects delivered across 25+ countries since 2020." },
-  { path: "/services", key: "services", title: "Disciplines — Design, Engineering & Growth", description: "A curated suite of disciplines: product design, web engineering, brand systems, performance marketing and business formation — delivered with singular vision." },
-  { path: "/portfolio", key: "portfolio", title: "Selected Work — A Curated Selection", description: "Selected work from a global client roster — refined websites, brand systems and digital products engineered for measurable, lasting impact." },
-  { path: "/contact", key: "contact", title: "Begin a Conversation That Matters", description: "Speak with our partners about a refined, ambitious project. We respond personally to every brief — discreet, considered, and on your timeline." },
-  { path: "/blog", key: "blog", title: "Journal — Notes on Craft & Strategy", description: "Considered essays on design, engineering and brand strategy from the partners and senior team at Dynime — written for founders and operators." },
-  { path: "/careers", key: "careers", title: "Careers — Join a Studio of Senior Craft", description: "Open invitations for senior designers, engineers and strategists. Remote-first, deeply collaborative, and built for people who care about the work." },
-  { path: "/products/os", key: "product-dbm", title: "Dynime OS — The AI-Powered Business Operating System", description: "Dynime OS unifies CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support into one intelligent platform — built for growing companies." },
-  { path: "/services/dss", key: "services-dss", title: "DSS — Custom Software, AI Apps & QA Engineering", description: "Dynime Software Services: senior-engineered custom software, AI applications and QA — built with discipline, shipped with precision." },
-  { path: "/usa-business-formation", key: "usa-formation", title: "USA Company Formation — All 50 States Compared", description: "Compare LLC and Corporation formation fees, annual costs and taxes across all 50 US states. Curated guidance from the Dynime team." },
-  { path: "/track", key: "track", title: "Track Your Order", description: "Track the live status of your order, invoice or company formation with Dynime Inc." },
+  { path: "/", key: "home", title: "Dynime | AI Software Development Company & Digital Transformation", description: "Build AI-powered software, websites, SaaS platforms and business automation solutions with Dynime. Helping startups and enterprises grow through technology, strategy and digital transformation." },
+  { path: "/about", key: "about", title: "About Dynime | AI Software, Digital Transformation & Business Solutions | Dynime", description: "Learn about Dynime, our mission, values and team. We help startups and enterprises build AI software, digital products and scalable business solutions worldwide." },
+  { path: "/services", key: "services", title: "Software Development Services, AI Solutions & Digital Transformation | Dynime", description: "Explore Dynime's complete range of AI software development, web development, SaaS, digital marketing, automation and business consulting services designed to help businesses grow globally." },
+  { path: "/portfolio", key: "portfolio", title: "Portfolio | AI, Web & Software Development Projects | Dynime", description: "Explore our portfolio featuring AI software, SaaS platforms, websites, business automation systems and digital transformation projects delivered for clients worldwide." },
+  { path: "/contact", key: "contact", title: "Contact Dynime | Start Your Next Project | Dynime", description: "Contact Dynime to discuss AI software, web development, automation, SaaS, marketing or business consulting. Schedule your free consultation today." },
+  { path: "/blog", key: "blog", title: "Blog | AI, Software Development & Business Growth Insights | Dynime", description: "Discover expert insights on AI, software development, SaaS, digital transformation, automation, web technologies and business growth strategies." },
+  { path: "/careers", key: "careers", title: "Careers at Dynime | Join Our Team | Dynime", description: "Explore career opportunities at Dynime and join a team building innovative AI software, digital products and technology solutions." },
+  { path: "/products/os", key: "product-dbm", title: "Dynime OS | AI Business Management Software", description: "Manage CRM, HR, finance, projects and operations from one AI-powered business operating system designed for growing businesses." },
+  { path: "/services/dss", key: "services-dss", title: "Software Development Services | Dynime Software Solutions", description: "Discover custom software development, AI solutions, SaaS platforms, testing and enterprise applications built for startups and growing businesses." },
+  { path: "/usa-business-formation", key: "usa-formation", title: "US Company Formation Services | LLC & C Corp Registration | Dynime", description: "Register your US LLC or C Corporation with expert guidance. Dynime helps entrepreneurs establish compliant US businesses with ongoing support." },
+  { path: "/track", key: "track", title: "Track Your Order — Real-Time Status & Milestones | Dynime", description: "Track your Dynime order in real time: project milestones, delivery progress, invoice status and live updates from your assigned project manager." },
 ];
 
 // ── Service detail pages — extract slug + meta from src/data/services.ts ──
@@ -153,7 +153,9 @@ function applyOverrides(route) {
 
 function buildHtml(route) {
   const r = applyOverrides(route);
-  const fullTitle = `${r.title} | ${SITE_NAME}`;
+  const fullTitle = r.title.includes("Dynime")
+    ? r.title
+    : `${r.title} | ${SITE_NAME}`;
   const description = r.description || DEFAULT_DESCRIPTION;
   const url = `${SITE_URL}${r.path === "/" ? "" : r.path}`;
   const ogType = r.ogType || "website";
