@@ -342,7 +342,7 @@ class HrmController extends Controller
             'doc_number'     => $docNumber,
             'issue_date'     => $data['issue_date'] ?? date('Y-m-d'),
             'effective_date' => $data['effective_date'] ?? null,
-            'period_month'   => $data['period_month'] ?? null,
+            'period_month'   => (isset($data['period_month']) && strlen($data['period_month']) === 7) ? ($data['period_month'] . '-01') : ($data['period_month'] ?? null),
             'status'         => 'active',
             'snapshot'       => $snapshot,
             'computed'       => $computed,
