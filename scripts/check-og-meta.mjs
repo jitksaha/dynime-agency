@@ -33,7 +33,7 @@ import path from "node:path";
 
 const DIST = path.resolve("dist");
 const SITE_URL = (process.env.PRERENDER_SITE_URL || "https://dynime.com").replace(/\/$/, "");
-const SITE_DEFAULT_OG = process.env.SITE_DEFAULT_OG || `${SITE_URL}/og-image.jpg`;
+const SITE_DEFAULT_OG = process.env.SITE_DEFAULT_OG || `${SITE_URL}/og-image-v2.jpg`;
 const FIX = !process.argv.includes("--fix=false");
 
 const REQUIRED_OG = [

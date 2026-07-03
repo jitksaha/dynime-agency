@@ -63,6 +63,21 @@ export class PublicFormsController {
     return this.formsService.uploadResumeFile(file, key);
   }
 
+  @Post('upload-student-proof')
+  @Version('1')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+    }),
+  )
+  async uploadStudentProof(
+    @UploadedFile() file: UploadedFileLike,
+    @Query('key') key: string,
+  ) {
+    return this.formsService.uploadStudentProofFile(file, key);
+  }
+
   @Post('apply')
   @Version('1')
   @HttpCode(HttpStatus.OK)

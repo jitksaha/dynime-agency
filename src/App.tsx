@@ -104,6 +104,7 @@ const AdminFlexPay = lazy(() => import("./pages/superadmin/AdminFlexPay.tsx"));
 const VerifyOrder = lazy(() => import("./pages/VerifyOrder.tsx"));
 const VerifyOrderMockFlow = lazy(() => import("./pages/VerifyOrderMockFlow.tsx"));
 const Maintenance = lazy(() => import("./pages/Maintenance.tsx"));
+const StudentProgram = lazy(() => import("./pages/StudentProgram.tsx"));
 
 // Investor Portal (lazy)
 const InvestorLogin = lazy(() => import("./pages/investor-portal/InvestorLogin.tsx"));
@@ -264,6 +265,7 @@ const App = () => (
                   <Routes>
                     {/* Maintenance */}
                     <Route path="/maintenance" element={<Maintenance />} />
+                    <Route path="/student-program" element={<StudentProgram />} />
                     {/* Public */}
                     <Route path="/" element={<Index />} />
                   <Route path="/about" element={<About />} />

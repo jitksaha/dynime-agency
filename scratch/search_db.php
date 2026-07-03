@@ -1,6 +1,6 @@
 <?php
 
-$envPath = '/Users/jitkumarsaha/Dynime Inc/dynime.com/dynime-api/.env';
+$envPath = '/Users/jitkumarsaha/Dynime LLC/dynime.com/dynime-api/.env';
 $env = [];
 foreach (file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
     if (strpos(trim($line), '#') === 0) continue;

@@ -435,6 +435,39 @@ export class PublicFormsService {
     };
   }
 
+  // ── Public File Upload for Student Verification ───────────────────────
+  async uploadStudentProofFile(file: UploadedFileLike, key: string) {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+    ];
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Proof document must be PDF, Word document, or Image (JPEG/PNG)');
+    }
+    const maxBytes = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxBytes) {
+      throw new BadRequestException('Verification file exceeds the 10MB size limit');
+    }
+
+    const result = await this.minio.putObject(
+      'student-verification',
+      key,
+      file.buffer,
+      file.size,
+      file.mimetype,
+    );
+
+    return {
+      key,
+      etag: result.etag,
+      bucket: 'student-verification',
+    };
+  }
+
   // ── Transctional Email Helper (Proxies to Dynamic SMTP Mailing Service) ─────
   private async sendTransactionalEmail(payload: any) {
     try {

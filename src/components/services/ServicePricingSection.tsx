@@ -657,7 +657,9 @@ const ServicePricingSection = ({
         return null;
       }
     },
+    enabled: !!serviceSlug,
   });
+
 
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [activeTierForQuote, setActiveTierForQuote] = useState<PricingTier | null>(null);

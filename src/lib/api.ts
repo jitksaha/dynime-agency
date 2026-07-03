@@ -10,12 +10,14 @@ import axios, { type AxiosInstance } from 'axios';
 
 export const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
+  timeout: 6000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
   withCredentials: false,
 });
+
 
 // ── Backward-compatible named helpers (used throughout the codebase) ──────────
 // These match the old NestJS API client shape so no component imports need changing.

@@ -143,6 +143,7 @@ const buildDynamicGroups = (): { title: string; links: { label: string; to: stri
       links: [
         ...services,
         { label: "FlexPay – Buy Now, Pay Later", to: "/flexpay" },
+        { label: "Student Discount", to: "/student-program" },
         { label: "All Services", to: "/services" },
       ],
     },
@@ -157,6 +158,7 @@ const buildDynamicGroups = (): { title: string; links: { label: string; to: stri
         { label: "Investment Plans", to: "/invest" },
         { label: "Investor Relations", to: "/investor-relations" },
         { label: "Investor Portal", to: "/investor" },
+        { label: "Student Discount", to: "/student-program" },
         { label: "Contact", to: "/contact" },
       ],
     },

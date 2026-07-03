@@ -9,7 +9,7 @@ const SITE_DOMAIN = typeof window !== "undefined"
 
 const DEFAULT_DESCRIPTION =
   "Global digital agency delivering web, e-commerce, SEO, paid ads, AI software and US/UK company formation. 500+ projects in 25+ countries.";
-const FALLBACK_OG_IMAGE = `${SITE_DOMAIN}/og-image.jpg`;
+const FALLBACK_OG_IMAGE = `${SITE_DOMAIN}/og-image-v2.jpg`;
 
 export interface SEOConfig {
   title?: string;

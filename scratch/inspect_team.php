@@ -1,6 +1,6 @@
 <?php
 
-$envPath = '/Users/jitkumarsaha/Dynime Inc/dynime.com/dynime-api/.env';
+$envPath = '/Users/jitkumarsaha/Dynime LLC/dynime.com/dynime-api/.env';
 if (!file_exists($envPath)) {
     echo "ERROR: .env not found.\n";
     exit;

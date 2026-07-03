@@ -510,6 +510,15 @@ class SettingsController extends Controller
     {
         if (empty($subject) || !is_string($subject)) return $subject;
 
+        // 1. Temporarily extract all email addresses to prevent their domains from being replaced
+        $emails = [];
+        $emailRegex = '/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/';
+        $subject = preg_replace_callback($emailRegex, function($matches) use (&$emails) {
+            $placeholder = '___EMAIL_PLACEHOLDER_' . count($emails) . '___';
+            $emails[$placeholder] = $matches[0];
+            return $placeholder;
+        }, $subject);
+
         // Strip LLC, Inc, Ltd, etc to get the base brand name
         $siteReplace = preg_replace('/\s+(llc|inc|ltd|limited|corp|co\.?)\b/i', '', $replace);
 
@@ -538,6 +547,11 @@ class SettingsController extends Controller
         if (!empty($siteName)) {
             $regexSite = '/' . preg_quote($siteName, '/') . '/i';
             $out = preg_replace($regexSite, $siteReplace, $out);
+        }
+
+        // 4. Restore the email addresses
+        if (!empty($emails)) {
+            $out = strtr($out, $emails);
         }
 
         return $out;

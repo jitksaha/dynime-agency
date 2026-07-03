@@ -32,7 +32,7 @@ const SITE_NAME = "Dynime Inc.";
 const SITE_TAGLINE = "Web Development, Digital Marketing & Business Solutions";
 const DEFAULT_DESCRIPTION =
   "Founded in 2020, Dynime Inc. is a global digital agency delivering 500+ projects for clients across 25+ countries — web development, digital marketing, e-commerce & business registration.";
-const DEFAULT_OG = `${SITE_URL}/og-image.jpg`;
+const DEFAULT_OG = `${SITE_URL}/og-image-v2.jpg`;
 
 const template = await readFile(TEMPLATE_PATH, "utf8");
 

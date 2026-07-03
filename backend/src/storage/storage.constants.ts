@@ -135,6 +135,14 @@ export const BUCKET_POLICIES: Record<string, BucketPolicy> = {
     maxBytes: 10 * MB,
     signedUrlTtlSec: 1800,
   },
+  'student-verification': {
+    visibility: 'private',
+    read: { roles: ALL_ADMIN_ROLES },
+    write: { authenticated: true },
+    allowedMime: DOC_IMG_MIME,
+    maxBytes: 10 * MB,
+    signedUrlTtlSec: 1800,
+  },
   'bank-receipts': {
     visibility: 'private',
     read: { owner: true, roles: ALL_ADMIN_ROLES },

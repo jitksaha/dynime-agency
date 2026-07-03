@@ -37,18 +37,33 @@ const writeCache = (rates: Record<string, number>) => {
   }
 };
 
+const fetchWithTimeout = async (url: string, options: RequestInit & { timeout?: number } = {}) => {
+  const { timeout = 3500, ...rest } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, {
+      ...rest,
+      signal: controller.signal
+    });
+    return response;
+  } finally {
+    clearTimeout(id);
+  }
+};
+
 const fetchLiveRates = async (): Promise<Record<string, number>> => {
   // Primary: open.er-api.com. Fallback: frankfurter.app (ECB) and exchangerate.host.
   const sources = [
     async () => {
-      const res = await fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" });
+      const res = await fetchWithTimeout("https://open.er-api.com/v6/latest/USD", { cache: "no-store" });
       if (!res.ok) throw new Error(`er-api HTTP ${res.status}`);
       const j = await res.json();
       if (!j?.rates) throw new Error("er-api missing rates");
       return j.rates as Record<string, number>;
     },
     async () => {
-      const res = await fetch("https://api.exchangerate.host/latest?base=USD", { cache: "no-store" });
+      const res = await fetchWithTimeout("https://api.exchangerate.host/latest?base=USD", { cache: "no-store" });
       if (!res.ok) throw new Error(`exr-host HTTP ${res.status}`);
       const j = await res.json();
       if (!j?.rates) throw new Error("exr-host missing rates");
@@ -61,6 +76,7 @@ const fetchLiveRates = async (): Promise<Record<string, number>> => {
   }
   throw lastErr instanceof Error ? lastErr : new Error("All FX sources failed");
 };
+
 
 /**
  * Returns USD-based exchange rates with three layers of resilience:

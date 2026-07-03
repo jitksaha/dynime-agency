@@ -633,7 +633,7 @@ Return:
       valid: true,
       ogTitle: 'Dynime LLC. — Global Web & AI Agency',
       ogDescription: 'Web, SEO, AI and formation agency. 500+ projects built.',
-      ogImage: 'https://dynime.com/og-image.jpg',
+      ogImage: 'https://dynime.com/og-image-v2.jpg',
       ogImageSecured: true,
     };
   }

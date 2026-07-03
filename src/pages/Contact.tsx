@@ -83,7 +83,7 @@ const Contact = () => {
         "@id": "https://dynime.com/#localbusiness",
         name: "Dynime LLC.",
         url: "https://dynime.com",
-        image: "https://dynime.com/og-image.jpg",
+        image: "https://dynime.com/og-image-v2.jpg",
         email: emails[0]?.value || "support@dynimetechnologies.com",
         telephone: phones[0]?.value || undefined,
         priceRange: "$$",
