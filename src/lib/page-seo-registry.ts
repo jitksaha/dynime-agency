@@ -161,7 +161,7 @@ const products: PageSEORegistryEntry[] = [
     path: "/flexpay/apply",
     group: "Product",
     defaults: {
-      title: "Apply for FlexPay Credit — Instant Pre-Approval",
+      title: "Apply for FlexPay Credit — Instant Pre-Approval | Dynime",
       description:
         "Apply for a Dynime FlexPay spending limit in under 3 minutes. Soft-check, instant pre-approval, transparent EMI terms. No credit card or hard pull required.",
       keywords: [
@@ -180,7 +180,7 @@ const products: PageSEORegistryEntry[] = [
     path: "/invest",
     group: "Product",
     defaults: {
-      title: "Invest in Dynime | Investment Opportunities",
+      title: "Invest in Dynime | Investment Opportunities | Dynime",
       description:
         "Discover investment opportunities with Dynime and support the growth of innovative AI software and technology solutions.",
       keywords: [
@@ -219,7 +219,7 @@ const products: PageSEORegistryEntry[] = [
     path: "/investor",
     group: "Product",
     defaults: {
-      title: "Become a Dynime Investor",
+      title: "Become a Dynime Investor | Dynime",
       description:
         "Partner with Dynime and explore investment opportunities focused on AI software, digital innovation and long-term growth.",
       keywords: [
@@ -340,7 +340,7 @@ const extras: PageSEORegistryEntry[] = [
     path: "/invest/apply",
     group: "Product",
     defaults: {
-      title: "Apply to Invest in Dynime LLC. — Shareholder Onboarding",
+      title: "Apply to Invest in Dynime LLC. — Shareholder Onboarding | Dynime",
       description:
         "Apply to become a Dynime LLC. shareholder. Choose a plan, submit KYC and complete onboarding in under 10 minutes. Audited financials and signed agreements.",
       keywords: [
@@ -358,7 +358,7 @@ const extras: PageSEORegistryEntry[] = [
     path: "/track",
     group: "Core",
     defaults: {
-      title: "Track Your Order — Real-Time Status & Milestones",
+      title: "Track Your Order — Real-Time Status & Milestones | Dynime",
       description:
         "Track your Dynime order in real time: project milestones, delivery progress, invoice status and live updates from your assigned project manager.",
       keywords: ["track order", "order status", "project tracking", "milestone tracker"],
@@ -370,7 +370,7 @@ const extras: PageSEORegistryEntry[] = [
     path: "/checkout",
     group: "Core",
     defaults: {
-      title: "Secure Checkout — Pay With Card, Wallet or FlexPay",
+      title: "Secure Checkout — Pay With Card, Wallet or FlexPay | Dynime",
       description:
         "Complete your Dynime order securely. Pay with card, Apple/Google Pay, bKash, Nagad, SSLCommerz, bank transfer or split into FlexPay installments.",
       keywords: ["secure checkout", "online payment", "FlexPay checkout", "digital agency checkout"],

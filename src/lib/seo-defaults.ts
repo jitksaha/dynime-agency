@@ -19,7 +19,7 @@ export interface PageSEO {
 
 export const SEO_DEFAULTS = {
   home: {
-    title: "Dynime | AI Software Development, Business Automation & Digital Transformation",
+    title: "Dynime | AI Software Development Company & Digital Transformation",
     description:
       "Build AI-powered software, websites, SaaS platforms and business automation solutions with Dynime. Helping startups and enterprises grow through technology, strategy and digital transformation.",
     keywords: [
@@ -40,7 +40,7 @@ export const SEO_DEFAULTS = {
     ],
   },
   about: {
-    title: "About Dynime | Global AI Software & Digital Transformation Company",
+    title: "About Dynime | AI Software, Digital Transformation & Business Solutions | Dynime",
     description:
       "Learn about Dynime, our mission, values and team. We help startups and enterprises build AI software, digital products and scalable business solutions worldwide.",
     keywords: [
@@ -56,7 +56,7 @@ export const SEO_DEFAULTS = {
     ],
   },
   services: {
-    title: "Software Development, AI & Digital Services | Dynime",
+    title: "Software Development Services, AI Solutions & Digital Transformation | Dynime",
     description:
       "Explore Dynime's complete range of AI software development, web development, SaaS, digital marketing, automation and business consulting services designed to help businesses grow globally.",
     keywords: [
@@ -91,7 +91,7 @@ export const SEO_DEFAULTS = {
     ],
   },
   contact: {
-    title: "Contact Dynime | Start Your Next Project",
+    title: "Contact Dynime | Start Your Next Project | Dynime",
     description:
       "Contact Dynime to discuss AI software, web development, automation, SaaS, marketing or business consulting. Schedule your free consultation today.",
     keywords: [
@@ -120,7 +120,7 @@ export const SEO_DEFAULTS = {
     ],
   },
   careers: {
-    title: "Careers at Dynime | Join Our Team",
+    title: "Careers at Dynime | Join Our Team | Dynime",
     description:
       "Explore career opportunities at Dynime and join a team building innovative AI software, digital products and technology solutions.",
     keywords: [
