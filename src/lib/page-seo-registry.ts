@@ -33,16 +33,16 @@ const products: PageSEORegistryEntry[] = [
     path: "/products/os",
     group: "Product",
     defaults: {
-      title: "Dynime OS — All-in-One Business Management Software",
+      title: "Dynime OS | AI Business Management Software",
       description:
-        "Run your whole company on one AI-powered platform: CRM, HRM, Sales, Finance, Projects, Inventory and Support. Built for SMBs replacing 5+ disconnected SaaS tools.",
+        "Manage CRM, HR, finance, projects and operations from one AI-powered business operating system designed for growing businesses.",
       keywords: [
-        "all in one business management software",
-        "ERP alternative for small business",
-        "CRM HRM accounting software",
+        "Business Management Software",
+        "Business Operating System",
+        "ERP Software",
+        "CRM Software",
+        "Business OS",
         "AI business operating system",
-        "SaaS for SMBs",
-        "Dynime OS",
         "unified business platform",
         "CRM and ERP combined",
       ],
@@ -98,18 +98,18 @@ const products: PageSEORegistryEntry[] = [
     path: "/usa-business-formation",
     group: "Product",
     defaults: {
-      title: "USA LLC Formation for Non-Residents — All 50 States",
+      title: "US Company Formation Services | LLC & C Corp Registration | Dynime",
       description:
-        "Form a US LLC or C-Corp from anywhere in the world. Compare state fees, annual costs and taxes across all 50 states. EIN, registered agent and bank account included.",
+        "Register your US LLC or C Corporation with expert guidance. Dynime helps entrepreneurs establish compliant US businesses with ongoing support.",
       keywords: [
+        "US Company Formation",
+        "LLC Registration",
+        "C Corp Registration",
+        "US Business Registration",
+        "Start a US Company",
         "USA LLC formation for non residents",
-        "form LLC in USA from abroad",
-        "Delaware LLC formation",
-        "Wyoming LLC formation",
         "register US company online",
         "EIN for non US resident",
-        "US C-Corp formation",
-        "open US business bank account",
         "USA company registration service",
       ],
     },
@@ -141,15 +141,15 @@ const products: PageSEORegistryEntry[] = [
     path: "/flexpay",
     group: "Product",
     defaults: {
-      title: "FlexPay — Buy Now, Pay Later for Digital Services",
+      title: "FlexPay | Smart Business Payment Platform | Dynime",
       description:
-        "Buy Now, Pay Later for web, marketing, AI and e-commerce services. Get a Dynime FlexPay credit limit in minutes — split into EMI installments with no credit card required.",
+        "Simplify business payments with FlexPay, a modern payment platform built for secure transactions and business growth.",
       keywords: [
+        "FlexPay",
+        "Business Payment Platform",
+        "Payment Management",
+        "Digital Payments",
         "buy now pay later digital services",
-        "EMI for web development",
-        "pay later for SEO services",
-        "BNPL for businesses",
-        "installment payment for agency services",
         "Dynime FlexPay",
         "interest free EMI services",
       ],
@@ -177,19 +177,19 @@ const products: PageSEORegistryEntry[] = [
   {
     key: "invest",
     label: "Invest in Dynime",
-    path: "/investor",
+    path: "/invest",
     group: "Product",
     defaults: {
-      title: "Invest in Dynime LLC. — Shareholder Plans & Profit Calculator",
+      title: "Invest in Dynime | Investment Opportunities",
       description:
-        "Invest in a profitable, audited global digital agency. Choose a shareholder plan, see projected returns with our profit calculator, and join 25+ existing investors.",
+        "Discover investment opportunities with Dynime and support the growth of innovative AI software and technology solutions.",
       keywords: [
+        "Invest in Dynime",
+        "Startup Investment",
+        "Investment Opportunity",
+        "Technology Investment",
         "invest in digital agency",
-        "buy shares in startup",
-        "shareholder investment plans",
-        "agency equity investment",
         "Dynime investor plans",
-        "passive income investment",
         "global business investment opportunity",
       ],
     },
@@ -200,16 +200,33 @@ const products: PageSEORegistryEntry[] = [
     path: "/investor-relations",
     group: "Product",
     defaults: {
-      title: "Investor Relations — Reports, Governance & IR Contact",
+      title: "Investor Relations | Dynime",
       description:
-        "Investor Relations at Dynime LLC. — audited financials, quarterly shareholder reports, governance, voting rights and direct access to our IR team.",
+        "Access investor information, company updates, governance resources and strategic announcements from Dynime.",
       keywords: [
+        "Investor Relations",
+        "Corporate Information",
+        "Investors",
+        "Company Updates",
         "Dynime investor relations",
-        "shareholder reports",
         "quarterly investor reports",
-        "agency governance and reporting",
-        "IR contact Dynime",
-        "audited agency financials",
+      ],
+    },
+  },
+  {
+    key: "investor-dashboard",
+    label: "Investor Dashboard",
+    path: "/investor",
+    group: "Product",
+    defaults: {
+      title: "Become a Dynime Investor",
+      description:
+        "Partner with Dynime and explore investment opportunities focused on AI software, digital innovation and long-term growth.",
+      keywords: [
+        "Become a Dynime Investor",
+        "Investment Partnership",
+        "Venture Investment",
+        "Dynime investor portal",
       ],
     },
   },
@@ -223,10 +240,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/privacy",
     group: "Legal",
     defaults: {
-      title: "Privacy Policy — How Dynime Protects Your Data",
+      title: "Privacy Policy | Dynime",
       description:
-        "Read how Dynime LLC. collects, uses and protects personal data under GDPR, CCPA and global privacy laws. Cookies, retention, rights and contact for data requests.",
-      keywords: ["privacy policy", "GDPR compliance", "CCPA", "data protection", "Dynime privacy"],
+        "Read Dynime's Privacy Policy to understand how we collect, use, protect and manage your personal information.",
+      keywords: ["privacy policy", "data protection", "Dynime privacy"],
     },
   },
   {
@@ -235,10 +252,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/terms",
     group: "Legal",
     defaults: {
-      title: "Terms of Service — Dynime LLC. Customer Agreement",
+      title: "Terms & Conditions | Dynime",
       description:
-        "The legal agreement between Dynime LLC. and customers using our digital services, software, FlexPay and investment products. Read scope, payments, liability and dispute terms.",
-      keywords: ["terms of service", "customer agreement", "service terms", "Dynime terms"],
+        "Review the terms and conditions governing the use of Dynime's products, services and website.",
+      keywords: ["terms of service", "terms and conditions", "Dynime terms"],
     },
   },
   {
@@ -247,10 +264,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/refund",
     group: "Legal",
     defaults: {
-      title: "Refund & Cancellation Policy — Digital Services",
+      title: "Refund Policy | Dynime",
       description:
-        "Eligibility, timelines and process for refunds and order cancellations on Dynime digital services, software subscriptions, FlexPay installments and one-time projects.",
-      keywords: ["refund policy", "cancellation policy", "service refund", "money back guarantee"],
+        "Understand Dynime's refund policy, eligibility requirements and service cancellation terms.",
+      keywords: ["refund policy", "cancellation policy", "service refund"],
     },
   },
   {
@@ -259,10 +276,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/cookies",
     group: "Legal",
     defaults: {
-      title: "Cookie Policy — Tracking & Consent Choices",
+      title: "Cookie Policy | Dynime",
       description:
-        "How Dynime uses cookies, local storage and pixels for authentication, analytics and personalization. Manage your consent and learn about third-party trackers.",
-      keywords: ["cookie policy", "cookie consent", "tracking cookies", "GDPR cookies"],
+        "Learn how Dynime uses cookies and similar technologies to improve website functionality and user experience.",
+      keywords: ["cookie policy", "cookie consent", "Dynime cookies"],
     },
   },
   {
@@ -271,10 +288,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/aml",
     group: "Legal",
     defaults: {
-      title: "AML & KYC Compliance Policy — Dynime LLC.",
+      title: "Anti-Money Laundering (AML) Policy | Dynime",
       description:
-        "Dynime's Anti-Money Laundering, KYC, sanctions-screening and counter-terrorism financing program. Country eligibility, ID checks and reporting obligations.",
-      keywords: ["AML policy", "KYC compliance", "sanctions screening", "anti money laundering", "OFAC"],
+        "Read Dynime's Anti-Money Laundering policy and compliance measures designed to prevent financial crime.",
+      keywords: ["AML policy", "anti money laundering", "Dynime compliance"],
     },
   },
   {
@@ -283,10 +300,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/payments",
     group: "Legal",
     defaults: {
-      title: "Payments Policy — Methods, Fees & Settlement",
+      title: "Payment Options & Billing Information | Dynime",
       description:
-        "Accepted payment methods, processing fees, settlement timelines, chargeback handling and FlexPay installment rules for Dynime customers and merchants worldwide.",
-      keywords: ["payments policy", "payment methods", "settlement terms", "chargeback policy"],
+        "View accepted payment methods, billing information and payment policies for Dynime services and products.",
+      keywords: ["Payment Options", "payment methods", "billing information", "Dynime payments"],
     },
   },
   {
@@ -295,10 +312,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/support",
     group: "Legal",
     defaults: {
-      title: "Support Policy & SLA — Response & Uptime Commitments",
+      title: "Customer Support | Help Center | Dynime",
       description:
-        "Dynime's customer support tiers, channels, response-time SLAs and uptime commitments for software, hosting and managed services. Severity levels and escalation path.",
-      keywords: ["support policy", "service level agreement", "SLA uptime", "customer support tiers"],
+        "Get help with Dynime products and services through our support center, technical assistance, documentation and customer care.",
+      keywords: ["Customer Support", "Technical Support", "Help Center", "Customer Service"],
     },
   },
   {
@@ -307,10 +324,10 @@ const legal: PageSEORegistryEntry[] = [
     path: "/acceptable-use",
     group: "Legal",
     defaults: {
-      title: "Acceptable Use Policy — Prohibited Content & Activity",
+      title: "Acceptable Use Policy | Dynime",
       description:
-        "Rules for using Dynime hosting, software, FlexPay and APIs. Prohibited content, abusive behavior, security restrictions and enforcement actions explained.",
-      keywords: ["acceptable use policy", "AUP", "prohibited content", "abuse policy"],
+        "Review Dynime's Acceptable Use Policy outlining permitted and prohibited use of our services.",
+      keywords: ["acceptable use policy", "AUP", "Dynime policy"],
     },
   },
 ];

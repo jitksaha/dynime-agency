@@ -120,17 +120,16 @@ export const SEO_DEFAULTS = {
     ],
   },
   careers: {
-    title: "Careers — Remote Engineering & Design Jobs",
+    title: "Careers at Dynime | Join Our Team",
     description:
-      "Remote-first careers at Dynime LLC. Open roles for senior engineers, designers, marketers and strategists who care about craft and the work they ship.",
+      "Explore career opportunities at Dynime and join a team building innovative AI software, digital products and technology solutions.",
     keywords: [
+      "Careers at Dynime",
+      "Software Jobs",
+      "Technology Careers",
+      "Join Dynime",
       "remote tech jobs",
       "remote developer jobs",
-      "remote designer jobs",
-      "digital marketing jobs",
-      "agency careers",
-      "senior engineering jobs",
-      "Bangladesh tech jobs",
       "Dynime careers",
     ],
   },

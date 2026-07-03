@@ -42,7 +42,10 @@ const RealtimeSync = () => {
 
 const LegacyServiceRedirect = () => {
   const { slug } = useParams<{ slug: string }>();
-  return <Navigate to={slug ? `/${slug}` : "/services"} replace />;
+  if (slug === "null" || !slug) {
+    return <Navigate to="/services" replace />;
+  }
+  return <Navigate to={`/${slug}`} replace />;
 };
 
 const ReferralRedirect = () => {
