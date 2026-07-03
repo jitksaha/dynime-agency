@@ -267,11 +267,7 @@ const Services = () => {
       <PageHero
         eyebrow="Digital Services · Web · Marketing · AI · Formation"
         eyebrowIcon={Sparkles}
-        title={
-          <>
-            One studio. <span className="gradient-text">Every digital discipline</span>.
-          </>
-        }
+        title="Technology Services That Scale Your Business"
         description="Web development, performance marketing, AI software, US/UK company formation and an all-in-one business OS — delivered by senior teams, shipped in weeks, priced fixed."
         primaryCta={{ label: "Get a free quote", href: "/contact" }}
         secondaryCta={{ label: "See our work", href: "/portfolio" }}
