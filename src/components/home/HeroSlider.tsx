@@ -29,9 +29,9 @@ interface Slide {
 
 const slides: Slide[] = [
   {
-    eyebrow: "Featured · Dynime OS",
-    title: "Dynime OS — the AI-powered",
-    highlight: "business operating system",
+    eyebrow: "Dynime · Digital Transformation Partner",
+    title: "AI Software, Business Automation",
+    highlight: "& Digital Transformation",
     description:
       "Dynime OS unifies CRM, HRM, Sales, Finance, Projects, Inventory, AI and Support into one intelligent platform — built for growing companies that want to scale without the chaos.",
     primary: { label: "Explore Dynime OS", to: "/products/os" },

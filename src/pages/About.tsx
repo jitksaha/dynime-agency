@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { SEO_DEFAULTS } from "@/lib/seo-defaults";
@@ -7,7 +8,7 @@ import TeamCarousel from "@/components/home/TeamCarousel";
 import CountryEligibilityChecker from "@/components/contact/CountryEligibilityChecker";
 import RegisteredEntities from "@/components/shared/RegisteredEntities";
 import { motion } from "framer-motion";
-import { Target, Eye, Heart, Globe, Award, Users, Zap, Trophy, Users2, Globe2, ShieldCheck } from "lucide-react";
+import { Target, Eye, Heart, Globe, Award, Users, Zap, Trophy, Users2, Globe2, ShieldCheck, ChevronDown, HelpCircle } from "lucide-react";
 import aboutTeam from "@/assets/about-team.webp";
 import { useAboutTimeline } from "@/hooks/use-about-timeline";
 import { useEligibleCountriesCount } from "@/hooks/use-eligible-countries-count";
@@ -20,9 +21,30 @@ const values = [
 ];
 
 
+const aboutFaqs = [
+  {
+    question: "Who founded Dynime?",
+    answer: "Dynime was founded by a team of visionary tech innovators, designers, and software engineers led by Jit Kumar Saha, with a vision to build high-performance digital architecture."
+  },
+  {
+    question: "What does Dynime do?",
+    answer: "Dynime builds advanced AI software, scalable SaaS platforms, premium websites, and provides comprehensive performance marketing, SEO, and global business consulting services."
+  },
+  {
+    question: "Where does Dynime operate?",
+    answer: "Dynime operates globally with fully registered compliant entities in the United States, United Kingdom, and Bangladesh, serving clients in over 25 countries."
+  },
+  {
+    question: "Why was Dynime created?",
+    answer: "Dynime was created to bridge the gap between high-level technology and growing businesses, making enterprise-grade software and marketing accessible to startups and scaling companies."
+  }
+];
+
 const About = () => {
   const { data: timeline = [] } = useAboutTimeline();
   const { data: eligibleCount = 0 } = useEligibleCountriesCount();
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
   usePageSEO("about", {
     title: SEO_DEFAULTS.about.title,
     description: SEO_DEFAULTS.about.description,
@@ -57,19 +79,27 @@ const About = () => {
           "Brand Design",
         ],
       },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: aboutFaqs.map(faq => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            "text": faq.answer
+          }
+        }))
+      }
     ],
   });
   return (
     <Layout>
       <PageHero
-        eyebrow="About Dynime"
+        eyebrow="Our Story"
         eyebrowIcon={Award}
-        title={
-          <>
-            Designing the Quiet <span className="gradient-text">Architecture</span> of Modern Brands
-          </>
-        }
-        description="A studio of designers, engineers, and strategists devoted to the craft of building digital experiences that feel inevitable — and last for decades."
+        title="About Dynime"
+        description="Global AI Software & Digital Transformation Company. A studio of designers, engineers, and strategists devoted to the craft of building digital experiences that feel inevitable — and last for decades."
         align="left"
         primaryCta={{ label: "Start a project", href: "/contact" }}
         secondaryCta={{ label: "View our work", href: "/portfolio" }}
@@ -107,7 +137,7 @@ const About = () => {
                 <span className="h-px w-6 bg-primary/60" />
               </span>
               <h2 className="font-heading text-3xl md:text-5xl font-bold mt-3">
-                The Story of <span className="gradient-text">Dynime</span>
+                Our <span className="gradient-text">Story</span>
               </h2>
               <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
                 From a one-person WordPress shop to a globally registered technology and consultancy group — here's how we got here.
@@ -246,6 +276,57 @@ const About = () => {
               </div>
             </ScrollReveal>
           ))}
+        </div>
+      </section>
+
+      {/* Accordion FAQ Section */}
+      <section className="section-padding bg-gradient-to-b from-background via-card/10 to-background border-t border-border/20">
+        <div className="container-custom max-w-4xl mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary mb-3">
+                <HelpCircle className="w-3.5 h-3.5 animate-pulse" /> FAQ
+              </span>
+              <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+                Frequently Asked <span className="gradient-text">Questions</span>
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-sm md:text-base">
+                Learn more about our founders, operating models, and core philosophy.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="space-y-4">
+            {aboutFaqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <ScrollReveal key={index} delay={index * 0.05}>
+                  <div className="rounded-xl border border-border/60 bg-card/45 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/30">
+                    <button
+                      onClick={() => setActiveFaq(isOpen ? null : index)}
+                      className="w-full flex items-center justify-between p-5 text-left font-heading font-semibold text-base md:text-lg text-foreground hover:text-primary transition-colors focus:outline-none"
+                    >
+                      <span>{faq.question}</span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-muted-foreground transition-transform duration-300 shrink-0 ml-4 ${
+                          isOpen ? "rotate-180 text-primary" : ""
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`transition-all duration-300 ease-in-out ${
+                        isOpen ? "max-h-[300px] border-t border-border/40 opacity-100" : "max-h-0 opacity-0"
+                      } overflow-hidden`}
+                    >
+                      <p className="p-5 text-sm md:text-base text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              );
+            })}
+          </div>
         </div>
       </section>
 

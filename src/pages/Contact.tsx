@@ -6,17 +6,37 @@ import ScrollReveal from "@/components/shared/ScrollReveal";
 import PageHero from "@/components/shared/PageHero";
 import ContactForm from "@/components/shared/ContactForm";
 import { useContactInfo } from "@/hooks/use-data";
-import { Mail, Phone, MapPin, MessageCircle, Sparkles, Clock, Globe2 } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Sparkles, Clock, Globe2, ChevronDown, HelpCircle } from "lucide-react";
 import SocialIcons from "@/components/shared/SocialIcons";
 import { BUSINESS_CONFIG, getActiveOffices } from "@/lib/business-config";
 import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
 
+const contactFaqs = [
+  {
+    question: "How can I contact Dynime?",
+    answer: "You can contact Dynime by submitting the form below, emailing us at support@dynime.com, calling us, or sending a direct message on WhatsApp at +1 (646) 884-0271."
+  },
+  {
+    question: "How quickly do you respond?",
+    answer: "Our support and sales teams are committed to responding to all inquiries within 24 hours on business days."
+  },
+  {
+    question: "What services can I inquire about?",
+    answer: "You can inquire about all Dynime services, including Custom AI & Software Development, Web Design (Shopify & WordPress), SaaS Platforms, Performance Marketing, and Company Formation."
+  },
+  {
+    question: "Do you work internationally?",
+    answer: "Yes, Dynime is a global digital agency serving clients across over 25 countries from our entities in the United States, United Kingdom, and Bangladesh."
+  }
+];
+
 const Contact = () => {
   const { data: contacts } = useContactInfo();
   const [officeSearchTerm, setOfficeSearchTerm] = useState("");
   const [selectedOfficeName, setSelectedOfficeName] = useState("");
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const rawPhones = contacts?.filter((c) => c.type === "phone") || [];
   // Filter out UK numbers (+44 or UK in label)
@@ -99,6 +119,18 @@ const Contact = () => {
           address: { "@type": "PostalAddress", streetAddress: a.value },
         })),
       },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: contactFaqs.map(faq => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            "text": faq.answer
+          }
+        }))
+      }
     ],
   });
 
@@ -119,11 +151,7 @@ const Contact = () => {
       <PageHero
         eyebrow="A reply within 24 hours — always"
         eyebrowIcon={Sparkles}
-        title={
-          <>
-            Begin a <span className="gradient-text">Conversation</span> That Matters
-          </>
-        }
+        title="Let's Build Something Great Together"
         description="Share your vision, your ambition, or simply a question. Our team will return with a thoughtful response — and the first steps toward something remarkable."
         primaryCta={{ label: "Send us a message", href: "#contact-form" }}
         secondaryCta={{ label: "View our services", href: "/services" }}
@@ -524,6 +552,57 @@ const Contact = () => {
                       >
                         Contact Us
                       </a>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Accordion FAQ Section */}
+      <section className="section-padding bg-gradient-to-b from-background via-card/10 to-background border-t border-border/20">
+        <div className="container-custom max-w-4xl mx-auto">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary mb-3">
+                <HelpCircle className="w-3.5 h-3.5 animate-pulse" /> FAQ
+              </span>
+              <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+                Frequently Asked <span className="gradient-text">Questions</span>
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-sm md:text-base">
+                Get quick answers to the most common inquiries our team receives.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <div className="space-y-4">
+            {contactFaqs.map((faq, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <ScrollReveal key={index} delay={index * 0.05}>
+                  <div className="rounded-xl border border-border/60 bg-card/45 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/30">
+                    <button
+                      onClick={() => setActiveFaq(isOpen ? null : index)}
+                      className="w-full flex items-center justify-between p-5 text-left font-heading font-semibold text-base md:text-lg text-foreground hover:text-primary transition-colors focus:outline-none"
+                    >
+                      <span>{faq.question}</span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-muted-foreground transition-transform duration-300 shrink-0 ml-4 ${
+                          isOpen ? "rotate-180 text-primary" : ""
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`transition-all duration-300 ease-in-out ${
+                        isOpen ? "max-h-[300px] border-t border-border/40 opacity-100" : "max-h-0 opacity-0"
+                      } overflow-hidden`}
+                    >
+                      <p className="p-5 text-sm md:text-base text-muted-foreground leading-relaxed">
+                        {faq.answer}
+                      </p>
                     </div>
                   </div>
                 </ScrollReveal>

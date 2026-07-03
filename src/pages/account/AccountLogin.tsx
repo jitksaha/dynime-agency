@@ -14,7 +14,12 @@ import { useSEO } from "@/hooks/use-seo";
 
 const AccountLogin = () => {
   usePageTitle("Sign in");
-  useSEO({ title: "Sign in", noIndex: true });
+  useSEO({
+    title: "Login | Dynime Account",
+    description: "Securely access your Dynime account to manage projects, services, invoices and business solutions.",
+    keywords: ["Dynime Login", "Client Portal", "Customer Login", "Dashboard Login"],
+    noIndex: true
+  });
   const { user, signIn } = useAuth();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -86,7 +91,7 @@ const AccountLogin = () => {
                 <Sparkles className="w-3.5 h-3.5" /> Account portal
               </span>
               <h1 className="font-heading text-3xl md:text-4xl font-bold">
-                Sign in to your <span className="gradient-text">Dynime</span> account
+                Login to Your Account
               </h1>
               <p className="text-muted-foreground">
                 Track orders, manage your purchased services, support tickets and download branded invoices — all in one place.

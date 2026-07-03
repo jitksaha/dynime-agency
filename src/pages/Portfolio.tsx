@@ -99,11 +99,7 @@ const Portfolio = () => {
       <PageHero
         eyebrow="A Curated Selection of Recent Work"
         eyebrowIcon={Layers}
-        title={
-          <>
-            Selected <span className="gradient-text">Work</span>
-          </>
-        }
+        title="Our Portfolio"
         description="Each project, a partnership. Each result, a quiet statement of intent. Explore the brands we've helped shape."
         primaryCta={{ label: "Begin a project", href: "/contact" }}
         secondaryCta={{ label: "Browse selected work", href: "#portfolio-grid" }}

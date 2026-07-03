@@ -79,7 +79,9 @@ export const useSEO = (config: SEOConfig = {}) => {
 
   useEffect(() => {
     const title = config.title
-      ? `${config.title} | ${SITE_NAME}`
+      ? config.title.includes(SITE_NAME)
+        ? config.title
+        : `${config.title} | ${SITE_NAME}`
       : `${SITE_NAME} — Web, SEO, AI & Formation Agency`;
     const description = config.description || DEFAULT_DESCRIPTION;
     const url = `${SITE_DOMAIN}${pathname}`;

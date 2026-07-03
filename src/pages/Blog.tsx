@@ -122,10 +122,10 @@ const Blog = () => {
                 <Sparkles className="w-3.5 h-3.5" /> Dynime Insights
               </span>
               <h1 className="font-heading text-4xl md:text-6xl font-bold mt-4 mb-4">
-                Real guides for <span className="gradient-text">global founders</span>
+                Insights & <span className="gradient-text">Resources</span>
               </h1>
               <p className="text-base md:text-lg text-muted-foreground">
-                Practical playbooks on company formation, marketing, e-commerce and AI software — written by the team that ships them every day.
+                Real guides for global founders. Practical playbooks on company formation, marketing, e-commerce and AI software — written by the team that ships them every day.
               </p>
 
               {/* Search */}

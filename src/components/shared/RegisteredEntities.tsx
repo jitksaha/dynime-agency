@@ -64,7 +64,7 @@ const RegisteredEntities = () => {
               <span className="h-px w-6 bg-primary/60" />
             </span>
             <h2 className="font-heading text-3xl md:text-5xl font-bold mt-3">
-              Our <span className="gradient-text">Registered Entities</span>
+              Our <span className="gradient-text">Global Approach</span>
             </h2>
             <p className="text-sm md:text-base text-muted-foreground mt-3 max-w-2xl mx-auto">
               We operate under fully compliant corporate entities across multiple jurisdictions —
