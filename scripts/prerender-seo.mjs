@@ -178,6 +178,41 @@ function buildHtml(route) {
       primaryImageOfPage: { "@type": "ImageObject", url: image },
     },
   ];
+  if (r.path === "/") {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      "url": SITE_URL,
+      "name": "Dynime",
+      "alternateName": ["Dynime Inc.", "Dynime LLC."],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${SITE_URL}/blog?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      }
+    });
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      "name": "Dynime",
+      "alternateName": ["Dynime Inc.", "Dynime LLC."],
+      "url": SITE_URL,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${SITE_URL}/favicon-48.png`
+      },
+      "sameAs": [
+        "https://www.facebook.com/thedynime",
+        "https://www.instagram.com/thedynime",
+        "https://www.linkedin.com/company/thedynime"
+      ]
+    });
+  }
   if (ogType === "article") {
     jsonLd.push({
       "@context": "https://schema.org",
