@@ -145,7 +145,7 @@ const ServiceDetailPage = () => {
       service?.description ||
       "Premium digital service by Dynime LLC. — explore features, process, and pricing.",
     keywords: service
-      ? [
+      ? service.keywords || [
           service.title,
           service.categoryLabel,
           `${service.title} agency`,

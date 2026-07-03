@@ -365,6 +365,7 @@ const extras: PageSEORegistryEntry[] = [
 // Smart keyword generator for service pages — derives a richer commercial
 // keyword set from the service title rather than just echoing it.
 const buildServiceKeywords = (sp: typeof servicePages[number]): string[] => {
+  if (sp.keywords && sp.keywords.length > 0) return sp.keywords;
   const base = sp.title.toLowerCase();
   const stripped = base
     .replace(/\s+services?$/i, "")

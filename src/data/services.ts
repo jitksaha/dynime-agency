@@ -7,6 +7,7 @@ export interface ServicePageData {
   description: string;
   metaTitle: string;
   metaDescription: string;
+  keywords?: string[];
   icon: LucideIcon;
   category: "dws" | "des" | "dms" | "dcs" | "dss";
   categoryLabel: string;
@@ -85,6 +86,7 @@ export const servicePages: ServicePageData[] = [
     description: "Transform outdated websites into modern, fast and conversion-focused digital experiences with strategic redesign, UX improvements and SEO optimization.",
     metaTitle: "Website Redesign Services | Modern Business Websites | Dynime",
     metaDescription: "Transform outdated websites into modern, fast and conversion-focused digital experiences with strategic redesign, UX improvements and SEO optimization.",
+    keywords: ["Website Redesign Services", "Website Modernization", "UX Redesign", "Website Upgrade", "Business website redesign company", "Website redesign services", "Modern website redesign"],
     icon: Layers,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -194,6 +196,7 @@ export const servicePages: ServicePageData[] = [
     description: "Improve website speed, Core Web Vitals and user experience with advanced performance optimization, caching, image optimization and technical SEO.",
     metaTitle: "Website Speed Optimization Services | Core Web Vitals | Dynime",
     metaDescription: "Improve website speed, Core Web Vitals and user experience with advanced performance optimization, caching, image optimization and technical SEO.",
+    keywords: ["Website Speed Optimization", "Core Web Vitals", "PageSpeed Optimization", "Website Performance", "Technical SEO", "Website speed optimization services", "Google PageSpeed optimization", "Core Web Vitals optimization"],
     icon: Zap,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -303,6 +306,7 @@ export const servicePages: ServicePageData[] = [
     description: "Launch and grow your online store with custom Shopify development, theme customization, app integration, migration and performance optimization.",
     metaTitle: "Shopify Development Services | Shopify Experts | Dynime",
     metaDescription: "Launch and grow your online store with custom Shopify development, theme customization, app integration, migration and performance optimization.",
+    keywords: ["Shopify Development Services", "Shopify Store Development", "Shopify Experts", "Ecommerce Development", "Shopify development company", "Shopify ecommerce development", "Shopify custom store development"],
     icon: ShoppingBag,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -359,6 +363,7 @@ export const servicePages: ServicePageData[] = [
     description: "Create intuitive user experiences and modern interfaces with UX research, wireframes, prototypes and product design tailored for web and mobile applications.",
     metaTitle: "UI/UX Design Services | User Experience & Product Design | Dynime",
     metaDescription: "Create intuitive user experiences and modern interfaces with UX research, wireframes, prototypes and product design tailored for web and mobile applications.",
+    keywords: ["UI UX Design Services", "Product Design", "UX Research", "User Interface Design", "User Experience Design", "Professional UI UX design agency", "SaaS UI UX design", "Mobile app UX design"],
     icon: Palette,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1541,6 +1546,7 @@ export const servicePages: ServicePageData[] = [
     description: "End-to-end web design and development across WordPress, React, Next.js, Laravel and Webflow. Strategy, UX, custom design, performance optimization, and launch — handled by one senior team.",
     metaTitle: "Web Design & Development Services | Custom Business Websites | Dynime",
     metaDescription: "Build modern, responsive and SEO-friendly websites with Dynime. We design and develop high-performance business websites that drive traffic, engagement and conversions.",
+    keywords: ["Web Design Services", "Website Development Company", "Business Website Development", "Custom Website Development", "Responsive Web Design", "Professional web design company", "Responsive website development services", "Custom business website development"],
     icon: Code,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1597,6 +1603,7 @@ export const servicePages: ServicePageData[] = [
     description: "Custom WordPress and WooCommerce development for business websites, online stores, custom plugins, themes, optimization and long-term growth.",
     metaTitle: "WordPress & WooCommerce Development Services | Dynime",
     metaDescription: "Custom WordPress and WooCommerce development for business websites, online stores, custom plugins, themes, optimization and long-term growth.",
+    keywords: ["WordPress Development Services", "WooCommerce Development", "WordPress Agency", "WordPress Website", "WooCommerce Store Development", "WordPress website development company", "WooCommerce development services", "Custom WordPress solutions"],
     icon: ShoppingBag,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1653,6 +1660,7 @@ export const servicePages: ServicePageData[] = [
     description: "Develop scalable React, Node.js, Express and MongoDB applications with Dynime for startups, SaaS businesses and enterprise platforms.",
     metaTitle: "React & MERN Stack Development Services | Dynime",
     metaDescription: "Develop scalable React, Node.js, Express and MongoDB applications with Dynime for startups, SaaS businesses and enterprise platforms.",
+    keywords: ["MERN Stack Development", "React Development", "Node.js Development", "MongoDB Development", "Full Stack Development", "MERN stack development company", "React application development", "Node.js web application development"],
     icon: Code,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1709,6 +1717,7 @@ export const servicePages: ServicePageData[] = [
     description: "Keep your website secure, updated and running smoothly with proactive maintenance, monitoring, backups, malware protection and technical support.",
     metaTitle: "Website Maintenance & Security Services | Dynime",
     metaDescription: "Keep your website secure, updated and running smoothly with proactive maintenance, monitoring, backups, malware protection and technical support.",
+    keywords: ["Website Maintenance Services", "Website Security", "WordPress Maintenance", "Website Monitoring", "Website Support", "Website maintenance company", "Website security services", "WordPress maintenance plans"],
     icon: Shield,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1765,6 +1774,7 @@ export const servicePages: ServicePageData[] = [
     description: "Build scalable SaaS products with secure architecture, cloud infrastructure, subscription systems, APIs and enterprise-grade performance.",
     metaTitle: "Custom SaaS Development Services | Dynime",
     metaDescription: "Build scalable SaaS products with secure architecture, cloud infrastructure, subscription systems, APIs and enterprise-grade performance.",
+    keywords: ["SaaS Development Company", "SaaS Software Development", "Cloud Software", "SaaS Platform Development", "Custom SaaS development company", "SaaS application development", "Cloud software development"],
     icon: Cpu,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
@@ -1821,6 +1831,7 @@ export const servicePages: ServicePageData[] = [
     description: "Design and develop fast, responsive and SEO-friendly Webflow websites with CMS integration, animations and scalable content management.",
     metaTitle: "Webflow Development Services | Custom Webflow Websites | Dynime",
     metaDescription: "Design and develop fast, responsive and SEO-friendly Webflow websites with CMS integration, animations and scalable content management.",
+    keywords: ["Webflow Development Services", "Webflow Agency", "CMS Development", "No-Code Development", "Professional Webflow development", "Webflow website agency", "Custom Webflow websites"],
     icon: Palette,
     category: "dws",
     categoryLabel: "DWS — Dynime Web Services",
