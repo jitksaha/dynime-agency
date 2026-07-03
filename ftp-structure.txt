@@ -50,6 +50,7 @@ show-ip.php
 custom-web-apps
 brand-strategy
 inspect-order.php
+favicon-48.png
 get_logs.php
 products
 inspect-api.php
@@ -104,6 +105,7 @@ woocommerce
 google-ads
 check-files.php
 dws-illustration.png
+favicon.ico
 assets
 og-image.jpg
 inspect-inv-2083.php
