@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, jobsApi, type SyncedJob, type JobsListResponse } from "@/lib/api";
 import { db } from "@/integrations/db/client";
 
 // Thin wrappers so existing pages keep working
@@ -443,5 +443,22 @@ export const useUpsertSiteSetting = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["site-settings"] });
     },
+  });
+};
+
+// ── Synced Jobs (Flowmingo ATS) Hooks ────────────────────────────────────────
+
+export const useSyncedJobs = (params?: Parameters<typeof jobsApi.list>[0]) => {
+  return useQuery<JobsListResponse>({
+    queryKey: ["synced-jobs", params],
+    queryFn: () => jobsApi.list(params),
+  });
+};
+
+export const useSyncedJob = (slug: string) => {
+  return useQuery<SyncedJob>({
+    queryKey: ["synced-job", slug],
+    queryFn: () => jobsApi.get(slug),
+    enabled: !!slug,
   });
 };

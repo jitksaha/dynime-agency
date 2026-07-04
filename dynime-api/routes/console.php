@@ -40,6 +40,11 @@ Schedule::command('queue:work --stop-when-empty --max-jobs=50 --max-time=240')
     ->everyFiveMinutes()
     ->withoutOverlapping();
 
+// Synchronize job listings from Flowmingo ATS every 10 minutes
+Schedule::job(new \App\Jobs\SyncJobsJob)
+    ->everyTenMinutes()
+    ->withoutOverlapping();
+
 // Regenerate sitemap cache weekly
 Schedule::call(function () {
     \Illuminate\Support\Facades\Cache::forget('sitemap_xml');

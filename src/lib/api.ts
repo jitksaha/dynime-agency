@@ -405,3 +405,58 @@ export interface SeoMeta {
   robots: string;
   is_active: boolean;
 }
+
+// ── Synced Jobs API (Flowmingo ATS) ──────────────────────────────────────────
+
+export interface SyncedJob {
+  id: number;
+  flowmingo_job_id: string;
+  slug: string;
+  title: string;
+  department: string;
+  employment_type: string;
+  location: string;
+  salary_min: number | null;
+  salary_max: number | null;
+  salary_currency: string | null;
+  salary_range: string | null;
+  description: string | null;
+  responsibilities: string[];
+  requirements: string[];
+  benefits: string[];
+  experience: string | null;
+  remote: boolean;
+  featured: boolean;
+  status: string;
+  apply_url: string;
+  published_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface JobsListResponse {
+  data: SyncedJob[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+export const jobsApi = {
+  list: (params?: {
+    search?: string;
+    department?: string;
+    location?: string;
+    employment_type?: string;
+    featured?: boolean | string;
+    remote?: boolean | string;
+    sort_by?: string;
+    sort_dir?: string;
+    per_page?: number;
+    page?: number;
+  }) => api.get<JobsListResponse>('/jobs', { params }).then((r) => r.data),
+
+  get: (slug: string) => api.get<SyncedJob>(`/jobs/${slug}`).then((r) => r.data),
+};

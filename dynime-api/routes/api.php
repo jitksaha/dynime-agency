@@ -54,6 +54,11 @@ Route::prefix('v1')->group(function () {
     Route::get('careers/{slug}',         [CareerController::class, 'show']);
     Route::post('careers/{slug}/view',   [CareerController::class, 'recordView']);
 
+    // Synced Jobs (Flowmingo ATS)
+    Route::get('jobs',                   [\App\Http\Controllers\Api\JobController::class, 'index']);
+    Route::get('jobs/{slug}',            [\App\Http\Controllers\Api\JobController::class, 'show']);
+    Route::post('webhooks/flowmingo',    [\App\Http\Controllers\Api\FlowmingoWebhookController::class, 'handle']);
+
     // Portfolio
     Route::get('portfolio',              [PortfolioController::class, 'index']);
     Route::get('portfolio/categories',   [PortfolioController::class, 'categories']);
