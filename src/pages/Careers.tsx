@@ -5,81 +5,166 @@ import Layout from "@/components/layout/Layout";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { SEO_DEFAULTS } from "@/lib/seo-defaults";
 import ScrollReveal from "@/components/shared/ScrollReveal";
-import { Briefcase, MapPin, Clock, ArrowUpRight, Sparkles, Heart, Globe, Rocket, Users, Search, X, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { type SyncedJob } from "@/lib/api";
+import { Briefcase, MapPin, Clock, ArrowUpRight, Sparkles, Heart, Globe, Rocket, Users, Search, X, ChevronLeft, ChevronRight, DollarSign, ChevronDown, CheckCircle2 } from "lucide-react";
 
-const perks = [
-  { icon: Globe, title: "Remote-first", desc: "Work from anywhere in the world" },
-  { icon: Rocket, title: "Growth budget", desc: "Annual learning & conference stipend" },
-  { icon: Heart, title: "Wellness", desc: "Mental health & wellness benefits" },
-  { icon: Users, title: "Team retreats", desc: "Annual offsites with the team" },
-];
+interface JobCardProps {
+  job: SyncedJob;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
 
-const JobCard = ({ job }: { job: SyncedJob }) => (
-  <Link
-    to={`/careers/${job.slug}`}
-    className="group relative block overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-b from-card/30 to-card/10 backdrop-blur-md p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_20px_50px_rgba(var(--primary-rgb),0.08)] hover:-translate-y-1"
-  >
-    {/* Background hover light effect */}
-    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
+  const cleanDescription = job.description
+    ? job.description.replace(/<[^>]+>/g, " ").trim()
+    : "";
 
-    {job.featured && (
-      <span className="absolute -top-px right-6 inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-primary to-accent text-primary-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">
-        <Sparkles className="w-3 h-3 animate-pulse" /> Featured
-      </span>
-    )}
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-2xl border bg-gradient-to-b from-card/40 to-card/10 backdrop-blur-md hover:shadow-[0_20px_50px_rgba(var(--primary-rgb),0.08)] transition-all duration-300 ${
+        isExpanded
+          ? "border-primary/40 shadow-[0_15px_40px_-15px_rgba(var(--primary-rgb),0.15)]"
+          : "border-border/30 hover:border-primary/20"
+      }`}
+    >
+      {/* Background hover light effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-    <div className="relative z-10 flex flex-col h-full justify-between">
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-primary font-bold mb-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/10 w-fit">
-          {job.department}
-        </p>
-        <h3 className="font-heading font-extrabold text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300 mb-3">
-          {job.title}
-        </h3>
+      {job.featured && (
+        <span className="absolute top-0 right-6 inline-flex items-center gap-1 rounded-b-xl bg-gradient-to-r from-primary to-accent text-primary-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm z-20">
+          <Sparkles className="w-3 h-3 animate-pulse" /> Featured
+        </span>
+      )}
 
-        {job.description && (
-          <p className="text-sm text-muted-foreground/80 mb-5 line-clamp-2 leading-relaxed font-sans">
-            {job.description.replace(/<[^>]+>/g, " ")}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
-            <MapPin className="w-3.5 h-3.5 text-primary" />
-            {job.location}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
-            <Clock className="w-3.5 h-3.5 text-primary" /> {job.employment_type}
-          </span>
-          {job.experience && (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/50 px-3 py-1 text-xs text-foreground/80 font-medium">
-              <Briefcase className="w-3.5 h-3.5 text-primary" /> {job.experience}
+      {/* Clickable Header */}
+      <button
+        onClick={onToggle}
+        type="button"
+        className="w-full text-left p-6 md:p-7 flex items-start justify-between gap-4 focus:outline-none z-10 relative"
+      >
+        <div className="space-y-3.5 pr-8">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-primary font-bold px-2.5 py-0.5 rounded-md bg-primary/10 border border-primary/10">
+              {job.department}
             </span>
-          )}
-          {job.salary_range && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-3 py-1 text-xs font-semibold">
-              <DollarSign className="w-3 h-3" /> {job.salary_range}
+          </div>
+          <h3 className="font-heading font-extrabold text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-300">
+            {job.title}
+          </h3>
+
+          {/* Always visible tags info */}
+          <div className="flex flex-wrap gap-2.5 pt-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/30 bg-background/40 px-3 py-1 text-xs text-foreground/80 font-medium">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              {job.location}
             </span>
-          )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/30 bg-background/40 px-3 py-1 text-xs text-foreground/80 font-medium">
+              <Clock className="w-3.5 h-3.5 text-primary" /> {job.employment_type}
+            </span>
+            {job.experience && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/30 bg-background/40 px-3 py-1 text-xs text-foreground/80 font-medium">
+                <Briefcase className="w-3.5 h-3.5 text-primary" /> {job.experience}
+              </span>
+            )}
+            {job.salary_currency && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-3 py-1 text-xs font-semibold">
+                <DollarSign className="w-3.5 h-3.5" /> {job.salary_currency}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-border/20">
-          <span className="text-xs text-muted-foreground">
-            {job.published_at ? `Posted ${new Date(job.published_at).toLocaleDateString()}` : ""}
-          </span>
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-primary group-hover:text-primary-foreground group-hover:bg-primary px-3 py-1.5 rounded-xl border border-primary/25 transition-all duration-300">
-            View Role <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-          </span>
+        <div className="shrink-0 pt-1">
+          <div className={`p-2 rounded-full border border-border/40 bg-background/50 hover:bg-primary/10 hover:text-primary transition-all duration-300 ${isExpanded ? 'rotate-180 border-primary/30 text-primary' : 'text-muted-foreground'}`}>
+            <ChevronDown className="w-5 h-5 transition-transform duration-300" />
+          </div>
+        </div>
+      </button>
+
+      {/* Expandable Content Container */}
+      <div className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
+        <div className="overflow-hidden">
+          <div className="px-6 md:px-7 pb-6 md:pb-7 border-t border-border/20 space-y-5 pt-5 relative z-10 bg-background/5">
+            
+            {cleanDescription && (
+              <div className="space-y-2">
+                <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Role Overview</h4>
+                <p className="text-sm text-foreground/85 leading-relaxed font-sans max-w-3xl">
+                  {cleanDescription.length > 280 ? cleanDescription.slice(0, 277).trim() + "..." : cleanDescription}
+                </p>
+              </div>
+            )}
+
+            {/* Responsibilities and Requirements side by side if present */}
+            {(job.responsibilities?.length > 0 || job.requirements?.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                {job.responsibilities?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Key Responsibilities
+                    </h4>
+                    <ul className="space-y-1.5 pl-1">
+                      {job.responsibilities.slice(0, 3).map((resp, idx) => (
+                        <li key={idx} className="text-xs text-foreground/80 leading-relaxed list-disc list-inside">
+                          {resp}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {job.requirements?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" /> Requirements
+                    </h4>
+                    <ul className="space-y-1.5 pl-1">
+                      {job.requirements.slice(0, 3).map((req, idx) => (
+                        <li key={idx} className="text-xs text-foreground/80 leading-relaxed list-disc list-inside">
+                          {req}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-5 border-t border-border/10">
+              <span className="text-xs text-muted-foreground self-center">
+                {job.published_at ? `Posted ${new Date(job.published_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}` : ""}
+              </span>
+              <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl border-border/60 hover:bg-background/80"
+                >
+                  <Link to={`/careers/${job.slug}`}>
+                    View Details
+                  </Link>
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(job.apply_url, "_blank", "noopener,noreferrer");
+                  }}
+                  size="sm"
+                  className="rounded-xl font-bold bg-primary hover:bg-primary/95 text-primary-foreground gap-1.5 group shadow-sm shadow-primary/10"
+                >
+                  Apply Now <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Button>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
+
     </div>
-  </Link>
-);
+  );
+};
 
 const Careers = () => {
   const [search, setSearch] = useState("");
@@ -88,6 +173,7 @@ const Careers = () => {
   const [employmentType, setEmploymentType] = useState("");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useSyncedJobs({
     search: search.trim() || undefined,
@@ -300,9 +386,9 @@ const Careers = () => {
 
           {/* Results Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 rounded-2xl bg-muted/40 animate-pulse border border-border/20" />
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-28 rounded-2xl bg-muted/40 animate-pulse border border-border/20" />
               ))}
             </div>
           ) : isError ? (
@@ -312,11 +398,21 @@ const Careers = () => {
               <p className="text-muted-foreground">We couldn't load the jobs listing. Please refresh the page or try again later.</p>
             </div>
           ) : data && data.data.length > 0 ? (
-            <div className="max-w-5xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="space-y-4 mb-8">
                 {data.data.map((job) => (
-                  <ScrollReveal key={job.id} delay={0.05}>
-                    <JobCard job={job} />
+                  <ScrollReveal key={job.flowmingo_job_id} delay={0.05}>
+                    <JobCard
+                      job={job}
+                      isExpanded={expandedJobId === job.flowmingo_job_id}
+                      onToggle={() =>
+                        setExpandedJobId(
+                          expandedJobId === job.flowmingo_job_id
+                            ? null
+                            : job.flowmingo_job_id
+                        )
+                      }
+                    />
                   </ScrollReveal>
                 ))}
               </div>

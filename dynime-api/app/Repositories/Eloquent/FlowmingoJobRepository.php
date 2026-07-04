@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\DTOs\AtsJobDTO;
 use App\Models\Job;
+use App\Models\Career;
 use App\Repositories\Contracts\JobRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -144,7 +145,13 @@ class FlowmingoJobRepository implements JobRepositoryInterface
         $perPage = (int) ($filters['per_page'] ?? 10);
         $perPage = max(1, min($perPage, 100));
 
-        return $query->paginate($perPage);
+        $paginator = $query->paginate($perPage);
+
+        foreach ($paginator->items() as $job) {
+            $this->mergeCareerDetails($job);
+        }
+
+        return $paginator;
     }
 
     /**
@@ -155,9 +162,15 @@ class FlowmingoJobRepository implements JobRepositoryInterface
      */
     public function findBySlug(string $slug): ?Job
     {
-        return Job::where('slug', $slug)
+        $job = Job::where('slug', $slug)
             ->where('status', 'open')
             ->first();
+
+        if ($job) {
+            $this->mergeCareerDetails($job);
+        }
+
+        return $job;
     }
 
     /**
@@ -208,5 +221,44 @@ class FlowmingoJobRepository implements JobRepositoryInterface
     protected function clearCache(): void
     {
         Cache::flush();
+    }
+
+    /**
+     * Dynamically merge details from the local careers table.
+     */
+    protected function mergeCareerDetails(Job $job): void
+    {
+        $career = Career::where('slug', $job->slug)
+            ->first() ?? Career::where('title', $job->title)->first();
+
+        if ($career) {
+            if (empty($job->description)) {
+                $job->description = !empty($career->content_html) ? $career->content_html : $career->description;
+            }
+            if (empty($job->responsibilities)) {
+                $job->responsibilities = $career->responsibilities;
+            }
+            if (empty($job->requirements)) {
+                $job->requirements = $career->requirements;
+            }
+            if (empty($job->benefits)) {
+                $job->benefits = $career->benefits ?? [];
+            }
+            if (!empty($career->location) && ($job->location === 'Office' || empty($job->location))) {
+                $job->location = $career->location;
+            }
+            if (!empty($career->employment_type)) {
+                $job->employment_type = $career->employment_type;
+            }
+            if (!empty($career->department) && ($job->department === 'General' || empty($job->department))) {
+                $job->department = $career->department;
+            }
+            if (!empty($career->salary_range) && empty($job->salary_max)) {
+                $job->salary_currency = $career->salary_range;
+            }
+            if (!empty($career->experience_level)) {
+                $job->experience = $career->experience_level;
+            }
+        }
     }
 }

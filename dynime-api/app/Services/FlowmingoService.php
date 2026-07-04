@@ -106,24 +106,8 @@ class FlowmingoService implements AtsProviderInterface
                 $postId = $post['id'];
                 $status = (int) ($post['status'] ?? 1) === 1 ? 'open' : 'closed';
 
-                // Find matching interview set of type 1 (AI Interview) to get a direct apply URL
-                $applyUrl = $fallbackApplyUrl;
-                $matchedSetId = null;
-
-                foreach ($interviewSets as $set) {
-                    if ((int) ($set['status'] ?? 1) !== 1 || (int) ($set['set_type'] ?? 1) !== 1) {
-                        continue;
-                    }
-
-                    if ($this->isTitleMatch($title, $set['title'])) {
-                        $matchedSetId = $set['id'];
-                        break;
-                    }
-                }
-
-                if ($matchedSetId) {
-                    $applyUrl = "https://talent.flowmingo.ai/interview/{$matchedSetId}";
-                }
+                // Construct direct apply URL using base64 encoded job post ID
+                $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($postId);
 
                 // Check remote status from title
                 $isRemote = false;

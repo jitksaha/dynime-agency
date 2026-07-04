@@ -69,7 +69,7 @@ class FlowmingoIntegrationTest extends TestCase
         $this->assertInstanceOf(AtsJobDTO::class, $dto);
         $this->assertEquals('fl_123', $dto->flowmingo_job_id);
         $this->assertEquals('Senior Backend Engineer', $dto->title);
-        $this->assertEquals('https://talent.flowmingo.ai/interview/set_123', $dto->apply_url);
+        $this->assertEquals('https://talent.flowmingo.ai/jobs/' . base64_encode('fl_123'), $dto->apply_url);
     }
 
     /**
