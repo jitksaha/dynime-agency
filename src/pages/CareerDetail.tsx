@@ -214,15 +214,13 @@ const CareerDetail = () => {
             <ScrollReveal delay={0.1}>
               <div className="lg:sticky lg:top-24">
                 <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.4)]">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">At a glance</p>
-
                   <dl className="space-y-3.5 text-sm">
-                    {job.salary_range && (
+                    {(job.salary_range || job.salary_currency) && (
                       <div className="flex items-start gap-3">
                         <BadgeDollarSign className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                         <div className="min-w-0">
                           <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Compensation</dt>
-                          <dd className="font-semibold text-foreground">{job.salary_range}</dd>
+                          <dd className="font-semibold text-foreground">{job.salary_range || job.salary_currency}</dd>
                         </div>
                       </div>
                     )}
