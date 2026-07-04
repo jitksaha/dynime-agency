@@ -16,7 +16,7 @@ if (!file_exists($envPath)) {
 }
 
 $keys = [
-    'FLOWMINGO_API_URL' => 'https://api.flowmingo.com/v1',
+    'FLOWMINGO_API_URL' => 'https://api.flowmingo.ai/v1',
     'FLOWMINGO_API_KEY' => 'fl_live_0VYl27roG.PbF9Yv7iPR8UI81o4zaSU8OaicK1qfGQgsHnIAGVAYM',
     'FLOWMINGO_API_TIMEOUT' => '10',
     'FLOWMINGO_API_RETRIES' => '3',
@@ -42,7 +42,7 @@ foreach ($keys as $key => $val) {
 }
 
 file_put_contents($envPath, implode("\n", $lines));
-echo "Successfully updated .env file keys.<br/>";
+echo "Successfully updated .env file keys to use .ai URL.<br/>";
 
 // Delete self for security
 @unlink(__FILE__);
