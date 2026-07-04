@@ -618,10 +618,85 @@ $envPath = $apiDir . '/.env';
                 echo "Now you can run the setup script from the primary domain web root directly.\n";
             }
             echo "</pre>";
+        <?php
         } else {
             echo '<p><a href="?token=' . $deployToken . '&action=cleanup_nested" class="btn" style="background:#d97706;">Cleanup Nested public_html Directory</a></p>';
         }
         ?>
     </div>
+
+    <div class="card" style="border-left: 4px solid #635bff;">
+        <h2>7. 🔄 Flowmingo Jobs Auto-Sync</h2>
+        <p>Fix the Flowmingo sync issue. This will: (1) correct the API URL in <code>.env</code>, (2) run an immediate sync of all jobs, and (3) show cron job setup instructions.</p>
+
+        <?php
+        // ─── Action: Fix ENV + Force Sync ────────────────────────────────────────
+        if (isset($_GET['action']) && $_GET['action'] === 'flowmingo_sync') {
+            echo "<pre>";
+            try {
+                require $apiDir . '/vendor/autoload.php';
+                $app = require_once $apiDir . '/bootstrap/app.php';
+                $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+                $kernel->bootstrap();
+
+                // Step 1: Fix the FLOWMINGO_API_URL in .env if wrong
+                echo "=== Step 1: Check/Fix FLOWMINGO_API_URL in .env ===\n";
+                $envContent = file_exists($envPath) ? file_get_contents($envPath) : '';
+                $wrongUrl   = 'FLOWMINGO_API_URL=https://api.flowmingo.com/v1';
+                $correctUrl = 'FLOWMINGO_API_URL=https://apis.flowmingo.ai/company';
+                if (strpos($envContent, $wrongUrl) !== false) {
+                    $envContent = str_replace($wrongUrl, $correctUrl, $envContent);
+                    file_put_contents($envPath, $envContent);
+                    echo "✅ Fixed FLOWMINGO_API_URL: https://api.flowmingo.com/v1 → https://apis.flowmingo.ai/company\n";
+                } elseif (strpos($envContent, $correctUrl) !== false) {
+                    echo "✅ FLOWMINGO_API_URL is already correct: https://apis.flowmingo.ai/company\n";
+                } else {
+                    // Check what URL is actually set
+                    preg_match('/FLOWMINGO_API_URL=(.+)/', $envContent, $m);
+                    echo "ℹ️ Current FLOWMINGO_API_URL: " . ($m[1] ?? 'NOT SET') . "\n";
+                }
+
+                // Step 2: Clear config cache so new URL takes effect
+                echo "\n=== Step 2: Clear Config Cache ===\n";
+                $exitCode = Illuminate\Support\Facades\Artisan::call('config:clear');
+                echo "config:clear → Exit: $exitCode\n" . Illuminate\Support\Facades\Artisan::output();
+
+                // Step 3: Run sync
+                echo "\n=== Step 3: Sync Jobs from Flowmingo ===\n";
+                $exitCode = Illuminate\Support\Facades\Artisan::call('flowmingo:sync');
+                $output   = Illuminate\Support\Facades\Artisan::output();
+                echo "flowmingo:sync → Exit: $exitCode\n$output";
+
+                // Step 4: Clear application cache
+                echo "\n=== Step 4: Clear Application Cache ===\n";
+                Illuminate\Support\Facades\Artisan::call('cache:clear');
+                echo "cache:clear done\n";
+                Illuminate\Support\Facades\Artisan::call('route:clear');
+                echo "route:clear done\n";
+
+                echo "\n✅ All done! Jobs should now show on dynime.com/careers\n";
+
+            } catch (Throwable $e) {
+                echo "❌ ERROR: " . $e->getMessage() . "\n";
+                echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+            }
+            echo "</pre>";
+        } else {
+            echo '<p><a href="?token=' . $deployToken . '&action=flowmingo_sync" class="btn" style="background:#635bff;">🔄 Fix ENV + Force Sync Now</a></p>';
+        }
+        ?>
+
+        <h3>⏰ Set Up Auto-Sync (Cron Job)</h3>
+        <p>Go to <strong>Hostinger hPanel → Hosting → Advanced → Cron Jobs</strong> and add:</p>
+        <pre style="background:#1f2937; color:#f9fafb; padding:15px; border-radius:8px; font-size:13px;">*/10 * * * *   curl -s "https://dynime.com/flowmingo-cron.php?token=deploy_token_7782" &gt;&gt; /dev/null 2&gt;&amp;1</pre>
+        <p style="margin-top:10px;">This runs every <strong>10 minutes</strong> and automatically pulls new jobs from Flowmingo into your website.</p>
+
+        <h3>🔗 Flowmingo Webhook Setup</h3>
+        <p>For <strong>instant</strong> job sync (within seconds of posting in Flowmingo), configure this webhook URL in your <strong>Flowmingo dashboard → Settings → Webhooks</strong>:</p>
+        <pre style="background:#1f2937; color:#10b981; padding:15px; border-radius:8px; font-size:14px; font-weight:bold;">https://dynime.com/api/v1/webhooks/flowmingo</pre>
+        <p>Webhook secret (already set in your .env): <code>whsec_f9ff03a...</code></p>
+        <p>Events to subscribe: <code>job.created</code>, <code>job.updated</code>, <code>job.deleted</code>, <code>job.closed</code></p>
+    </div>
+
 </body>
 </html>

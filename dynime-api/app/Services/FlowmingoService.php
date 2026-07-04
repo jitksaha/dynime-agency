@@ -102,42 +102,109 @@ class FlowmingoService implements AtsProviderInterface
                     continue;
                 }
 
-                $title = $post['title'];
+                $title  = $post['title'];
                 $postId = $post['id'];
-                $status = (int) ($post['status'] ?? 1) === 1 ? 'open' : 'closed';
+
+                // Map status: 1 = open/active, anything else = closed
+                $statusVal = $post['status'] ?? $post['is_active'] ?? 1;
+                $status = ((int) $statusVal === 1 || $statusVal === true || $statusVal === 'active' || $statusVal === 'open') ? 'open' : 'closed';
 
                 // Construct direct apply URL using base64 encoded job post ID
                 $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($postId);
 
-                // Check remote status from title
-                $isRemote = false;
-                if (stripos($title, 'remote') !== false || stripos($title, 'hybrid') !== false) {
+                // ─── Extract all available fields from API response ───────────────
+                // Location: try various field names Flowmingo might use
+                $location = $post['location'] ?? $post['work_location'] ?? $post['office_location'] ?? null;
+                if (empty($location)) {
+                    $location = 'Hybrid'; // Sensible default
+                }
+
+                // Employment type
+                $employmentType = $post['employment_type']
+                    ?? $post['job_type']
+                    ?? $post['contract_type']
+                    ?? 'Full-time';
+
+                // Department / Category
+                $department = $post['department']
+                    ?? $post['category']
+                    ?? $post['team']
+                    ?? $post['group']
+                    ?? 'General';
+
+                // Experience level
+                $experience = $post['experience_level']
+                    ?? $post['experience']
+                    ?? $post['seniority']
+                    ?? $post['level']
+                    ?? null;
+
+                // Salary
+                $salaryMin  = $post['salary_min'] ?? $post['min_salary'] ?? null;
+                $salaryMax  = $post['salary_max'] ?? $post['max_salary'] ?? null;
+                $salaryCurr = $post['salary_currency'] ?? $post['currency'] ?? null;
+                // Some ATS return salary as a formatted string
+                $salaryStr  = $post['salary'] ?? $post['salary_range'] ?? null;
+                if ($salaryStr && !$salaryMin && !$salaryMax) {
+                    // e.g. "USD 1,800 – 3,600 / year" — store as salary_currency field for display
+                    $salaryCurr = is_string($salaryStr) ? $salaryStr : $salaryCurr;
+                }
+
+                // Description / responsibilities / requirements
+                $description     = $post['description'] ?? $post['summary'] ?? $post['job_description'] ?? null;
+                $responsibilities = null;
+                $requirements     = null;
+                $benefits         = null;
+                if (!empty($post['responsibilities'])) {
+                    $r = $post['responsibilities'];
+                    $responsibilities = is_array($r) ? $r : (is_string($r) ? array_filter(explode("\n", $r)) : null);
+                }
+                if (!empty($post['requirements'])) {
+                    $r = $post['requirements'];
+                    $requirements = is_array($r) ? $r : (is_string($r) ? array_filter(explode("\n", $r)) : null);
+                }
+                if (!empty($post['benefits'])) {
+                    $b = $post['benefits'];
+                    $benefits = is_array($b) ? $b : (is_string($b) ? array_filter(explode("\n", $b)) : null);
+                }
+
+                // Remote flag
+                $isRemote = (bool) ($post['is_remote'] ?? $post['remote'] ?? false);
+                if (!$isRemote) {
+                    $loc = strtolower($location);
+                    $isRemote = str_contains($loc, 'remote') || str_contains($loc, 'hybrid');
+                }
+                if (!$isRemote && stripos($title, 'remote') !== false) {
                     $isRemote = true;
                 }
+
+                // Published date
+                $publishedAt = $post['published_at'] ?? $post['created_at'] ?? null;
 
                 // Parse into AtsJobDTO
                 $jobs[] = new AtsJobDTO(
                     flowmingo_job_id: $postId,
-                    title: $title,
-                    slug: \Illuminate\Support\Str::slug($title),
-                    department: 'General',
-                    employment_type: 'Full-time',
-                    location: $isRemote ? 'Remote' : 'Office',
-                    salary_min: null,
-                    salary_max: null,
-                    salary_currency: null,
-                    description: null,
-                    responsibilities: null,
-                    requirements: null,
-                    benefits: null,
-                    experience: null,
-                    remote: $isRemote,
-                    featured: false,
-                    status: $status,
-                    apply_url: $applyUrl,
-                    published_at: $post['created_at'] ?? null
+                    title:            $title,
+                    slug:             \Illuminate\Support\Str::slug($title),
+                    department:       $department,
+                    employment_type:  $employmentType,
+                    location:         $location,
+                    salary_min:       $salaryMin ? (int) $salaryMin : null,
+                    salary_max:       $salaryMax ? (int) $salaryMax : null,
+                    salary_currency:  $salaryCurr,
+                    description:      $description,
+                    responsibilities: $responsibilities,
+                    requirements:     $requirements,
+                    benefits:         $benefits,
+                    experience:       $experience,
+                    remote:           $isRemote,
+                    featured:         (bool) ($post['featured'] ?? $post['is_featured'] ?? false),
+                    status:           $status,
+                    apply_url:        $applyUrl,
+                    published_at:     $publishedAt
                 );
             }
+
 
             return $jobs;
 
