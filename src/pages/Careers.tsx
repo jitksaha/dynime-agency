@@ -1,11 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSyncedJobs } from "@/hooks/use-cms-data";
+import { type SyncedJob } from "@/lib/api";
 import Layout from "@/components/layout/Layout";
 import { usePageSEO } from "@/hooks/use-page-seo";
 import { SEO_DEFAULTS } from "@/lib/seo-defaults";
 import ScrollReveal from "@/components/shared/ScrollReveal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Briefcase, MapPin, Clock, ArrowUpRight, Sparkles, Heart, Globe, Rocket, Users, Search, X, ChevronLeft, ChevronRight, DollarSign, ChevronDown, CheckCircle2 } from "lucide-react";
+
+const perks = [
+  { icon: Globe, title: "Remote-first", desc: "Work from anywhere in the world" },
+  { icon: Rocket, title: "Fast growth", desc: "Own meaningful work from day one" },
+  { icon: Heart, title: "Great benefits", desc: "Health, equity & flexible time off" },
+  { icon: Users, title: "Inclusive culture", desc: "Diverse teams, strong values" },
+];
+
 
 interface JobCardProps {
   job: SyncedJob;
