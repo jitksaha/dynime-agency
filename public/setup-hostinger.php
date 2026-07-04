@@ -494,6 +494,10 @@ $envPath = $apiDir . '/.env';
                 $exitCodeConfig = Illuminate\Support\Facades\Artisan::call('config:clear');
                 echo "Exit Code: $exitCodeConfig\n";
                 
+                echo "Clearing application data cache...\n";
+                $exitCodeCache = Illuminate\Support\Facades\Artisan::call('cache:clear');
+                echo "Exit Code: $exitCodeCache\n";
+                
                 echo "Success!\n";
             } catch (Exception $e) {
                 echo "ERROR executing Artisan commands: " . $e->getMessage() . "\n";
