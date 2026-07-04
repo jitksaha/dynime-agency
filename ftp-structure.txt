@@ -7,12 +7,14 @@ consulting
 check_id_card.php
 get-logs-advanced.php
 web-design-development
+update-live-env.php
 blog
 robots.txt
 portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
@@ -72,6 +74,7 @@ facebook-ads
 replit.nix
 netlify.toml
 og-image-v2.jpg
+inspect-live-env.php
 ..
 public
 og-image-dark-v2.jpg
@@ -82,6 +85,7 @@ apple-touch-icon.png
 get-migrations-list.php
 track
 sitemap.xml
+update-live-env-ai.php
 web.config
 test-migrations-exist.php
 dcs-illustration.png
