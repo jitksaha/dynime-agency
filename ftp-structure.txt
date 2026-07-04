@@ -7,12 +7,14 @@ consulting
 check_id_card.php
 get-logs-advanced.php
 web-design-development
+update-live-env.php
 blog
 robots.txt
 portfolio
 index.html
 dms-illustration.png
 .replit
+dynime-api.zip
 .agents
 .gitignore
 nodejs-mern-ecommerce
