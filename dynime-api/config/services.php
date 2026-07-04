@@ -36,11 +36,12 @@ return [
     ],
 
     'flowmingo' => [
-        'url' => env('FLOWMINGO_API_URL', 'https://api.flowmingo.com/v1'),
+        'url' => env('FLOWMINGO_API_URL', 'https://apis.flowmingo.ai/company'),
         'key' => env('FLOWMINGO_API_KEY'),
         'timeout' => env('FLOWMINGO_API_TIMEOUT', 10),
         'retries' => env('FLOWMINGO_API_RETRIES', 3),
         'retry_delay' => env('FLOWMINGO_API_RETRY_DELAY', 100),
+        'webhook_secret' => env('FLOWMINGO_WEBHOOK_SECRET'),
     ],
 
 ];

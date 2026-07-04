@@ -21,7 +21,7 @@ class FlowmingoWebhookController extends Controller
      */
     public function handle(Request $request): JsonResponse
     {
-        $secret = env('FLOWMINGO_WEBHOOK_SECRET');
+        $secret = config('services.flowmingo.webhook_secret');
         
         // Verify signature if a secret is configured
         if (!empty($secret)) {

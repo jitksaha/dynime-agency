@@ -33,31 +33,30 @@ class FlowmingoIntegrationTest extends TestCase
     public function test_flowmingo_service_fetches_and_parses_jobs(): void
     {
         Http::fake([
-            'https://api.flowmingo.com/v1/jobs' => Http::response([
+            'https://api.flowmingo.com/v1/integration/me/v1' => Http::response([
+                'organization_id' => 21234
+            ], 200),
+            'https://api.flowmingo.com/v1/integration/hiring/job-posts/v1' => Http::response([
                 'data' => [
                     [
                         'id' => 'fl_123',
                         'title' => 'Senior Backend Engineer',
-                        'slug' => 'senior-backend-engineer',
-                        'department' => 'Engineering',
-                        'employment_type' => 'Full-time',
-                        'location' => 'Remote, USA',
-                        'salary_min' => 120000,
-                        'salary_max' => 150000,
-                        'salary_currency' => 'USD',
-                        'description' => 'Great role.',
-                        'responsibilities' => ['Code', 'Review'],
-                        'requirements' => ['PHP', 'Laravel'],
-                        'benefits' => ['Health', 'Dental'],
-                        'experience' => '5+ years',
-                        'remote' => true,
-                        'featured' => true,
-                        'status' => 'open',
-                        'apply_url' => 'https://apply.flowmingo.com/dynime/fl_123',
-                        'published_at' => '2026-07-04T12:00:00Z',
+                        'status' => 1,
+                        'created_at' => '2026-07-04T12:00:00Z',
                     ]
                 ]
-            ], 200)
+            ], 200),
+            'https://api.flowmingo.com/v1/integration/hiring/interview-sets/v1' => Http::response([
+                'data' => [
+                    [
+                        'id' => 'set_123',
+                        'title' => 'Senior Backend Engineer Interview Set',
+                        'status' => 1,
+                        'set_type' => 1,
+                        'created_at' => '2026-07-04T12:00:00Z',
+                    ]
+                ]
+            ], 200),
         ]);
 
         $service = app(AtsProviderInterface::class);
@@ -70,8 +69,7 @@ class FlowmingoIntegrationTest extends TestCase
         $this->assertInstanceOf(AtsJobDTO::class, $dto);
         $this->assertEquals('fl_123', $dto->flowmingo_job_id);
         $this->assertEquals('Senior Backend Engineer', $dto->title);
-        $this->assertTrue($dto->remote);
-        $this->assertTrue($dto->featured);
+        $this->assertEquals('https://talent.flowmingo.ai/interview/set_123', $dto->apply_url);
     }
 
     /**
@@ -255,20 +253,30 @@ class FlowmingoIntegrationTest extends TestCase
     {
         // Mock Flowmingo API call
         Http::fake([
-            'https://api.flowmingo.com/v1/jobs' => Http::response([
+            'https://api.flowmingo.com/v1/integration/me/v1' => Http::response([
+                'organization_id' => 21234
+            ], 200),
+            'https://api.flowmingo.com/v1/integration/hiring/job-posts/v1' => Http::response([
                 'data' => [
                     [
                         'id' => 'fl_job_sync',
                         'title' => 'DevOps Engineer',
-                        'slug' => 'devops-engineer',
-                        'department' => 'Engineering',
-                        'employment_type' => 'Full-time',
-                        'location' => 'Remote',
-                        'status' => 'open',
-                        'apply_url' => 'https://apply.com',
+                        'status' => 1,
+                        'created_at' => '2026-07-04T12:00:00Z',
                     ]
                 ]
-            ], 200)
+            ], 200),
+            'https://api.flowmingo.com/v1/integration/hiring/interview-sets/v1' => Http::response([
+                'data' => [
+                    [
+                        'id' => 'set_sync',
+                        'title' => 'DevOps Engineer Interview Set',
+                        'status' => 1,
+                        'set_type' => 1,
+                        'created_at' => '2026-07-04T12:00:00Z',
+                    ]
+                ]
+            ], 200),
         ]);
 
         // Execute job
@@ -290,7 +298,6 @@ class FlowmingoIntegrationTest extends TestCase
     public function test_webhook_rejects_invalid_signature(): void
     {
         config(['services.flowmingo.webhook_secret' => 'super-secret']);
-        putenv('FLOWMINGO_WEBHOOK_SECRET=super-secret');
 
         $payload = [
             'event' => 'job.created',
@@ -310,8 +317,7 @@ class FlowmingoIntegrationTest extends TestCase
             'flowmingo_job_id' => 'fl_webhook_1',
         ]);
         
-        // Cleanup env
-        putenv('FLOWMINGO_WEBHOOK_SECRET');
+        config(['services.flowmingo.webhook_secret' => null]);
     }
 
     /**
@@ -320,7 +326,7 @@ class FlowmingoIntegrationTest extends TestCase
     public function test_webhook_handles_job_created_and_updated(): void
     {
         $secret = 'super-secret';
-        putenv("FLOWMINGO_WEBHOOK_SECRET={$secret}");
+        config(['services.flowmingo.webhook_secret' => $secret]);
 
         $payload = [
             'event' => 'job.created',
@@ -367,7 +373,7 @@ class FlowmingoIntegrationTest extends TestCase
             'title' => 'Updated Webhook Developer',
         ]);
 
-        putenv('FLOWMINGO_WEBHOOK_SECRET');
+        config(['services.flowmingo.webhook_secret' => null]);
     }
 
     /**
@@ -376,7 +382,7 @@ class FlowmingoIntegrationTest extends TestCase
     public function test_webhook_handles_job_deleted_and_closed(): void
     {
         $secret = 'super-secret';
-        putenv("FLOWMINGO_WEBHOOK_SECRET={$secret}");
+        config(['services.flowmingo.webhook_secret' => $secret]);
 
         // Preseed
         Job::create([
@@ -413,6 +419,6 @@ class FlowmingoIntegrationTest extends TestCase
             'flowmingo_job_id' => 'fl_webhook_delete',
         ]);
 
-        putenv('FLOWMINGO_WEBHOOK_SECRET');
+        config(['services.flowmingo.webhook_secret' => null]);
     }
 }
