@@ -38,6 +38,7 @@ scripts
 attached_assets
 .env
 marketplace-solution
+force-fix-url-env.php
 dropshipping-solution
 favicon-dark-16.png
 software-testing-qa
@@ -56,6 +57,7 @@ favicon-48.png
 get_logs.php
 products
 inspect-api.php
+debug-api-call.php
 ui-ux-design
 favicon-16.png
 llms.txt
@@ -77,6 +79,7 @@ og-image-v2.jpg
 inspect-live-env.php
 ..
 flowmingo-cron.php
+debug-http-direct.php
 public
 og-image-dark-v2.jpg
 backend
@@ -105,6 +108,7 @@ shopify
 deploy
 test-folder.php
 laravel-ecommerce
+debug-flowmingo-endpoints.php
 social-media
 woocommerce
 google-ads
