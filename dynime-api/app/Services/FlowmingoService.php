@@ -97,16 +97,32 @@ class FlowmingoService implements AtsProviderInterface
             }
 
             $jobs = [];
-            foreach ($jobPosts as $post) {
-                if (empty($post['id']) || empty($post['title'])) {
+            foreach ($jobPosts as $postItem) {
+                if (empty($postItem['id']) || empty($postItem['title'])) {
                     continue;
                 }
 
-                $title  = $post['title'];
-                $postId = $post['id'];
+                $postId = $postItem['id'];
+
+                // Fetch full details of the job post since the list only returns ID and Title
+                $postDetailResponse = Http::withHeaders([
+                    'X-Api-Key' => $this->apiKey,
+                    'Accept' => 'application/json',
+                ])
+                ->timeout($this->timeout)
+                ->get("{$this->apiUrl}/integration/hiring/job-posts/{$postId}/v1");
+
+                if ($postDetailResponse->successful()) {
+                    $detailData = $postDetailResponse->json();
+                    $post = $detailData ?: $postItem;
+                } else {
+                    $post = $postItem;
+                }
+
+                $title = $post['title'] ?? $postItem['title'];
 
                 // Map status: 1 = open/active, anything else = closed
-                $statusVal = $post['status'] ?? $post['is_active'] ?? 1;
+                $statusVal = $post['status'] ?? 1;
                 $status = ((int) $statusVal === 1 || $statusVal === true || $statusVal === 'active' || $statusVal === 'open') ? 'open' : 'closed';
 
                 // Construct direct apply URL using base64 encoded job post ID
