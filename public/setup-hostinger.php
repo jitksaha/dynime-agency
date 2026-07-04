@@ -614,11 +614,9 @@ $envPath = $apiDir . '/.env';
                         }
                     }
                 }
-                echo "\nDeletion complete. Deleted: $successCount, Failed: $failCount.\n";
-                echo "Now you can run the setup script from the primary domain web root directly.\n";
+                 echo "\nDeletion complete. Deleted: $successCount, Failed: $failCount.\n";
             }
             echo "</pre>";
-        <?php
         } else {
             echo '<p><a href="?token=' . $deployToken . '&action=cleanup_nested" class="btn" style="background:#d97706;">Cleanup Nested public_html Directory</a></p>';
         }
