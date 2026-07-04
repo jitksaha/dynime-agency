@@ -10,6 +10,7 @@ web-design-development
 update-live-env.php
 blog
 robots.txt
+debug-cron-error.php
 portfolio
 index.html
 dms-illustration.png
@@ -75,6 +76,7 @@ netlify.toml
 og-image-v2.jpg
 inspect-live-env.php
 ..
+flowmingo-cron.php
 public
 og-image-dark-v2.jpg
 backend
