@@ -84,6 +84,7 @@ inspect-db-rows.php
 check-settings.php
 nginx.conf.example
 list-dist-files.php
+debug-flowmingo-all-endpoints-v3.php
 .env.example
 facebook-ads
 replit.nix
@@ -95,8 +96,10 @@ debug-flowmingo-all-endpoints.php
 debug-flowmingo-keys.php
 debug-http-direct.php
 public
+debug-flowmingo-hiring-fields.php
 og-image-dark-v2.jpg
 backend
+debug-flowmingo-paths.php
 debug-flowmingo-payload.php
 favicon-dark-32.png
 list-migrations.php
