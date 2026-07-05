@@ -7,11 +7,11 @@ $app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-// Force request URI path matching to /jobs on live system
-$request = Illuminate\Http\Request::create('/jobs', 'GET');
+// Force request URI path matching to /api/jobs on live system
+$request = Illuminate\Http\Request::create('/api/jobs', 'GET');
 
 try {
-    echo "<h3>Sending Request to /jobs...</h3>";
+    echo "<h3>Sending Request to /api/jobs...</h3>";
     $response = $kernel->handle($request);
     echo "<b>Status Code:</b> " . $response->getStatusCode() . "<br/>";
     echo "<b>Response Headers:</b> <pre>" . htmlspecialchars(json_encode($response->headers->all(), JSON_PRETTY_PRINT)) . "</pre>";
