@@ -1,22 +1,42 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $token = 'deploy_token_7782';
 if (!isset($_GET['token']) || $_GET['token'] !== $token) {
     header('HTTP/1.1 403 Forbidden');
     exit('Denied');
 }
 
-$logPath = dirname(__DIR__) . '/dynime-api/storage/logs/laravel.log';
-if (!file_exists($logPath)) {
-    echo "Log file not found at: " . htmlspecialchars($logPath);
-    exit;
+$dir = dirname(__DIR__);
+echo "App Base Dir: " . htmlspecialchars($dir) . "<br/>";
+
+$logPaths = [
+    $dir . '/dynime-api/storage/logs/laravel.log',
+    dirname($dir) . '/dynime-api/storage/logs/laravel.log',
+    '/home/u740731947/domains/dynime.com/dynime-api/storage/logs/laravel.log'
+];
+
+$found = false;
+foreach ($logPaths as $path) {
+    echo "Checking: " . htmlspecialchars($path) . "... ";
+    if (file_exists($path)) {
+        echo "FOUND! Size: " . filesize($path) . " bytes.<br/>";
+        $content = file_get_contents($path);
+        if ($content !== false) {
+            $lines = explode("\n", $content);
+            $tail = array_slice($lines, -40);
+            echo "<pre style='background:#f6f8fa; padding:12px; border-radius:6px; overflow:auto;'>" . htmlspecialchars(implode("\n", $tail)) . "</pre>";
+            $found = true;
+            break;
+        } else {
+            echo "Failed to read.<br/>";
+        }
+    } else {
+        echo "Not found.<br/>";
+    }
 }
 
-$content = file_get_contents($logPath);
-if ($content === false) {
-    echo "Failed to read file contents.";
-    exit;
+if (!$found) {
+    echo "Could not load laravel log from any checked paths.";
 }
-
-$lines = explode("\n", $content);
-$tail = array_slice($lines, -40);
-echo "<pre>" . htmlspecialchars(implode("\n", $tail)) . "</pre>";
