@@ -7,14 +7,13 @@ $app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-// Force request URI path matching to /api/jobs on live system
-$request = Illuminate\Http\Request::create('/api/jobs', 'GET');
+// Force request URI path matching to /dynime-api/public/api/v1/jobs on live system
+$request = Illuminate\Http\Request::create('https://dynime.com/dynime-api/public/api/v1/jobs', 'GET');
 
 try {
-    echo "<h3>Sending Request to /api/jobs...</h3>";
+    echo "<h3>Sending Request to dynime-api/public/api/v1/jobs...</h3>";
     $response = $kernel->handle($request);
     echo "<b>Status Code:</b> " . $response->getStatusCode() . "<br/>";
-    echo "<b>Response Headers:</b> <pre>" . htmlspecialchars(json_encode($response->headers->all(), JSON_PRETTY_PRINT)) . "</pre>";
     
     if ($response->getStatusCode() === 500) {
         if (method_exists($response, 'getOriginalContent') && $response->getOriginalContent() instanceof \Throwable) {
