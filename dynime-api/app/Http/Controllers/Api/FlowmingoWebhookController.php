@@ -75,6 +75,10 @@ class FlowmingoWebhookController extends Controller
                         }
                     }
                     
+                    // Generate proper base64 encoded com_project_id apply URL
+                    $projId = $data['com_project_id'] ?? $data['id'] ?? '';
+                    $data['apply_url'] = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
+                    
                     $dto = AtsJobDTO::fromArray($data);
                     $this->jobRepository->upsertJob($dto);
                     break;

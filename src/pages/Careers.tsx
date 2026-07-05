@@ -97,9 +97,9 @@ const JobCard = ({ job, isExpanded, onToggle }: JobCardProps) => {
 
               <Button
                 asChild
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="rounded-full text-xs font-semibold hover:bg-muted"
+                className="rounded-full text-xs font-semibold border-border/80 text-foreground hover:bg-muted/80 hover:text-foreground transition-all"
               >
                 <Link to={`/careers/${job.slug}`}>
                   View Details Page
@@ -231,9 +231,27 @@ const Careers = () => {
             </div>
           </ScrollReveal>
 
-          {/* Filtering System Panel */}
+                  {/* Filtering System Panel */}
           <div className="max-w-5xl mx-auto bg-background/40 border border-border/50 backdrop-blur-md rounded-2xl p-6 mb-12 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            {/* Styled Remote Only Checkbox on Top */}
+            <div className="flex items-center gap-4 mb-5 pb-4 border-b border-border/20">
+              <button
+                type="button"
+                onClick={() => setRemoteOnly(!remoteOnly)}
+                className="flex items-center gap-3 group text-sm text-foreground/80 font-semibold focus:outline-none cursor-pointer"
+              >
+                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${remoteOnly ? 'bg-primary border-primary' : 'border-border/80 group-hover:border-primary/50'}`}>
+                  {remoteOnly && (
+                    <svg className="w-3.5 h-3.5 text-primary-foreground stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                Remote Only
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none" />
                 <Input
@@ -286,30 +304,18 @@ const Careers = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2.5 border-t border-border/20">
-              <div className="flex items-center gap-4">
-                <label className="inline-flex items-center gap-2.5 text-sm text-foreground/80 font-medium cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={remoteOnly}
-                    onChange={(e) => setRemoteOnly(e.target.checked)}
-                    className="rounded border-input text-primary focus:ring-primary h-4 w-4"
-                  />
-                  Remote Only
-                </label>
-              </div>
-
-              {(search || department || employmentType || remoteOnly) && (
+            {(search || department || employmentType || remoteOnly) && (
+              <div className="flex justify-end pt-3 mt-3 border-t border-border/10">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleResetFilters}
-                  className="text-xs text-primary hover:text-primary-hover w-fit self-end"
+                  className="text-xs text-primary hover:text-primary-hover w-fit"
                 >
                   Clear Filters
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Results List */}

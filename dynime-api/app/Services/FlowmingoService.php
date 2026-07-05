@@ -125,8 +125,9 @@ class FlowmingoService implements AtsProviderInterface
                 $statusVal = $post['status'] ?? 1;
                 $status = ((int) $statusVal === 1 || $statusVal === true || $statusVal === 'active' || $statusVal === 'open') ? 'open' : 'closed';
 
-                // Construct direct apply URL using base64 encoded job post ID
-                $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($postId);
+                // Construct direct apply URL using base64 encoded project ID if available, otherwise fallback to post ID
+                $projId = $post['com_project_id'] ?? $postItem['com_project_id'] ?? $postId;
+                $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
 
                 // ─── Extract all available fields from API response ───────────────
                 // Location: try various field names Flowmingo might use
