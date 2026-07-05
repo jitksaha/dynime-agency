@@ -30,7 +30,7 @@ const getJobMeta = (id: string) => {
 // Beautiful brand logos mapping based on title/department to look premium
 const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; className?: string }) => {
   return (
-    <div className={`${className} rounded-2xl flex items-center justify-center shrink-0 border border-border/50 bg-background overflow-hidden p-2`}>
+    <div className={`${className} flex items-center justify-center shrink-0 overflow-hidden`}>
       <img src={dynimeIcon} alt="Dynime logo" className="w-full h-full object-contain" />
     </div>
   );
