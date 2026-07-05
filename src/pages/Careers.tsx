@@ -97,7 +97,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
   };
 
   return (
-    <div className="bg-background border border-border/50 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm overflow-y-auto h-full scrollbar-thin">
+    <div id="job-details-container" className="bg-background border border-border/50 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm overflow-y-auto h-full scrollbar-thin">
       {onBack && (
         <button
           onClick={onBack}
@@ -112,7 +112,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
         <div className="flex gap-4 items-start">
           <JobBrandLogo job={job} className="w-14 h-14" />
           <div className="space-y-1">
-            <h2 className="font-heading text-xl md:text-2xl font-bold text-foreground leading-tight flex items-center gap-1.5">
+            <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground leading-tight flex items-center gap-1.5">
               {job.title} <span className="text-primary font-normal text-lg">+</span>
             </h2>
             <p className="text-xs text-muted-foreground font-semibold flex flex-wrap gap-x-2 gap-y-1 items-center">
@@ -216,6 +216,69 @@ const Careers = () => {
   // Selection
   const [selectedJob, setSelectedJob] = useState<SyncedJob | null>(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [isDashboardMode, setIsDashboardMode] = useState(false);
+
+  // Scroll handler to enter dashboard mode when user scrolls down
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20 && !isDashboardMode) {
+        setIsDashboardMode(true);
+        window.scrollTo(0, 0);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isDashboardMode]);
+
+  // Gesture/wheel handlers to exit dashboard mode when at top of scroll
+  useEffect(() => {
+    if (!isDashboardMode) return;
+
+    let touchStartY = 0;
+
+    const handleWheel = (e: WheelEvent) => {
+      const jobListEl = document.getElementById("jobs-list-container");
+      const detailEl = document.getElementById("job-details-container");
+      
+      const isJobListAtTop = jobListEl ? jobListEl.scrollTop === 0 : true;
+      const isDetailAtTop = detailEl ? detailEl.scrollTop === 0 : true;
+
+      // User scrolls up (negative deltaY) while both panels are at the very top
+      if (e.deltaY < -15 && isJobListAtTop && isDetailAtTop) {
+        setIsDashboardMode(false);
+      }
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const touchY = e.touches[0].clientY;
+      const diff = touchY - touchStartY;
+      
+      const jobListEl = document.getElementById("jobs-list-container");
+      const detailEl = document.getElementById("job-details-container");
+      
+      const isJobListAtTop = jobListEl ? jobListEl.scrollTop === 0 : true;
+      const isDetailAtTop = detailEl ? detailEl.scrollTop === 0 : true;
+
+      // Swipe down (scrolling up)
+      if (diff > 40 && isJobListAtTop && isDetailAtTop) {
+        setIsDashboardMode(false);
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [isDashboardMode]);
 
   // Fetch jobs
   const { data, isLoading, isError } = useSyncedJobs({ per_page: 100 });
@@ -277,11 +340,13 @@ const Careers = () => {
   });
 
   return (
-    <Layout>
+    <Layout hideFooter={isDashboardMode}>
       <div className="bg-slate-50/50 min-h-screen pb-6 flex flex-col">
         
         {/* ── Top Header Banner (White Background, Centered Title) ────────────────── */}
-        <section className="text-center py-5 px-4 max-w-full">
+        <section className={`text-center px-4 max-w-full transition-all duration-300 ease-in-out ${
+          isDashboardMode ? "max-h-0 opacity-0 py-0 overflow-hidden" : "py-5"
+        }`}>
           <div className="space-y-2 max-w-3xl mx-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
               We're hiring globally
@@ -338,12 +403,22 @@ const Careers = () => {
               </button>
             </div>
             
-            {/* Active filters summary */}
-            {(search || department || employmentType || experience || remoteOnly) && (
-              <button onClick={handleResetFilters} className="text-primary text-xs font-bold hover:underline shrink-0 pl-2">
-                Reset
-              </button>
-            )}
+            {/* Active filters / Dashboard mode toggles */}
+            <div className="flex items-center gap-3 shrink-0 pl-2">
+              {isDashboardMode && (
+                <button
+                  onClick={() => setIsDashboardMode(false)}
+                  className="text-muted-foreground hover:text-foreground text-xs font-bold flex items-center gap-1 bg-muted/60 px-2.5 py-1 rounded-lg transition-colors border border-border/20 shrink-0"
+                >
+                  <ArrowLeft className="w-3 h-3 rotate-90" /> Show Banner
+                </button>
+              )}
+              {(search || department || employmentType || experience || remoteOnly) && (
+                <button onClick={handleResetFilters} className="text-primary text-xs font-bold hover:underline shrink-0">
+                  Reset
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
@@ -366,7 +441,9 @@ const Careers = () => {
             </div>
           ) : filteredJobs.length > 0 ? (
             /* Split Container: full screen flex height, scroll lock */
-            <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start lg:h-[calc(100vh-140px)] overflow-hidden pb-4">
+            <div className={`grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start overflow-hidden pb-4 transition-all duration-300 ${
+              isDashboardMode ? "lg:h-[calc(100vh-var(--header-h,72px)-90px)]" : "lg:h-[calc(100vh-140px)]"
+            }`}>
               
               {/* LEFT Column: Sticky & Independently Scrollable Jobs List */}
               <div className={`h-full flex flex-col ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
@@ -376,7 +453,7 @@ const Careers = () => {
                 </div>
                 
                 {/* Scrollable list box */}
-                <div className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
+                <div id="jobs-list-container" className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
                   {filteredJobs.map((job) => {
                     const isSelected = selectedJob?.flowmingo_job_id === job.flowmingo_job_id;
 
@@ -395,8 +472,8 @@ const Careers = () => {
                       >
                         <JobBrandLogo job={job} className="w-10 h-10" />
                         <div className="space-y-0.5 flex-1 min-w-0 pr-16">
-                          <h3 className="font-heading font-bold text-sm md:text-base text-foreground leading-tight truncate flex items-center gap-1">
-                            {job.title} <span className="text-primary font-normal text-sm">+</span>
+                          <h3 className="font-heading font-semibold text-sm md:text-[15px] text-foreground leading-snug">
+                            {job.title} <span className="text-primary font-normal text-xs">+</span>
                           </h3>
                           <span className="text-[11px] font-bold text-muted-foreground block truncate">
                             {job.department}
