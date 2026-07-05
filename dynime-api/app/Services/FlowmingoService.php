@@ -114,7 +114,9 @@ class FlowmingoService implements AtsProviderInterface
 
                 if ($postDetailResponse->successful()) {
                     $detailData = $postDetailResponse->json();
-                    $post = $detailData ?: $postItem;
+                    // Merge: start with list item (which has com_project_id) then overlay detail fields
+                    // This prevents the detail response from accidentally losing com_project_id
+                    $post = array_merge($postItem, $detailData ?: []);
                 } else {
                     $post = $postItem;
                 }
@@ -125,8 +127,14 @@ class FlowmingoService implements AtsProviderInterface
                 $statusVal = $post['status'] ?? 1;
                 $status = ((int) $statusVal === 1 || $statusVal === true || $statusVal === 'active' || $statusVal === 'open') ? 'open' : 'closed';
 
-                // Construct direct apply URL using base64 encoded project ID if available, otherwise fallback to post ID
-                $projId = $post['com_project_id'] ?? $postItem['com_project_id'] ?? $postId;
+                // ALWAYS use com_project_id for the apply URL — never the raw job UUID.
+                // com_project_id is available in both list and detail responses.
+                $projId = $postItem['com_project_id'] ?? $post['com_project_id'] ?? null;
+                if (empty($projId)) {
+                    // Absolute fallback — log a warning, this should never happen
+                    Log::warning("Flowmingo: com_project_id missing for job '{$postId}' ({$title}). Falling back to job ID.");
+                    $projId = $postId;
+                }
                 $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
 
                 // ─── Extract all available fields from API response ───────────────
