@@ -150,6 +150,56 @@ const CareerDetail = () => {
     );
   }
 
+  // Parse Description for additional Flowmingo custom metadata if not returned by native API
+  let workplaceType: string[] = [];
+  let seniorityLevel: string[] = [];
+  let jobFunctions: string[] = [];
+  let extractedSalary = "";
+
+  if (job.description) {
+    // Extract Salary
+    const salaryMatch = job.description.match(/(?:Expected Annual Salary|Salary|Compensation)\s*\(?USD\)?\s*[:\-]?\s*([^\n\r]+)/i);
+    if (salaryMatch) {
+      extractedSalary = salaryMatch[1].replace(/[\*#_]/g, "").trim();
+    }
+
+    // Extract Workplace Type
+    const workplaceMatch = job.description.match(/(?:Workplace Type|Location)\s*[:\-]?\s*([^\n\r]+)/i);
+    if (workplaceMatch) {
+      const typeStr = workplaceMatch[1].replace(/[\*#_]/g, "").trim();
+      workplaceType = typeStr.split(/[,&/\\+]/).map(t => t.trim()).filter(Boolean);
+    } else if (job.description.toLowerCase().includes("remote-first") || job.description.toLowerCase().includes("remote first")) {
+      workplaceType = ["Remote"];
+    }
+    if (job.location && !workplaceType.includes(job.location)) {
+      workplaceType.push(job.location);
+    }
+
+    // Extract Seniority Level
+    const experienceMatch = job.description.match(/(?:Seniority Level|Seniority|Experience)\s*[:\-]?\s*([^\n\r]+)/i);
+    if (experienceMatch) {
+      const expStr = experienceMatch[1].replace(/[\*#_]/g, "").trim();
+      seniorityLevel = expStr.split(/[,&/\\+]/).map(s => s.trim()).filter(Boolean);
+    } else if (job.experience) {
+      seniorityLevel = [job.experience];
+    }
+
+    // Extract Job Functions / Core Competencies
+    const functionsMatch = job.description.match(/(?:Job Functions|Core Competencies)\s*[\r\n]+((?:\s*\*.*[\r\n]+)+)/i);
+    if (functionsMatch) {
+      jobFunctions = functionsMatch[1]
+        .split("\n")
+        .map(line => line.replace(/[\*#_\-\s]/g, "").trim())
+        .filter(line => line.length > 2);
+    }
+  }
+
+  // Fallbacks if not extracted
+  const displaySalary = job.salary_range || job.salary_currency || extractedSalary || "Negotiable";
+  const displayWorkplace = workplaceType.length > 0 ? workplaceType : [job.location || "Remote"];
+  const displaySeniority = seniorityLevel.length > 0 ? seniorityLevel : (job.experience ? [job.experience] : ["Mid-Senior Level"]);
+  const displayFunctions = jobFunctions.length > 0 ? jobFunctions : [job.department || "Marketing & Growth"];
+
   let cleanHtml = "";
   if (job.description) {
     const isMarkdown = job.description.includes('#') || job.description.includes('*') || job.description.includes('\n\n');
@@ -203,9 +253,13 @@ const CareerDetail = () => {
               </h1>
 
               <div className="flex flex-wrap gap-2 mt-6">
-                <Pill icon={MapPin}>{job.location}</Pill>
-                <Pill icon={Clock}>{job.employment_type}</Pill>
-                {job.experience && <Pill icon={Briefcase}>{job.experience}</Pill>}
+                {displayWorkplace.map((w, idx) => (
+                  <Pill key={`wp-${idx}`} icon={MapPin}>{w}</Pill>
+                ))}
+                <Pill icon={Clock}>{job.employment_type || "Full-time"}</Pill>
+                {displaySeniority.map((s, idx) => (
+                  <Pill key={`sn-${idx}`} icon={Briefcase}>{s}</Pill>
+                ))}
                 {job.remote && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary px-3 py-1 text-xs font-semibold">
                     Remote Friendly
@@ -218,45 +272,77 @@ const CareerDetail = () => {
             <ScrollReveal delay={0.1}>
               <div className="lg:sticky lg:top-24">
                 <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.4)]">
-                  <dl className="space-y-3.5 text-sm">
-                    {(job.salary_range || job.salary_currency) && (
-                      <div className="flex items-start gap-3">
-                        <BadgeDollarSign className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <div className="min-w-0">
-                          <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Compensation</dt>
-                          <dd className="font-semibold text-foreground">{job.salary_range || job.salary_currency}</dd>
-                        </div>
+                  <dl className="space-y-4.5 text-sm">
+                    {/* Salary Section */}
+                    <div className="flex items-start gap-3">
+                      <BadgeDollarSign className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Salary / Compensation</dt>
+                        <dd className="font-semibold text-foreground text-base mt-0.5">{displaySalary}</dd>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Workplace Type */}
                     <div className="flex items-start gap-3">
                       <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                       <div className="min-w-0">
-                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Location</dt>
-                        <dd className="font-medium text-foreground">{job.location}</dd>
+                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Workplace Type</dt>
+                        <dd className="flex flex-wrap gap-1.5 mt-1">
+                          {displayWorkplace.map((w, idx) => (
+                            <span key={`side-wp-${idx}`} className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs text-primary font-medium">
+                              {w}
+                            </span>
+                          ))}
+                        </dd>
                       </div>
                     </div>
+
+                    {/* Employment Type */}
                     <div className="flex items-start gap-3">
                       <Clock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                       <div className="min-w-0">
-                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Type</dt>
-                        <dd className="font-medium text-foreground">{job.employment_type}</dd>
+                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Employment Type</dt>
+                        <dd className="font-semibold text-foreground mt-0.5">{job.employment_type || "Full-time"}</dd>
                       </div>
                     </div>
-                    {job.experience && (
-                      <div className="flex items-start gap-3">
-                        <Briefcase className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <div className="min-w-0">
-                          <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Experience</dt>
-                          <dd className="font-medium text-foreground">{job.experience}</dd>
-                        </div>
+
+                    {/* Seniority Level */}
+                    <div className="flex items-start gap-3">
+                      <Briefcase className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Seniority Level</dt>
+                        <dd className="flex flex-wrap gap-1.5 mt-1">
+                          {displaySeniority.map((s, idx) => (
+                            <span key={`side-sn-${idx}`} className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs text-primary font-medium">
+                              {s}
+                            </span>
+                          ))}
+                        </dd>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Job Functions */}
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Job Functions</dt>
+                        <dd className="flex flex-wrap gap-1.5 mt-1.5">
+                          {displayFunctions.map((f, idx) => (
+                            <span key={`side-fn-${idx}`} className="inline-flex items-center rounded-full bg-primary/5 border border-border/80 px-2.5 py-0.5 text-xs text-foreground/80 font-medium">
+                              {f}
+                            </span>
+                          ))}
+                        </dd>
+                      </div>
+                    </div>
+
+                    {/* Posted Date */}
                     {postedDate && (
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-3 pt-1 border-t border-border/30">
                         <Calendar className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                         <div className="min-w-0">
                           <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">Posted</dt>
-                          <dd className="font-medium text-foreground">{postedDate}</dd>
+                          <dd className="font-medium text-foreground mt-0.5">{postedDate}</dd>
                         </div>
                       </div>
                     )}
