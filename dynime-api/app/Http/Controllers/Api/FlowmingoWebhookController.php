@@ -26,8 +26,13 @@ class FlowmingoWebhookController extends Controller
         // Verify signature if a secret is configured
         if (!empty($secret)) {
             $signature = $request->header('X-Flowmingo-Signature');
-            if (empty($signature) || !$this->verifySignature($request->getContent(), $signature, $secret)) {
-                Log::warning('Flowmingo Webhook: Invalid signature received.');
+            $isValid = !empty($signature) && $this->verifySignature($request->getContent(), $signature, $secret);
+            if (!$isValid) {
+                Log::warning('Flowmingo Webhook: Invalid signature received.', [
+                    'received_signature' => $signature,
+                    'computed_signature' => $signature ? hash_hmac('sha256', $request->getContent(), $secret) : null,
+                    'secret_configured' => substr($secret, 0, 10) . '...'
+                ]);
                 return response()->json(['message' => 'Invalid signature.'], 401);
             }
         }
@@ -49,9 +54,27 @@ class FlowmingoWebhookController extends Controller
             switch ($event) {
                 case 'job.created':
                 case 'job.updated':
-                    if (empty($data['id']) || empty($data['title']) || empty($data['apply_url'])) {
-                        return response()->json(['message' => 'Missing required job data fields.'], 422);
+                    if (empty($data['id'])) {
+                        return response()->json(['message' => 'Missing required job ID.'], 422);
                     }
+                    
+                    // Webhooks payload from Flowmingo only sends basic data. Fetch complete details:
+                    $apiUrl = config('services.flowmingo.url') ?: env('FLOWMINGO_API_URL', 'https://apis.flowmingo.ai/company');
+                    $apiKey = config('services.flowmingo.key') ?: env('FLOWMINGO_API_KEY', '');
+                    
+                    if (!empty($apiKey)) {
+                        $response = \Illuminate\Support\Facades\Http::withHeaders([
+                            'X-Api-Key' => $apiKey,
+                            'Accept' => 'application/json',
+                        ])
+                        ->timeout(10)
+                        ->get("{$apiUrl}/integration/hiring/job-posts/{$data['id']}/v1");
+                        
+                        if ($response->successful() && !empty($response->json())) {
+                            $data = array_merge($data, $response->json());
+                        }
+                    }
+                    
                     $dto = AtsJobDTO::fromArray($data);
                     $this->jobRepository->upsertJob($dto);
                     break;
