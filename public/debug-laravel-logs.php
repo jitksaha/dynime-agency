@@ -8,7 +8,7 @@ $app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
 // Force request URI path matching to /dynime-api/public/api/v1/jobs on live system
-$request = Illuminate\Http\Request::create('https://dynime.com/dynime-api/public/api/v1/jobs', 'GET');
+$request = Illuminate\Http\Request::create('/dynime-api/public/api/v1/jobs', 'GET');
 
 try {
     echo "<h3>Sending Request to dynime-api/public/api/v1/jobs...</h3>";
