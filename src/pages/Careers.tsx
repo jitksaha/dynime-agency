@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import dynimeIcon from "@/assets/dynime-icon-light.svg";
 
 // Helper to get a deterministic fake applicant count and rating
 const getJobMeta = (id: string) => {
@@ -28,40 +29,9 @@ const getJobMeta = (id: string) => {
 
 // Beautiful brand logos mapping based on title/department to look premium
 const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; className?: string }) => {
-  const title = job.title.toLowerCase();
-  
-  let bg = "bg-blue-600/10 text-blue-600 border-blue-600/20";
-  let letter = "D";
-
-  if (title.includes("social") || title.includes("brand")) {
-    bg = "bg-sky-500/10 text-sky-500 border-sky-500/20";
-    letter = "S";
-  } else if (title.includes("seo") || title.includes("content")) {
-    bg = "bg-rose-500/10 text-rose-500 border-rose-500/20";
-    letter = "C";
-  } else if (title.includes("market")) {
-    bg = "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
-    letter = "P";
-  } else if (title.includes("partner") || title.includes("outreach")) {
-    bg = "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
-    letter = "O";
-  } else if (title.includes("sales") || title.includes("sdr") || title.includes("business")) {
-    bg = "bg-amber-500/10 text-amber-500 border-amber-500/20";
-    letter = "S";
-  } else if (title.includes("crm") || title.includes("automation")) {
-    bg = "bg-purple-500/10 text-purple-500 border-purple-500/20";
-    letter = "A";
-  } else if (title.includes("operation") || title.includes("project")) {
-    bg = "bg-teal-500/10 text-teal-500 border-teal-500/20";
-    letter = "M";
-  } else if (title.includes("growth") || title.includes("revenue")) {
-    bg = "bg-violet-500/10 text-violet-500 border-violet-500/20";
-    letter = "G";
-  }
-
   return (
-    <div className={`${className} rounded-2xl flex items-center justify-center shrink-0 border font-heading font-extrabold text-lg ${bg}`}>
-      {letter}
+    <div className={`${className} rounded-2xl flex items-center justify-center shrink-0 border border-border/50 bg-background overflow-hidden p-2`}>
+      <img src={dynimeIcon} alt="Dynime logo" className="w-full h-full object-contain" />
     </div>
   );
 };
