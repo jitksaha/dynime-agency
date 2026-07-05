@@ -7,15 +7,19 @@ $app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 
 $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
-// Instantiate the controller directly and run the index method bypass routing matching rules
 try {
     echo "<h3>Direct Controller Execution...</h3>";
     $repository = $app->make(App\Repositories\Contracts\JobRepositoryInterface::class);
     $controller = new App\Http\Controllers\Api\JobController($repository);
     
+    // Instantiate request and force validation using form request mock
     $request = App\Http\Requests\JobSearchRequest::create('/api/v1/jobs', 'GET');
-    // Bind mock validator to the request so validated() call does not error
-    $request->setContainer($app)->setRedirector($app->make(Illuminate\Routing\Redirector::class));
+    $request->setContainer($app);
+    
+    // Mock request validator manually to bypass Laravel FormRequest routing dependency
+    $factory = $app->make(Illuminate\Validation\Factory::class);
+    $validator = $factory->make($request->all(), $request->rules());
+    $request->setValidator($validator);
     
     $response = $controller->index($request);
     echo "<b>Response Status:</b> " . $response->getStatusCode() . "<br/>";
