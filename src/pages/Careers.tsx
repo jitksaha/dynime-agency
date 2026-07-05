@@ -443,7 +443,11 @@ const Careers = () => {
             </div>
           ) : filteredJobs.length > 0 ? (
             /* Split Container: full screen flex height, scroll lock */
-            <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start overflow-hidden w-full lg:h-[calc(100vh-var(--header-h,72px)-115px)] pb-4">
+            <div className={`grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start overflow-hidden w-full transition-all duration-500 ease-in-out ${
+              isDashboardMode 
+                ? "lg:h-[calc(100vh-var(--header-h,72px)-76px)] pb-1" 
+                : "lg:h-[calc(100vh-var(--header-h,72px)-260px)] lg:min-h-[550px] pb-4"
+            }`}>
               
               {/* LEFT Column: Sticky & Independently Scrollable Jobs List */}
               <div className={`h-full flex flex-col ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
