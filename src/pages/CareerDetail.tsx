@@ -157,26 +157,25 @@ const CareerDetail = () => {
   let extractedSalary = "";
 
   if (job.description) {
-    // Extract Salary
-    const salaryMatch = job.description.match(/(?:Expected Annual Salary|Salary|Compensation)\s*\(?USD\)?\s*[:\-]?\s*([^\n\r]+)/i);
+    // Extract Salary from exact markdown blocks (e.g. ## expected annual salary)
+    const salaryMatch = job.description.match(/(?:^|\n)#*\s*(?:Expected Annual Salary|Salary|Compensation)\s*(?:\(USD\))?\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
     if (salaryMatch) {
       extractedSalary = salaryMatch[1].replace(/[\*#_]/g, "").trim();
     }
 
-    // Extract Workplace Type
-    const workplaceMatch = job.description.match(/(?:Workplace Type|Location)\s*[:\-]?\s*([^\n\r]+)/i);
+    // Extract Workplace Type from exact description headers
+    const workplaceMatch = job.description.match(/(?:^|\n)#*\s*(?:Workplace Type)\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
     if (workplaceMatch) {
       const typeStr = workplaceMatch[1].replace(/[\*#_]/g, "").trim();
       workplaceType = typeStr.split(/[,&/\\+]/).map(t => t.trim()).filter(Boolean);
-    } else if (job.description.toLowerCase().includes("remote-first") || job.description.toLowerCase().includes("remote first")) {
-      workplaceType = ["Remote"];
-    }
-    if (job.location && !workplaceType.includes(job.location)) {
-      workplaceType.push(job.location);
+    } else if (job.location) {
+      // Clean location strings (e.g. "Remote / Hybrid (Global)" => ["Remote", "Hybrid"])
+      const locClean = job.location.replace(/\([^)]*\)/g, "").trim();
+      workplaceType = locClean.split(/[\/,]/).map(t => t.trim()).filter(Boolean);
     }
 
-    // Extract Seniority Level
-    const experienceMatch = job.description.match(/(?:Seniority Level|Seniority|Experience)\s*[:\-]?\s*([^\n\r]+)/i);
+    // Extract Seniority Level from exact experience header
+    const experienceMatch = job.description.match(/(?:^|\n)#*\s*(?:Seniority Level|Seniority|Experience Level)\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
     if (experienceMatch) {
       const expStr = experienceMatch[1].replace(/[\*#_]/g, "").trim();
       seniorityLevel = expStr.split(/[,&/\\+]/).map(s => s.trim()).filter(Boolean);
@@ -184,8 +183,8 @@ const CareerDetail = () => {
       seniorityLevel = [job.experience];
     }
 
-    // Extract Job Functions / Core Competencies
-    const functionsMatch = job.description.match(/(?:Job Functions|Core Competencies)\s*[\r\n]+((?:\s*\*.*[\r\n]+)+)/i);
+    // Extract Job Functions / Core Competencies lists
+    const functionsMatch = job.description.match(/(?:^|\n)#*\s*(?:Job Functions|Core Competencies)\s*[\r\n]+((?:\s*\*.*[\r\n]+)+)/i);
     if (functionsMatch) {
       jobFunctions = functionsMatch[1]
         .split("\n")
