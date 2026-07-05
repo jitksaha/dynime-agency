@@ -11,11 +11,12 @@ if (!file_exists($logPath)) {
     exit;
 }
 
-$lines = 40;
-if (isset($_GET['lines'])) {
-    $lines = (int)$_GET['lines'];
+$content = file_get_contents($logPath);
+if ($content === false) {
+    echo "Failed to read file contents.";
+    exit;
 }
 
-$file = escapeshellarg($logPath);
-$output = shell_exec("tail -n $lines $file 2>&1");
-echo "<pre>" . htmlspecialchars($output) . "</pre>";
+$lines = explode("\n", $content);
+$tail = array_slice($lines, -40);
+echo "<pre>" . htmlspecialchars(implode("\n", $tail)) . "</pre>";
