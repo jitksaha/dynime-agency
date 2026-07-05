@@ -67,6 +67,41 @@ const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; classN
 };
 
 // ─────────────────────────────────────────────────────────────────
+// Filter Select Component
+// ─────────────────────────────────────────────────────────────────
+const FilterSelect = ({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: string[];
+}) => (
+  <div className="relative">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full h-11 px-4 pr-10 rounded-xl border border-border/60 bg-background/80 text-sm text-foreground/80 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all appearance-none cursor-pointer font-medium"
+    >
+      <option value="">{placeholder}</option>
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────────
 // Job Detail View Pane Component (Mockup Matched)
 // ─────────────────────────────────────────────────────────────────
 interface JobDetailPaneProps {
