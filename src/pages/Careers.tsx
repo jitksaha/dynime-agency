@@ -8,18 +8,16 @@ import DOMPurify from "isomorphic-dompurify";
 import { marked } from "marked";
 import {
   Briefcase, MapPin, Clock, Search, X,
-  DollarSign, Star, CheckCircle2, ChevronRight,
-  Shield, Heart, Users, Check, ArrowLeft, Bookmark
+  Star, CheckCircle2, ChevronRight,
+  Shield, Heart, Check, ArrowLeft, Bookmark
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynimeIcon from "@/assets/dynime-icon-light.svg";
 
-
-
-// Beautiful brand logos mapping based on title/department to look premium
-const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; className?: string }) => {
+// Beautiful brand logo component
+const JobBrandLogo = ({ job, className = "w-10 h-10" }: { job: SyncedJob; className?: string }) => {
   return (
     <div className={`${className} flex items-center justify-center shrink-0 overflow-hidden`}>
       <img src={dynimeIcon} alt="Dynime logo" className="w-full h-full object-contain" />
@@ -28,7 +26,7 @@ const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; classN
 };
 
 // ─────────────────────────────────────────────────────────────────
-// Filter Select Component
+// Filter Select Component (Compact sized)
 // ─────────────────────────────────────────────────────────────────
 const FilterSelect = ({
   value,
@@ -41,11 +39,11 @@ const FilterSelect = ({
   placeholder: string;
   options: string[];
 }) => (
-  <div className="relative">
+  <div className="relative w-full">
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full h-11 px-4 pr-10 rounded-xl border border-border/60 bg-background/80 text-sm text-foreground/80 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all appearance-none cursor-pointer font-medium"
+      className="w-full h-9 px-3 pr-8 rounded-lg border border-border/50 bg-background/80 text-xs text-foreground/80 focus:outline-none focus:ring-1 focus:ring-ring/30 transition-all appearance-none cursor-pointer font-semibold"
     >
       <option value="">{placeholder}</option>
       {options.map((opt) => (
@@ -54,8 +52,8 @@ const FilterSelect = ({
         </option>
       ))}
     </select>
-    <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/60">
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
@@ -63,7 +61,7 @@ const FilterSelect = ({
 );
 
 // ─────────────────────────────────────────────────────────────────
-// Job Detail View Pane Component (Mockup Matched)
+// Job Detail View Pane Component
 // ─────────────────────────────────────────────────────────────────
 interface JobDetailPaneProps {
   job: SyncedJob;
@@ -71,7 +69,6 @@ interface JobDetailPaneProps {
 }
 
 const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
-
   const cleanHtml = useMemo(() => {
     if (!job.description) return "";
     const isMarkdown = job.description.includes('#') || job.description.includes('*') || job.description.includes('\n\n');
@@ -281,45 +278,41 @@ const Careers = () => {
 
   return (
     <Layout>
-      <div className="bg-slate-50/50 min-h-screen pb-16">
+      <div className="bg-slate-50/50 min-h-screen pb-6 flex flex-col">
         
-        {/* ── Top Header Banner (Mockup Styled) ────────────────────── */}
-        <section className="bg-blue-600 text-white relative overflow-hidden py-14 px-6 md:px-12 text-center md:text-left flex flex-col md:flex-row md:items-center justify-between gap-6 max-w-7xl mx-auto md:rounded-3xl mt-4 md:mt-6">
-          <div className="space-y-2.5 relative z-10 max-w-2xl">
-            <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight">
+        {/* ── Top Header Banner (White Background, Centered Title) ────────────────── */}
+        <section className="text-center py-8 px-4 max-w-full">
+          <div className="space-y-2 max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+              We're hiring globally
+            </span>
+            <h1 className="font-heading text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
               Find your dream job
             </h1>
-            <p className="text-blue-100 text-sm md:text-base font-medium">
-              Looking for jobs? Browse our latest job openings to view and apply.
+            <p className="text-muted-foreground text-xs md:text-sm font-medium">
+              Browse our open positions below. Work with an ambitious, global, remote-first team building world-class products.
             </p>
-          </div>
-          <div className="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none hidden lg:block select-none">
-            {/* Dynamic visual placeholder matching header patterns */}
-            <svg width="400" height="100%" fill="none" viewBox="0 0 400 300">
-              <path d="M50 0h100l-50 300H0z" fill="currentColor"/>
-              <path d="M180 0h80L160 300h-80z" fill="currentColor"/>
-              <path d="M300 0h100L300 300H200z" fill="currentColor"/>
-            </svg>
           </div>
         </section>
 
-        {/* ── Filters Section (Mockup Styled) ─────────────────────── */}
-        <section className="max-w-7xl mx-auto px-4 mt-6">
-          <div className="bg-background rounded-2xl border border-border/50 p-4 md:p-5 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-center">
+        {/* ── Filters Section (Full Width, Compact Height) ─────────────────────── */}
+        <section className="w-full px-4 md:px-8 mb-4">
+          <div className="bg-background rounded-xl border border-border/40 p-3 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 w-full items-center">
+              
               {/* Search */}
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none" />
                 <Input
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search jobs..."
-                  className="pl-9 pr-9 h-11 rounded-xl border-border/60 bg-background font-medium text-sm focus-visible:ring-ring/40"
+                  className="pl-8 pr-8 h-9 rounded-lg border-border/50 bg-background font-semibold text-xs focus-visible:ring-ring/30"
                 />
                 {search && (
-                  <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
+                  <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    <X className="w-3 h-3" />
                   </button>
                 )}
               </div>
@@ -336,32 +329,31 @@ const Careers = () => {
               {/* Remote only toggle */}
               <button
                 onClick={() => setRemoteOnly(!remoteOnly)}
-                className={`w-full h-11 px-4 rounded-xl border font-semibold text-sm transition-all flex items-center justify-between select-none ${
-                  remoteOnly ? "bg-primary/5 border-primary text-primary" : "border-border/60 text-muted-foreground bg-background hover:bg-muted/40"
+                className={`h-9 px-3.5 rounded-lg border font-bold text-xs transition-all flex items-center justify-between select-none ${
+                  remoteOnly ? "bg-primary/5 border-primary text-primary" : "border-border/50 text-muted-foreground bg-background hover:bg-muted/40"
                 }`}
               >
                 <span>Remote Only</span>
-                <span className={`w-2 h-2 rounded-full ${remoteOnly ? "bg-primary animate-pulse" : "bg-muted-foreground/30"}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${remoteOnly ? "bg-primary animate-pulse" : "bg-muted-foreground/35"}`} />
               </button>
             </div>
             
             {/* Active filters summary */}
             {(search || department || employmentType || experience || remoteOnly) && (
-              <div className="flex items-center justify-between pt-1 text-xs">
-                <span className="text-muted-foreground font-medium">Active filters apply</span>
-                <button onClick={handleResetFilters} className="text-primary font-bold hover:underline">Reset Filters</button>
-              </div>
+              <button onClick={handleResetFilters} className="text-primary text-xs font-bold hover:underline shrink-0 pl-2">
+                Reset
+              </button>
             )}
           </div>
         </section>
 
-        {/* ── Main Two-Column Split Layout (Fixed & Sticky) ────────── */}
-        <section className="max-w-7xl mx-auto px-4 mt-6">
+        {/* ── Main Two-Column Split Layout (Full Width & Height Viewport) ────────── */}
+        <section className="w-full px-4 md:px-8 flex-1">
           {isLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6 h-[75vh]">
-              <div className="space-y-3.5 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6 h-[65vh]">
+              <div className="space-y-3 overflow-hidden">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-28 bg-muted/40 animate-pulse rounded-2xl border border-border/40" />
+                  <div key={i} className="h-24 bg-muted/40 animate-pulse rounded-2xl border border-border/40" />
                 ))}
               </div>
               <div className="bg-muted/20 animate-pulse rounded-2xl border border-border/40 hidden lg:block" />
@@ -373,12 +365,12 @@ const Careers = () => {
               <p className="text-muted-foreground text-sm">Please refresh the page to reload the listing.</p>
             </div>
           ) : filteredJobs.length > 0 ? (
-            /* Split Container: height locks to screen on large screens, enabling dual column scrolling */
-            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6 items-start lg:h-[78vh] lg:max-h-[850px] overflow-hidden">
+            /* Split Container: full screen flex height, scroll lock */
+            <div className="grid grid-cols-1 lg:grid-cols-[38%_62%] gap-6 items-start lg:h-[calc(100vh-220px)] overflow-hidden pb-4">
               
               {/* LEFT Column: Sticky & Independently Scrollable Jobs List */}
               <div className={`h-full flex flex-col ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
-                <div className="mb-3 px-1 flex justify-between items-center text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
+                <div className="mb-2 px-1 flex justify-between items-center text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
                   <span>Related Jobs</span>
                   <span>{filteredJobs.length} posting{filteredJobs.length !== 1 ? "s" : ""}</span>
                 </div>
@@ -395,39 +387,25 @@ const Careers = () => {
                           setSelectedJob(job);
                           setMobileDetailOpen(true);
                         }}
-                        className={`w-full text-left p-5 rounded-2xl border transition-all duration-200 flex flex-col gap-3 relative overflow-hidden bg-background ${
+                        className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex gap-3.5 relative overflow-hidden bg-background ${
                           isSelected
                             ? "border-primary shadow-sm ring-1 ring-primary/40 bg-primary/[0.02]"
-                            : "border-border/50 hover:bg-card/40 hover:border-border/80"
+                            : "border-border/50 hover:bg-card/45 hover:border-border/80"
                         }`}
                       >
-                        {/* Upper row: icon + title */}
-                        <div className="flex gap-3.5 items-start w-full">
-                          <JobBrandLogo job={job} className="w-11 h-11" />
-                          <div className="space-y-0.5 flex-1 min-w-0">
-                            <h3 className="font-heading font-bold text-sm md:text-base text-foreground leading-tight truncate flex items-center gap-1">
-                              {job.title} <span className="text-primary font-normal text-sm">+</span>
-                            </h3>
-                            <span className="text-[11px] font-bold text-muted-foreground block truncate">
-                              {job.department}
-                            </span>
-                            <p className="text-[11px] text-muted-foreground/80 font-medium pt-1 flex items-center gap-1.5">
-                              <span className="inline-flex items-center gap-0.5"><MapPin className="w-3 h-3 text-muted-foreground/50" /> {job.location}</span>
-                              <span>·</span>
-                              <span>{job.employment_type || "Full-time"}</span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Dotted divider line */}
-                        <div className="border-t border-dashed border-border/60 w-full pt-2" />
-
-                        {/* Bottom Row metadata */}
-                        <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 font-semibold pt-1">
-                          <span className="inline-flex items-center gap-1 text-emerald-600">
-                            <CheckCircle2 className="w-3.5 h-3.5 fill-emerald-500/10" /> Company Verified
+                        <JobBrandLogo job={job} className="w-10 h-10" />
+                        <div className="space-y-0.5 flex-1 min-w-0">
+                          <h3 className="font-heading font-bold text-sm md:text-base text-foreground leading-tight truncate flex items-center gap-1">
+                            {job.title} <span className="text-primary font-normal text-sm">+</span>
+                          </h3>
+                          <span className="text-[11px] font-bold text-muted-foreground block truncate">
+                            {job.department}
                           </span>
-                          <span className="text-muted-foreground/60 font-medium">Dynime LLC.</span>
+                          <p className="text-[11px] text-muted-foreground/80 font-medium pt-1 flex items-center gap-1.5">
+                            <span className="inline-flex items-center gap-0.5"><MapPin className="w-3 h-3 text-muted-foreground/50" /> {job.location}</span>
+                            <span>·</span>
+                            <span>{job.employment_type || "Full-time"}</span>
+                          </p>
                         </div>
                       </button>
                     );
@@ -458,11 +436,11 @@ const Careers = () => {
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
                 Try adjusting your search terms or filters.
               </p>
-              {hasActiveFilters && (
+              {search || department || employmentType || experience || remoteOnly ? (
                 <Button variant="outline" size="sm" onClick={handleResetFilters} className="mt-5 rounded-full text-xs">
                   Clear all filters
                 </Button>
-              )}
+              ) : null}
             </div>
           )}
         </section>
