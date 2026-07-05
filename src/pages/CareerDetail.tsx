@@ -194,10 +194,21 @@ const CareerDetail = () => {
   }
 
   // Fallbacks if not extracted
-  const displaySalary = job.salary_range || job.salary_currency || extractedSalary || "Negotiable";
-  const displayWorkplace = workplaceType.length > 0 ? workplaceType : [job.location || "Remote"];
+  // Salary: prefer explicit API fields, then extracted, then "Negotiable"
+  const salaryFromMinMax =
+    job.salary_min != null && job.salary_max != null
+      ? `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`
+      : job.salary_min != null
+      ? `From ${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()}`
+      : job.salary_max != null
+      ? `Up to ${job.salary_currency || 'USD'} ${Number(job.salary_max).toLocaleString()}`
+      : null;
+  const displaySalary = job.salary_range || salaryFromMinMax || extractedSalary || "Negotiable";
+  const displayWorkplace = workplaceType.length > 0 ? workplaceType : (
+    job.location ? job.location.replace(/\([^)]*\)/g, "").split(/[\/,]/).map((t) => t.trim()).filter(Boolean) : ["Remote"]
+  );
   const displaySeniority = seniorityLevel.length > 0 ? seniorityLevel : (job.experience ? [job.experience] : ["Mid-Senior Level"]);
-  const displayFunctions = jobFunctions.length > 0 ? jobFunctions : [job.department || "Marketing & Growth"];
+  const displayFunctions = jobFunctions.length > 0 ? jobFunctions : [job.department || "General"];
 
   let cleanHtml = "";
   if (job.description) {
