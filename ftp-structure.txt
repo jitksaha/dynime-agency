@@ -37,6 +37,7 @@ des-illustration.png
 debug-flowmingo-project-detail-by-id.php
 debug-flowmingo-set-detail.php
 repair-tables.php
+debug-laravel-logs.php
 wordpress-maintenance
 debug-flowmingo-keys-list.php
 content-marketing
