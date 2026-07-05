@@ -141,6 +141,7 @@ og-image.jpg
 inspect-inv-2083.php
 query-supabase.php
 favicon-32.png
+sync-jobs-now.php
 uk-company
 nginx
 wordpress-ecommerce
