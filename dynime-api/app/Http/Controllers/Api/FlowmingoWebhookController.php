@@ -75,9 +75,14 @@ class FlowmingoWebhookController extends Controller
                         }
                     }
                     
-                    // Generate proper base64 encoded com_project_id apply URL
-                    $projId = $data['com_project_id'] ?? $data['id'] ?? '';
-                    $data['apply_url'] = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
+                    // Generate proper apply URL (direct interview link if com_interview_set_id exists, else job portal link)
+                    $interviewSetId = $data['com_interview_set_id'] ?? null;
+                    if (!empty($interviewSetId)) {
+                        $data['apply_url'] = "https://talent.flowmingo.ai/interview/{$interviewSetId}";
+                    } else {
+                        $projId = $data['com_project_id'] ?? $data['id'] ?? '';
+                        $data['apply_url'] = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
+                    }
                     
                     $dto = AtsJobDTO::fromArray($data);
                     $this->jobRepository->upsertJob($dto);

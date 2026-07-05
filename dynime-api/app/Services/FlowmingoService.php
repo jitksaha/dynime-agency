@@ -127,15 +127,32 @@ class FlowmingoService implements AtsProviderInterface
                 $statusVal = $post['status'] ?? 1;
                 $status = ((int) $statusVal === 1 || $statusVal === true || $statusVal === 'active' || $statusVal === 'open') ? 'open' : 'closed';
 
-                // ALWAYS use com_project_id for the apply URL — never the raw job UUID.
-                // com_project_id is available in both list and detail responses.
-                $projId = $postItem['com_project_id'] ?? $post['com_project_id'] ?? null;
-                if (empty($projId)) {
-                    // Absolute fallback — log a warning, this should never happen
-                    Log::warning("Flowmingo: com_project_id missing for job '{$postId}' ({$title}). Falling back to job ID.");
-                    $projId = $postId;
+                // Prioritize Direct Interview URL over generic job listing page
+                $interviewSetId = $post['com_interview_set_id'] ?? $postItem['com_interview_set_id'] ?? null;
+
+                if (empty($interviewSetId)) {
+                    // Try mapping from title in interviewSets array
+                    foreach ($interviewSets as $set) {
+                        if ((int) ($set['status'] ?? 1) !== 1 || (int) ($set['set_type'] ?? 1) !== 1) {
+                            continue;
+                        }
+                        if ($this->isTitleMatch($title, $set['title'])) {
+                            $interviewSetId = $set['id'];
+                            break;
+                        }
+                    }
                 }
-                $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
+
+                if (!empty($interviewSetId)) {
+                    $applyUrl = "https://talent.flowmingo.ai/interview/{$interviewSetId}";
+                } else {
+                    $projId = $postItem['com_project_id'] ?? $post['com_project_id'] ?? null;
+                    if (empty($projId)) {
+                        Log::warning("Flowmingo: com_project_id missing for job '{$postId}' ({$title}). Falling back to job ID.");
+                        $projId = $postId;
+                    }
+                    $applyUrl = "https://talent.flowmingo.ai/jobs/" . base64_encode($projId);
+                }
 
                 // ─── Extract all available fields from API response ───────────────
                 // Location: try various field names Flowmingo might use
