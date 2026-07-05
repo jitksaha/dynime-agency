@@ -281,7 +281,7 @@ const Careers = () => {
       <div className="bg-slate-50/50 min-h-screen pb-6 flex flex-col">
         
         {/* ── Top Header Banner (White Background, Centered Title) ────────────────── */}
-        <section className="text-center py-8 px-4 max-w-full">
+        <section className="text-center py-5 px-4 max-w-full">
           <div className="space-y-2 max-w-3xl mx-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
               We're hiring globally
@@ -366,7 +366,7 @@ const Careers = () => {
             </div>
           ) : filteredJobs.length > 0 ? (
             /* Split Container: full screen flex height, scroll lock */
-            <div className="grid grid-cols-1 lg:grid-cols-[38%_62%] gap-6 items-start lg:h-[calc(100vh-220px)] overflow-hidden pb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start lg:h-[calc(100vh-140px)] overflow-hidden pb-4">
               
               {/* LEFT Column: Sticky & Independently Scrollable Jobs List */}
               <div className={`h-full flex flex-col ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
@@ -394,7 +394,7 @@ const Careers = () => {
                         }`}
                       >
                         <JobBrandLogo job={job} className="w-10 h-10" />
-                        <div className="space-y-0.5 flex-1 min-w-0">
+                        <div className="space-y-0.5 flex-1 min-w-0 pr-16">
                           <h3 className="font-heading font-bold text-sm md:text-base text-foreground leading-tight truncate flex items-center gap-1">
                             {job.title} <span className="text-primary font-normal text-sm">+</span>
                           </h3>
@@ -407,6 +407,11 @@ const Careers = () => {
                             <span>{job.employment_type || "Full-time"}</span>
                           </p>
                         </div>
+
+                        {/* Verified badge top right */}
+                        <span className="absolute top-4 right-4 inline-flex items-center gap-0.5 text-[9px] text-emerald-600 font-bold bg-emerald-500/5 px-1.5 py-0.5 rounded-full border border-emerald-500/10 shrink-0">
+                          <CheckCircle2 className="w-2.5 h-2.5 fill-emerald-500/10" /> Verified
+                        </span>
                       </button>
                     );
                   })}
