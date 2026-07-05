@@ -100,7 +100,7 @@ const centerNav = [
   { label: "Blog", to: "/blog" },
 ];
 
-const Header = () => {
+const Header = ({ isRelative = false }: { isRelative?: boolean }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ServiceTabKey>("dws");
@@ -151,7 +151,7 @@ const Header = () => {
     to !== "__services__" && to !== "__os__" && (to === "/" ? location.pathname === "/" : location.pathname.startsWith(to));
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] bg-background border-b border-border/60">
+    <header className={`${isRelative ? "relative" : "fixed"} top-0 left-0 right-0 z-[100] bg-background border-b border-border/60`}>
       <div
         ref={barRef}
         className="container-custom flex items-center justify-between gap-6 lg:gap-10 h-16 md:h-[72px] relative"

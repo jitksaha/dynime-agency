@@ -12,7 +12,15 @@ import GoogleTranslate from "@/components/shared/GoogleTranslate";
  *
  * Individual pages should NOT add their own top padding to clear the navbar.
  */
-const Layout = ({ children, hideFooter = false }: { children: ReactNode; hideFooter?: boolean }) => {
+const Layout = ({
+  children,
+  hideFooter = false,
+  relativeHeader = false,
+}: {
+  children: ReactNode;
+  hideFooter?: boolean;
+  relativeHeader?: boolean;
+}) => {
   const headerWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,12 +60,12 @@ const Layout = ({ children, hideFooter = false }: { children: ReactNode; hideFoo
   return (
     <div className="min-h-screen flex flex-col">
       <div ref={headerWrapRef} aria-hidden={false}>
-        <Header />
+        <Header isRelative={relativeHeader} />
       </div>
       <main
         data-floating-header-main="true"
         className="flex-1 floating-header-main"
-        style={{ paddingTop: "calc(var(--header-h, 72px) + var(--header-breathing, 16px))" }}
+        style={relativeHeader ? {} : { paddingTop: "calc(var(--header-h, 72px) + var(--header-breathing, 16px))" }}
       >
         {children}
       </main>

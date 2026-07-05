@@ -340,8 +340,12 @@ const Careers = () => {
   });
 
   return (
-    <Layout hideFooter={isDashboardMode}>
-      <div className="bg-slate-50/50 min-h-screen pb-6 flex flex-col">
+    <Layout hideFooter={isDashboardMode} relativeHeader={isDashboardMode}>
+      <div className={`bg-slate-50/50 flex flex-col transition-all duration-500 ease-in-out ${
+        isDashboardMode 
+          ? "lg:h-[calc(100vh-var(--header-h,72px))] lg:overflow-hidden pb-1" 
+          : "min-h-screen pb-6"
+      }`}>
         
         {/* ── Top Header Banner (White Background, Centered Title) ────────────────── */}
         <section className={`text-center px-4 max-w-full transition-all duration-500 ease-in-out transform origin-top ${
