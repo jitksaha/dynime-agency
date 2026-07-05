@@ -16,16 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import dynimeIcon from "@/assets/dynime-icon-light.svg";
 
-// Helper to get a deterministic fake applicant count and rating
-const getJobMeta = (id: string) => {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const rating = (4.0 + (Math.abs(hash) % 10) / 10).toFixed(1);
-  const applicants = (Math.abs(hash) % 40) + 5;
-  return { rating, applicants };
-};
+
 
 // Beautiful brand logos mapping based on title/department to look premium
 const JobBrandLogo = ({ job, className = "w-11 h-11" }: { job: SyncedJob; className?: string }) => {
@@ -80,7 +71,6 @@ interface JobDetailPaneProps {
 }
 
 const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
-  const { rating, applicants } = useMemo(() => getJobMeta(job.flowmingo_job_id), [job.flowmingo_job_id]);
 
   const cleanHtml = useMemo(() => {
     if (!job.description) return "";
@@ -397,7 +387,6 @@ const Careers = () => {
                 <div className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
                   {filteredJobs.map((job) => {
                     const isSelected = selectedJob?.flowmingo_job_id === job.flowmingo_job_id;
-                    const { rating, applicants } = getJobMeta(job.flowmingo_job_id);
 
                     return (
                       <button
@@ -433,15 +422,12 @@ const Careers = () => {
                         {/* Dotted divider line */}
                         <div className="border-t border-dashed border-border/60 w-full pt-2" />
 
-                        {/* Bottom Row metadata (mockup styles) */}
+                        {/* Bottom Row metadata */}
                         <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 font-semibold pt-1">
-                          <span className="inline-flex items-center gap-1 text-amber-500">
-                            <Star className="w-3.5 h-3.5 fill-amber-500 stroke-none" /> {rating} Trusted
-                          </span>
-                          <span>{applicants} Applicants</span>
                           <span className="inline-flex items-center gap-1 text-emerald-600">
-                            <CheckCircle2 className="w-3.5 h-3.5 fill-emerald-500/10" /> Verified
+                            <CheckCircle2 className="w-3.5 h-3.5 fill-emerald-500/10" /> Company Verified
                           </span>
+                          <span className="text-muted-foreground/60 font-medium">Dynime LLC.</span>
                         </div>
                       </button>
                     );
