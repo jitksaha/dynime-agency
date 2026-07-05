@@ -223,7 +223,7 @@ const Careers = () => {
     const handleScroll = () => {
       if (window.scrollY > 20 && !isDashboardMode) {
         setIsDashboardMode(true);
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -341,11 +341,17 @@ const Careers = () => {
 
   return (
     <Layout hideFooter={isDashboardMode}>
-      <div className="bg-slate-50/50 min-h-screen pb-6 flex flex-col">
+      <div className={`bg-slate-50/50 flex flex-col transition-all duration-500 ease-in-out ${
+        isDashboardMode 
+          ? "h-[calc(100vh-var(--header-h,72px)-var(--header-breathing,16px))] overflow-hidden pb-3" 
+          : "min-h-screen pb-6"
+      }`}>
         
         {/* ── Top Header Banner (White Background, Centered Title) ────────────────── */}
-        <section className={`text-center px-4 max-w-full transition-all duration-300 ease-in-out ${
-          isDashboardMode ? "max-h-0 opacity-0 py-0 overflow-hidden" : "py-5"
+        <section className={`text-center px-4 max-w-full transition-all duration-500 ease-in-out transform origin-top ${
+          isDashboardMode 
+            ? "max-h-0 opacity-0 py-0 mb-0 overflow-hidden pointer-events-none -translate-y-4 scale-y-95" 
+            : "max-h-[200px] opacity-100 py-5 scale-y-100 translate-y-0"
         }`}>
           <div className="space-y-2 max-w-3xl mx-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
@@ -361,7 +367,7 @@ const Careers = () => {
         </section>
 
         {/* ── Filters Section (Full Width, Compact Height) ─────────────────────── */}
-        <section className="w-full px-4 md:px-8 mb-4">
+        <section className="w-full px-4 md:px-8 mb-3 shrink-0">
           <div className="bg-background rounded-xl border border-border/40 p-3 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 w-full items-center">
               
@@ -423,7 +429,7 @@ const Careers = () => {
         </section>
 
         {/* ── Main Two-Column Split Layout (Full Width & Height Viewport) ────────── */}
-        <section className="w-full px-4 md:px-8 flex-1">
+        <section className="w-full px-4 md:px-8 flex-1 min-h-0 flex flex-col pb-2">
           {isLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1.8fr] gap-6 h-[65vh]">
               <div className="space-y-3 overflow-hidden">
@@ -441,19 +447,19 @@ const Careers = () => {
             </div>
           ) : filteredJobs.length > 0 ? (
             /* Split Container: full screen flex height, scroll lock */
-            <div className={`grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start overflow-hidden pb-4 transition-all duration-300 ${
-              isDashboardMode ? "lg:h-[calc(100vh-var(--header-h,72px)-90px)]" : "lg:h-[calc(100vh-140px)]"
+            <div className={`grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 items-start overflow-hidden w-full transition-all duration-500 ease-in-out ${
+              isDashboardMode ? "flex-1 min-h-0 h-full pb-1" : "lg:h-[calc(100vh-140px)] pb-4"
             }`}>
               
               {/* LEFT Column: Sticky & Independently Scrollable Jobs List */}
-              <div className={`h-full flex flex-col ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
+              <div className={`h-full flex flex-col min-h-0 ${mobileDetailOpen ? "hidden md:flex" : "flex"}`}>
                 <div className="mb-2 px-1 flex justify-between items-center text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
                   <span>Related Jobs</span>
                   <span>{filteredJobs.length} posting{filteredJobs.length !== 1 ? "s" : ""}</span>
                 </div>
                 
                 {/* Scrollable list box */}
-                <div id="jobs-list-container" className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
+                <div id="jobs-list-container" className="flex-1 overflow-y-auto min-h-0 pr-1 space-y-3 scrollbar-thin pb-4">
                   {filteredJobs.map((job) => {
                     const isSelected = selectedJob?.flowmingo_job_id === job.flowmingo_job_id;
 
@@ -496,7 +502,7 @@ const Careers = () => {
               </div>
 
               {/* RIGHT Column: Independently Scrollable Job Details Panel */}
-              <div className={`h-full ${mobileDetailOpen ? "block" : "hidden md:block"}`}>
+              <div className={`h-full min-h-0 ${mobileDetailOpen ? "block" : "hidden md:block"}`}>
                 {selectedJob ? (
                   <JobDetailPane job={selectedJob} onBack={() => setMobileDetailOpen(false)} />
                 ) : (
