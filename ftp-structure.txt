@@ -166,6 +166,7 @@ company-formation-illustration.png
 marketing-ads-illustration.png
 dynime-icon-light.svg
 dss-illustration.png
+fix-apply-urls-direct.php
 api
 dynime-api
 deploy-api.php
