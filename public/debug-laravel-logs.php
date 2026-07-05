@@ -2,19 +2,20 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$token = 'deploy_token_7782';
-if (!isset($_GET['token']) || $_GET['token'] !== $token) {
-    header('HTTP/1.1 403 Forbidden');
-    exit('Denied');
-}
+// Diagnostic test script for the 500 error on jobs endpoint
+require_once dirname(__DIR__) . '/dynime-api/vendor/autoload.php';
+$app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 
-$path = dirname(__DIR__) . '/dynime-api/storage/logs/laravel.log';
-if (file_exists($path)) {
-    // Show last 30 lines of file regardless of log level to catch uncaught startup exceptions
-    $content = file_get_contents($path);
-    if ($content !== false) {
-        $lines = explode("\n", $content);
-        $tail = array_slice($lines, -60);
-        echo "<h3>Latest 60 Lines:</h3><pre style='background:#f6f8fa; padding:12px; border-radius:6px; overflow:auto;'>" . htmlspecialchars(implode("\n", $tail)) . "</pre>";
-    }
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$request = Illuminate\Http\Request::capture();
+
+try {
+    echo "<h3>Attempting Booting...</h3>";
+    $response = $kernel->handle($request);
+    echo "Boot success! Response code: " . $response->getStatusCode() . "<br/>";
+} catch (\Throwable $e) {
+    echo "<h3>Exception caught during boot:</h3>";
+    echo "<b>Message:</b> " . htmlspecialchars($e->getMessage()) . "<br/>";
+    echo "<b>File:</b> " . htmlspecialchars($e->getFile()) . " on line " . $e->getLine() . "<br/>";
+    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
 }
