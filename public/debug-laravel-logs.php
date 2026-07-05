@@ -7,11 +7,11 @@ $app = require_once dirname(__DIR__) . '/dynime-api/bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-// Force routing to /api/v1/jobs directly inside the application kernel handle
-$request = Illuminate\Http\Request::create('/api/v1/jobs', 'GET');
+// Force request URI path matching to /api/v1/jobs on live system
+$request = Illuminate\Http\Request::create('http://dynime.com/dynime-api/public/api/v1/jobs', 'GET');
 
 try {
-    echo "<h3>Sending Request to /api/v1/jobs...</h3>";
+    echo "<h3>Sending Request to public jobs api...</h3>";
     $response = $kernel->handle($request);
     echo "<b>Status Code:</b> " . $response->getStatusCode() . "<br/>";
     echo "<b>Response Headers:</b> <pre>" . htmlspecialchars(json_encode($response->headers->all(), JSON_PRETTY_PRINT)) . "</pre>";
