@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import DOMPurify from "isomorphic-dompurify";
+import { marked } from "marked";
 import Layout from "@/components/layout/Layout";
 import { useSEO } from "@/hooks/use-seo";
 import ScrollReveal from "@/components/shared/ScrollReveal";
@@ -149,13 +150,16 @@ const CareerDetail = () => {
     );
   }
 
-  const cleanHtml = job.description
-    ? DOMPurify.sanitize(job.description, {
-        USE_PROFILES: { html: true },
-        FORBID_TAGS: ["img", "picture", "source", "figure", "svg", "video", "iframe"],
-        FORBID_ATTR: ["style", "background"],
-      })
-    : "";
+  let cleanHtml = "";
+  if (job.description) {
+    const isMarkdown = job.description.includes('#') || job.description.includes('*') || job.description.includes('\n\n');
+    const rawHtml = isMarkdown ? marked.parse(job.description) as string : job.description;
+    cleanHtml = DOMPurify.sanitize(rawHtml, {
+      USE_PROFILES: { html: true },
+      FORBID_TAGS: ["img", "picture", "source", "figure", "svg", "video", "iframe"],
+      FORBID_ATTR: ["style", "background"],
+    });
+  }
 
   const postedDate = job.published_at
     ? new Date(job.published_at).toLocaleDateString(undefined, {
