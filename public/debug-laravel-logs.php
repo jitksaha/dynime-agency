@@ -8,35 +8,18 @@ if (!isset($_GET['token']) || $_GET['token'] !== $token) {
     exit('Denied');
 }
 
-$dir = dirname(__DIR__);
-echo "App Base Dir: " . htmlspecialchars($dir) . "<br/>";
-
-$logPaths = [
-    $dir . '/dynime-api/storage/logs/laravel.log',
-    dirname($dir) . '/dynime-api/storage/logs/laravel.log',
-    '/home/u740731947/domains/dynime.com/dynime-api/storage/logs/laravel.log'
-];
-
-$found = false;
-foreach ($logPaths as $path) {
-    echo "Checking: " . htmlspecialchars($path) . "... ";
-    if (file_exists($path)) {
-        echo "FOUND! Size: " . filesize($path) . " bytes.<br/>";
-        $content = file_get_contents($path);
-        if ($content !== false) {
-            $lines = explode("\n", $content);
-            $tail = array_slice($lines, -40);
-            echo "<pre style='background:#f6f8fa; padding:12px; border-radius:6px; overflow:auto;'>" . htmlspecialchars(implode("\n", $tail)) . "</pre>";
-            $found = true;
-            break;
-        } else {
-            echo "Failed to read.<br/>";
+$path = dirname(__DIR__) . '/dynime-api/storage/logs/laravel.log';
+if (file_exists($path)) {
+    $content = file_get_contents($path);
+    if ($content !== false) {
+        $lines = explode("\n", $content);
+        $errors = [];
+        foreach (array_reverse($lines) as $line) {
+            if (strpos($line, 'production.ERROR') !== false || strpos($line, 'local.ERROR') !== false) {
+                $errors[] = $line;
+                if (count($errors) >= 15) break;
+            }
         }
-    } else {
-        echo "Not found.<br/>";
+        echo "<h3>Latest 15 Laravel Errors:</h3><pre style='background:#f6f8fa; padding:12px; border-radius:6px; overflow:auto;'>" . htmlspecialchars(implode("\n", $errors)) . "</pre>";
     }
-}
-
-if (!$found) {
-    echo "Could not load laravel log from any checked paths.";
 }
