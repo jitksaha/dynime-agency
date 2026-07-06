@@ -67,7 +67,7 @@ class FlowmingoService implements AtsProviderInterface
                 'Accept' => 'application/json',
             ])
             ->timeout($this->timeout)
-            ->get("{$this->apiUrl}/integration/hiring/job-posts/v1");
+            ->get("{$this->apiUrl}/integration/hiring/job-posts/v1?page=1&limit=200");
 
             if ($postsResponse->failed()) {
                 Log::error('Flowmingo /integration/hiring/job-posts/v1 failed', [
@@ -86,7 +86,7 @@ class FlowmingoService implements AtsProviderInterface
                 'Accept' => 'application/json',
             ])
             ->timeout($this->timeout)
-            ->get("{$this->apiUrl}/integration/hiring/interview-sets/v1");
+            ->get("{$this->apiUrl}/integration/hiring/interview-sets/v1?page=1&limit=200");
 
             $interviewSets = [];
             if ($setsResponse->successful()) {

@@ -12,7 +12,7 @@ import { useSyncedJobs, useSyncFlowmingoJobs } from "@/hooks/use-cms-data";
 const AdminCareers = () => {
   const [search, setSearch] = useState("");
 
-  const { data: response, isLoading } = useSyncedJobs();
+  const { data: response, isLoading } = useSyncedJobs({ per_page: 200 });
   const syncJobsMutation = useSyncFlowmingoJobs();
 
   const jobs = useMemo(() => response?.data || [], [response]);
