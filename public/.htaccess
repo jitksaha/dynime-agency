@@ -4,17 +4,6 @@
 # Explicitly set document root index
 DirectoryIndex index.html index.php
 
-# ─── LiteSpeed SPA Fallback ───────────────────────────────────────────────────
-# FallbackResource is processed BEFORE mod_rewrite on LiteSpeed.
-# This is the primary fix for "404 Not Found" on SPA routes (/invoice, /careers, etc.)
-# It tells LiteSpeed: if the requested path doesn't exist as a file/dir, serve index.html
-FallbackResource /index.html
-
-# ─── Error Document ───────────────────────────────────────────────────────────
-# Catches any 404 that LiteSpeed generates before mod_rewrite fires.
-# Works as a second safety net alongside FallbackResource.
-ErrorDocument 404 /index.html
-
 # ─── Rewrite Rules ────────────────────────────────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -24,7 +13,7 @@ ErrorDocument 404 /index.html
     RewriteRule ^cgi-sys/defaultwebpage\.cgi$ /index.html [R=301,L]
 
     # ── API passthrough — MUST be before SPA catch-all ──────────────────────
-    # Laravel API requests must reach PHP, not be served index.html
+    # Requests starting with /api/ must be routed to the API router or passed through
     RewriteCond %{REQUEST_URI} ^/api/ [NC]
     RewriteRule ^ - [L]
 
@@ -32,9 +21,12 @@ ErrorDocument 404 /index.html
     RewriteCond %{REQUEST_URI} \.php$ [NC]
     RewriteRule ^ - [L]
 
+    # ── Physical files and directories — serve directly ─────────────────────
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
     # ── SPA catch-all — serve index.html for all non-file/dir routes ─────────
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ /index.html [L]
 </IfModule>
 
