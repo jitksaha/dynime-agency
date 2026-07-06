@@ -97,8 +97,11 @@ jobs:
             lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd /; rm -f cleanup-nested.php; quit" || true
           fi
           
+          echo "Uploading backend ZIP package..."
+          lftp -e "set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; cd $TARGET_DIR; put backend-release.zip -o backend-release.zip; quit" || true
+
           echo "Executing file sync to $TARGET_DIR..."
-          lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --delete --exclude '^dynime-api/' --exclude '^node_modules/' --exclude '^\.git/' --parallel=10 ./dist/ $TARGET_DIR; quit"
+          lftp -e "set net:timeout 30; set net:max-retries 10; set net:reconnect-interval-multiplier 2; set net:limit-rate 0; set ssl:verify-certificate no; set ftp:ssl-allow yes; open -u '${{ secrets.HOSTINGER_FTP_USERNAME }}','${{ secrets.HOSTINGER_FTP_PASSWORD }}' -p 21 ${{ secrets.HOSTINGER_FTP_SERVER }}; mirror -R --delete --exclude '^api/' --exclude '^dynime-api/' --exclude '^node_modules/' --exclude '^\.git/' --parallel=10 ./dist/ $TARGET_DIR; quit"
 
       - name: 🚀 Commit and Push FTP Structure
         run: |
