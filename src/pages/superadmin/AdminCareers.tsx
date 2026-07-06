@@ -13,10 +13,10 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Briefcase, Star, Trash2, Edit2, Search, MapPin, Clock, ExternalLink, Copy, Link2, Globe2, Upload, Image as ImageIcon, X } from "lucide-react";
+import { Plus, Briefcase, Star, Trash2, Edit2, Search, MapPin, Clock, ExternalLink, Copy, Link2, Globe2, Upload, Image as ImageIcon, X, RefreshCw } from "lucide-react";
 import { JOB_CHANNELS, findChannel, type PostingChannel } from "@/lib/job-channels";
 import OfficeLocationsDialog, { useOfficeLocations } from "@/components/admin/OfficeLocationsDialog";
-import { useCareersAdmin, useUpsertCareer, useDeleteCareer } from "@/hooks/use-cms-data";
+import { useCareersAdmin, useUpsertCareer, useDeleteCareer, useSyncFlowmingoJobs } from "@/hooks/use-cms-data";
 
 interface JobPost {
   id: string;
@@ -124,6 +124,17 @@ const AdminCareers = () => {
   const { data: jobs = [], isLoading } = useCareersAdmin();
   const upsertCareer = useUpsertCareer();
   const deleteCareer = useDeleteCareer();
+  const syncJobsMutation = useSyncFlowmingoJobs();
+
+  const handleSyncFlowmingo = async () => {
+    const toastId = toast.loading("Syncing jobs from Flowmingo ATS...");
+    try {
+      await syncJobsMutation.mutateAsync();
+      toast.success("Jobs synchronized successfully!", { id: toastId });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to synchronize jobs", { id: toastId });
+    }
+  };
 
   // Realtime: keep admin list in sync with DB and the public /careers page
   useEffect(() => {
@@ -384,6 +395,9 @@ const AdminCareers = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleSyncFlowmingo} disabled={syncJobsMutation.isPending}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${syncJobsMutation.isPending ? "animate-spin" : ""}`} /> Sync Flowmingo
+            </Button>
             <Button variant="outline" onClick={openBulk}>
               <Globe2 className="w-4 h-4 mr-2" /> Bulk Channels
             </Button>

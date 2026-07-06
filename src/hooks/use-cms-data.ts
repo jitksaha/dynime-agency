@@ -462,3 +462,15 @@ export const useSyncedJob = (slug: string) => {
     enabled: !!slug,
   });
 };
+
+export const useSyncFlowmingoJobs = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiPost<any>("/admin/jobs/sync", {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["synced-jobs"] });
+      qc.invalidateQueries({ queryKey: ["synced-job"] });
+      qc.invalidateQueries({ queryKey: ["careers-admin"] });
+    },
+  });
+};

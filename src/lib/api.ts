@@ -419,6 +419,7 @@ export interface SyncedJob {
   salary_min: number | null;
   salary_max: number | null;
   salary_currency: string | null;
+  salary_period: string | null;
   salary_range: string | null;
   description: string | null;
   responsibilities: string[];

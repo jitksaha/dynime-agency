@@ -92,8 +92,29 @@ class FlowmingoService implements AtsProviderInterface
             if ($setsResponse->successful()) {
                 $setsData = $setsResponse->json();
                 $interviewSets = $setsData['data'] ?? [];
-            } else {
-                Log::warning('Flowmingo /integration/hiring/interview-sets/v1 call failed, will fallback to careers page.');
+            }
+            // Fetch public seeker jobs for salary enrichment
+            $publicJobsMap = [];
+            if ($orgId) {
+                try {
+                    $publicResponse = Http::withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    ])
+                    ->timeout($this->timeout)
+                    ->get("https://apis.flowmingo.ai/seeker/post/jobs?organization_id={$orgId}&page=1&limit=200");
+
+                    if ($publicResponse->successful()) {
+                        $publicData = $publicResponse->json();
+                        $items = $publicData['items'] ?? [];
+                        foreach ($items as $item) {
+                            if (!empty($item['id'])) {
+                                $publicJobsMap[$item['id']] = $item;
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    Log::warning("Failed to fetch public seeker jobs for salary enrichment: " . $e->getMessage());
+                }
             }
 
             $jobs = [];
@@ -119,6 +140,15 @@ class FlowmingoService implements AtsProviderInterface
                     $post = array_merge($postItem, $detailData ?: []);
                 } else {
                     $post = $postItem;
+                }
+
+                // Enrich with public data (salary info) if available
+                if (isset($publicJobsMap[$postId])) {
+                    $pubJob = $publicJobsMap[$postId];
+                    $post['salary_min'] = $pubJob['salary_min'] ?? null;
+                    $post['salary_max'] = $pubJob['salary_max'] ?? null;
+                    $post['salary_currency'] = $pubJob['salary_currency'] ?? null;
+                    $post['salary_period'] = $pubJob['salary_period'] ?? null;
                 }
 
                 $title = $post['title'] ?? $postItem['title'];
@@ -185,6 +215,7 @@ class FlowmingoService implements AtsProviderInterface
                 $salaryMin  = $post['salary_min'] ?? $post['min_salary'] ?? null;
                 $salaryMax  = $post['salary_max'] ?? $post['max_salary'] ?? null;
                 $salaryCurr = $post['salary_currency'] ?? $post['currency'] ?? null;
+                $salaryPeriod = $post['salary_period'] ?? null;
                 // Some ATS return salary as a formatted string
                 $salaryStr  = $post['salary'] ?? $post['salary_range'] ?? null;
                 if ($salaryStr && !$salaryMin && !$salaryMax) {
@@ -231,9 +262,10 @@ class FlowmingoService implements AtsProviderInterface
                     department:       $department,
                     employment_type:  $employmentType,
                     location:         $location,
-                    salary_min:       $salaryMin ? (int) $salaryMin : null,
-                    salary_max:       $salaryMax ? (int) $salaryMax : null,
+                    salary_min:       $salaryMin ? (float) $salaryMin : null,
+                    salary_max:       $salaryMax ? (float) $salaryMax : null,
                     salary_currency:  $salaryCurr,
+                    salary_period:    $salaryPeriod,
                     description:      $description,
                     responsibilities: $responsibilities,
                     requirements:     $requirements,

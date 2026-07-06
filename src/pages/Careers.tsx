@@ -10,7 +10,7 @@ import {
   Briefcase, MapPin, Clock, Search, X,
   Star, CheckCircle2, ChevronRight,
   Shield, Heart, Check, ArrowLeft, Bookmark,
-  DollarSign
+  DollarSign, Globe, Linkedin, Facebook, Instagram
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,9 @@ interface JobDetailPaneProps {
 const getJobSalary = (job: SyncedJob): string | null => {
   if (job.salary_range) return job.salary_range;
   if (job.salary_min != null && job.salary_max != null) {
-    return `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`;
+    const rawPeriod = (job.salary_period || "").toLowerCase();
+    const periodSuffix = rawPeriod === "annual" ? " / year" : (rawPeriod === "monthly" ? " / month" : (rawPeriod ? ` / ${rawPeriod}` : ""));
+    return `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}${periodSuffix}`;
   }
 
   // Fallback to extract from description
@@ -150,6 +152,40 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
                 </>
               )}
             </p>
+            <div className="flex flex-wrap gap-1.5 pt-2">
+              <a
+                href="https://dynime.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+              >
+                <Globe className="w-3 h-3 text-muted-foreground" /> dynime.com
+              </a>
+              <a
+                href="https://linkedin.com/company/dynime"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+              >
+                <Linkedin className="w-3 h-3 text-[#0a66c2]" /> LinkedIn
+              </a>
+              <a
+                href="https://facebook.com/dynime"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+              >
+                <Facebook className="w-3 h-3 text-[#1877f2]" /> Facebook
+              </a>
+              <a
+                href="https://instagram.com/dynime"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+              >
+                <Instagram className="w-3 h-3 text-[#e1306c]" /> Instagram
+              </a>
+            </div>
           </div>
         </div>
 
@@ -159,14 +195,6 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
             className="flex-1 sm:flex-none font-bold bg-primary hover:bg-primary/95 text-primary-foreground rounded-xl px-6 h-10 shadow-sm"
           >
             Apply Now
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-xl border-border/80 text-foreground hover:bg-muted shrink-0 w-10 h-10"
-            title="Save Job"
-          >
-            <Bookmark className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -210,21 +238,52 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
         <h3 className="font-heading font-bold text-base text-foreground flex items-center gap-1">
           About Dynime <span className="text-primary font-normal">+</span>
         </h3>
-        <div className="rounded-xl border border-border/40 bg-card/25 p-5 flex flex-col sm:flex-row gap-4 items-start justify-between">
+        <div className="rounded-xl border border-border/40 bg-card/25 p-5 flex flex-col gap-4">
           <div className="flex gap-3.5 items-start">
-            <div className="w-11 h-11 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-heading font-bold text-base shrink-0">
-              d
+            <div className="w-11 h-11 bg-card border border-border/40 rounded-xl flex items-center justify-center shrink-0 overflow-hidden p-1 bg-white">
+              <img src={dynimeIcon} alt="Dynime logo" className="w-full h-full object-contain" />
             </div>
             <div className="space-y-1">
-              <span className="font-heading font-bold text-sm text-foreground">Dynime Agency</span>
-              <p className="text-xs text-muted-foreground max-w-md leading-normal">
-                Dynime is a global AI Software Development Company & Digital Transformation partner. We build beautiful, performant software.
+              <span className="font-heading font-bold text-sm text-foreground">Dynime LLC</span>
+              <p className="text-xs text-muted-foreground leading-normal">
+                Dynime LLC is a global digital studio and technology company that partners with startups, entrepreneurs, and established businesses to design, build, and grow digital products. Our multidisciplinary team combines strategy, design, engineering, AI, and marketing to deliver solutions that solve real business problems. From launching a new startup to modernizing enterprise workflows, we help organizations accelerate digital transformation with scalable technology.
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" className="rounded-lg text-xs font-bold border-border/80 text-foreground hover:bg-muted w-full sm:w-auto">
-            Follow
-          </Button>
+          <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border/10">
+            <a
+              href="https://dynime.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+            >
+              <Globe className="w-3 h-3 text-muted-foreground" /> dynime.com
+            </a>
+            <a
+              href="https://linkedin.com/company/dynime"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+            >
+              <Linkedin className="w-3 h-3 text-[#0a66c2]" /> LinkedIn
+            </a>
+            <a
+              href="https://facebook.com/dynime"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+            >
+              <Facebook className="w-3 h-3 text-[#1877f2]" /> Facebook
+            </a>
+            <a
+              href="https://instagram.com/dynime"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
+            >
+              <Instagram className="w-3 h-3 text-[#e1306c]" /> Instagram
+            </a>
+          </div>
         </div>
       </div>
     </div>

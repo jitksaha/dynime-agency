@@ -31,6 +31,7 @@ class Job extends Model
         'salary_min',
         'salary_max',
         'salary_currency',
+        'salary_period',
         'description',
         'responsibilities',
         'requirements',

@@ -249,6 +249,7 @@ Route::prefix('v1')->group(function () {
             Route::post('careers',             [CareerController::class, 'store']);
             Route::patch('careers/{id}',       [CareerController::class, 'update']);
             Route::delete('careers/{id}',      [CareerController::class, 'destroy']);
+            Route::post('jobs/sync',           [\App\Http\Controllers\Api\JobController::class, 'sync']);
 
 
             // Portfolio

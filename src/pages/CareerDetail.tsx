@@ -204,14 +204,20 @@ const CareerDetail = () => {
 
   // Fallbacks if not extracted
   // Salary: prefer explicit API fields, then extracted, then "Negotiable"
-  const salaryFromMinMax =
-    job.salary_min != null && job.salary_max != null
-      ? `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`
-      : job.salary_min != null
-      ? `From ${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()}`
-      : job.salary_max != null
-      ? `Up to ${job.salary_currency || 'USD'} ${Number(job.salary_max).toLocaleString()}`
-      : null;
+  const salaryFromMinMax = (() => {
+    if (job.salary_min != null && job.salary_max != null) {
+      const rawPeriod = (job.salary_period || "").toLowerCase();
+      const periodSuffix = rawPeriod === "annual" ? " / year" : (rawPeriod === "monthly" ? " / month" : (rawPeriod ? ` / ${rawPeriod}` : ""));
+      return `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}${periodSuffix}`;
+    }
+    if (job.salary_min != null) {
+      return `From ${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()}`;
+    }
+    if (job.salary_max != null) {
+      return `Up to ${job.salary_currency || 'USD'} ${Number(job.salary_max).toLocaleString()}`;
+    }
+    return null;
+  })();
   const displaySalary = job.salary_range || salaryFromMinMax || extractedSalary || "Negotiable";
   const displayWorkplace = workplaceType.length > 0 ? workplaceType : (
     job.location ? job.location.replace(/\([^)]*\)/g, "").split(/[\/,]/).map((t) => t.trim()).filter(Boolean) : ["Remote"]

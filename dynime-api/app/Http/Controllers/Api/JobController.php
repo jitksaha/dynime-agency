@@ -67,4 +67,28 @@ class JobController extends Controller
 
         return response()->json($jobData);
     }
+
+    /**
+     * Manually trigger sync with Flowmingo ATS.
+     */
+    public function sync(\App\Services\Contracts\AtsProviderInterface $atsProvider): JsonResponse
+    {
+        try {
+            $jobs = $atsProvider->fetchJobs();
+            $results = $this->jobRepository->syncJobs($jobs);
+
+            // Clear cache for jobs list and detail
+            Cache::flush();
+
+            return response()->json([
+                'message' => 'Sync completed successfully.',
+                'stats' => $results
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Manual Flowmingo Sync failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Sync failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
