@@ -69,6 +69,33 @@ interface JobDetailPaneProps {
   onBack?: () => void;
 }
 
+const getJobSalary = (job: SyncedJob): string | null => {
+  if (job.salary_range) return job.salary_range;
+  if (job.salary_min != null && job.salary_max != null) {
+    return `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`;
+  }
+
+  // Fallback to extract from description
+  if (job.description) {
+    // 1. Look for inline pattern: **Salary Range:** $X - $Y
+    const inlineMatch = job.description.match(/(?:Salary Range|Salary|Compensation)[^\n:]*:\s*([^\n\r]+)/i);
+    if (inlineMatch) {
+      return inlineMatch[1].replace(/[\*#_]/g, "").trim();
+    }
+
+    // 2. Look for block pattern
+    const blockMatch = job.description.match(/(?:Salary Range|Salary|Compensation)[^\n]*\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
+    if (blockMatch) {
+      const val = blockMatch[1].replace(/[\*#_]/g, "").trim();
+      if (/[\$\d]|usd|negotiable/i.test(val)) {
+        return val;
+      }
+    }
+  }
+
+  return null;
+};
+
 const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
   const cleanHtml = useMemo(() => {
     if (!job.description) return "";
@@ -81,13 +108,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
     });
   }, [job.description]);
 
-  const displaySalary = useMemo(() => {
-    if (job.salary_range) return job.salary_range;
-    if (job.salary_min != null && job.salary_max != null) {
-      return `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`;
-    }
-    return "Negotiable";
-  }, [job.salary_range, job.salary_min, job.salary_max, job.salary_currency]);
+  const displaySalary = useMemo(() => getJobSalary(job) || "Negotiable", [job]);
 
   const handleApplyRedirect = () => {
     if (job.apply_url) {
@@ -471,9 +492,7 @@ const Careers = () => {
                 <div id="jobs-list-container" className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
                   {filteredJobs.map((job) => {
                     const isSelected = selectedJob?.flowmingo_job_id === job.flowmingo_job_id;
-                    const cardSalary = job.salary_range || (job.salary_min != null && job.salary_max != null
-                      ? `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`
-                      : null);
+                    const cardSalary = getJobSalary(job);
 
                     return (
                       <button

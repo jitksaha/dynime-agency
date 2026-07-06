@@ -157,10 +157,19 @@ const CareerDetail = () => {
   let extractedSalary = "";
 
   if (job.description) {
-    // Extract Salary from exact markdown blocks (e.g. ## expected annual salary)
-    const salaryMatch = job.description.match(/(?:^|\n)#*\s*(?:Expected Annual Salary|Salary|Compensation)\s*(?:\(USD\))?\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
-    if (salaryMatch) {
-      extractedSalary = salaryMatch[1].replace(/[\*#_]/g, "").trim();
+    // 1. Look for inline pattern: **Salary Range:** $X - $Y
+    const inlineMatch = job.description.match(/(?:Salary Range|Salary|Compensation)[^\n:]*:\s*([^\n\r]+)/i);
+    if (inlineMatch) {
+      extractedSalary = inlineMatch[1].replace(/[\*#_]/g, "").trim();
+    } else {
+      // 2. Look for block pattern
+      const blockMatch = job.description.match(/(?:Salary Range|Salary|Compensation)[^\n]*\s*[\r\n]+(?:\*?\s*)?([^\n\r]+)/i);
+      if (blockMatch) {
+        const val = blockMatch[1].replace(/[\*#_]/g, "").trim();
+        if (/[\$\d]|usd|negotiable/i.test(val)) {
+          extractedSalary = val;
+        }
+      }
     }
 
     // Extract Workplace Type from exact description headers
