@@ -66,18 +66,34 @@ if (file_exists($envPath)) {
         $newEnv = "APP_NAME=\"Dynime API\"\nAPP_ENV=production\nAPP_KEY=$appKey\nAPP_DEBUG=false\nAPP_URL=https://dynime.com/api\nFRONTEND_URL=https://dynime.com\n\nDB_CONNECTION=mysql\nDB_HOST=\"$db_host\"\nDB_PORT=\"$db_port\"\nDB_DATABASE=\"$db_database\"\nDB_USERNAME=\"$db_username\"\nDB_PASSWORD=\"$db_password\"\n\nCACHE_STORE=file\nSESSION_DRIVER=file\nSESSION_LIFETIME=120\nSESSION_SECURE_COOKIE=true\nQUEUE_CONNECTION=database\n\nMAIL_MAILER=smtp\nMAIL_HOST=smtp.hostinger.com\nMAIL_PORT=587\nMAIL_USERNAME=contact@dynime.com\nMAIL_PASSWORD=\nMAIL_ENCRYPTION=tls\nMAIL_FROM_ADDRESS=contact@dynime.com\nMAIL_FROM_NAME=\"Dynime\"\n\nFILESYSTEM_DISK=public\n";
     }
     
-    // Add/overwrite Admin details
+    // Add/overwrite Admin & Flowmingo details
     if (strpos($newEnv, 'ADMIN_EMAIL=') === false) {
         $newEnv .= "\nADMIN_EMAIL=\"mail.dynime@gmail.com\"\nADMIN_PASSWORD=\"Dynime123!\"\n";
     } else {
         $newEnv = preg_replace('/ADMIN_EMAIL=.*/', 'ADMIN_EMAIL="mail.dynime@gmail.com"', $newEnv);
         $newEnv = preg_replace('/ADMIN_PASSWORD=.*/', 'ADMIN_PASSWORD="Dynime123!"', $newEnv);
     }
+
+    if (strpos($newEnv, 'FLOWMINGO_API_KEY=') === false) {
+        $newEnv .= "\nFLOWMINGO_API_URL=\"https://apis.flowmingo.ai/company\"\nFLOWMINGO_API_KEY=\"fl_live_0VYl27roG.PbF9Yv7iPR8UI81o4zaSU8OaicK1qfGQgsHnIAGVAYM\"\nFLOWMINGO_API_TIMEOUT=\"10\"\nFLOWMINGO_API_RETRIES=\"3\"\nFLOWMINGO_API_RETRY_DELAY=\"100\"\nFLOWMINGO_WEBHOOK_SECRET=\"whsec_f9ff03a2fce35a5e1b7fdd3a05085e5ed23fcf4f6cd31f6577884774be80834d\"\n";
+    } else {
+        $newEnv = preg_replace('/FLOWMINGO_API_URL=.*/', 'FLOWMINGO_API_URL="https://apis.flowmingo.ai/company"', $newEnv);
+        $newEnv = preg_replace('/FLOWMINGO_API_KEY=.*/', 'FLOWMINGO_API_KEY="fl_live_0VYl27roG.PbF9Yv7iPR8UI81o4zaSU8OaicK1qfGQgsHnIAGVAYM"', $newEnv);
+    }
     
     if (file_put_contents($envPath, $newEnv) !== false) {
-        echo "<p style='color:green;'>Success: Updated backend .env file with quoted credentials.</p>";
+        echo "<p style='color:green;'>Success: Updated backend .env file with quoted credentials and Flowmingo API Key.</p>";
     } else {
         echo "<p style='color:red;'>Error: Failed to write to .env file.</p>";
+    }
+
+    // Clear stale cached configs and routes
+    foreach (['config.php', 'routes-v7.php', 'services.php', 'packages.php'] as $cacheFile) {
+        $fullCachePath = $apiDir . '/bootstrap/cache/' . $cacheFile;
+        if (file_exists($fullCachePath)) {
+            @unlink($fullCachePath);
+            echo "<p>Cleared cached file: <code>$cacheFile</code></p>";
+        }
     }
 } else {
     echo "<p style='color:red;'>Error: .env file not found at $envPath.</p>";
