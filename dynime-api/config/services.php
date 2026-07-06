@@ -37,11 +37,11 @@ return [
 
     'flowmingo' => [
         'url' => env('FLOWMINGO_API_URL', 'https://apis.flowmingo.ai/company'),
-        'key' => env('FLOWMINGO_API_KEY'),
+        'key' => env('FLOWMINGO_API_KEY', 'fl_live_0VYl27roG.PbF9Yv7iPR8UI81o4zaSU8OaicK1qfGQgsHnIAGVAYM'),
         'timeout' => env('FLOWMINGO_API_TIMEOUT', 10),
         'retries' => env('FLOWMINGO_API_RETRIES', 3),
         'retry_delay' => env('FLOWMINGO_API_RETRY_DELAY', 100),
-        'webhook_secret' => env('FLOWMINGO_WEBHOOK_SECRET'),
+        'webhook_secret' => env('FLOWMINGO_WEBHOOK_SECRET', 'whsec_f9ff03a2fce35a5e1b7fdd3a05085e5ed23fcf4f6cd31f6577884774be80834d'),
     ],
 
 ];

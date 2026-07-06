@@ -20,7 +20,7 @@ class FlowmingoService implements AtsProviderInterface
     public function __construct()
     {
         $this->apiUrl = (string) config('services.flowmingo.url') ?: (string) env('FLOWMINGO_API_URL', 'https://apis.flowmingo.ai/company');
-        $this->apiKey = (string) config('services.flowmingo.key') ?: (string) env('FLOWMINGO_API_KEY', '');
+        $this->apiKey = (string) config('services.flowmingo.key') ?: (string) env('FLOWMINGO_API_KEY', 'fl_live_0VYl27roG.PbF9Yv7iPR8UI81o4zaSU8OaicK1qfGQgsHnIAGVAYM');
         $this->timeout = (int) config('services.flowmingo.timeout', 10);
         $this->retryAttempts = (int) config('services.flowmingo.retries', 3);
         $this->retryDelayMs = (int) config('services.flowmingo.retry_delay', 100);
