@@ -55,10 +55,10 @@ jobs:
       - name: Package backend ZIP
         run: |
           cd dynime-api
-          zip -r ../dynime-api.zip . -x ".git*" -x "node_modules/*" -x "tests/*" -x "storage/logs/*" -x "storage/framework/cache/data/*" -x ".env*" -x ".phpunit.result.cache"
+          zip -r ../backend-release.zip . -x ".git*" -x "node_modules/*" -x "tests/*" -x "storage/logs/*" -x "storage/framework/cache/data/*" -x ".env*" -x ".phpunit.result.cache"
 
       - name: Copy backend package to dist for FTP upload
-        run: cp dynime-api.zip dist/
+        run: cp backend-release.zip dist/
 
       - name: 📂 Install lftp
         run: |

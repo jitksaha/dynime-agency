@@ -56,13 +56,16 @@ echo "Current directory: " . htmlspecialchars(__DIR__) . "<br/>";
 
 // Locate ZIP file paths across multiple possible directories
 $zipLocations = [
+    __DIR__ . '/backend-release.zip',
     __DIR__ . '/dynime-api.zip',
+    dirname(__DIR__) . '/backend-release.zip',
     dirname(__DIR__) . '/dynime-api.zip',
-    dirname(dirname(__DIR__)) . '/dynime-api.zip',
+    dirname(dirname(__DIR__)) . '/backend-release.zip',
+    $docRoot . '/backend-release.zip',
     $docRoot . '/dynime-api.zip',
-    dirname($docRoot) . '/dynime-api.zip',
-    '/home/u740731947/domains/dynime.com/public_html/dynime-api.zip',
-    '/home/u740731947/public_html/dynime-api.zip',
+    dirname($docRoot) . '/backend-release.zip',
+    '/home/u740731947/domains/dynime.com/public_html/backend-release.zip',
+    '/home/u740731947/public_html/backend-release.zip',
 ];
 
 $zipFile = null;
