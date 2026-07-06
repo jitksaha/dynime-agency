@@ -23,8 +23,8 @@ export const api: AxiosInstance = axios.create({
 // These match the old NestJS API client shape so no component imports need changing.
 export const apiGet  = <T = unknown>(path: string, params?: Record<string, unknown>) =>
   api.get<T>(path, { params }).then((r) => r.data);
-export const apiPost = <T = unknown>(path: string, body?: unknown) =>
-  api.post<T>(path, body).then((r) => r.data);
+export const apiPost = <T = unknown>(path: string, body?: unknown, config?: import('axios').AxiosRequestConfig) =>
+  api.post<T>(path, body, config).then((r) => r.data);
 export const apiPatch = <T = unknown>(path: string, body?: unknown) =>
   api.patch<T>(path, body).then((r) => r.data);
 export const apiDelete = <T = unknown>(path: string) =>

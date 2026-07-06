@@ -466,7 +466,7 @@ export const useSyncedJob = (slug: string) => {
 export const useSyncFlowmingoJobs = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<any>("/admin/jobs/sync", {}),
+    mutationFn: () => apiPost<any>("/admin/jobs/sync", {}, { timeout: 60000 }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["synced-jobs"] });
       qc.invalidateQueries({ queryKey: ["synced-job"] });
