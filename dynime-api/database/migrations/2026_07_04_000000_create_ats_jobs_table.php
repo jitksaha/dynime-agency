@@ -26,6 +26,7 @@ return new class extends Migration
             $table->decimal('salary_min', 15, 2)->nullable();
             $table->decimal('salary_max', 15, 2)->nullable();
             $table->string('salary_currency', 10)->nullable();
+            $table->string('salary_period', 20)->nullable();
             $table->text('description')->nullable();
             $table->json('responsibilities')->nullable();
             $table->json('requirements')->nullable();

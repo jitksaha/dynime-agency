@@ -107,6 +107,17 @@ try {
     ]);
     
     echo "<p>Connected to database successfully. Checking admin user in database...</p>";
+
+    // Ensure ats_jobs table has salary_period column if table exists
+    $atsChk = $pdo->query("SHOW TABLES LIKE 'ats_jobs'");
+    if ($atsChk->rowCount() > 0) {
+        try {
+            $pdo->exec("ALTER TABLE ats_jobs ADD COLUMN salary_period VARCHAR(20) NULL AFTER salary_currency");
+            echo "<p style='color:green;'>Success: Added salary_period column to ats_jobs table.</p>";
+        } catch (\PDOException $e) {
+            // Column already exists
+        }
+    }
     
     // Laravel uses bcrypt for default passwords
     $hashedPassword = password_hash('Dynime123!', PASSWORD_BCRYPT, ['cost' => 10]);
