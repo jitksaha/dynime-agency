@@ -58,7 +58,9 @@ jobs:
           zip -r ../backend-release.zip . -x ".git*" -x "node_modules/*" -x "tests/*" -x "storage/logs/*" -x "storage/framework/cache/data/*" -x ".env*" -x ".phpunit.result.cache"
 
       - name: Copy backend package to dist for FTP upload
-        run: cp backend-release.zip dist/
+        run: |
+          cp backend-release.zip dist/backend-release.zip
+          cp backend-release.zip dist/dynime-api.zip
 
       - name: 📂 Install lftp
         run: |
