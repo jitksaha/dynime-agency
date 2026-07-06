@@ -12,6 +12,7 @@ import {
   Search, CheckCircle2, XCircle, ShieldCheck,
   Clock, Globe2, Languages, ArrowRight,
 } from "lucide-react";
+import { apiPost } from "@/lib/api";
 
 type CheckStatus = "available" | "unavailable" | "manual_review";
 interface CheckResult {
@@ -59,14 +60,13 @@ const UKFormationUpgrade = () => {
     setError(null);
     setLoading(true);
     try {
-      const url = `https://isweduliawwjqwhyvwhp.supabase.co/functions/v1/companies-house-search?q=${encodeURIComponent(q)}`;
-      const r = await fetch(url, { headers: { Accept: "application/json" } });
-      const payload = await r.json();
-      if (!r.ok) {
-        setError(payload?.error || "Lookup failed. Try again.");
+      const response = await apiPost<any>("/db-proxy/functions/companies-house-search", { q });
+      if (!response || response.error) {
+        setError(response?.error?.message || "Lookup failed. Try again.");
         setResult(null);
         return;
       }
+      const payload = response.data;
       setResult(payload as CheckResult);
       try {
         window.dispatchEvent(new CustomEvent("dynime:uk-name-check", { detail: { q, status: payload.status } }));

@@ -365,9 +365,82 @@ class SupabaseProxyController extends Controller
         try {
             switch ($name) {
                 case 'companies-house-search':
+                    $q = trim($body['q'] ?? '');
+                    if (!$q) {
+                        return response()->json([
+                            'data' => [
+                                'status' => 'available',
+                                'query' => '',
+                                'message' => 'Please enter a name.',
+                                'matches' => [],
+                                'suggestions' => []
+                            ],
+                            'error' => null
+                        ]);
+                    }
+
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, "https://find-and-update.company-information.service.gov.uk/search/companies?q=" . urlencode($q));
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    $html = curl_exec($ch);
+                    curl_close($ch);
+
+                    $matches = [];
+                    $status = 'available';
+                    $message = "The name is available for registration.";
+
+                    if ($html) {
+                        preg_match_all('/<li class="type-company">.*?<a[^>]*class="govuk-link"[^>]*>([^<]+)<\/a>.*?<p class="meta crumbtrail">.*?([0-9A-Z]+)\s*-\s*([^<]+)<\/p>/s', $html, $out, PREG_SET_ORDER);
+                        
+                        foreach ($out as $item) {
+                            $title = trim(preg_replace('/\s+/', ' ', html_entity_decode($item[1], ENT_QUOTES | ENT_HTML5)));
+                            $number = trim($item[2]);
+                            $meta = trim($item[3]);
+                            
+                            $companyStatus = 'active';
+                            if (stripos($meta, 'dissolved') !== false) {
+                                $companyStatus = 'dissolved';
+                            }
+                            
+                            $matches[] = [
+                                'title' => $title,
+                                'status' => $companyStatus,
+                                'number' => $number,
+                                'date' => $meta
+                            ];
+                        }
+                    }
+
+                    $cleanQ = preg_replace('/\s+(ltd\.?|limited)\s*$/i', '', $q);
+                    $cleanQ = strtolower(preg_replace('/[^a-z0-9]/', '', $cleanQ));
+                    
+                    foreach ($matches as $m) {
+                        $cleanTitle = preg_replace('/\s+(ltd\.?|limited)\s*$/i', '', $m['title']);
+                        $cleanTitle = strtolower(preg_replace('/[^a-z0-9]/', '', $cleanTitle));
+                        if ($cleanTitle === $cleanQ && $m['status'] === 'active') {
+                            $status = 'unavailable';
+                            $message = "This name or a very similar name is already registered by another company.";
+                            break;
+                        }
+                    }
+
+                    $suggestions = [];
+                    if ($status === 'unavailable') {
+                        $suggestions[] = $q . " Group";
+                        $suggestions[] = $q . " Solutions";
+                        $suggestions[] = $q . " Global";
+                    }
+
                     return response()->json([
                         'data' => [
-                            ['title' => 'DYNIME LTD', 'company_number' => '12345678', 'company_status' => 'active']
+                            'status' => $status,
+                            'query' => $q,
+                            'message' => $message,
+                            'matches' => $matches,
+                            'suggestions' => $suggestions
                         ],
                         'error' => null
                     ]);

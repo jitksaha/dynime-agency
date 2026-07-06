@@ -146,4 +146,139 @@ class ContactController extends Controller
         OfficeLocation::findOrFail($id)->delete();
         return response()->json(['message' => 'Deleted successfully.']);
     }
+
+    public function subscribe(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email'  => 'required|email|max:255',
+            'source' => 'nullable|string|max:100',
+        ]);
+
+        $email = trim(strtolower($data['email']));
+        $source = trim($data['source'] ?? 'footer');
+
+        $existing = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+            ->where('email', $email)
+            ->first();
+
+        if ($existing) {
+            if ($existing->status === 'subscribed') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'You are already subscribed!',
+                ]);
+            }
+
+            \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+                ->where('id', $existing->id)
+                ->update([
+                    'status' => 'subscribed',
+                    'subscribed_at' => now(),
+                    'unsubscribed_at' => null,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            \Illuminate\Support\Facades\DB::table('newsletter_subscribers')->insert([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'email' => $email,
+                'source' => $source,
+                'status' => 'subscribed',
+                'subscribed_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thanks for subscribing to our newsletter!',
+        ]);
+    }
+
+    public function checkUnsubscribe(Request $request): JsonResponse
+    {
+        $token = trim($request->query('token', ''));
+        if (!$token) {
+            return response()->json(['error' => 'Token is required.'], 400);
+        }
+
+        $subscriber = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+            ->where('id', $token)
+            ->first();
+
+        if (!$subscriber) {
+            $decoded = base64_decode($token, true);
+            if ($decoded && filter_var($decoded, FILTER_VALIDATE_EMAIL)) {
+                $email = trim(strtolower($decoded));
+                $subscriber = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+                    ->where('email', $email)
+                    ->first();
+                
+                if (!$subscriber) {
+                    $newId = (string) \Illuminate\Support\Str::uuid();
+                    \Illuminate\Support\Facades\DB::table('newsletter_subscribers')->insert([
+                        'id' => $newId,
+                        'email' => $email,
+                        'source' => 'unsubscribe_page',
+                        'status' => 'subscribed',
+                        'subscribed_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $subscriber = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+                        ->where('id', $newId)
+                        ->first();
+                }
+            }
+        }
+
+        if (!$subscriber) {
+            return response()->json(['error' => 'Invalid or expired unsubscribe token.'], 404);
+        }
+
+        return response()->json([
+            'email' => $subscriber->email,
+            'alreadyUnsubscribed' => $subscriber->status !== 'subscribed',
+            'already_unsubscribed' => $subscriber->status !== 'subscribed',
+        ]);
+    }
+
+    public function confirmUnsubscribe(Request $request): JsonResponse
+    {
+        $token = trim($request->input('token', ''));
+        if (!$token) {
+            return response()->json(['error' => 'Token is required.'], 400);
+        }
+
+        $subscriber = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+            ->where('id', $token)
+            ->first();
+
+        if (!$subscriber) {
+            $decoded = base64_decode($token, true);
+            if ($decoded && filter_var($decoded, FILTER_VALIDATE_EMAIL)) {
+                $email = trim(strtolower($decoded));
+                $subscriber = \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+                    ->where('email', $email)
+                    ->first();
+            }
+        }
+
+        if (!$subscriber) {
+            return response()->json(['error' => 'Invalid or expired unsubscribe token.'], 404);
+        }
+
+        \Illuminate\Support\Facades\DB::table('newsletter_subscribers')
+            ->where('id', $subscriber->id)
+            ->update([
+                'status' => 'unsubscribed',
+                'unsubscribed_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'You have been successfully unsubscribed.',
+        ]);
+    }
 }

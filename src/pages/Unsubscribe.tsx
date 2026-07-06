@@ -3,11 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, AlertTriangle, Loader2, MailX } from "lucide-react";
-
-const SUPABASE_URL = "https://isweduliawwjqwhyvwhp.supabase.co";
-const ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlzd2VkdWxpYXd3anF3aHl2d2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzU2NTIsImV4cCI6MjA5MjYxMTY1Mn0.I7InCnynzCOzjZPi_IOb3L9pVUJ7YgebDNWuNb6Uu9M";
-const FN_URL = `${SUPABASE_URL}/functions/v1/handle-email-unsubscribe`;
+import { apiGet, apiPost } from "@/lib/api";
 
 type State = "validating" | "ready" | "already" | "invalid" | "submitting" | "done" | "error";
 
@@ -22,19 +18,15 @@ const Unsubscribe = () => {
     if (!token) { setState("invalid"); return; }
     (async () => {
       try {
-        const r = await fetch(`${FN_URL}?token=${encodeURIComponent(token)}`, {
-          headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}` },
-        });
-        const j = await r.json().catch(() => ({}));
-        if (!r.ok) { setState("invalid"); setErrorMsg(j?.error ?? "Invalid token."); return; }
+        const j = await apiGet<any>("/public/forms/unsubscribe", { token });
         if (j?.alreadyUnsubscribed || j?.already_unsubscribed) {
           setEmail(j?.email ?? null); setState("already"); return;
         }
         setEmail(j?.email ?? null);
         setState("ready");
-      } catch (e) {
-        setState("error");
-        setErrorMsg(e instanceof Error ? e.message : "Network error");
+      } catch (e: any) {
+        setState("invalid");
+        setErrorMsg(e?.response?.data?.error ?? e.message ?? "Invalid or expired unsubscribe link.");
       }
     })();
   }, [token]);
@@ -42,21 +34,11 @@ const Unsubscribe = () => {
   const confirm = async () => {
     setState("submitting");
     try {
-      const r = await fetch(FN_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: ANON_KEY,
-          Authorization: `Bearer ${ANON_KEY}`,
-        },
-        body: JSON.stringify({ token }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) { setState("error"); setErrorMsg(j?.error ?? "Could not unsubscribe."); return; }
+      const j = await apiPost<any>("/public/forms/unsubscribe", { token });
       setState("done");
-    } catch (e) {
+    } catch (e: any) {
       setState("error");
-      setErrorMsg(e instanceof Error ? e.message : "Network error");
+      setErrorMsg(e?.response?.data?.error ?? e.message ?? "Could not unsubscribe.");
     }
   };
 

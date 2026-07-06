@@ -75,6 +75,9 @@ Route::prefix('v1')->group(function () {
     // Contact (rate-limited)
     Route::post('contact',               [ContactController::class, 'submit'])->middleware('throttle:5,1');
     Route::get('office-locations',       [ContactController::class, 'officeLocations']);
+    Route::post('public/forms/subscribe', [ContactController::class, 'subscribe']);
+    Route::get('public/forms/unsubscribe', [ContactController::class, 'checkUnsubscribe']);
+    Route::post('public/forms/unsubscribe', [ContactController::class, 'confirmUnsubscribe']);
 
     // Job Applications (rate-limited)
     Route::post('job-applications',            [CareerController::class, 'apply'])->middleware('throttle:5,1');

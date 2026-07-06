@@ -118,6 +118,24 @@ try {
             // Column already exists
         }
     }
+
+    // Ensure newsletter_subscribers table exists
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+            id CHAR(36) PRIMARY KEY,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            source VARCHAR(100) NULL,
+            status VARCHAR(50) DEFAULT 'subscribed',
+            metadata JSON NULL,
+            subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            unsubscribed_at TIMESTAMP NULL,
+            created_at TIMESTAMP NULL,
+            updated_at TIMESTAMP NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        echo "<p style='color:green;'>Success: Ensured newsletter_subscribers table exists.</p>";
+    } catch (\PDOException $e) {
+        // Ignore if error
+    }
     
     // Laravel uses bcrypt for default passwords
     $hashedPassword = password_hash('Dynime123!', PASSWORD_BCRYPT, ['cost' => 10]);
