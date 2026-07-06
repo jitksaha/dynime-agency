@@ -33,11 +33,11 @@ export const STATIC_BUSINESS_DEFAULTS = {
   whatsapp: "+1 (646) 884-0271",
   
   socialLinks: {
-    facebook: "https://facebook.com/dynime",
-    twitter: "https://twitter.com/dynime",
-    linkedin: "https://linkedin.com/company/dynime",
-    instagram: "https://instagram.com/dynime",
-    youtube: "https://youtube.com/dynime"
+    facebook: "https://facebook.com/thedynime",
+    twitter: "https://twitter.com/thedynime",
+    linkedin: "https://linkedin.com/company/thedynime",
+    instagram: "https://instagram.com/thedynime",
+    youtube: "https://youtube.com/thedynime"
   },
 
   offices: [

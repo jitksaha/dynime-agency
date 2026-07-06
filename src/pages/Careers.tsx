@@ -162,7 +162,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
                 <Globe className="w-3 h-3 text-muted-foreground" /> dynime.com
               </a>
               <a
-                href="https://linkedin.com/company/dynime"
+                href="https://linkedin.com/company/thedynime"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
@@ -170,7 +170,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
                 <Linkedin className="w-3 h-3 text-[#0a66c2]" /> LinkedIn
               </a>
               <a
-                href="https://facebook.com/dynime"
+                href="https://facebook.com/thedynime"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
@@ -178,7 +178,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
                 <Facebook className="w-3 h-3 text-[#1877f2]" /> Facebook
               </a>
               <a
-                href="https://instagram.com/dynime"
+                href="https://instagram.com/thedynime"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
@@ -260,7 +260,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
               <Globe className="w-3 h-3 text-muted-foreground" /> dynime.com
             </a>
             <a
-              href="https://linkedin.com/company/dynime"
+              href="https://linkedin.com/company/thedynime"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
@@ -268,7 +268,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
               <Linkedin className="w-3 h-3 text-[#0a66c2]" /> LinkedIn
             </a>
             <a
-              href="https://facebook.com/dynime"
+              href="https://facebook.com/thedynime"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
@@ -276,7 +276,7 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
               <Facebook className="w-3 h-3 text-[#1877f2]" /> Facebook
             </a>
             <a
-              href="https://instagram.com/dynime"
+              href="https://instagram.com/thedynime"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-muted hover:bg-muted/80 text-foreground transition-all duration-200 border border-border/40"
