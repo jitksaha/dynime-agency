@@ -9,7 +9,8 @@ import { marked } from "marked";
 import {
   Briefcase, MapPin, Clock, Search, X,
   Star, CheckCircle2, ChevronRight,
-  Shield, Heart, Check, ArrowLeft, Bookmark
+  Shield, Heart, Check, ArrowLeft, Bookmark,
+  DollarSign
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,12 @@ const JobDetailPane = ({ job, onBack }: JobDetailPaneProps) => {
               <span className="inline-flex items-center gap-0.5"><MapPin className="w-3 h-3" /> {job.location}</span>
               <span>·</span>
               <span className="inline-flex items-center gap-0.5"><Clock className="w-3 h-3" /> {job.employment_type || "Full-time"}</span>
+              {displaySalary && (
+                <>
+                  <span>·</span>
+                  <span className="inline-flex items-center gap-0.5"><DollarSign className="w-3 h-3 text-primary" /> {displaySalary}</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -464,6 +471,9 @@ const Careers = () => {
                 <div id="jobs-list-container" className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin pb-4">
                   {filteredJobs.map((job) => {
                     const isSelected = selectedJob?.flowmingo_job_id === job.flowmingo_job_id;
+                    const cardSalary = job.salary_range || (job.salary_min != null && job.salary_max != null
+                      ? `${job.salary_currency || 'USD'} ${Number(job.salary_min).toLocaleString()} – ${Number(job.salary_max).toLocaleString()}`
+                      : null);
 
                     return (
                       <button
@@ -486,10 +496,16 @@ const Careers = () => {
                           <span className="text-[11px] font-bold text-muted-foreground block truncate">
                             {job.department}
                           </span>
-                          <p className="text-[11px] text-muted-foreground/80 font-medium pt-1 flex items-center gap-1.5">
+                          <p className="text-[11px] text-muted-foreground/80 font-medium pt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                             <span className="inline-flex items-center gap-0.5"><MapPin className="w-3 h-3 text-muted-foreground/50" /> {job.location}</span>
                             <span>·</span>
                             <span>{job.employment_type || "Full-time"}</span>
+                            {cardSalary && (
+                              <>
+                                <span>·</span>
+                                <span className="text-primary font-semibold">{cardSalary}</span>
+                              </>
+                            )}
                           </p>
                         </div>
 
