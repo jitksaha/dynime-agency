@@ -83,7 +83,6 @@ wordpress-ecommerce
 email-marketing
 dynime-seal.png
 shopify-illustration.png
-api_bak_1783355900
 _redirects
 payment-gateway
 seo-illustration.png
