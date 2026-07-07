@@ -18,6 +18,12 @@ from pathlib import Path
 import environ
 from django.contrib.messages import constants as messages
 
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -186,7 +192,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "/hrm/static/"
+STATIC_URL = env("STATIC_URL", default="/hrm/static/")
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [
@@ -195,7 +201,7 @@ STATICFILES_DIRS = [
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
-MEDIA_URL = "/hrm/media/"
+MEDIA_URL = env("MEDIA_URL", default="/hrm/media/")
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -278,5 +284,7 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Serving HRM under /hrm/ prefix of the main domain
-FORCE_SCRIPT_NAME = "/hrm"
+# Serving HRM under a custom prefix if defined (defaults to /hrm)
+FORCE_SCRIPT_NAME = env("FORCE_SCRIPT_NAME", default="/hrm")
+if FORCE_SCRIPT_NAME == "" or FORCE_SCRIPT_NAME == "/":
+    FORCE_SCRIPT_NAME = None
