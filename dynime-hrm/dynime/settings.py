@@ -214,6 +214,11 @@ MESSAGE_TAGS = {
 
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost:8000", "http://localhost:5001", "http://localhost:5000", "https://dynime.com", "http://127.0.0.1:5001", "http://127.0.0.1:5000"])
 
+# Ensure custom domain and wildcard subdomains are trusted for CSRF
+for origin in ["https://hr.dynime.com", "https://*.dynime.com", "https://dynime.com", "https://*.onrender.com"]:
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+
 LOGIN_URL = "/hrm/login/"
 
 
