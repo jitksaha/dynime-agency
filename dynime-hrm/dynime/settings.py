@@ -138,6 +138,20 @@ else:
         }
     }
 
+# Connection persistence for better performance (re-use database connections)
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=600)
+
+# Caching Configuration (Local Memory Cache for fast read access)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "dynime-hrm-cache",
+    }
+}
+
+# Use cached database sessions to prevent loading session from DB on every single request
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
