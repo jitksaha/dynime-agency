@@ -30,7 +30,7 @@ import { canAccessRoute } from "@/lib/role-permissions";
 import type { Database } from "@/integrations/db/types";
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-type NavLeaf = { to: string; label: string; icon: any; badge?: string };
+type NavLeaf = { to: string; label: string; icon: any; badge?: string; external?: boolean };
 type NavParent = { label: string; icon: any; key: string; children: NavLeaf[]; badge?: string };
 type NavItem = NavLeaf | NavParent;
 type NavGroup = { label: string; items: NavItem[] };
@@ -145,21 +145,8 @@ const navGroupsCommerce: NavGroup = {
         { to: "/superadmin/payroll", label: "Payroll", icon: Banknote, badge: "New" },
       ],
     },
-    {
-      key: "crm",
-      label: "CRM",
-      icon: Users,
-      badge: "New",
-      children: [
-        { to: "/superadmin/crm", label: "Dashboard", icon: LayoutDashboard },
-        { to: "/superadmin/crm/leads", label: "Leads", icon: Users },
-        { to: "/superadmin/crm/pipeline", label: "Pipeline", icon: TrendingUp },
-        { to: "/superadmin/crm/activities", label: "Activities", icon: Bell },
-        { to: "/superadmin/crm/automations", label: "Automations", icon: Bell, badge: "New" },
-        { to: "/superadmin/crm/email-templates", label: "Email Templates", icon: Bell },
-        
-      ],
-    },
+    { to: "/crm/", label: "CRM", icon: Building2, external: true },
+    { to: "/hrm/", label: "HRM Portal", icon: UserCog, external: true },
     { to: "/superadmin/customer-services", label: "Customer Services", icon: ShoppingBag },
     {
       key: "pricing",
@@ -400,6 +387,21 @@ const SuperAdminLayout = ({ children }: { children: ReactNode }) => {
         >
           {inner}
         </button>
+      );
+    }
+    if (item.external || item.to.startsWith("http")) {
+      return (
+        <a
+          key={item.to}
+          href={item.to}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setSidebarOpen(false)}
+          title={collapsed ? item.label : undefined}
+          className={baseClass}
+        >
+          {inner}
+        </a>
       );
     }
     return (

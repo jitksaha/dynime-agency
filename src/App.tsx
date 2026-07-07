@@ -165,13 +165,6 @@ const AdminProductUrls = lazy(() => import("./pages/superadmin/AdminProductUrls.
 const AdminEmployees = lazy(() => import("./pages/superadmin/AdminEmployees.tsx"));
 const AdminHR = lazy(() => import("./pages/superadmin/AdminHR.tsx"));
 const AdminHRRequests = lazy(() => import("./pages/superadmin/AdminHRRequests.tsx"));
-const AdminCrmDashboard = lazy(() => import("./pages/superadmin/crm/AdminCrmDashboard.tsx"));
-const AdminCrmLeads = lazy(() => import("./pages/superadmin/crm/AdminCrmLeads.tsx"));
-const AdminCrmPipeline = lazy(() => import("./pages/superadmin/crm/AdminCrmPipeline.tsx"));
-const AdminCrmActivities = lazy(() => import("./pages/superadmin/crm/AdminCrmActivities.tsx"));
-const AdminCrmAutomations = lazy(() => import("./pages/superadmin/crm/AdminCrmAutomations.tsx"));
-const AdminCrmAutomationEditor = lazy(() => import("./pages/superadmin/crm/AdminCrmAutomationEditor.tsx"));
-const AdminCrmEmailTemplates = lazy(() => import("./pages/superadmin/crm/AdminCrmEmailTemplates.tsx"));
 
 const AdminHRExtras = lazy(() => import("./pages/superadmin/AdminHRExtras.tsx"));
 const AdminPayroll = lazy(() => import("./pages/superadmin/AdminPayroll.tsx"));
@@ -433,13 +426,6 @@ const App = () => (
                   <Route path="/admin/*" element={<Navigate to="/superadmin" replace />} />
 
                   {/* Dynamic service pages */}
-                  <Route path="/superadmin/crm" element={<ProtectedRoute><AdminCrmDashboard /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/leads" element={<ProtectedRoute><AdminCrmLeads /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/pipeline" element={<ProtectedRoute><AdminCrmPipeline /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/activities" element={<ProtectedRoute><AdminCrmActivities /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/automations" element={<ProtectedRoute><AdminCrmAutomations /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/automations/:id" element={<ProtectedRoute><AdminCrmAutomationEditor /></ProtectedRoute>} />
-                  <Route path="/superadmin/crm/email-templates" element={<ProtectedRoute><AdminCrmEmailTemplates /></ProtectedRoute>} />
                   
                   <Route path="/superadmin/hr-extras" element={<ProtectedRoute><AdminHRExtras /></ProtectedRoute>} />
                   <Route path="/superadmin/payroll" element={<ProtectedRoute><AdminPayroll /></ProtectedRoute>} />

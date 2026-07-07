@@ -19,6 +19,16 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      // Proxy /crm/* to Django CRM
+      "/crm": {
+        target: "http://localhost:8002",
+        changeOrigin: true,
+      },
+      // Proxy /hrm/* to Django HRM
+      "/hrm": {
+        target: "http://localhost:8001",
+        changeOrigin: true,
+      },
     },
   },
   preview: {
