@@ -72,7 +72,6 @@ shopify
 laravel-ecommerce
 social-media
 woocommerce
-api_bak_1783450639
 google-ads
 dws-illustration.png
 favicon.ico
@@ -97,7 +96,6 @@ react-mern-apps
 ai-software-illustration.png
 company-formation-illustration.png
 marketing-ads-illustration.png
-api_bak_1783450642
 dynime-icon-light.svg
 dss-illustration.png
 fix-apply-urls-direct.php
