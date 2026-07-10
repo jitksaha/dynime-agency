@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('ats_jobs', 'salary_period')) {
+            return;
+        }
         Schema::table('ats_jobs', function (Blueprint $table) {
             $table->string('salary_period', 20)->nullable()->after('salary_currency');
         });

@@ -31,7 +31,7 @@ export class SeoService {
   }
 
   async getPageBySlug(slug: string) {
-    return this.prisma.pages.findUnique({
+    return this.prisma.pages.findFirst({
       where: { slug },
     });
   }
@@ -109,6 +109,7 @@ export class SeoService {
         country: payload.country || null,
         device: payload.device || null,
         notes: payload.notes || null,
+        is_active: true,
       },
     });
   }
@@ -142,7 +143,7 @@ export class SeoService {
         where: { cache_key: cacheKeyStr },
       });
       if (cached) {
-        const ageSec = (Date.now() - new Date(cached.fetched_at).getTime()) / 1000;
+        const ageSec = (Date.now() - new Date(cached.fetched_at!).getTime()) / 1000;
         if (ageSec < ttl) {
           return { ok: true, data: cached.payload, cached: true, fetchedAt: cached.fetched_at, ageSec };
         }
@@ -383,32 +384,39 @@ export class SeoService {
           snap = await this.fetchKeywordRankFromGsc(kw, LOVABLE_API_KEY, GSC_KEY);
         }
 
-        await this.prisma.keyword_rank_history.upsert({
+        const existing = await this.prisma.keyword_rank_history.findFirst({
           where: {
-            keyword_id_captured_for: {
-              keyword_id: kw.id,
-              captured_for: new Date(today),
-            },
-          },
-          update: {
-            position: snap.position ? Number(snap.position.toFixed(2)) : null,
-            impressions: snap.impressions,
-            clicks: snap.clicks,
-            ctr: snap.ctr,
-            top_page: snap.top_page,
-            captured_at: new Date(),
-          },
-          create: {
             keyword_id: kw.id,
-            position: snap.position ? Number(snap.position.toFixed(2)) : null,
-            impressions: snap.impressions,
-            clicks: snap.clicks,
-            ctr: snap.ctr,
-            top_page: snap.top_page,
             captured_for: new Date(today),
-            captured_at: new Date(),
           },
         });
+
+        if (existing) {
+          await this.prisma.keyword_rank_history.update({
+            where: { id: existing.id },
+            data: {
+              position: snap.position ? Number(snap.position.toFixed(2)) : null,
+              impressions: snap.impressions,
+              clicks: snap.clicks,
+              ctr: snap.ctr,
+              top_page: snap.top_page,
+              captured_at: new Date(),
+            },
+          });
+        } else {
+          await this.prisma.keyword_rank_history.create({
+            data: {
+              keyword_id: kw.id,
+              position: snap.position ? Number(snap.position.toFixed(2)) : null,
+              impressions: snap.impressions,
+              clicks: snap.clicks,
+              ctr: snap.ctr,
+              top_page: snap.top_page,
+              captured_for: new Date(today),
+              captured_at: new Date(),
+            },
+          });
+        }
 
         results.push({ keyword: kw.keyword, ok: true, ...snap });
       } catch (err: any) {

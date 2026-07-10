@@ -40,30 +40,43 @@ export const useSiteSettings = () => {
       // Prefer /public-settings (array format, no auth) when available.
       // Falls back to /site-settings (flat dict, no auth) for compatibility
       // with the currently deployed backend until /public-settings is live.
-      // NEVER uses /cms/site-settings — that endpoint requires admin auth and
-      // returns 500 for public visitors, causing the switcher toggles to silently
-      // default to 'true' regardless of what the admin saved.
       let data: any[] | null = null;
+      const isAdmin = !!localStorage.getItem("dynime_admin_token");
 
-      try {
-        const res = await apiGet<any>("/public-settings");
-        // /public-settings returns [{key, value}] array
-        if (Array.isArray(res)) {
-          data = res;
-        } else if (res && typeof res === "object") {
-          // Flat dict fallback — convert to array
-          data = Object.entries(res).map(([key, value]) => ({ key, value }));
-        }
-      } catch {
-        // /public-settings not yet deployed — fall back to /site-settings
+      if (isAdmin) {
         try {
-          const fallback = await apiGet<Record<string, any>>("/site-settings");
-          if (fallback && typeof fallback === "object" && !Array.isArray(fallback)) {
-            data = Object.entries(fallback).map(([key, value]) => ({ key, value }));
+          const res = await apiGet<any>("/cms/site-settings");
+          if (Array.isArray(res)) {
+            data = res;
+          } else if (res && typeof res === "object") {
+            data = Object.entries(res).map(([key, value]) => ({ key, value }));
+          }
+        } catch (e) {
+          console.error("Failed to fetch admin site settings, falling back to public settings", e);
+        }
+      }
+
+      if (!data) {
+        try {
+          const res = await apiGet<any>("/public-settings");
+          // /public-settings returns [{key, value}] array
+          if (Array.isArray(res)) {
+            data = res;
+          } else if (res && typeof res === "object") {
+            // Flat dict fallback — convert to array
+            data = Object.entries(res).map(([key, value]) => ({ key, value }));
           }
         } catch {
-          // both failed — return whatever is in localStorage
-          return readCachedSiteSettings() ?? {};
+          // /public-settings not yet deployed — fall back to /site-settings
+          try {
+            const fallback = await apiGet<Record<string, any>>("/site-settings");
+            if (fallback && typeof fallback === "object" && !Array.isArray(fallback)) {
+              data = Object.entries(fallback).map(([key, value]) => ({ key, value }));
+            }
+          } catch {
+            // both failed — return whatever is in localStorage
+            return readCachedSiteSettings() ?? {};
+          }
         }
       }
 

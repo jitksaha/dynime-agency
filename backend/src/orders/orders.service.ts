@@ -197,7 +197,7 @@ export class OrdersService {
     const data = await this.prisma.orders.findMany({
       where: {
         OR: [
-          { customer_email: { equals: userEmail, mode: 'insensitive' } },
+          { customer_email: userEmail },
           { user_id: userId },
         ],
       },
@@ -261,6 +261,12 @@ export class OrdersService {
     const updated = await this.prisma.orders.update({ where: { id }, data });
     this.eventService.emit('order-updated', { orderId: id });
 
+    if (dto.status === 'paid' || updated.status === 'paid') {
+      this.syncOrderToERP(updated).catch((err) =>
+        console.error('[updateOrder] sync error:', err.message),
+      );
+    }
+
     // Trigger commission if transitioned to paid/completed/verified and has referral_code
     if (
       dto.status &&
@@ -302,6 +308,12 @@ export class OrdersService {
     const created = await this.prisma.orders.create({ data });
     this.eventService.emit('order-updated', { orderId: created.id });
 
+    if (created.status === 'paid' || created.status === 'completed') {
+      this.syncOrderToERP(created).catch((err) =>
+        console.error('[createOrder] sync error:', err.message),
+      );
+    }
+
     // Trigger commission for manual orders marked as paid/completed immediately
     if (dto.referral_code && ['paid', 'completed', 'verified'].includes(dto.status || '')) {
       this.referralService.triggerCommission(
@@ -337,7 +349,7 @@ export class OrdersService {
   async claimOrder(dto: ClaimOrderDto, userId: string, userEmail: string) {
     const invoice = dto.invoice.trim();
     const order = await this.prisma.orders.findFirst({
-      where: { invoice_number: { equals: invoice, mode: 'insensitive' } },
+      where: { invoice_number: invoice },
     });
     if (!order) return { matches: 0, matched_fields: [] as string[] };
 
@@ -568,7 +580,14 @@ export class OrdersService {
     });
     const settings: Record<string, string> = {};
     rows.forEach((row) => {
-      const val = typeof row.value === 'string' ? row.value.replace(/^"|"$/g, '') : String(row.value);
+      let val = '';
+      if (typeof row.value === 'string') {
+        val = row.value.replace(/^"|"$/g, '');
+      } else if (typeof row.value === 'object' && row.value !== null) {
+        val = JSON.stringify(row.value);
+      } else {
+        val = String(row.value);
+      }
       settings[row.key] = val;
     });
     return settings;
@@ -641,6 +660,12 @@ export class OrdersService {
         updated_at: new Date(),
       },
     });
+
+    if (status === 'paid') {
+      this.syncOrderToERP(updated).catch((err) =>
+        console.error('[completeOrderPayment] sync error:', err.message),
+      );
+    }
 
     return updated;
   }
@@ -1296,6 +1321,7 @@ export class OrdersService {
         currency: body.currency || 'USD',
         status: i === 0 ? 'invoiced' : 'pending',
         invoiced_at: i === 0 ? new Date() : null,
+        metadata: {},
       }));
       await this.prisma.order_milestones.createMany({ data: milestoneRows });
     }
@@ -2029,7 +2055,7 @@ export class OrdersService {
     const e = email?.trim();
     if (!e) throw new BadRequestException('Email is required');
     return this.prisma.orders.findMany({
-      where: { customer_email: { equals: e, mode: 'insensitive' } },
+      where: { customer_email: e },
       orderBy: { created_at: 'desc' },
     });
   }
@@ -2488,7 +2514,7 @@ export class OrdersService {
       }
 
       if (!existingOrder && order.invoice_number) {
-        existingOrder = await this.prisma.orders.findUnique({
+        existingOrder = await this.prisma.orders.findFirst({
           where: { invoice_number: order.invoice_number },
         });
       }
@@ -2511,6 +2537,38 @@ export class OrdersService {
     }
 
     return { created: createdCount, updated: updatedCount };
+  }
+
+  private async syncOrderToERP(order: any) {
+    try {
+      const crmUrl = process.env.VITE_CRM_URL || 'http://localhost:8000';
+      const token = 'dynime-secret-token'; // must match configured secret
+      
+      const payload = {
+        customer_name: order.customer_name || 'Guest Customer',
+        customer_email: order.customer_email,
+        order_id: order.id,
+        type: 'service',
+        notes: order.notes,
+        items: (order.items as any[] || []).map((item) => ({
+          name: item.name || 'Service Item',
+          sku: item.sku || item.id || 'SERVICE-SKU',
+          quantity: Number(item.quantity) || 1,
+          unit_price: Number(item.price) || 0,
+          discount_percentage: 0,
+          tax_percentage: 0,
+        })),
+      };
+
+      const axios = require('axios');
+      await axios.post(`${crmUrl}/api/webhook/orders`, payload, {
+        headers: {
+          'X-Webhook-Token': token,
+        },
+      });
+    } catch (e: any) {
+      console.error('[syncOrderToERP] Failed to sync order to ERP:', e.message);
+    }
   }
 }
 

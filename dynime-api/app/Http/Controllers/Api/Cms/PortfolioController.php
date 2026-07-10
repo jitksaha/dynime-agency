@@ -21,18 +21,30 @@ class PortfolioController extends Controller
             }
             return $query->select([
                 'id', 'title', 'slug', 'category', 'description',
-                'cover_image_url', 'gallery_images', 'client_name',
-                'project_url', 'tags', 'is_featured', 'completed_at',
-            ])->get()->toArray();
+                'cover_image_url', 'thumbnail_url', 'thumbnail_path', 'alt_text',
+                'gallery_images', 'client_name', 'project_url', 'tags', 'technologies',
+                'is_featured', 'completed_at',
+            ])->get()->map(function ($p) {
+                $p->thumbnail_url = $p->thumbnail_url ?? $p->cover_image_url;
+                $p->cover_image_url = $p->cover_image_url ?? $p->thumbnail_url;
+                $p->technologies = $p->technologies ?? $p->tags ?? [];
+                $p->tags = $p->tags ?? $p->technologies ?? [];
+                return $p;
+            })->toArray();
         });
         return response()->json($projects);
     }
 
     public function show(string $slug): JsonResponse
     {
-        $project = Cache::remember('portfolio_' . $slug, 3600, fn() =>
-            PortfolioProject::where('slug', $slug)->where('is_published', true)->firstOrFail()->toArray()
-        );
+        $project = Cache::remember('portfolio_' . $slug, 3600, function () use ($slug) {
+            $p = PortfolioProject::where('slug', $slug)->where('is_published', true)->firstOrFail();
+            $p->thumbnail_url = $p->thumbnail_url ?? $p->cover_image_url;
+            $p->cover_image_url = $p->cover_image_url ?? $p->thumbnail_url;
+            $p->technologies = $p->technologies ?? $p->tags ?? [];
+            $p->tags = $p->tags ?? $p->technologies ?? [];
+            return $p->toArray();
+        });
         return response()->json($project);
     }
 
@@ -46,7 +58,17 @@ class PortfolioController extends Controller
 
     public function adminIndex(): JsonResponse
     {
-        return response()->json(PortfolioProject::orderBy('sort_order')->orderByDesc('created_at')->get());
+        $projects = PortfolioProject::orderBy('sort_order')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($p) {
+                $p->thumbnail_url = $p->thumbnail_url ?? $p->cover_image_url;
+                $p->cover_image_url = $p->cover_image_url ?? $p->thumbnail_url;
+                $p->technologies = $p->technologies ?? $p->tags ?? [];
+                $p->tags = $p->tags ?? $p->technologies ?? [];
+                return $p;
+            });
+        return response()->json($projects);
     }
 
     public function store(Request $request): JsonResponse
@@ -58,16 +80,35 @@ class PortfolioController extends Controller
             'description'     => 'nullable|string',
             'content_html'    => 'nullable|string',
             'cover_image_url' => 'nullable|url|max:500',
+            'thumbnail_url'   => 'nullable|url|max:500',
+            'thumbnail_path'  => 'nullable|string|max:500',
+            'alt_text'        => 'nullable|string',
             'gallery_images'  => 'nullable|array',
             'client_name'     => 'nullable|string|max:255',
             'project_url'     => 'nullable|url|max:500',
             'tags'            => 'nullable|array',
+            'technologies'    => 'nullable|array',
             'is_published'    => 'nullable|boolean',
             'is_featured'     => 'nullable|boolean',
             'sort_order'      => 'nullable|integer',
             'completed_at'    => 'nullable|date',
         ]);
         $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
+
+        // Fallback mapping/syncing before saving
+        if (isset($data['thumbnail_url'])) {
+            $data['cover_image_url'] = $data['cover_image_url'] ?? $data['thumbnail_url'];
+        }
+        if (isset($data['cover_image_url'])) {
+            $data['thumbnail_url'] = $data['thumbnail_url'] ?? $data['cover_image_url'];
+        }
+        if (isset($data['technologies'])) {
+            $data['tags'] = $data['tags'] ?? $data['technologies'];
+        }
+        if (isset($data['tags'])) {
+            $data['technologies'] = $data['technologies'] ?? $data['tags'];
+        }
+
         $project = PortfolioProject::create($data);
         Cache::flush();
         return response()->json($project, 201);
@@ -83,15 +124,34 @@ class PortfolioController extends Controller
             'description'     => 'nullable|string',
             'content_html'    => 'nullable|string',
             'cover_image_url' => 'nullable|url|max:500',
+            'thumbnail_url'   => 'nullable|url|max:500',
+            'thumbnail_path'  => 'nullable|string|max:500',
+            'alt_text'        => 'nullable|string',
             'gallery_images'  => 'nullable|array',
             'client_name'     => 'nullable|string|max:255',
             'project_url'     => 'nullable|url|max:500',
             'tags'            => 'nullable|array',
+            'technologies'    => 'nullable|array',
             'is_published'    => 'nullable|boolean',
             'is_featured'     => 'nullable|boolean',
             'sort_order'      => 'nullable|integer',
             'completed_at'    => 'nullable|date',
         ]);
+
+        // Fallback mapping/syncing before updating
+        if (isset($data['thumbnail_url'])) {
+            $data['cover_image_url'] = $data['cover_image_url'] ?? $data['thumbnail_url'];
+        }
+        if (isset($data['cover_image_url'])) {
+            $data['thumbnail_url'] = $data['thumbnail_url'] ?? $data['cover_image_url'];
+        }
+        if (isset($data['technologies'])) {
+            $data['tags'] = $data['tags'] ?? $data['technologies'];
+        }
+        if (isset($data['tags'])) {
+            $data['technologies'] = $data['technologies'] ?? $data['tags'];
+        }
+
         $project->update($data);
         Cache::flush();
         return response()->json($project);

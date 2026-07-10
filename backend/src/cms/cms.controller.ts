@@ -18,12 +18,18 @@ export class CmsController {
   // ── Site Settings ──────────────────────────────────────────────────────
   @Get('site-settings')
   @Version('1')
+  @UseGuards(FlexAuthGuard, RolesGuard)
+  @Roles(...ADMIN)
+  @ApiBearerAuth()
   getSiteSettings() {
     return this.svc.getSiteSettings();
   }
 
   @Get('site-settings/:key')
   @Version('1')
+  @UseGuards(FlexAuthGuard, RolesGuard)
+  @Roles(...ADMIN)
+  @ApiBearerAuth()
   getSiteSetting(@Param('key') key: string) {
     return this.svc.getSiteSetting(key);
   }
@@ -553,6 +559,12 @@ export class CmsController {
   @ApiBearerAuth()
   getResumeSignedUrl(@Param('id') id: string) {
     return this.svc.getResumeSignedUrl(id);
+  }
+
+  @Post('sync/catalog')
+  @Version('1')
+  syncCatalog(@Body() body: { products?: any[]; services?: any[]; addons?: any[]; usa_state_pricings?: any[]; coupons?: any[]; delete_coupons?: string[] }) {
+    return this.svc.syncCatalog(body);
   }
 }
 

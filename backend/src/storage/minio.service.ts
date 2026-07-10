@@ -1,7 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client as MinioClient } from 'minio';
 import { BUCKET_POLICIES } from './storage.constants';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Thin wrapper around the MinIO (S3-compatible) client. Owns the connection and
@@ -14,6 +16,8 @@ export class MinioService implements OnModuleInit {
   readonly client: MinioClient;
   private readonly region: string;
   private readonly publicUrl: string;
+  private isFallback = false;
+  private readonly fallbackDir = path.join(process.cwd(), 'storage-fallback');
 
   constructor(private readonly config: ConfigService) {
     this.region = this.config.get<string>('storage.region') ?? 'us-east-1';
@@ -27,6 +31,10 @@ export class MinioService implements OnModuleInit {
       secretKey: this.config.get<string>('storage.secretKey') ?? 'minioadmin',
       region: this.region,
     });
+
+    if (!fs.existsSync(this.fallbackDir)) {
+      fs.mkdirSync(this.fallbackDir, { recursive: true });
+    }
   }
 
   async onModuleInit() {
@@ -36,8 +44,9 @@ export class MinioService implements OnModuleInit {
     try {
       await this.ensureBuckets();
     } catch (err) {
+      this.isFallback = true;
       this.logger.warn(
-        `Storage bootstrap skipped (MinIO unavailable?): ${String(err)}`,
+        `MinIO connection failed. Switching to Local Filesystem Fallback: ${String(err)}`,
       );
     }
   }
@@ -74,35 +83,84 @@ export class MinioService implements OnModuleInit {
   }
 
   publicObjectUrl(bucket: string, key: string): string {
+    if (this.isFallback) {
+      return `/api/v1/storage-fallback/${bucket}/${encodeURI(key)}`;
+    }
     const base = this.publicUrl.replace(/\/+$/, '');
     return `${base}/${bucket}/${encodeURI(key)}`;
   }
 
-  putObject(
+  async putObject(
     bucket: string,
     key: string,
     body: Buffer,
     size: number,
     mime: string,
   ) {
+    if (this.isFallback) {
+      const bucketDir = path.join(this.fallbackDir, bucket);
+      if (!fs.existsSync(bucketDir)) {
+        fs.mkdirSync(bucketDir, { recursive: true });
+      }
+      const filePath = path.join(bucketDir, key);
+      const fileDir = path.dirname(filePath);
+      if (!fs.existsSync(fileDir)) {
+        fs.mkdirSync(fileDir, { recursive: true });
+      }
+      fs.writeFileSync(filePath, body);
+      return { etag: `local-${Date.now()}` };
+    }
     return this.client.putObject(bucket, key, body, size, {
       'Content-Type': mime,
     });
   }
 
-  getObject(bucket: string, key: string) {
+  async getObject(bucket: string, key: string) {
+    if (this.isFallback) {
+      const filePath = path.join(this.fallbackDir, bucket, key);
+      if (!fs.existsSync(filePath)) {
+        throw new NotFoundException('Object not found');
+      }
+      const stream = require('stream');
+      const bufferStream = new stream.PassThrough();
+      bufferStream.end(fs.readFileSync(filePath));
+      return bufferStream;
+    }
     return this.client.getObject(bucket, key);
   }
 
-  statObject(bucket: string, key: string) {
+  async statObject(bucket: string, key: string) {
+    if (this.isFallback) {
+      const filePath = path.join(this.fallbackDir, bucket, key);
+      if (!fs.existsSync(filePath)) {
+        throw new NotFoundException('Object not found');
+      }
+      const stat = fs.statSync(filePath);
+      return {
+        size: stat.size,
+        lastModified: stat.mtime,
+        metaData: {},
+        etag: `local-${stat.mtimeMs}`,
+      };
+    }
     return this.client.statObject(bucket, key);
   }
 
-  presignedGetUrl(bucket: string, key: string, ttlSec: number) {
+  async presignedGetUrl(bucket: string, key: string, ttlSec: number) {
+    if (this.isFallback) {
+      return `/api/v1/storage-fallback/${bucket}/${encodeURI(key)}`;
+    }
     return this.client.presignedGetObject(bucket, key, ttlSec);
   }
 
-  removeObject(bucket: string, key: string) {
+  async removeObject(bucket: string, key: string) {
+    if (this.isFallback) {
+      const filePath = path.join(this.fallbackDir, bucket, key);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return;
+    }
     return this.client.removeObject(bucket, key);
   }
 

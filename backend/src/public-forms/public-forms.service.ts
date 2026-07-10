@@ -279,6 +279,8 @@ export class PublicFormsService {
         message: data.message || null,
         plan_slug: data.plan_slug || null,
         target_slug: data.target_slug || null,
+        status: 'pending',
+        metadata: {},
       },
     });
 
@@ -378,6 +380,8 @@ export class PublicFormsService {
         source: 'career-page',
         ip_address: ipAddress || null,
         user_agent: userAgent ? userAgent.slice(0, 500) : null,
+        status: 'pending',
+        metadata: {},
       },
     });
 

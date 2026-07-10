@@ -157,9 +157,10 @@ const AdminDashboard = () => {
     return { from: start, to: now };
   }, [preset, customFrom, customTo]);
 
-  const inRange = (iso?: string | null) => {
+  const inRange = (iso?: string | null | unknown) => {
     if (!iso) return false;
-    const normalized = iso.includes(' ') && !iso.includes('T') ? iso.replace(' ', 'T') : iso;
+    const isoStr = typeof iso === 'string' ? iso : (iso instanceof Date ? iso.toISOString() : String(iso));
+    const normalized = isoStr.includes(' ') && !isoStr.includes('T') ? isoStr.replace(' ', 'T') : isoStr;
     const t = new Date(normalized).getTime();
     if (isNaN(t)) return false;
     return t >= from.getTime() && t <= to.getTime();
@@ -235,9 +236,10 @@ const AdminDashboard = () => {
         orders: 0, subs: 0, leads: 0,
       });
     }
-    const bucketIdx = (iso: string) => {
+    const bucketIdx = (iso: string | Date | unknown) => {
       if (!iso) return -1;
-      const normalized = iso.includes(' ') && !iso.includes('T') ? iso.replace(' ', 'T') : iso;
+      const isoStr = typeof iso === 'string' ? iso : (iso instanceof Date ? iso.toISOString() : String(iso));
+      const normalized = isoStr.includes(' ') && !isoStr.includes('T') ? isoStr.replace(' ', 'T') : isoStr;
       const t = new Date(normalized).getTime();
       if (isNaN(t)) return -1;
       const i = Math.floor((t - startDay.getTime()) / dayMs / bucketDays);

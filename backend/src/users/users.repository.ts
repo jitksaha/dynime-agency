@@ -13,7 +13,7 @@ export class UsersRepository {
 
   findProfileByEmail(email: string) {
     return this.prisma.profiles.findFirst({
-      where: { email: { equals: email, mode: 'insensitive' } },
+      where: { email },
     });
   }
 
@@ -23,63 +23,39 @@ export class UsersRepository {
     const last8 = digits.slice(-8);
 
     const rows = await this.prisma.$queryRaw<any[]>`
-      SELECT p.id AS "user_id", p.full_name AS "name", p.email
-      FROM public.orders o
-      JOIN public.profiles p ON p.id = o.user_id
+      SELECT p.id AS user_id, p.full_name AS name, p.email
+      FROM orders o
+      JOIN profiles p ON p.id = o.user_id
       WHERE o.user_id IS NOT NULL
-        AND length(regexp_replace(coalesce(o.billing_address->>'phone', ''), '\\D', '', 'g')) >= 6
-        AND right(regexp_replace(coalesce(o.billing_address->>'phone', ''), '\\D', '', 'g'), 8) = ${last8}
-      ORDER BY o.created_at DESC
-      LIMIT 1
+        AND length(regexp_replace(coalesce(o.billing_address->>'phone', ''), '\\\\D', '', 'g')) >= 6
     `;
-
-    return rows.length ? rows[0] : null;
-  }
-
-  updateProfile(id: string, data: Prisma.profilesUpdateInput) {
-    return this.prisma.profiles.update({
-      where: { id },
-      data: { ...data, updated_at: new Date() },
-    });
-  }
-
-  rolesForUser(userId: string) {
-    return this.prisma.user_roles.findMany({
-      where: { user_id: userId },
-      select: { role: true },
-    });
+    const found = rows.find((r) => r.phone && r.phone.replace(/\D/g, '').endsWith(last8));
+    if (!found) return null;
+    return {
+      userId: found.user_id,
+      name: found.name,
+      email: found.email,
+    };
   }
 
   async listProfiles(params: { skip: number; take: number; search?: string }) {
     const where: Prisma.profilesWhereInput = params.search
       ? {
           OR: [
-            { email: { contains: params.search, mode: 'insensitive' } },
-            { full_name: { contains: params.search, mode: 'insensitive' } },
+            { email: { contains: params.search } },
+            { full_name: { contains: params.search } },
           ],
         }
       : {};
 
-    const [profiles, total] = await this.prisma.$transaction([
+    const [profiles, adminUsers, total] = await this.prisma.$transaction([
       this.prisma.profiles.findMany({
         where,
         skip: params.skip,
         take: params.take,
         orderBy: { created_at: 'desc' },
-        include: {
-          users: {
-            select: {
-              last_sign_in_at: true,
-              email_confirmed_at: true,
-              user_roles: {
-                select: {
-                  role: true,
-                },
-              },
-            },
-          },
-        },
       }),
+      this.prisma.admin_users.findMany({}),
       this.prisma.profiles.count({ where }),
     ]);
 
@@ -102,18 +78,16 @@ export class UsersRepository {
     }
 
     const data = profiles.map((p) => {
-      const roles = p.users?.user_roles ?? [];
-      const dbRoles = roles.map((r) => r.role);
-      const sanitized = sanitizeRoles(p.email, dbRoles);
-      const primaryRole = sanitized.length > 0 ? sanitized[0] : null;
+      const adminUser = adminUsers.find((u) => u.email.toLowerCase() === p.email.toLowerCase());
+      const primaryRole = adminUser ? adminUser.role : 'editor';
       return {
         user_id: p.id,
         email: p.email,
         full_name: p.full_name,
         role: primaryRole,
         created_at: p.created_at,
-        last_sign_in_at: p.users?.last_sign_in_at ?? null,
-        email_confirmed_at: p.users?.email_confirmed_at ?? null,
+        last_sign_in_at: adminUser?.updated_at ?? null,
+        email_confirmed_at: adminUser?.created_at ?? null,
         order_count: orderCountMap.get(p.id) ?? 0,
       };
     });
@@ -128,107 +102,109 @@ export class UsersRepository {
     full_name: string;
     role?: string;
   }) {
-    const existing = await this.prisma.users.findFirst({
-      where: { email: { equals: data.email, mode: 'insensitive' } },
+    const existing = await this.prisma.admin_users.findFirst({
+      where: { email: data.email },
     });
     if (existing) {
       throw new ConflictException('Email already registered');
     }
 
     const now = new Date();
-    const SUPABASE_INSTANCE_ID = '00000000-0000-0000-0000-000000000000';
 
     return await this.prisma.$transaction(async (tx) => {
-      // 1. Create auth user
-      const user = await tx.users.create({
+      // 1. Create admin user
+      const user = await tx.admin_users.create({
         data: {
-          id: data.id,
-          instance_id: SUPABASE_INSTANCE_ID,
-          aud: 'authenticated',
-          role: 'authenticated',
+          name: data.full_name,
           email: data.email.toLowerCase(),
-          encrypted_password: data.passwordHash,
-          email_confirmed_at: now,
-          raw_app_meta_data: { provider: 'email', providers: ['email'] },
-          raw_user_meta_data: {
-            full_name: data.full_name,
-            email_verified: true,
-          },
+          password: data.passwordHash,
+          role: (data.role || 'editor') as any,
+          is_active: true,
           created_at: now,
           updated_at: now,
         },
       });
 
-      // 2. Double-check profile creation (if DB trigger created it, let's update it. Otherwise, create it)
-      const existingProfile = await tx.profiles.findUnique({
-        where: { id: data.id },
+      const stringUserId = String(user.id);
+
+      // 2. Create profile
+      await tx.profiles.create({
+        data: {
+          id: stringUserId,
+          email: data.email.toLowerCase(),
+          full_name: data.full_name,
+          created_at: now,
+          updated_at: now,
+        },
       });
 
-      if (existingProfile) {
-        await tx.profiles.update({
-          where: { id: data.id },
-          data: {
-            email: data.email.toLowerCase(),
-            full_name: data.full_name,
-            updated_at: now,
-          },
-        });
-      } else {
-        await tx.profiles.create({
-          data: {
-            id: data.id,
-            email: data.email.toLowerCase(),
-            full_name: data.full_name,
-            created_at: now,
-            updated_at: now,
-          },
-        });
-      }
-
-      // 3. Assign role if specified
-      if (data.role) {
-        await tx.user_roles.create({
-          data: {
-            user_id: data.id,
-            role: data.role as any,
-            created_at: now,
-          },
-        });
-      }
-
-      return user;
+      return {
+        id: stringUserId,
+        email: user.email,
+        raw_user_meta_data: {
+          full_name: user.name,
+        },
+      };
     });
   }
 
   async deleteUser(id: string) {
-    // Delete from auth.users cascades into profiles, user_roles, etc.
-    return this.prisma.users.delete({ where: { id } });
+    if (!isNaN(Number(id))) {
+      await this.prisma.admin_users.delete({
+        where: { id: BigInt(id) },
+      });
+    }
+    try {
+      await this.prisma.profiles.delete({
+        where: { id },
+      });
+    } catch {}
+    return { id };
   }
 
   async updateUserRole(userId: string, role?: string) {
-    const now = new Date();
-    return this.prisma.$transaction(async (tx) => {
-      // Remove all existing roles
-      await tx.user_roles.deleteMany({ where: { user_id: userId } });
-
-      // Add new role if specified
-      if (role && role.trim() !== '') {
-        await tx.user_roles.create({
-          data: {
-            user_id: userId,
-            role: role as any,
-            created_at: now,
-          },
-        });
-      }
-    });
+    if (!isNaN(Number(userId)) && role) {
+      await this.prisma.admin_users.update({
+        where: { id: BigInt(userId) },
+        data: {
+          role: role as any,
+          updated_at: new Date(),
+        },
+      });
+    }
   }
 
   async updateUserPassword(userId: string, passwordHash: string) {
-    return this.prisma.users.update({
-      where: { id: userId },
+    if (!isNaN(Number(userId))) {
+      await this.prisma.admin_users.update({
+        where: { id: BigInt(userId) },
+        data: {
+          password: passwordHash,
+          updated_at: new Date(),
+        },
+      });
+    }
+    return { id: userId };
+  }
+
+  async rolesForUser(id: string) {
+    if (!isNaN(Number(id))) {
+      const user = await this.prisma.admin_users.findUnique({
+        where: { id: BigInt(id) },
+      });
+      if (user) {
+        return [{ role: user.role }];
+      }
+    }
+    return [];
+  }
+
+  async updateProfile(id: string, data: any) {
+    return this.prisma.profiles.update({
+      where: { id },
       data: {
-        encrypted_password: passwordHash,
+        full_name: data.full_name,
+        avatar_url: data.avatar_url,
         updated_at: new Date(),
       },
     });

@@ -1,14 +1,18 @@
 {
   "name": "dynime-backend",
   "version": "0.1.0",
-  "description": "Dynime NestJS backend (Supabase migration target)",
+  "description": "Dynime NestJS backend",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
+    "deploy:migrate": "npx prisma generate && node dist/main.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.json",
@@ -31,6 +35,7 @@
     "@prisma/client": "^5.20.0",
     "@prisma/engines": "^7.8.0",
     "@socket.io/redis-adapter": "^8.3.0",
+    "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.13.2",
     "class-transformer": "^0.5.1",

@@ -58,10 +58,9 @@ export class FlexAuthGuard implements CanActivate {
         if (!userRow) throw new UnauthorizedException('User not found');
 
         // Fetch roles from user_roles
-        const roleRows = await this.prisma.$queryRawUnsafe<{ role: string }[]>(
-          'SELECT role FROM public.user_roles WHERE user_id = $1::uuid',
-          payload.sub,
-        );
+        const roleRows = await this.prisma.user_roles.findMany({
+          where: { user_id: payload.sub },
+        });
 
         const email = userRow.email || payload.email;
         req.user = {
@@ -98,10 +97,9 @@ export class FlexAuthGuard implements CanActivate {
       if (!userRow) throw new UnauthorizedException('User not found');
 
       // Fetch roles from user_roles
-      const roleRows = await this.prisma.$queryRawUnsafe<{ role: string }[]>(
-        'SELECT role FROM public.user_roles WHERE user_id = $1::uuid',
-        rawPayload.sub,
-      );
+      const roleRows = await this.prisma.user_roles.findMany({
+        where: { user_id: rawPayload.sub },
+      });
 
       const email = userRow.email || (rawPayload.email ?? null);
       req.user = {

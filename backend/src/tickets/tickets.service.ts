@@ -18,7 +18,7 @@ export class TicketsService {
       where: {
         OR: [
           { user_id: userId },
-          { customer_email: { equals: userEmail, mode: 'insensitive' } },
+          { customer_email: userEmail },
         ],
       },
       orderBy: { updated_at: 'desc' },

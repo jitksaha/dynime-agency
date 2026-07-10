@@ -1221,14 +1221,11 @@ export class VerificationService {
   private async syncOrderStatus(sessionId: string, status: string) {
     if (!sessionId) return;
     try {
-      const matched = await this.prisma.orders.findFirst({
-        where: {
-          service_brief: {
-            path: ['identity_verification', 'session_id'],
-            equals: sessionId,
-          },
-        },
-      });
+      const matchedRows = await this.prisma.$queryRawUnsafe<any[]>(
+        "SELECT * FROM orders WHERE JSON_UNQUOTE(JSON_EXTRACT(service_brief, '$.identity_verification.session_id')) = ? LIMIT 1",
+        sessionId
+      );
+      const matched = matchedRows.length > 0 ? matchedRows[0] : null;
 
       if (matched) {
         const brief = (matched.service_brief as Record<string, any>) || {};

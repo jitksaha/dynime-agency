@@ -131,16 +131,25 @@ export class CmsService {
   }
 
   async getFlexpaySettings() {
-    return this.prisma.flexpay_settings.findUnique({
+    const settings = await this.prisma.flexpay_settings.findUnique({
       where: { id: 1 },
     });
+    if (!settings) return null;
+    return {
+      ...settings,
+      id: Number(settings.id),
+    };
   }
 
   async updateFlexpaySettings(enabled: boolean) {
-    return this.prisma.flexpay_settings.update({
+    const settings = await this.prisma.flexpay_settings.update({
       where: { id: 1 },
       data: { enabled },
     });
+    return {
+      ...settings,
+      id: Number(settings.id),
+    };
   }
 
   // ── Blog Posts ─────────────────────────────────────────────────────────
@@ -667,6 +676,180 @@ export class CmsService {
     );
 
     return { signedUrl };
+  }
+
+  async syncCatalog(payload: { products?: any[]; services?: any[]; addons?: any[]; usa_state_pricings?: any[]; coupons?: any[]; delete_coupons?: string[] }) {
+    if (payload.services) {
+      for (const service of payload.services) {
+        await this.prisma.service_pricing.upsert({
+          where: { service_slug: service.slug },
+          update: {
+            service_title: service.name,
+            is_enabled: service.is_active,
+            tiers: service.tiers || [],
+            quote_settings: service.quote_settings || {},
+            updated_at: new Date(),
+          },
+          create: {
+            service_slug: service.slug,
+            service_title: service.name,
+            is_enabled: service.is_active,
+            tiers: service.tiers || [],
+            quote_settings: service.quote_settings || {},
+          },
+        });
+      }
+    }
+
+    if (payload.addons) {
+      for (const addon of payload.addons) {
+        await this.prisma.service_addons.upsert({
+          where: { id: addon.id },
+          update: {
+            service_slug: addon.service_slug,
+            name: addon.name,
+            description: addon.description,
+            price_usd: addon.price_usd,
+            period: addon.period,
+            is_popular: addon.is_popular,
+            is_active: addon.is_active,
+            sort_order: addon.sort_order,
+            updated_at: new Date(),
+          },
+          create: {
+            id: addon.id,
+            service_slug: addon.service_slug,
+            name: addon.name,
+            description: addon.description,
+            price_usd: addon.price_usd,
+            period: addon.period,
+            is_popular: addon.is_popular,
+            is_active: addon.is_active,
+            sort_order: addon.sort_order,
+          },
+        });
+      }
+    }
+
+    if (payload.products) {
+      for (const product of payload.products) {
+        await this.prisma.products.upsert({
+          where: { id: product.id },
+          update: {
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            price: product.price,
+            category: product.category,
+            image_url: product.image_url,
+            is_active: product.is_active,
+            is_featured: product.is_featured,
+            sort_order: product.sort_order,
+            updated_at: new Date(),
+          },
+          create: {
+            id: product.id,
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            price: product.price,
+            category: product.category,
+            image_url: product.image_url,
+            is_active: product.is_active,
+            is_featured: product.is_featured,
+            sort_order: product.sort_order,
+          },
+        });
+      }
+    }
+
+    if (payload.usa_state_pricings) {
+      for (const statePricing of payload.usa_state_pricings) {
+        const existing = await this.prisma.usa_state_pricing.findFirst({
+          where: { abbr: statePricing.abbr }
+        });
+        
+        const data = {
+          state: statePricing.state,
+          abbr: statePricing.abbr,
+          llc_formation: statePricing.llc_formation,
+          corp_formation: statePricing.corp_formation,
+          llc_annual: statePricing.llc_annual,
+          llc_annual_label: statePricing.llc_annual_label,
+          corp_annual: statePricing.corp_annual,
+          corp_annual_label: statePricing.corp_annual_label,
+          llc_renewal: statePricing.llc_renewal,
+          corp_renewal: statePricing.corp_renewal,
+          state_tax_note: statePricing.state_tax_note,
+          franchise_tax: statePricing.franchise_tax,
+          notes: statePricing.notes,
+          sort_order: statePricing.sort_order,
+          is_active: statePricing.is_active,
+          updated_at: new Date(),
+        };
+
+        if (existing) {
+          await this.prisma.usa_state_pricing.update({
+            where: { id: existing.id },
+            data,
+          });
+        } else {
+          await this.prisma.usa_state_pricing.create({
+            data,
+          });
+        }
+      }
+    }
+
+    if (payload.coupons) {
+      for (const coupon of payload.coupons) {
+        const existing = await this.prisma.coupons.findFirst({
+          where: { code: coupon.code }
+        });
+
+        const data = {
+          code: coupon.code,
+          description: coupon.description,
+          discount_type: coupon.type === 'percentage' ? 'percentage' : 'fixed',
+          discount_value: coupon.discount,
+          min_order_amount: coupon.minimum_spend || 0,
+          max_discount_amount: coupon.maximum_spend || null,
+          usage_limit: coupon.limit || null,
+          expires_at: coupon.expiry_date ? new Date(coupon.expiry_date) : null,
+          is_active: coupon.status == 1 || coupon.status === true,
+          updated_at: new Date(),
+        };
+
+        if (existing) {
+          await this.prisma.coupons.update({
+            where: { id: existing.id },
+            data,
+          });
+        } else {
+          await this.prisma.coupons.create({
+            data: {
+              ...data,
+              usage_count: 0,
+              is_milestone: false,
+            }
+          });
+        }
+      }
+    }
+
+    if (payload.delete_coupons) {
+      for (const code of payload.delete_coupons) {
+        try {
+          await this.prisma.coupons.delete({
+            where: { code }
+          });
+        } catch (e) {
+          // Ignore
+        }
+      }
+    }
+
+    return { success: true, message: 'Catalog synced successfully' };
   }
 }
 

@@ -29,17 +29,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     // Confirm user still exists in auth.users
-    const users = await this.prisma.$queryRawUnsafe<{ id: string }[]>(
-      'SELECT id FROM auth.users WHERE id = $1::uuid LIMIT 1',
-      payload.sub,
-    );
-    if (!users.length) throw new UnauthorizedException('User not found');
+    const user = await this.prisma.users.findUnique({
+      where: { id: payload.sub },
+      select: { id: true },
+    });
+    if (!user) throw new UnauthorizedException('User not found');
 
     // Fetch roles from user_roles
-    const roleRows = await this.prisma.$queryRawUnsafe<{ role: string }[]>(
-      'SELECT role FROM public.user_roles WHERE user_id = $1::uuid',
-      payload.sub,
-    );
+    const roleRows = await this.prisma.user_roles.findMany({
+      where: { user_id: payload.sub },
+    });
 
     return {
       id: payload.sub,

@@ -94,7 +94,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const valid = await bcrypt.compare(dto.password, user.encrypted_password);
+    const hashToCompare = user.encrypted_password.replace(/^\$2y\$/, '$2a$');
+    const valid = await bcrypt.compare(dto.password, hashToCompare);
     if (!valid) {
       await this.audit({
         event: 'login_failure',
@@ -190,7 +191,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token reuse detected');
     }
 
-    if (row.expires_at < new Date()) {
+    if (!row.expires_at || row.expires_at < new Date()) {
       await this.audit({
         event: 'token_refresh_failure',
         userId: row.user_id,

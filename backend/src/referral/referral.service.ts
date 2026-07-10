@@ -30,7 +30,7 @@ export class ReferralService implements OnModuleInit {
 
     // Look up partner by code (case-insensitive)
     const partner = await this.prisma.partners.findFirst({
-      where: { referral_code: { equals: code, mode: 'insensitive' } },
+      where: { referral_code: code },
     });
 
     if (!partner) {
@@ -105,7 +105,7 @@ export class ReferralService implements OnModuleInit {
       where: {
         OR: [
           { user_id: userId },
-          { email: { equals: email, mode: 'insensitive' } },
+          { email: email },
         ],
       },
     });
@@ -118,7 +118,7 @@ export class ReferralService implements OnModuleInit {
     let parentPartnerId: string | null = null;
     if (parentReferralCode) {
       const parent = await this.prisma.partners.findFirst({
-        where: { referral_code: { equals: parentReferralCode.trim(), mode: 'insensitive' } },
+        where: { referral_code: parentReferralCode.trim() },
       });
       if (parent) {
         parentPartnerId = parent.id;
@@ -707,7 +707,7 @@ export class ReferralService implements OnModuleInit {
 
     // Find the partner
     const partner = await this.prisma.partners.findFirst({
-      where: { referral_code: { equals: code, mode: 'insensitive' } },
+      where: { referral_code: code },
     });
     if (!partner || partner.status !== 'active') return;
 
@@ -726,7 +726,7 @@ export class ReferralService implements OnModuleInit {
     // First-purchase check: count PAID orders for this email excluding this order
     const previousPaidOrders = await this.prisma.orders.count({
       where: {
-        customer_email: { equals: customerEmail, mode: 'insensitive' },
+        customer_email: customerEmail,
         status: { in: ['paid', 'completed', 'verified'] },
         id: { not: orderId },
       },

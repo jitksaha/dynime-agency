@@ -33,6 +33,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   onModuleInit() {
     // Pipe all application events emitted via EventService directly to Socket.IO rooms/broadcasts
     this.eventService.getUpdateStream().subscribe(({ event, data }) => {
+      if (!this.server) {
+        this.logger.log(`Skipping event broadcast (server not initialized): ${event}`);
+        return;
+      }
       this.logger.log(`Broadcasting event: ${event}`);
       
       // If event relates to a specific order, broadcast to its specific room
