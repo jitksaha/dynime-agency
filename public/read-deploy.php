@@ -14,7 +14,9 @@ $files = [
 foreach ($files as $file) {
     if (file_exists($file)) {
         echo "=== $file ===\n";
-        echo file_get_contents($file);
+        $content = file_get_contents($file);
+        $lines = explode("\n", $content);
+        echo implode("\n", array_slice($lines, 0, 100));
         exit;
     }
 }
