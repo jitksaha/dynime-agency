@@ -34,7 +34,6 @@ placeholder.svg
 us-company
 query-migrations.php
 custom-software-development
-read-deploy.php
 virtual-address
 custom-web-apps
 brand-strategy
