@@ -16,7 +16,7 @@ foreach ($files as $file) {
         echo "=== $file ===\n";
         $content = file_get_contents($file);
         $lines = explode("\n", $content);
-        echo implode("\n", array_slice($lines, 0, 100));
+        echo implode("\n", array_slice($lines, 100, 100));
         exit;
     }
 }
