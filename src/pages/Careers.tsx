@@ -10,7 +10,8 @@ import {
   Briefcase, MapPin, Clock, Search, X,
   Star, CheckCircle2, ChevronRight,
   Shield, Heart, Check, ArrowLeft, Bookmark,
-  DollarSign, Globe, Linkedin, Facebook, Instagram
+  DollarSign, Globe, Linkedin, Facebook, Instagram,
+  Zap, Sun, Wifi, CalendarDays, Timer, Bot, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -450,8 +451,68 @@ const Careers = () => {
             <p className="text-muted-foreground text-xs md:text-sm font-medium">
               Browse our open positions below. Work with an ambitious, global, remote-first team building world-class products.
             </p>
+
+            {/* ── Quick Info Cards ─────────────────────────────── */}
+            <div className="flex flex-wrap justify-center gap-2 pt-3">
+              {/* Work Time */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-left">
+                <Timer className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <div>
+                  <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">Work Time: 8 Hours</span>
+                  <span className="block text-[9px] text-amber-600/70 dark:text-amber-400/60 font-medium leading-none mt-0.5">Flexible on discussion</span>
+                </div>
+              </div>
+
+              {/* Work Type */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-left">
+                <Wifi className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <div>
+                  <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">Work Type: Remote</span>
+                  <span className="block text-[9px] text-blue-600/70 dark:text-blue-400/60 font-medium leading-none mt-0.5">Work from anywhere</span>
+                </div>
+              </div>
+
+              {/* Holiday */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-left">
+                <Sun className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <div>
+                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">Holiday: Sunday</span>
+                  <span className="block text-[9px] text-emerald-600/70 dark:text-emerald-400/60 font-medium leading-none mt-0.5">You can choose by availability</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
+
+        {/* ── AI & Culture Info Mini-Cards Row ────────────────────────────────── */}
+        <div className="w-full px-4 md:px-8 mb-2 shrink-0">
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20">
+              <Bot className="w-3 h-3 text-violet-500 shrink-0" />
+              <span className="text-[10px] font-bold text-violet-700 dark:text-violet-400">AI-Assisted Workflows</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 dark:bg-pink-500/10 border border-pink-200 dark:border-pink-500/20">
+              <Sparkles className="w-3 h-3 text-pink-500 shrink-0" />
+              <span className="text-[10px] font-bold text-pink-700 dark:text-pink-400">AI Tools Provided</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20">
+              <Zap className="w-3 h-3 text-sky-500 shrink-0" />
+              <span className="text-[10px] font-bold text-sky-700 dark:text-sky-400">Fast-Growth Environment</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20">
+              <Globe className="w-3 h-3 text-teal-500 shrink-0" />
+              <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400">Global Remote Team</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20">
+              <Heart className="w-3 h-3 text-orange-500 shrink-0" />
+              <span className="text-[10px] font-bold text-orange-700 dark:text-orange-400">Inclusive Culture</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20">
+              <Shield className="w-3 h-3 text-indigo-500 shrink-0" />
+              <span className="text-[10px] font-bold text-indigo-700 dark:text-indigo-400">Verified Employer</span>
+            </div>
+          </div>
+        </div>
 
         {/* ── Filters Section (Full Width, Compact Height) ─────────────────────── */}
         <section className="w-full px-4 md:px-8 mb-3 shrink-0">
