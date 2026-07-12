@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSyncedJobs } from "@/hooks/use-cms-data";
 import { type SyncedJob } from "@/lib/api";
 import Layout from "@/components/layout/Layout";
@@ -104,10 +105,11 @@ const JobDetailModal = ({ job, onClose }: { job: SyncedJob; onClose: () => void 
     { href: "https://instagram.com/thedynime", Icon: Instagram, label: "Instagram", color: "text-[#e1306c]" },
   ];
 
-  return (
-    /* Fixed overlay — always centered on viewport, never tied to scroll position */
+  return createPortal(
+    /* Rendered directly on document.body via portal — bypasses any parent overflow/transform */
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-6 bg-black/50 backdrop-blur-sm"
+      style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       {/* Modal container — 80% viewport width, max 960px, 88% viewport height */}
@@ -241,7 +243,8 @@ const JobDetailModal = ({ job, onClose }: { job: SyncedJob; onClose: () => void 
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 };
 
