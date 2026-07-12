@@ -108,6 +108,7 @@ const VerifyOrder = lazy(() => import("./pages/VerifyOrder.tsx"));
 const VerifyOrderMockFlow = lazy(() => import("./pages/VerifyOrderMockFlow.tsx"));
 const Maintenance = lazy(() => import("./pages/Maintenance.tsx"));
 const StudentProgram = lazy(() => import("./pages/StudentProgram.tsx"));
+const EmployeeHandbook = lazy(() => import("./pages/EmployeeHandbook.tsx"));
 
 // Investor Portal (lazy)
 const InvestorLogin = lazy(() => import("./pages/investor-portal/InvestorLogin.tsx"));
@@ -307,6 +308,7 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/careers/:slug" element={<CareerDetail />} />
+                  <Route path="/internal/handbook" element={<EmployeeHandbook />} />
                   <Route path="/page/:slug" element={<DynamicPage />} />
                   <Route path="/usa-business-formation" element={<USAFormation />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
