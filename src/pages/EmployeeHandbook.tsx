@@ -313,9 +313,9 @@ const EmployeeHandbook = () => {
         <div className="container-custom flex gap-0 relative">
 
           {/* ── LEFT STICKY SIDEBAR ─────────────────────── */}
-          <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0">
-            {/* This inner div is the sticky one */}
-            <div className="sticky top-16 md:top-[72px] h-[calc(100vh-72px)] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm">
+          {/* self-start is REQUIRED: flex items stretch by default, preventing sticky from activating */}
+          <aside className="hidden md:block w-64 lg:w-72 shrink-0 self-start sticky top-16 md:top-[72px]">
+            <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-72px)] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm">
 
               {/* Search */}
               <div className="px-3 pt-4 pb-2 shrink-0">
