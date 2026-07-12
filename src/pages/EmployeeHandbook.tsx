@@ -183,18 +183,20 @@ const PTable = ({ rows }: { rows: [string, string][] }) => (
 const ChapterHero = ({ ch }: { ch: Chapter }) => {
   const Icon = ch.icon;
   return (
-    <div className={`relative rounded-2xl overflow-hidden mb-8 p-6 bg-gradient-to-br ${ch.gradient}`}>
-      {/* decorative circles */}
-      <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/10" />
-      <div className="absolute -right-2 -bottom-10 w-24 h-24 rounded-full bg-white/5" />
-      <div className="relative flex items-center gap-5">
-        <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg shrink-0">
-          <Icon className="w-7 h-7 text-white" />
-        </div>
-        <div>
-          <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-0.5">Chapter {ch.number}</p>
-          <h2 className="text-white font-heading font-extrabold text-2xl leading-tight">{ch.title}</h2>
-        </div>
+    <div className="relative rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm mb-8 p-5 flex items-center gap-4.5 shadow-sm overflow-hidden">
+      {/* Subtle visual color accent bar on the left */}
+      <div className={`absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b ${ch.gradient}`} />
+      
+      {/* Colored soft badge for the icon */}
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+        accentBg[ch.accent]?.split(" ")[0] || "bg-primary/10"
+      } ${accentBg[ch.accent]?.split(" ")[2] || "text-primary"}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+
+      <div>
+        <p className="text-muted-foreground/60 text-[9px] font-black uppercase tracking-[0.15em] mb-0.5">Chapter {ch.number}</p>
+        <h2 className="text-foreground font-heading font-bold text-[18px] leading-tight">{ch.title}</h2>
       </div>
     </div>
   );
@@ -407,25 +409,26 @@ const EmployeeHandbook = () => {
       <div className="min-h-screen bg-muted/20">
 
         {/* ── Banner ─────────────────────────────────────── */}
-        <div className="relative overflow-hidden border-b border-border/40 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
-          <div className="absolute -bottom-10 -left-10 w-60 h-60 rounded-full bg-white/5" />
-          <div className="container-custom relative py-10 flex flex-col sm:flex-row sm:items-center gap-5">
+        <div className="relative overflow-hidden border-b border-border/60 bg-muted/20">
+          {/* Very soft background glow accent */}
+          <div className="absolute top-0 right-0 w-[400px] h-[300px] rounded-full bg-primary/5 blur-[80px]" />
+          
+          <div className="container-custom relative py-8 flex flex-col sm:flex-row sm:items-center gap-5">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Lock className="w-3.5 h-3.5 text-white/60" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">Confidential · Internal Use Only</span>
+              <div className="flex items-center gap-2 mb-1.5">
+                <Lock className="w-3.5 h-3.5 text-muted-foreground/60" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Confidential · Internal Use Only</span>
               </div>
-              <h1 className="font-heading font-extrabold text-3xl md:text-4xl text-white leading-tight mb-1.5">
+              <h1 className="font-heading font-extrabold text-2xl md:text-3xl text-foreground leading-tight mb-1">
                 Dynime Employee Handbook
               </h1>
-              <p className="text-white/70 text-sm font-medium">Culture · People · Policies · Version 1.0 · July 2026</p>
+              <p className="text-muted-foreground text-xs font-semibold">Culture · People · Policies · Version 1.0 · July 2026</p>
             </div>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2.5 flex-wrap">
               {[["22+","Chapters"],["40+","Policies"],["2026","Edition"]].map(([n,l]) => (
-                <div key={l} className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5 text-center border border-white/20">
-                  <p className="text-white font-black text-xl leading-none">{n}</p>
-                  <p className="text-white/60 text-[10px] font-semibold mt-0.5">{l}</p>
+                <div key={l} className="bg-background/80 dark:bg-muted/20 border border-border/50 rounded-xl px-4.5 py-2 text-center min-w-[85px] shadow-sm">
+                  <p className="text-foreground font-black text-[16px] leading-none">{n}</p>
+                  <p className="text-muted-foreground/75 text-[9px] font-bold uppercase tracking-wider mt-0.5">{l}</p>
                 </div>
               ))}
             </div>
