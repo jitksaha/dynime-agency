@@ -202,10 +202,10 @@ const ChapterHero = ({ ch }: { ch: Chapter }) => {
 
 // ─── Mobile TOC Portal ────────────────────────────────────────────
 const MobileTOCDrawer = ({
-  open, onClose, chapters, activeId, onNav, search, setSearch
+  open, onClose, chapters, activeId, activeSubId, onNav, search, setSearch
 }: {
   open: boolean; onClose: () => void; chapters: Chapter[];
-  activeId: string; onNav: (id: string) => void;
+  activeId: string; activeSubId: string; onNav: (id: string) => void;
   search: string; setSearch: (v: string) => void;
 }) => {
   if (!open) return null;
@@ -224,7 +224,7 @@ const MobileTOCDrawer = ({
               className="w-full h-8 pl-8 pr-3 rounded-lg border border-border/60 bg-muted/30 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30" />
           </div>
         </div>
-        <TOCItems chapters={chapters} activeId={activeId} onNav={(id) => { onNav(id); onClose(); }} />
+        <TOCItems chapters={chapters} activeId={activeId} activeSubId={activeSubId} onNav={(id) => { onNav(id); onClose(); }} />
       </aside>
     </div>,
     document.body
@@ -232,7 +232,11 @@ const MobileTOCDrawer = ({
 };
 
 // ─── TOC Item List ────────────────────────────────────────────────
-const TOCItems = ({ chapters, activeId, onNav }: { chapters: Chapter[]; activeId: string; onNav: (id: string) => void }) => (
+const TOCItems = ({
+  chapters, activeId, activeSubId, onNav
+}: {
+  chapters: Chapter[]; activeId: string; activeSubId: string; onNav: (id: string) => void;
+}) => (
   <div className="flex flex-col px-3 py-2 pb-10">
     {chapters.map(ch => {
       const Icon = ch.icon;
@@ -241,6 +245,7 @@ const TOCItems = ({ chapters, activeId, onNav }: { chapters: Chapter[]; activeId
         <div key={ch.id} className="mb-0.5">
           {/* Chapter row */}
           <button
+            id={`toc-${ch.id}`}
             onClick={() => onNav(ch.id)}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all duration-150 group relative overflow-hidden ${
               isActive
@@ -284,17 +289,28 @@ const TOCItems = ({ chapters, activeId, onNav }: { chapters: Chapter[]; activeId
             <div className="ml-[42px] my-1 relative">
               {/* Vertical connector line */}
               <div className="absolute left-0 top-0 bottom-0 w-px bg-border/60" />
-              <div className="flex flex-col pl-3">
-                {ch.sections.map(s => (
-                  <button
-                    key={s.id}
-                    onClick={() => onNav(s.id)}
-                    className="group text-left text-[10.5px] text-muted-foreground/70 hover:text-primary py-[5px] px-2 rounded-md hover:bg-primary/5 transition-all leading-snug flex items-center gap-1.5"
-                  >
-                    <span className="w-1 h-1 rounded-full bg-muted-foreground/30 group-hover:bg-primary/50 shrink-0 transition-colors" />
-                    {s.title}
-                  </button>
-                ))}
+              <div className="flex flex-col pl-3 space-y-0.5">
+                {ch.sections.map(s => {
+                  const isActiveSub = activeSubId === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => onNav(s.id)}
+                      className={`group text-left text-[12px] py-1.5 px-2.5 rounded-md transition-all leading-snug flex items-center gap-2 ${
+                        isActiveSub
+                          ? "text-primary font-semibold bg-primary/5"
+                          : "text-muted-foreground/75 hover:text-primary hover:bg-primary/5"
+                      }`}
+                    >
+                      <ChevronRight className={`w-3 h-3 shrink-0 transition-transform ${
+                        isActiveSub
+                          ? "text-primary translate-x-0.5"
+                          : "text-muted-foreground/30 group-hover:text-primary/70"
+                      }`} />
+                      <span>{s.title}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -310,6 +326,7 @@ const TOCItems = ({ chapters, activeId, onNav }: { chapters: Chapter[]; activeId
 // ═════════════════════════════════════════════════════════════════
 const EmployeeHandbook = () => {
   const [activeId, setActiveId] = useState("ch1");
+  const [activeSubId, setActiveSubId] = useState("");
   const [search, setSearch] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrollTop, setScrollTop] = useState(false);
@@ -323,15 +340,48 @@ const EmployeeHandbook = () => {
     );
   }, [search]);
 
+  // Scroll active chapter into view in sidebar
+  useEffect(() => {
+    const tocEl = document.getElementById(`toc-${activeId}`);
+    if (tocEl) {
+      tocEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [activeId]);
+
+  // Combined Scroll Spy: Updates active chapter and active sub-section dynamically
   useEffect(() => {
     const onScroll = () => {
       setScrollTop(window.scrollY > 500);
-      for (const ch of [...CHAPTERS].reverse()) {
+
+      let currentChId = "ch1";
+      let currentSubId = "";
+
+      for (const ch of CHAPTERS) {
         const el = document.getElementById(ch.id);
-        if (el && el.getBoundingClientRect().top <= 100) { setActiveId(ch.id); break; }
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 140) {
+            currentChId = ch.id;
+          }
+        }
+
+        for (const s of ch.sections) {
+          const subEl = document.getElementById(s.id);
+          if (subEl) {
+            const rect = subEl.getBoundingClientRect();
+            if (rect.top <= 140) {
+              currentSubId = s.id;
+            }
+          }
+        }
       }
+
+      setActiveId(currentChId);
+      setActiveSubId(currentSubId);
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll(); // initial run
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -396,8 +446,8 @@ const EmployeeHandbook = () => {
               <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-5 pb-1 shrink-0">Table of Contents</div>
 
               {/* Scrollable TOC list */}
-              <div className="flex-1 overflow-y-auto">
-                <TOCItems chapters={filtered} activeId={activeId} onNav={navTo} />
+              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <TOCItems chapters={filtered} activeId={activeId} activeSubId={activeSubId} onNav={navTo} />
               </div>
             </div>
           </aside>
@@ -414,7 +464,7 @@ const EmployeeHandbook = () => {
             </button>
 
             <MobileTOCDrawer open={mobileOpen} onClose={() => setMobileOpen(false)}
-              chapters={filtered} activeId={activeId} onNav={navTo} search={search} setSearch={setSearch} />
+              chapters={filtered} activeId={activeId} activeSubId={activeSubId} onNav={navTo} search={search} setSearch={setSearch} />
 
             {/* ════ CH 1 — Welcome ═══════════════════════════ */}
             <article id="ch1" className="scroll-mt-20 mb-20">

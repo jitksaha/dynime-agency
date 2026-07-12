@@ -608,11 +608,11 @@ body { top: 0 !important; position: static !important; }
 /* Apple-style route entrance — subtle fade + lift + de-blur */
 @keyframes appleRouteEnter {
   0%   { opacity: 0; transform: translateY(6px); filter: blur(2px); }
-  100% { opacity: 1; transform: translateY(0);   filter: blur(0);  }
+  100% { opacity: 1; transform: none; filter: none; }
 }
 .route-enter {
-  animation: appleRouteEnter 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  will-change: opacity, transform, filter;
+  animation: appleRouteEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity;
 }
 @media (prefers-reduced-motion: reduce) {
   .route-enter { animation: none !important; }
