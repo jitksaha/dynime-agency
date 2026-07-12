@@ -308,7 +308,7 @@ const App = () => (
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/careers/:slug" element={<CareerDetail />} />
-                  <Route path="/internal/handbook" element={<EmployeeHandbook />} />
+                  <Route path="/handbook" element={<EmployeeHandbook />} />
                   <Route path="/page/:slug" element={<DynamicPage />} />
                   <Route path="/usa-business-formation" element={<USAFormation />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />

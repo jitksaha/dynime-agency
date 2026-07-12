@@ -187,6 +187,21 @@ const dotMap: Record<string, string> = {
   red:"bg-red-500",gray:"bg-gray-500",green:"bg-green-500",
 };
 
+// ─── Chapter Header Component (defined before EmployeeHandbook so const is available)
+// ─────────────────────────────────────────────────────────────────────────────────
+const ChapterHeader = ({ number, title, color, icon: Icon }: { number: string; title: string; color: string; icon: React.ElementType }) => (
+  <div className={`flex items-center gap-4 p-5 rounded-2xl border ${colorMap[color]} mb-6`}>
+    <div className={`w-12 h-12 rounded-xl ${dotMap[color]} flex items-center justify-center shrink-0 shadow-sm`}>
+      <Icon className="w-5 h-5 text-white" />
+    </div>
+    <div>
+      <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Chapter {number}</span>
+      <h2 className="font-heading font-extrabold text-xl leading-snug">{title}</h2>
+    </div>
+  </div>
+);
+
+
 // ─── Callout ──────────────────────────────────────────────────────
 const Callout = ({ type = "note", children }: { type?: "note"|"important"|"warning"; children: React.ReactNode }) => {
   const s = {
@@ -1072,17 +1087,6 @@ const EmployeeHandbook = () => {
   );
 };
 
-// ─── Chapter Header Component ────────────────────────────────────
-const ChapterHeader = ({ number, title, color, icon: Icon }: { number: string; title: string; color: string; icon: React.ElementType }) => (
-  <div className={`flex items-center gap-4 p-5 rounded-2xl border ${colorMap[color]} mb-6`}>
-    <div className={`w-12 h-12 rounded-xl ${dotMap[color]} flex items-center justify-center shrink-0 shadow-sm`}>
-      <Icon className="w-5 h-5 text-white" />
-    </div>
-    <div>
-      <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Chapter {number}</span>
-      <h2 className="font-heading font-extrabold text-xl leading-snug">{title}</h2>
-    </div>
-  </div>
-);
 
 export default EmployeeHandbook;
+
