@@ -309,6 +309,7 @@ const App = () => (
                   <Route path="/careers" element={<Careers />} />
                   <Route path="/careers/:slug" element={<CareerDetail />} />
                   <Route path="/handbook" element={<EmployeeHandbook />} />
+                  <Route path="/internal/handbook" element={<Navigate to="/handbook" replace />} />
                   <Route path="/page/:slug" element={<DynamicPage />} />
                   <Route path="/usa-business-formation" element={<USAFormation />} />
                   <Route path="/unsubscribe" element={<Unsubscribe />} />
