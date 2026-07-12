@@ -425,13 +425,13 @@ const EmployeeHandbook = () => {
               <h1 className="font-heading font-extrabold text-2xl md:text-3xl text-foreground leading-tight mb-1">
                 Dynime Employee Handbook
               </h1>
-              <p className="text-muted-foreground text-xs font-semibold">Culture · People · Policies · Version 1.0 · July 2026</p>
+              <p className="text-muted-foreground text-xs font-semibold">Last Updated: Jul 2026</p>
             </div>
             <div className="flex gap-2.5 flex-wrap">
               {[["22+","Chapters"],["40+","Policies"],["2026","Edition"]].map(([n,l]) => (
-                <div key={l} className="bg-background/80 dark:bg-muted/20 border border-border/50 rounded-xl px-4.5 py-2 text-center min-w-[85px] shadow-sm">
+                <div key={l} className="bg-background/80 dark:bg-muted/20 border border-border/50 rounded-xl px-6 py-3 text-center min-w-[95px] shadow-sm">
                   <p className="text-foreground font-black text-[16px] leading-none">{n}</p>
-                  <p className="text-muted-foreground/75 text-[9px] font-bold uppercase tracking-wider mt-0.5">{l}</p>
+                  <p className="text-muted-foreground/75 text-[9px] font-bold uppercase tracking-wider mt-1">{l}</p>
                 </div>
               ))}
             </div>
