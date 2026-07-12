@@ -183,7 +183,7 @@ const PTable = ({ rows }: { rows: [string, string][] }) => (
 const ChapterHero = ({ ch }: { ch: Chapter }) => {
   const Icon = ch.icon;
   return (
-    <div className="relative rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm mb-8 p-5 flex items-center gap-4.5 shadow-sm overflow-hidden">
+    <div className="relative rounded-2xl border border-border/50 bg-background/50 backdrop-blur-sm mb-8 p-5 pl-7 flex items-center gap-5 shadow-sm overflow-hidden">
       {/* Subtle visual color accent bar on the left */}
       <div className={`absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b ${ch.gradient}`} />
       
