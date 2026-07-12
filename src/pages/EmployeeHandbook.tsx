@@ -330,6 +330,8 @@ const EmployeeHandbook = () => {
   const [search, setSearch] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrollTop, setScrollTop] = useState(false);
+  
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -340,11 +342,20 @@ const EmployeeHandbook = () => {
     );
   }, [search]);
 
-  // Scroll active chapter into view in sidebar
+  // Scroll active chapter into view inside the sidebar container directly, preventing window scroll propagation
   useEffect(() => {
-    const tocEl = document.getElementById(`toc-${activeId}`);
-    if (tocEl) {
-      tocEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const activeEl = document.getElementById(`toc-${activeId}`);
+    const sidebarEl = sidebarRef.current;
+    if (activeEl && sidebarEl) {
+      const activeRect = activeEl.getBoundingClientRect();
+      const sidebarRect = sidebarEl.getBoundingClientRect();
+
+      // Check if active item is out of view (above or below visible container viewport)
+      if (activeRect.top < sidebarRect.top || activeRect.bottom > sidebarRect.bottom) {
+        const offsetTop = activeEl.offsetTop;
+        const targetScrollTop = offsetTop - sidebarEl.clientHeight / 2 + activeEl.clientHeight / 2;
+        sidebarEl.scrollTo({ top: targetScrollTop, behavior: "smooth" });
+      }
     }
   }, [activeId]);
 
@@ -424,10 +435,11 @@ const EmployeeHandbook = () => {
         {/* ── Body: Sidebar + Content ─────────────────────── */}
         <div className="container-custom flex gap-0 relative">
 
-          {/* ── LEFT STICKY SIDEBAR ─────────────────────── */}
-          {/* self-start is REQUIRED: flex items stretch by default, preventing sticky from activating */}
-          <aside className="hidden md:block w-64 lg:w-72 shrink-0 self-start sticky top-16 md:top-[72px]">
-            <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-72px)] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm">
+          {/* ── LEFT FIXED SIDEBAR ─────────────────────── */}
+          {/* We keep the aside element as a static spacer to reserve column space in the layout */}
+          <aside className="hidden md:block w-64 lg:w-72 shrink-0">
+            {/* The inner container is fixed relative to the viewport to guarantee it never scrolls away */}
+            <div className="fixed top-16 md:top-[72px] bottom-0 w-64 lg:w-[288px] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm z-30">
 
               {/* Search */}
               <div className="px-3 pt-4 pb-2 shrink-0">
@@ -446,7 +458,10 @@ const EmployeeHandbook = () => {
               <div className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-5 pb-1 shrink-0">Table of Contents</div>
 
               {/* Scrollable TOC list */}
-              <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div
+                ref={sidebarRef}
+                className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              >
                 <TOCItems chapters={filtered} activeId={activeId} activeSubId={activeSubId} onNav={navTo} />
               </div>
             </div>
