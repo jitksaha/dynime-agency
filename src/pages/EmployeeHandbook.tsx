@@ -10,7 +10,8 @@ import {
   GraduationCap, DollarSign, TrendingUp,
   MessageSquare, ShieldCheck, Monitor, Bot,
   Fingerprint, Scale, AlertOctagon, LogOut,
-  ClipboardCheck, Menu,
+  ClipboardCheck, Menu, Database, HelpCircle,
+  Phone, ListChecks, Crown, Layers, Award,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -75,6 +76,36 @@ const CHAPTERS: Chapter[] = [
   { id:"ch16", number:"16", title:"Employee Acknowledgment", icon:ClipboardCheck,
     gradient:"from-green-500 to-emerald-600", accent:"green",
     sections:[{id:"acknowledgment-statement",title:"Acknowledgment"},{id:"version-history",title:"Version History"}] },
+  { id:"ch21", number:"21", title:"Data Privacy & Records", icon:Database,
+    gradient:"from-cyan-500 to-teal-600", accent:"teal",
+    sections:[{id:"dp-purpose",title:"Purpose"},{id:"privacy-principles",title:"Privacy Principles"},{id:"personal-info",title:"Personal Information"},{id:"data-collection",title:"Data Collection"},{id:"data-access",title:"Access & Accuracy"},{id:"secure-storage",title:"Secure Storage"},{id:"data-retention",title:"Retention & Disposal"},{id:"records-management",title:"Records Management"},{id:"data-breaches-dp",title:"Data Breaches"}] },
+  { id:"ch22", number:"22", title:"Business Continuity & Compliance", icon:ShieldCheck,
+    gradient:"from-slate-600 to-zinc-700", accent:"slate",
+    sections:[{id:"bc-purpose",title:"Purpose"},{id:"business-continuity",title:"Business Continuity"},{id:"incident-mgmt",title:"Incident Management"},{id:"compliance-laws",title:"Compliance with Laws"},{id:"anti-fraud-comp",title:"Anti-Fraud & Corruption"},{id:"sanctions",title:"Sanctions & Trade"},{id:"audits",title:"Audits"},{id:"decision-framework",title:"Decision Framework"},{id:"crisis-comms",title:"Crisis Communication"}] },
+  { id:"dynime-way", number:"★", title:"The Dynime Way", icon:Zap,
+    gradient:"from-violet-600 to-indigo-700", accent:"violet",
+    sections:[{id:"dw-principles",title:"Operating Principles"},{id:"dw-how",title:"How We Work"}] },
+  { id:"leadership", number:"★", title:"Leadership Principles", icon:Crown,
+    gradient:"from-amber-500 to-orange-600", accent:"amber",
+    sections:[{id:"lp-principles",title:"Core Leadership Principles"},{id:"lp-managers",title:"What Great Managers Do"}] },
+  { id:"standard", number:"★", title:"The Dynime Standard", icon:Award,
+    gradient:"from-emerald-500 to-green-600", accent:"emerald",
+    sections:[{id:"quality-checklist",title:"Quality Checklist"},{id:"standard-why",title:"Why Standards Matter"}] },
+  { id:"faqs", number:"★", title:"FAQs", icon:HelpCircle,
+    gradient:"from-sky-500 to-blue-600", accent:"sky",
+    sections:[{id:"faq-work",title:"Working at Dynime"},{id:"faq-policy",title:"Policy Questions"},{id:"faq-tech",title:"Technology & AI"}] },
+  { id:"app-a", number:"A", title:"Appendix A — Quick Contacts", icon:Phone,
+    gradient:"from-rose-500 to-pink-600", accent:"rose",
+    sections:[] },
+  { id:"app-b", number:"B", title:"Appendix B — Quick Reference", icon:FileText,
+    gradient:"from-blue-500 to-indigo-600", accent:"blue",
+    sections:[] },
+  { id:"app-c", number:"C", title:"Appendix C — Glossary", icon:BookOpen,
+    gradient:"from-purple-500 to-violet-600", accent:"purple",
+    sections:[] },
+  { id:"app-d", number:"D", title:"Appendix D — First Week Checklist", icon:ListChecks,
+    gradient:"from-green-500 to-teal-600", accent:"green",
+    sections:[] },
 ];
 
 // ─── Accent helpers ───────────────────────────────────────────────
@@ -330,7 +361,7 @@ const EmployeeHandbook = () => {
               <p className="text-white/70 text-sm font-medium">Culture · People · Policies · Version 1.0 · July 2026</p>
             </div>
             <div className="flex gap-3 flex-wrap">
-              {[["16","Chapters"],["25+","Policies"],["2026","Edition"]].map(([n,l]) => (
+              {[["22+","Chapters"],["40+","Policies"],["2026","Edition"]].map(([n,l]) => (
                 <div key={l} className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5 text-center border border-white/20">
                   <p className="text-white font-black text-xl leading-none">{n}</p>
                   <p className="text-white/60 text-[10px] font-semibold mt-0.5">{l}</p>
@@ -697,6 +728,388 @@ const EmployeeHandbook = () => {
                   <span className="text-[10px] text-muted-foreground font-semibold">Dynime LLC · All Rights Reserved</span>
                 </div>
               </div>
+            </article>
+
+            {/* ════ CH 21 — Data Privacy & Records ══════════ */}
+            <article id="ch21" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="ch21")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-5">At Dynime, we are entrusted with information that belongs to our employees, clients, partners, and the company. Protecting that information is a shared responsibility. Every employee who collects, accesses, stores, shares, or manages data must do so responsibly, securely, and in accordance with company policies and applicable laws.</p>
+              <SH id="dp-purpose">Purpose</SH>
+              <BList items={["Protect personal and business information","Support compliance with applicable privacy and data protection laws","Establish responsible data management practices","Minimize security and privacy risks","Ensure business records remain accurate, available, and secure"]} />
+              <SH id="privacy-principles">Our Privacy Principles</SH>
+              <div className="grid md:grid-cols-2 gap-3 my-5">
+                {["Collect only what is necessary","Use information only for legitimate business purposes","Keep information accurate and up to date","Protect information with appropriate security measures","Share information only when authorized","Retain information only as long as necessary","Dispose of information securely when no longer required"].map((p,i)=>(
+                  <div key={i} className="flex items-start gap-3 p-3.5 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-900/40">
+                    <Check className="w-4 h-4 text-teal-500 shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground/80">{p}</span>
+                  </div>
+                ))}
+              </div>
+              <SH id="personal-info">Personal & Business Information</SH>
+              <div className="grid md:grid-cols-2 gap-4 my-4">
+                {[
+                  {title:"Personal Information",items:["Full name & contact details","Email address & telephone number","Date of birth","Government-issued identification","Banking information","Employment & payroll records","Emergency contacts","Performance records"]},
+                  {title:"Business Information",items:["Client records & contracts","Financial reports","Internal documentation","Sales & marketing plans","Operational procedures","Project documentation","Technical documentation","Business correspondence"]},
+                ].map(c=>(
+                  <div key={c.title} className="rounded-xl border border-border/50 bg-background p-5 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{c.title}</p>
+                    <BList items={c.items} />
+                  </div>
+                ))}
+              </div>
+              <SH id="data-collection">Data Collection</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">Employees should collect only the information necessary to perform legitimate business activities. Before collecting information, consider:</p>
+              <BList items={["Why is the information needed?","Is the collection appropriate and is there a business purpose?","Can the objective be achieved with less information?","Collecting unnecessary information increases privacy and security risks"]} />
+              <SH id="data-access">Access to Information & Data Accuracy</SH>
+              <Callout type="important">Access should be based on the principle of least privilege. Employees should only access information necessary for their responsibilities.</Callout>
+              <BList items={["Do not browse records out of curiosity","Do not access information unrelated to your role","Never share credentials or attempt to bypass access controls","Managers should regularly review access permissions for their teams","Make reasonable efforts to keep records accurate, complete, and current"]} />
+              <SH id="secure-storage">Secure Storage & Sharing</SH>
+              <PTable rows={[["Avoid","Personal cloud storage, personal email, unauthorized messaging apps, unapproved devices"],["Use","Company-approved systems with proper security, backup, and access management"],["Before Sharing","Verify recipient is authorized, method is secure, and confidentiality is maintained"],["Minimum Info","Share the minimum amount of information required to achieve the business purpose"],["International Transfers","Implement appropriate safeguards; consult management before transfers to new systems"]]} />
+              <SH id="data-retention">Data Retention & Secure Disposal</SH>
+              <div className="my-5 rounded-xl overflow-hidden border border-border/50 shadow-sm">
+                <table className="w-full text-sm">
+                  <thead><tr className="bg-teal-50 dark:bg-teal-950/40 border-b border-border/40"><th className="py-2.5 px-4 text-left font-bold text-foreground/80">Record Type</th><th className="py-2.5 px-4 text-left font-bold text-foreground/80">Typical Retention</th></tr></thead>
+                  <tbody>
+                    {[["Employment Records","As required by applicable law and company policy"],["Payroll Records","As required by applicable law"],["Financial Records","As required by applicable law and accounting standards"],["Client Contracts","During the contract term and applicable retention period"],["Project Documentation","According to business needs and contractual obligations"],["Security Logs","According to operational and security requirements"]].map(([r,v],i)=>(
+                      <tr key={i} className={`border-b border-border/30 last:border-0 ${i%2===0?"bg-muted/20":"bg-background"}`}><td className="py-2.5 px-4 font-semibold text-foreground/90 border-r border-border/30">{r}</td><td className="py-2.5 px-4 text-foreground/70">{v}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Callout type="note">Retention periods may vary based on applicable laws, contractual obligations, and regulatory requirements. The company may update retention schedules from time to time.</Callout>
+              <SH id="records-management">Records Management</SH>
+              <BList items={["Business records should be accurate, organized, and readily available when needed","Protected against unauthorized access and retained according to company requirements","Examples: employment records, contracts, financial records, project & technical documentation","Company emails may form part of official business records — retain important correspondence","Good records management supports transparency, compliance, and operational continuity"]} />
+              <SH id="data-breaches-dp">Data Breaches & Employee Responsibilities</SH>
+              <Callout type="warning">If you suspect that personal or confidential information has been lost, stolen, accessed without authorization, or shared incorrectly — report it immediately per the Information Security Policy. Prompt reporting enables the company to respond quickly and reduce potential impact.</Callout>
+              <div className="grid md:grid-cols-2 gap-4 my-4">
+                {[
+                  {title:"Every Employee Must",items:["Protect personal information","Keep records accurate","Follow company privacy policies","Use approved systems","Report security incidents","Respect confidentiality","Dispose of information securely"]},
+                  {title:"Managers Must Ensure Teams",items:["Understand privacy requirements","Follow data handling procedures","Maintain appropriate records","Review access permissions periodically","Report significant privacy concerns promptly"]},
+                ].map(c=>(
+                  <div key={c.title} className="rounded-xl border border-border/50 bg-background p-5 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{c.title}</p>
+                    <BList items={c.items} />
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 rounded-2xl border-2 border-teal-200 dark:border-teal-800/60 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 p-6">
+                <p className="font-bold text-sm text-foreground mb-3">Summary — When Handling Information:</p>
+                {["Collect only what you need","Access only what you are authorized to use","Store information securely","Share responsibly","Retain records appropriately","Dispose of information securely","Report concerns immediately"].map((item,i)=>(
+                  <div key={i} className="flex items-center gap-2.5 py-1.5"><Check className="w-4 h-4 text-teal-500 shrink-0" /><span className="text-sm text-foreground/80">{item}</span></div>
+                ))}
+              </div>
+            </article>
+
+            {/* ════ CH 22 — Business Continuity & Compliance ═ */}
+            <article id="ch22" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="ch22")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-5">Dynime is committed to operating responsibly, ethically, and consistently, even during unexpected events. Whether facing a technology outage, natural disaster, cybersecurity incident, or regulatory change, our goal is to continue serving our clients while protecting our employees, information, and business operations.</p>
+              <SH id="bc-purpose">Purpose</SH>
+              <BList items={["Support uninterrupted business operations","Prepare employees for unexpected disruptions","Promote compliance with applicable laws and regulations","Encourage ethical decision-making","Protect clients, employees, and company assets","Maintain trust during challenging situations"]} />
+              <SH id="business-continuity">Business Continuity</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">Potential disruptions may include:</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 my-4">
+                {["Internet Outages","Power Failures","Cybersecurity Incidents","Cloud Service Interruptions","Natural Disasters","Public Health Emergencies","Civil Disturbances","Loss of Key Personnel","Hardware Failures"].map(s=>(
+                  <div key={s} className="text-xs font-semibold px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 text-foreground/80">{s}</div>
+                ))}
+              </div>
+              <div className="grid md:grid-cols-2 gap-4 my-4">
+                {[
+                  {title:"During Disruptions, Employees Should",items:["Prioritize personal safety","Notify manager if unable to work","Follow emergency communication instructions","Protect company equipment and information","Continue working using approved alternative methods","Report significant operational issues promptly"]},
+                  {title:"Remote Work Continuity — Be Prepared",items:["Maintain a reliable internet connection","Have backup internet options where feasible","Keep access to company systems current","Maintain updated contact information","Access to approved communication platforms"]},
+                ].map(c=>(
+                  <div key={c.title} className="rounded-xl border border-border/50 bg-background p-5 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{c.title}</p>
+                    <BList items={c.items} />
+                  </div>
+                ))}
+              </div>
+              <SH id="incident-mgmt">Incident Management</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">Immediately report incidents that may significantly affect business operations:</p>
+              <BList items={["Security incidents and system outages","Data breaches and loss of company equipment","Service disruptions and safety concerns","Legal notices, major client issues"]} />
+              <SH id="compliance-laws">Compliance with Laws & Ethical Business Practices</SH>
+              <PTable rows={[["Employment","Follow applicable employment laws in your jurisdiction"],["Privacy","Comply with applicable data protection regulations"],["Intellectual Property","Respect IP rights; do not infringe third-party IP"],["Anti-Corruption","Zero tolerance for bribery or improper payments"],["Information Security","Follow company security policies and applicable regulations"],["Tax Obligations","Comply with applicable tax laws where relevant"],["Consumer Protection","Conduct business fairly and transparently"]]} />
+              <SH id="anti-fraud-comp">Anti-Fraud & Anti-Corruption</SH>
+              <Callout type="warning">Fraud and corruption in any form are strictly prohibited and may result in immediate termination and referral to legal authorities.</Callout>
+              <div className="grid md:grid-cols-2 gap-4 my-4">
+                {[
+                  {title:"Fraud Includes",items:["Falsifying records","Misappropriating company funds","Expense fraud and payroll fraud","Identity fraud and forgery","Unauthorized financial transactions"]},
+                  {title:"Corruption — Never",items:["Offer or accept bribes","Provide unlawful incentives","Attempt to influence decisions through unethical means","Engage in improper payments","Conduct business outside professional integrity"]},
+                ].map(c=>(
+                  <div key={c.title} className="rounded-xl border border-border/50 bg-background p-5 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{c.title}</p>
+                    <BList items={c.items} />
+                  </div>
+                ))}
+              </div>
+              <SH id="sanctions">Sanctions & International Trade</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed">Because Dynime may serve international clients, employees should ensure that business activities comply with applicable sanctions, export controls, and international trade restrictions. Do not enter into business relationships that violate applicable legal restrictions. Questions should be directed to management before proceeding.</p>
+              <SH id="audits">Regulatory Cooperation & Audits</SH>
+              <BList items={["Forward legal notices, subpoenas, or regulatory inquiries promptly to company leadership","Do not respond independently to official legal requests without authorization unless legally required","Cooperate honestly during internal or external audits","Provide accurate information and maintain requested records during audits","Audits help improve operations and strengthen accountability"]} />
+              <SH id="decision-framework">Ethical Decision-Making Framework</SH>
+              <div className="my-5 rounded-2xl bg-gradient-to-br from-slate-50 to-zinc-50 dark:from-slate-900/40 dark:to-zinc-900/40 border border-border/50 p-6">
+                <p className="font-bold text-sm text-foreground mb-4">When uncertain whether an action is appropriate, ask:</p>
+                {["Is it legal?","Is it ethical?","Does it comply with company policy?","Would I be comfortable explaining this decision to a client, my manager, or my colleagues?","Could this damage Dynime's reputation?","Does it align with our values?"].map((q,i)=>(
+                  <div key={i} className="flex items-start gap-3 py-1.5">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">{i+1}</span>
+                    <span className="text-sm text-foreground/80">{q}</span>
+                  </div>
+                ))}
+                <Callout type="warning">If the answer to any question is <strong>No</strong> or <strong>I'm not sure</strong> — stop and seek guidance before proceeding.</Callout>
+              </div>
+              <SH id="crisis-comms">Crisis Communication</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed">During significant business disruptions, only authorized spokespersons may communicate with clients, media, government authorities, investors, and the public. Employees should avoid sharing unofficial information or speculation regarding ongoing incidents. Accurate communication protects both the company and our stakeholders.</p>
+              <div className="mt-8 rounded-2xl border-2 border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/30 p-6">
+                <p className="font-bold text-sm text-foreground mb-3">When Facing Uncertainty:</p>
+                {["Protect people first","Protect information","Follow company procedures","Report incidents promptly","Act ethically","Ask for guidance when unsure","Help maintain business continuity"].map((item,i)=>(
+                  <div key={i} className="flex items-center gap-2.5 py-1.5"><Check className="w-4 h-4 text-primary shrink-0" /><span className="text-sm text-foreground/80">{item}</span></div>
+                ))}
+              </div>
+            </article>
+
+            {/* ════ THE DYNIME WAY ════════════════════════════ */}
+            <article id="dynime-way" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="dynime-way")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">The Dynime Way is not a rule book. It is how we think, how we work, and how we make decisions every day. These operating principles define our culture and reflect what we believe makes great work possible.</p>
+              <SH id="dw-principles">Our 10 Operating Principles</SH>
+              <div className="grid md:grid-cols-2 gap-4 my-5">
+                {[
+                  {num:"01",title:"We Own Outcomes",desc:"We take responsibility for the result, not just the task. We follow through, we own our work end-to-end, and we do not pass blame when things go wrong."},
+                  {num:"02",title:"We Move Fast, Responsibly",desc:"Speed matters. But not at the cost of quality, security, or our clients' trust. We move with purpose and make thoughtful decisions quickly."},
+                  {num:"03",title:"We Think Long-Term",desc:"We build things that last. Short-term gains that compromise long-term trust are never worth it. We optimize for sustainability."},
+                  {num:"04",title:"We Protect Trust",desc:"Trust is the foundation of every client relationship. Once broken, it is extremely difficult to rebuild. We protect it with our behavior."},
+                  {num:"05",title:"We Build Quality",desc:"Mediocre work is never acceptable. We take pride in what we deliver. Every output should reflect the Dynime Standard."},
+                  {num:"06",title:"We Document Everything",desc:"A great idea that is not documented is eventually a lost idea. We write things down clearly, so the whole team can benefit."},
+                  {num:"07",title:"We Learn Continuously",desc:"Technology, business, and the world evolve. The team that learns fastest wins. We read, experiment, share, and grow."},
+                  {num:"08",title:"We Respect Everyone",desc:"Every person deserves dignity. Regardless of role, location, background, or seniority — respect is non-negotiable at Dynime."},
+                  {num:"09",title:"We Solve Problems",desc:"We do not just raise problems. We come prepared with potential solutions, context, and a willingness to find the right path forward."},
+                  {num:"10",title:"We Leave Things Better",desc:"When we touch a process, a codebase, a client relationship, or a system — we leave it better than we found it. Always."},
+                ].map(p=>(
+                  <div key={p.num} className="group rounded-2xl border border-border/50 bg-background hover:shadow-md transition-shadow p-5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-violet-500 to-indigo-600 rounded-l-2xl" />
+                    <div className="pl-2">
+                      <span className="text-[10px] font-black text-muted-foreground/50 tracking-widest">{p.num}</span>
+                      <p className="font-heading font-bold text-[13.5px] text-foreground mt-0.5 mb-2">{p.title}</p>
+                      <p className="text-xs text-foreground/65 leading-relaxed">{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <SH id="dw-how">How We Bring the Dynime Way to Life</SH>
+              <BList items={["Start every project by clearly understanding the outcome, not just the task","Ask 'does this reflect the Dynime Standard?' before submitting any work","Document decisions, processes, and key learnings in real time","Share what you learn — write it down so others benefit","When in doubt, choose the path that protects trust","Treat every client interaction as a reflection of our values","Celebrate team wins and learn openly from setbacks"]} />
+            </article>
+
+            {/* ════ LEADERSHIP PRINCIPLES ══════════════════════ */}
+            <article id="leadership" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="leadership")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">Leadership at Dynime is not defined by a job title. It is defined by how you show up — for your team, your clients, and the company. These principles apply to everyone who leads others, whether formally or informally.</p>
+              <SH id="lp-principles">Core Leadership Principles</SH>
+              <div className="grid md:grid-cols-2 gap-4 my-5">
+                {[
+                  {title:"Lead by Example",desc:"The standards you hold for your team must first be standards you hold for yourself. Your team watches what you do more than what you say."},
+                  {title:"Coach, Don't Micromanage",desc:"Trust your team to do the work. Your role is to set clear expectations, provide support, remove obstacles, and develop people — not control every step."},
+                  {title:"Hire Carefully",desc:"One wrong hire can damage team culture and performance for months. Invest time in finding the right person, not just the fast person."},
+                  {title:"Give Clear Feedback",desc:"Vague feedback helps no one. Be direct, specific, and kind. Address issues early — small problems ignored today become large problems tomorrow."},
+                  {title:"Make Decisions with Data",desc:"Opinions are useful, but decisions should be grounded in evidence. Ask for data. Question assumptions. Be willing to change your mind."},
+                  {title:"Build Trust",desc:"Trust is built through consistency, honesty, and follow-through. Do what you say you will do. Admit when you are wrong."},
+                  {title:"Empower Others",desc:"Give your team the authority to make decisions within their responsibility. Empowered teams deliver better outcomes and grow faster."},
+                  {title:"Create Future Leaders",desc:"The best leaders build other leaders. Actively invest in the development of the people around you. Your success is measured by theirs."},
+                ].map(p=>(
+                  <div key={p.title} className="rounded-2xl border border-border/50 bg-background hover:shadow-md transition-shadow p-5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-500 to-orange-600 rounded-l-2xl" />
+                    <div className="pl-2">
+                      <p className="font-heading font-bold text-[13.5px] text-foreground mb-1.5">{p.title}</p>
+                      <p className="text-xs text-foreground/65 leading-relaxed">{p.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <SH id="lp-managers">What Great Managers Do at Dynime</SH>
+              <BList items={["Hold weekly or bi-weekly 1-on-1 meetings with every direct report","Set clear goals and success criteria at the start of every project or quarter","Provide written feedback, not just verbal — documentation matters","Recognize contributions publicly and address concerns privately","Actively ask 'what do you need from me?' to remove blockers","Create psychological safety — people do their best work when they feel safe to speak up","Review team access permissions and project assignments regularly","Participate in performance reviews with preparation and honesty"]} />
+            </article>
+
+            {/* ════ THE DYNIME STANDARD ════════════════════════ */}
+            <article id="standard" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="standard")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">The Dynime Standard is a simple quality framework. Before submitting any work — whether a line of code, a client deliverable, a document, or a communication — apply this checklist.</p>
+              <SH id="quality-checklist">The Quality Checklist</SH>
+              <div className="my-6 space-y-3">
+                {[
+                  {q:"Is it accurate?",desc:"Have you verified the information, data, or output? Are there errors, assumptions, or gaps?"},
+                  {q:"Is it secure?",desc:"Does this work follow security and confidentiality standards? Have you checked for exposure of sensitive information?"},
+                  {q:"Is it documented?",desc:"Has this been written down clearly so that someone else can understand, continue, or audit it?"},
+                  {q:"Is it professional?",desc:"Does this work meet the quality standard expected from Dynime? Would you be proud to put your name on it?"},
+                  {q:"Would I proudly show this to a client?",desc:"If the answer is no, it is not ready. If the answer is yes, you may be close."},
+                  {q:"Did I verify my work?",desc:"Did you test it, re-read it, or review it from a fresh perspective before submitting?"},
+                  {q:"Is it complete?",desc:"Has every item been addressed? Are there open questions that need to be resolved before this is finalized?"},
+                ].map((item,i)=>(
+                  <div key={i} className="flex gap-4 p-4 rounded-xl border border-border/50 bg-background hover:bg-emerald-50/30 dark:hover:bg-emerald-950/10 transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-foreground mb-1">{item.q}</p>
+                      <p className="text-xs text-foreground/65 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <SH id="standard-why">Why This Standard Matters</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">Quality work is not always the fastest work. But work that does not meet the Dynime Standard will always cost us more time in the long run — through revisions, client dissatisfaction, or reputational damage.</p>
+              <Callout type="important">When you apply the Dynime Standard consistently, you build your professional reputation, strengthen client relationships, and contribute to a culture where excellence is the default — not the exception.</Callout>
+            </article>
+
+            {/* ════ FAQs ══════════════════════════════════════ */}
+            <article id="faqs" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="faqs")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">Answers to the questions employees ask most often. If your question is not listed here, contact HR or your manager.</p>
+              <SH id="faq-work">Working at Dynime</SH>
+              <div className="space-y-3 my-4">
+                {[
+                  {q:"Can I work while traveling?",a:"Yes. Dynime is a remote-first company. You can work from any location as long as you maintain your performance, availability during core hours, comply with security requirements, and ensure there are no legal or tax implications in the destination country. Consult HR if traveling for extended periods."},
+                  {q:"Can I freelance or do outside work?",a:"Limited outside work may be permitted provided it does not conflict with Dynime's business interests, does not involve competitor clients, does not use Dynime's resources, and is disclosed to HR. Work that creates a conflict of interest is not permitted."},
+                  {q:"Can I work from another country?",a:"Short-term remote work from another country may be possible with manager and HR approval. Extended relocation may trigger tax, legal, and employment obligations. Always consult HR before making arrangements."},
+                  {q:"What happens during probation?",a:"During probation (typically 2–6 months), your performance will be formally reviewed at midpoint and at the end. Either party may terminate with appropriate notice. Successful completion results in a written confirmation of employment."},
+                ].map((item,i)=>(
+                  <div key={i} className="rounded-xl border border-border/50 bg-background overflow-hidden">
+                    <div className="flex items-start gap-3 px-5 py-3.5 bg-sky-50/50 dark:bg-sky-950/20 border-b border-border/30">
+                      <HelpCircle className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                      <p className="font-semibold text-[13px] text-foreground">{item.q}</p>
+                    </div>
+                    <p className="px-5 py-3.5 text-sm text-foreground/75 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+              <SH id="faq-policy">Policy Questions</SH>
+              <div className="space-y-3 my-4">
+                {[
+                  {q:"How do I request leave?",a:"Submit your leave request to your manager with at least 3 business days' advance notice for planned leave. Emergency leave should be reported as soon as reasonably possible. Approvals depend on business requirements and team coverage."},
+                  {q:"Who approves expenses?",a:"Your direct manager approves day-to-day business expenses. Submit expense claims with receipts within 30 days of incurring the expense. Pre-approval is required for expenses above the standard threshold."},
+                  {q:"Who owns the code or work I produce?",a:"All intellectual property created during the course of your employment belongs to Dynime, including code, designs, documentation, and any AI-assisted work produced for company purposes. See Chapter 12 for full details."},
+                  {q:"What is the notice period if I resign?",a:"The notice period is specified in your employment agreement. The standard is 30 days unless otherwise agreed. During notice, you are expected to continue your responsibilities professionally and cooperate with the transition."},
+                ].map((item,i)=>(
+                  <div key={i} className="rounded-xl border border-border/50 bg-background overflow-hidden">
+                    <div className="flex items-start gap-3 px-5 py-3.5 bg-sky-50/50 dark:bg-sky-950/20 border-b border-border/30">
+                      <HelpCircle className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                      <p className="font-semibold text-[13px] text-foreground">{item.q}</p>
+                    </div>
+                    <p className="px-5 py-3.5 text-sm text-foreground/75 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+              <SH id="faq-tech">Technology & AI</SH>
+              <div className="space-y-3 my-4">
+                {[
+                  {q:"Can I use ChatGPT or other AI tools?",a:"Yes, approved AI tools may be used for work. However, never upload confidential client information, source code, credentials, or company proprietary data to public AI tools. Review all AI-generated output before use. See Chapter 11 for the full AI Usage Policy."},
+                  {q:"Can I use my personal device for work?",a:"Personal devices used for work (BYOD) must meet minimum security requirements including device encryption, screen lock, and up-to-date antivirus. Company data on personal devices must be removed upon separation."},
+                  {q:"What should I do if I receive a suspicious email?",a:"Do not click any links or download attachments. Report the email to your manager and the security team immediately. Follow the procedures in Chapter 9 — Information Security Policy."},
+                ].map((item,i)=>(
+                  <div key={i} className="rounded-xl border border-border/50 bg-background overflow-hidden">
+                    <div className="flex items-start gap-3 px-5 py-3.5 bg-sky-50/50 dark:bg-sky-950/20 border-b border-border/30">
+                      <HelpCircle className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                      <p className="font-semibold text-[13px] text-foreground">{item.q}</p>
+                    </div>
+                    <p className="px-5 py-3.5 text-sm text-foreground/75 leading-relaxed">{item.a}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            {/* ════ APPENDIX A — QUICK CONTACTS ════════════════ */}
+            <article id="app-a" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="app-a")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">Use this directory when you need to reach the right team or person quickly.</p>
+              <div className="grid md:grid-cols-2 gap-3 my-4">
+                {[
+                  {need:"Human Resources",who:"HR Department",icon:Users,color:"violet"},
+                  {need:"Payroll & Finance",who:"Finance Department",icon:DollarSign,color:"emerald"},
+                  {need:"IT Support",who:"IT Department",icon:Monitor,color:"blue"},
+                  {need:"Information Security",who:"Security Team",icon:ShieldCheck,color:"slate"},
+                  {need:"Legal & Compliance",who:"Legal / Compliance Team",icon:Scale,color:"red"},
+                  {need:"Your Role & Performance",who:"Direct Manager",icon:Star,color:"amber"},
+                  {need:"AI Tools & Access",who:"IT Department",icon:Bot,color:"purple"},
+                  {need:"Data Privacy Concerns",who:"HR & Security Team",icon:Lock,color:"teal"},
+                ].map(row=>(
+                  <div key={row.need} className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-background hover:shadow-sm transition-shadow">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <row.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-muted-foreground font-semibold">{row.need}</p>
+                      <p className="text-sm font-bold text-foreground">{row.who}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            {/* ════ APPENDIX B — QUICK REFERENCE ══════════════ */}
+            <article id="app-b" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="app-b")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">At-a-glance summary of key employment terms and entitlements.</p>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 my-4">
+                {[
+                  {label:"Standard Work Week",value:"40 Hours (8hrs/day, Flexible)"},
+                  {label:"Work Type",value:"Remote — Work from Anywhere"},
+                  {label:"Weekly Holiday",value:"Sunday (Adjustable)"},
+                  {label:"Annual Leave",value:"14 Working Days"},
+                  {label:"Sick Leave",value:"5 Working Days"},
+                  {label:"Emergency Leave",value:"3 Working Days"},
+                  {label:"Notice Period",value:"30 Days (unless otherwise agreed)"},
+                  {label:"Probation",value:"2–6 Months (role dependent)"},
+                  {label:"Payroll",value:"As per employment agreement"},
+                ].map(item=>(
+                  <div key={item.label} className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-100 dark:border-blue-900/40">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">{item.label}</p>
+                    <p className="font-bold text-sm text-foreground">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            {/* ════ APPENDIX C — GLOSSARY ══════════════════════ */}
+            <article id="app-c" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="app-c")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">Common terms and abbreviations used throughout this handbook and in day-to-day operations at Dynime.</p>
+              <div className="my-5 rounded-xl overflow-hidden border border-border/50 shadow-sm">
+                <table className="w-full text-sm">
+                  <thead><tr className="bg-purple-50 dark:bg-purple-950/40 border-b border-border/40"><th className="py-2.5 px-4 text-left font-bold text-foreground/80">Term</th><th className="py-2.5 px-4 text-left font-bold text-foreground/80">Meaning</th></tr></thead>
+                  <tbody>
+                    {[["AI","Artificial Intelligence"],["API","Application Programming Interface"],["BYOD","Bring Your Own Device"],["CRM","Customer Relationship Management"],["HRIS","Human Resources Information System"],["IP","Intellectual Property"],["KPI","Key Performance Indicator"],["MFA","Multi-Factor Authentication"],["NDA","Non-Disclosure Agreement"],["OKR","Objectives and Key Results"],["PIP","Performance Improvement Plan"],["SaaS","Software as a Service"],["SSO","Single Sign-On"],["VPN","Virtual Private Network"],["EEO","Equal Employment Opportunity"],["GDPR","General Data Protection Regulation"]].map(([t,m],i)=>(
+                      <tr key={t} className={`border-b border-border/30 last:border-0 ${i%2===0?"bg-muted/20":"bg-background"}`}><td className="py-2.5 px-4 font-bold text-foreground/90 border-r border-border/30 w-24">{t}</td><td className="py-2.5 px-4 text-foreground/70">{m}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            {/* ════ APPENDIX D — FIRST WEEK CHECKLIST ══════════ */}
+            <article id="app-d" className="scroll-mt-20 mb-20">
+              <ChapterHero ch={CHAPTERS.find(c=>c.id==="app-d")!} />
+              <p className="text-sm text-foreground/75 leading-relaxed mb-6">Your guided checklist for the first five days at Dynime. Work through this with your manager and HR to ensure a smooth start.</p>
+              <div className="space-y-5 my-6">
+                {[
+                  {day:"Day 1",color:"from-violet-500 to-indigo-600",items:["Receive company equipment (if applicable)","Activate company email account","Configure Multi-Factor Authentication (MFA)","Read the Employee Handbook","Meet your manager and immediate team","Join all required communication channels"]},
+                  {day:"Day 2–3",color:"from-blue-500 to-sky-500",items:["Gain access to all required systems and tools","Review department processes and workflows","Meet key stakeholders and cross-functional teams","Complete mandatory security awareness training","Review current active projects"]},
+                  {day:"Day 4–5",color:"from-emerald-500 to-green-600",items:["Understand your role responsibilities and KPIs","Review current projects in detail","Set initial 30-day goals with your manager","Schedule your first formal 1-on-1 meeting","Confirm understanding of policies and acknowledge the handbook"]},
+                ].map(block=>(
+                  <div key={block.day} className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                    <div className={`px-5 py-3 bg-gradient-to-r ${block.color} flex items-center gap-2`}>
+                      <ListChecks className="w-4 h-4 text-white" />
+                      <p className="font-bold text-white text-sm">{block.day}</p>
+                    </div>
+                    <div className="p-5">
+                      {block.items.map((item,i)=>(
+                        <div key={i} className="flex items-start gap-3 py-2 border-b border-border/20 last:border-0">
+                          <div className="w-5 h-5 rounded border-2 border-border/40 shrink-0 mt-0.5" />
+                          <span className="text-sm text-foreground/75">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Callout type="note">This checklist is a guide. Your manager may adjust the sequence based on your role and team requirements. Don't hesitate to ask questions — your team wants you to succeed.</Callout>
             </article>
 
           </main>
