@@ -726,7 +726,7 @@ button:hover .text-muted-foreground,
    ============================================ */
 @layer utilities {
   /* Prevent stray horizontal page scroll on small screens */
-  html, body { overflow-x: hidden; }
+  body { overflow-x: hidden; }
 
   /* Tab strips: allow horizontal scroll on mobile instead of overflowing */
   [role="tablist"] {
