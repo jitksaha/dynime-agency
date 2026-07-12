@@ -214,19 +214,22 @@ const MobileTOCDrawer = ({
   return createPortal(
     <div className="fixed inset-0 z-[200] flex">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <aside className="relative z-10 w-72 h-full bg-background border-r border-border overflow-y-auto flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+      <aside className="relative z-10 w-72 h-full bg-background border-r border-border flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 shrink-0">
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Contents</span>
           <button onClick={onClose}><X className="w-4 h-4" /></button>
         </div>
-        <div className="px-3 py-2">
+        <div className="px-3 py-2 shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
               className="w-full h-8 pl-8 pr-3 rounded-lg border border-border/60 bg-muted/30 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30" />
           </div>
         </div>
-        <TOCItems chapters={chapters} activeId={activeId} activeSubId={activeSubId} onNav={(id) => { onNav(id); onClose(); }} />
+        {/* Scrollable list container matches desktop layout exactly to prevent flex height bugs */}
+        <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <TOCItems chapters={chapters} activeId={activeId} activeSubId={activeSubId} onNav={(id) => { onNav(id); onClose(); }} />
+        </div>
       </aside>
     </div>,
     document.body
