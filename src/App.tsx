@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -226,11 +226,23 @@ const RouteFallback = () => {
 
 // Apple-style route transition: subtle fade + lift + de-blur on every
 // navigation. Keyed by pathname so React remounts the wrapper and the
-// CSS animation re-runs.
+// CSS animation re-runs. We clear the animation class after 450ms so that
+// position: fixed and position: sticky components behave correctly relative
+// to the viewport (clearing the CSS transform/will-change containing block).
 const RouteTransition = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const [animating, setAnimating] = useState(true);
+
+  useEffect(() => {
+    setAnimating(true);
+    const timer = setTimeout(() => {
+      setAnimating(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   return (
-    <div key={location.pathname} className="route-enter">
+    <div key={location.pathname} className={animating ? "route-enter" : ""}>
       {children}
     </div>
   );

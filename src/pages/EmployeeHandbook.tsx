@@ -435,11 +435,10 @@ const EmployeeHandbook = () => {
         {/* ── Body: Sidebar + Content ─────────────────────── */}
         <div className="container-custom flex gap-0 relative">
 
-          {/* ── LEFT FIXED SIDEBAR ─────────────────────── */}
-          {/* We keep the aside element as a static spacer to reserve column space in the layout */}
-          <aside className="hidden md:block w-64 lg:w-72 shrink-0">
-            {/* The inner container is fixed relative to the viewport to guarantee it never scrolls away */}
-            <div className="fixed top-16 md:top-[72px] bottom-0 w-64 lg:w-[288px] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm z-30">
+          {/* ── LEFT STICKY SIDEBAR ─────────────────────── */}
+          {/* self-start prevents flex item stretching, which is required for sticky to activate */}
+          <aside className="hidden md:block w-64 lg:w-72 shrink-0 self-start sticky top-16 md:top-[72px]">
+            <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-72px)] flex flex-col overflow-hidden border-r border-border/40 bg-background/60 backdrop-blur-sm">
 
               {/* Search */}
               <div className="px-3 pt-4 pb-2 shrink-0">
