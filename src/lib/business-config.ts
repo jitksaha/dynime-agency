@@ -34,9 +34,10 @@ export const STATIC_BUSINESS_DEFAULTS = {
   
   socialLinks: {
     facebook: "https://facebook.com/thedynime",
-    twitter: "https://twitter.com/thedynime",
-    linkedin: "https://linkedin.com/company/thedynime",
     instagram: "https://instagram.com/thedynime",
+    linkedin: "https://linkedin.com/company/thedynime",
+    whatsapp: "https://wa.me/message/N7GEIT4BZHAMG1",
+    twitter: "https://twitter.com/thedynime",
     youtube: "https://youtube.com/thedynime"
   },
 

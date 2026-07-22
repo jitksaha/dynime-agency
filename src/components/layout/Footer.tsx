@@ -326,7 +326,7 @@ const Footer = () => {
         icon: MessageCircle,
         title: "WhatsApp",
         subtitle: whatsappVal,
-        href: `https://wa.me/${whatsappDigits}`,
+        href: whatsapp?.value && whatsapp.value.startsWith("http") ? whatsapp.value : "https://wa.me/message/N7GEIT4BZHAMG1",
       },
       {
         id: address?.id || "footer-address",
