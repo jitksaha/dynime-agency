@@ -45,7 +45,7 @@ const CHAPTERS: Chapter[] = [
     sections:[{id:"annual-leave",title:"Annual Leave"},{id:"sick-leave",title:"Sick Leave"},{id:"other-leaves",title:"Other Leave Types"},{id:"public-holidays",title:"Public Holidays"},{id:"leave-guidelines",title:"General Guidelines"}] },
   { id:"ch6", number:"06", title:"Compensation & Benefits", icon:DollarSign,
     gradient:"from-emerald-500 to-green-600", accent:"emerald",
-    sections:[{id:"salary",title:"Salary & Payroll"},{id:"benefits",title:"Benefits"},{id:"reimbursements",title:"Reimbursements"}] },
+    sections:[{id:"salary",title:"Salary & Payroll"},{id:"probationary-compensation",title:"Probationary Compensation"},{id:"monthly-payroll",title:"Monthly Payroll"},{id:"benefits",title:"Benefits"},{id:"reimbursements",title:"Reimbursements"}] },
   { id:"ch7", number:"07", title:"Performance & Growth", icon:TrendingUp,
     gradient:"from-sky-500 to-blue-500", accent:"sky",
     sections:[{id:"kpis",title:"KPIs & OKRs"},{id:"reviews",title:"Performance Reviews"},{id:"learning",title:"Learning & Development"},{id:"promotions",title:"Promotions & Career Growth"}] },
@@ -599,6 +599,7 @@ const EmployeeHandbook = () => {
               <PTable rows={[["Full-Time","Standard weekly schedule, eligible for full benefits"],["Part-Time","Fewer hours; benefits based on policy and local law"],["Contract","Services under a separate agreement; not employees unless required by law"],["Intern","Structured learning opportunity; terms in the internship agreement"],["Temporary","Hired for a specific project or limited duration"]]} />
               <SH id="probation">Probation Period</SH>
               <BList items={["Standard probation: 2–6 months depending on role","Performance review at midpoint and end of probation","Probation may be extended with documented justification","Confirmation letter issued upon successful completion","Either party may terminate with appropriate notice during probation"]} />
+              <Callout type="note">For details on salary accrued and paid during probation, refer to <a href="#probationary-compensation" className="font-semibold text-primary underline underline-offset-2">Probationary Compensation</a> in Chapter 06.</Callout>
               <SH id="working-hours">Working Hours</SH>
               <PTable rows={[["Standard Hours","8 hours per working day (Flexible by discussion)"],["Work Type","Remote — work from anywhere"],["Holiday","Sunday (adjustable by location/availability)"],["Core Hours","Agreed between employee and manager"],["Overtime","Prior approval required; compensated per local law or company policy"]]} />
               <Callout type="note">Working hours are flexible by discussion. Core hours ensure team overlap for collaboration.</Callout>
@@ -639,6 +640,22 @@ const EmployeeHandbook = () => {
               <ChapterHero ch={CHAPTERS[5]} />
               <SH id="salary">Salary & Payroll</SH>
               <BList items={["Salary is specified in the individual employment agreement","Payment is made on the agreed payroll schedule (monthly or bi-weekly)","Dynime operates in multiple currencies; payment currency specified in agreement","Applicable deductions and taxes processed in accordance with local law","Salary revisions reviewed annually or during performance promotion cycles"]} />
+              
+              <SH id="probationary-compensation">Probationary Compensation</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">
+                All newly hired employees will begin under a probation period as specified in their Employment Agreement.
+              </p>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-3">
+                Compensation earned during the probation period will be held until the completion of the probation review. Employees who successfully complete probation and are confirmed as permanent employees will receive the <strong className="font-bold text-foreground">full confirmed salary</strong>, including the compensation accrued during the probation period, in accordance with the Company's compensation policy.
+              </p>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-5">
+                If employment ends during the probation period for any valid reason, including resignation or unsuccessful performance, the employee will receive only the <strong className="font-bold text-foreground">probationary compensation</strong> earned for the actual period worked. In such cases, the employee will not be eligible for the confirmed permanent salary or its associated adjustment.
+              </p>
+
+              <SH id="monthly-payroll">Monthly Payroll</SH>
+              <p className="text-sm text-foreground/75 leading-relaxed mb-5">
+                Upon confirmation as a permanent employee, salary payments will be processed on a <strong className="font-bold text-foreground">monthly basis</strong> according to the Company's Payroll Policy and the official payroll schedule in effect at the time. The Company reserves the right to update payroll dates and payment procedures in accordance with business requirements and applicable laws.
+              </p>
               <SH id="benefits">Benefits</SH>
               <PTable rows={[["Annual Leave","14 paid working days per year"],["Sick Leave","5 paid working days per year"],["Remote Work","Full remote — work from your preferred location"],["Flexible Hours","Core hours with flexibility by discussion"],["Holiday","Sunday off (adjustable by location)"],["Learning Budget","Approved courses, certifications, and training"],["Equipment","Allowance or provision based on role"],["Internet Allowance","As specified in employment agreement"]]} />
               <SH id="reimbursements">Reimbursements</SH>
