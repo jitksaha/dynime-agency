@@ -35,8 +35,10 @@ us-company
 query-migrations.php
 custom-software-development
 virtual-address
+default.php.old.php
 custom-web-apps
 brand-strategy
+hrm
 inspect-order.php
 favicon-48.png
 products
@@ -49,6 +51,7 @@ facebook-ads
 og-image-v2.jpg
 inspect-live-env.php
 flowmingo-cron.php
+home
 og-image-dark-v2.jpg
 favicon-dark-32.png
 list-migrations.php
@@ -84,6 +87,7 @@ email-marketing
 dynime-seal.png
 shopify-illustration.png
 _redirects
+default.php
 payment-gateway
 seo-illustration.png
 speed-optimization
