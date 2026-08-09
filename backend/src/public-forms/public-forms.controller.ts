@@ -77,16 +77,4 @@ export class PublicFormsController {
   ) {
     return this.formsService.uploadStudentProofFile(file, key);
   }
-
-  @Post('apply')
-  @Version('1')
-  @HttpCode(HttpStatus.OK)
-  async apply(
-    @Body() data: any,
-    @Req() req: Request,
-  ) {
-    const ip = req.ip || undefined;
-    const userAgent = req.headers['user-agent'] as string | undefined;
-    return this.formsService.submitJobApplication(data, ip, userAgent);
-  }
 }

@@ -28,7 +28,6 @@ export const ROUTE_ACCESS: Record<string, AppRole[]> = {
   "/superadmin/id-cards": ["super_admin", "manager", "hr"],
   "/superadmin/employees": ["super_admin", "manager", "hr", "editor"],
   "/superadmin/about-timeline": ["super_admin", "manager", "editor"],
-  "/superadmin/careers": ["super_admin", "manager", "hr"],
   "/superadmin/seo": ["super_admin", "manager", "editor"],
   "/superadmin/page-seo": ["super_admin", "manager", "editor"],
   "/superadmin/seo-rules": ["super_admin", "manager", "editor"],

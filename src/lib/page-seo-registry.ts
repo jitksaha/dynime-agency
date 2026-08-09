@@ -22,7 +22,7 @@ const core: PageSEORegistryEntry[] = [
   { key: "portfolio", label: "Portfolio", path: "/portfolio", group: "Core", defaults: SEO_DEFAULTS.portfolio },
   { key: "contact", label: "Contact", path: "/contact", group: "Core", defaults: SEO_DEFAULTS.contact },
   { key: "blog", label: "Blog", path: "/blog", group: "Core", defaults: SEO_DEFAULTS.blog },
-  { key: "careers", label: "Careers", path: "/careers", group: "Core", defaults: SEO_DEFAULTS.careers },
+  { key: "careers", label: "Careers", path: "https://careers.dynime.com", group: "Core", defaults: SEO_DEFAULTS.careers },
   
 ];
 

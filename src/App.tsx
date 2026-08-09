@@ -48,6 +48,13 @@ const LegacyServiceRedirect = () => {
   return <Navigate to={`/${slug}`} replace />;
 };
 
+const ExternalRedirect = ({ url }: { url: string }) => {
+  useEffect(() => {
+    window.location.replace(url);
+  }, [url]);
+  return null;
+};
+
 const ReferralRedirect = () => {
   const { code } = useParams<{ code: string }>();
   return <Navigate to={code ? `/?ref=${code}` : "/"} replace />;
@@ -66,8 +73,6 @@ const Blog = lazy(() => import("./pages/Blog.tsx"));
 const BlogPost = lazy(() => import("./pages/BlogPost.tsx"));
 const BlogTaxonomy = lazy(() => import("./pages/BlogTaxonomy.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
-const Careers = lazy(() => import("./pages/Careers.tsx"));
-const CareerDetail = lazy(() => import("./pages/CareerDetail.tsx"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory.tsx"));
 const AccountLogin = lazy(() => import("./pages/account/AccountLogin.tsx"));
 const ResetPassword = lazy(() => import("./pages/account/ResetPassword.tsx"));
@@ -144,7 +149,6 @@ const AdminSubscribers = lazy(() => import("./pages/superadmin/AdminSubscribers.
 const AdminInvestLeads = lazy(() => import("./pages/superadmin/AdminInvestLeads.tsx"));
 const AdminInvestmentPlans = lazy(() => import("./pages/superadmin/AdminInvestmentPlans.tsx"));
 const AdminInvestors = lazy(() => import("./pages/superadmin/AdminInvestors.tsx"));
-const AdminCareers = lazy(() => import("./pages/superadmin/AdminCareers.tsx"));
 const AdminSocialLinks = lazy(() => import("./pages/superadmin/AdminSocialLinks.tsx"));
 const AdminBrandTone = lazy(() => import("./pages/superadmin/AdminBrandTone.tsx"));
 const AdminPageSEO = lazy(() => import("./pages/superadmin/AdminPageSEO.tsx"));
@@ -318,8 +322,8 @@ const App = () => (
                   <Route path="/agreement/:id" element={<Agreement />} />
                   <Route path="/agreement/*" element={<Agreement />} />
                   <Route path="/contact" element={<Contact />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/careers/:slug" element={<CareerDetail />} />
+                  <Route path="/careers" element={<ExternalRedirect url="https://careers.dynime.com" />} />
+                  <Route path="/careers/*" element={<ExternalRedirect url="https://careers.dynime.com" />} />
                   <Route path="/handbook" element={<EmployeeHandbook />} />
                   <Route path="/internal/handbook" element={<Navigate to="/handbook" replace />} />
                   <Route path="/page/:slug" element={<DynamicPage />} />
@@ -425,7 +429,6 @@ const App = () => (
                   <Route path="/superadmin/invest-leads" element={<ProtectedRoute><AdminInvestLeads /></ProtectedRoute>} />
                   <Route path="/superadmin/investment-plans" element={<ProtectedRoute><AdminInvestmentPlans /></ProtectedRoute>} />
                   <Route path="/superadmin/investors" element={<ProtectedRoute><AdminInvestors /></ProtectedRoute>} />
-                  <Route path="/superadmin/careers" element={<ProtectedRoute><AdminCareers /></ProtectedRoute>} />
                   <Route path="/superadmin/social-links" element={<ProtectedRoute><AdminSocialLinks /></ProtectedRoute>} />
                   <Route path="/superadmin/brand-tone" element={<ProtectedRoute><AdminBrandTone /></ProtectedRoute>} />
                   <Route path="/superadmin/blog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>} />

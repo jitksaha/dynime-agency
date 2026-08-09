@@ -98,7 +98,7 @@ const QUICK_LINKS = [
   { to: "/about", label: "About Dynime", icon: Users2 },
   { to: "/contact", label: "Get a quote", icon: MessageSquare },
   { to: "/blog", label: "Insights & guides", icon: FileText },
-  { to: "/careers", label: "Careers", icon: Sparkles },
+  { to: "https://careers.dynime.com", label: "Careers", icon: Sparkles },
   { to: "/services/dss", label: "AI Software Hub", icon: Rocket },
   { to: "/products/os", label: "Dynime OS", icon: Globe2 },
   { to: "/pay-open-source", label: "Dynime Pay (Self-Hosted)", icon: Wallet },
@@ -612,12 +612,10 @@ const Services = () => {
             </div>
           </ScrollReveal>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {QUICK_LINKS.map((l, i) => (
-              <ScrollReveal key={l.label} delay={i * 0.03}>
-                <Link
-                  to={l.to}
-                  className="group flex items-center gap-3 p-4 rounded-xl bg-background border border-border hover:border-primary/50 hover:shadow-sm transition-all"
-                >
+            {QUICK_LINKS.map((l, i) => {
+              const isExternal = l.to.startsWith("http");
+              const linkContent = (
+                <>
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors flex-shrink-0">
                     <l.icon className="w-4 h-4 text-primary group-hover:text-primary-foreground transition-colors" />
                   </div>
@@ -625,9 +623,30 @@ const Services = () => {
                     <div className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">{l.label}</div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                </Link>
-              </ScrollReveal>
-            ))}
+                </>
+              );
+              return (
+                <ScrollReveal key={l.label} delay={i * 0.03}>
+                  {isExternal ? (
+                    <a
+                      href={l.to}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-3 p-4 rounded-xl bg-background border border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                    >
+                      {linkContent}
+                    </a>
+                  ) : (
+                    <Link
+                      to={l.to}
+                      className="group flex items-center gap-3 p-4 rounded-xl bg-background border border-border hover:border-primary/50 hover:shadow-sm transition-all"
+                    >
+                      {linkContent}
+                    </Link>
+                  )}
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </section>

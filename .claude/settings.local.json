@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php -l \"/Users/jitkumarsaha/Dynime LLC/dynime.com/public/deploy-api.php\")",
+      "Bash(npm run *)",
+      "Bash(npm pkg *)",
+      "Bash(npm config *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(gh workflow *)",
+      "Bash(gh run *)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" diff -- dynime-api/app/Http/Controllers/Api/OrdersController.php dynime-api/routes/api.php src/pages/superadmin/AdminOrders.tsx public/deploy-api.php)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" diff -- dynime-api/routes/api.php)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" status --short --branch)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" remote -v)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" add dynime-api/routes/api.php)",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" commit -m \"fix: allow order import export without admin middleware\")",
+      "Bash(git -C \"/Users/jitkumarsaha/Dynime LLC/dynime.com\" push origin-github main)"
+    ]
+  }
+}

@@ -640,15 +640,36 @@ const Header = ({ isRelative = false }: { isRelative?: boolean }) => {
                 {primaryNav.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.to);
+                  const isExternal = item.to.startsWith("http");
+                  const linkClass = [
+                    "flex items-center gap-2 px-2.5 py-2 rounded-xl transition-colors min-w-0",
+                    active ? "bg-foreground/8 text-foreground" : "text-foreground/85 hover:bg-foreground/5",
+                  ].join(" ");
+
+                  if (isExternal) {
+                    return (
+                      <a
+                        key={item.label}
+                        href={item.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMobileOpen(false)}
+                        className={linkClass}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-4 h-4 text-primary" />
+                        </div>
+                        <span className="text-sm font-semibold">{item.label}</span>
+                      </a>
+                    );
+                  }
+
                   return (
                     <Link
                       key={item.label}
                       to={item.to}
                       onClick={() => setMobileOpen(false)}
-                      className={[
-                        "flex items-center gap-2 px-2.5 py-2 rounded-xl transition-colors min-w-0",
-                        active ? "bg-foreground/8 text-foreground" : "text-foreground/85 hover:bg-foreground/5",
-                      ].join(" ")}
+                      className={linkClass}
                     >
                       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Icon className="w-4 h-4 text-primary" />

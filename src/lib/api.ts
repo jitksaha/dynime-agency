@@ -105,36 +105,7 @@ export const blogApi = {
   delete: (id: number) => api.delete(`/admin/blog-posts/${id}`),
 };
 
-// ── Careers API ──────────────────────────────────────────────────────────────
 
-export const careerApi = {
-  list: (params?: { department?: string }) => api.get<Career[]>('/careers', { params }),
-  departments: () => api.get<string[]>('/careers/departments'),
-  get: (slug: string) => api.get<Career>(`/careers/${slug}`),
-  recordView: (slug: string) => api.post(`/careers/${slug}/view`),
-
-  // Job Applications
-  apply: (formData: FormData) =>
-    api.post('/job-applications', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
-
-  // Admin
-  adminList: () => api.get<Career[]>('/admin/careers'),
-  adminGet: (id: number) => api.get<Career>(`/admin/careers/${id}`),
-  create: (data: Partial<Career>) => api.post<Career>('/admin/careers', data),
-  update: (id: number, data: Partial<Career>) => api.patch<Career>(`/admin/careers/${id}`, data),
-  delete: (id: number) => api.delete(`/admin/careers/${id}`),
-
-  // Admin: Applications
-  applications: (params?: { status?: string; career_id?: number }) =>
-    api.get('/admin/job-applications', { params }),
-  application: (id: number) => api.get(`/admin/job-applications/${id}`),
-  updateApplication: (id: number, data: { status?: string; admin_notes?: string }) =>
-    api.patch(`/admin/job-applications/${id}`, data),
-  deleteApplication: (id: number) => api.delete(`/admin/job-applications/${id}`),
-  resumeUrl: (id: number) => api.get<{ url: string; filename: string }>(`/admin/job-applications/${id}/resume`),
-};
 
 // ── Portfolio API ─────────────────────────────────────────────────────────────
 

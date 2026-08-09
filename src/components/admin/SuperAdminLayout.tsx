@@ -140,7 +140,6 @@ const navGroupsCommerce: NavGroup = {
         { to: "/superadmin/hr?tab=builder", label: "Document Builder", icon: FileText },
         { to: "/superadmin/hr?tab=history", label: "Documents History", icon: FileText },
         { to: "/superadmin/hr-requests", label: "Employee Requests", icon: FileText },
-        { to: "/superadmin/careers", label: "Job Posts", icon: Briefcase },
         { to: "/superadmin/hr-extras", label: "Attendance & Leave", icon: FileText },
         { to: "/superadmin/payroll", label: "Payroll", icon: Banknote, badge: "New" },
       ],

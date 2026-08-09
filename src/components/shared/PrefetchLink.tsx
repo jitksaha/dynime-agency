@@ -25,8 +25,6 @@ const routeImporter = (path: string): (() => Promise<unknown>) | null => {
   if (clean.startsWith("/blog/category/") || clean.startsWith("/blog/tag/")) return () => import("@/pages/BlogTaxonomy.tsx");
   if (clean.startsWith("/blog/")) return () => import("@/pages/BlogPost.tsx");
   if (clean === "/contact") return () => import("@/pages/Contact.tsx");
-  if (clean === "/careers") return () => import("@/pages/Careers.tsx");
-  if (clean.startsWith("/careers/")) return () => import("@/pages/CareerDetail.tsx");
   if (clean === "/checkout") return () => import("@/pages/Checkout.tsx");
   if (clean === "/track" || clean.startsWith("/track/")) return () => import("@/pages/TrackOrder.tsx");
   if (clean === "/orders") return () => import("@/pages/OrderHistory.tsx");

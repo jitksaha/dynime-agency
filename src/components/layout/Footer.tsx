@@ -41,19 +41,39 @@ import { BUSINESS_CONFIG } from "@/lib/business-config";
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const FooterLink = forwardRef<HTMLAnchorElement, { to: string; children: React.ReactNode }>(
-  ({ to, children }, ref) => (
-    <Link
-      ref={ref}
-      to={to}
-      className="group/fl inline-flex items-center text-sm text-muted-foreground hover:text-foreground dark:text-slate-300 dark:hover:text-white transition-colors"
-    >
-      <span className="relative">
-        {children}
-        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-primary group-hover/fl:w-full transition-all duration-300" />
-      </span>
-      <ArrowUpRight className="ml-1 w-3 h-3 opacity-0 -translate-x-1 group-hover/fl:opacity-100 group-hover/fl:translate-x-0 transition-all" />
-    </Link>
-  ),
+  ({ to, children }, ref) => {
+    const isExternal = to.startsWith("http");
+    if (isExternal) {
+      return (
+        <a
+          ref={ref}
+          href={to}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group/fl inline-flex items-center text-sm text-muted-foreground hover:text-foreground dark:text-slate-300 dark:hover:text-white transition-colors"
+        >
+          <span className="relative">
+            {children}
+            <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-primary group-hover/fl:w-full transition-all duration-300" />
+          </span>
+          <ArrowUpRight className="ml-1 w-3 h-3 opacity-0 -translate-x-1 group-hover/fl:opacity-100 group-hover/fl:translate-x-0 transition-all" />
+        </a>
+      );
+    }
+    return (
+      <Link
+        ref={ref}
+        to={to}
+        className="group/fl inline-flex items-center text-sm text-muted-foreground hover:text-foreground dark:text-slate-300 dark:hover:text-white transition-colors"
+      >
+        <span className="relative">
+          {children}
+          <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-primary group-hover/fl:w-full transition-all duration-300" />
+        </span>
+        <ArrowUpRight className="ml-1 w-3 h-3 opacity-0 -translate-x-1 group-hover/fl:opacity-100 group-hover/fl:translate-x-0 transition-all" />
+      </Link>
+    );
+  },
 );
 FooterLink.displayName = "FooterLink";
 
@@ -154,7 +174,7 @@ const buildDynamicGroups = (): { title: string; links: { label: string; to: stri
         { label: "About Us", to: "/about" },
         { label: "Portfolio", to: "/portfolio" },
         { label: "Our Team", to: "/about" },
-        { label: "Careers", to: "/careers" },
+        { label: "Careers", to: "https://careers.dynime.com" },
         { label: "Investment Plans", to: "/invest" },
         { label: "Investor Relations", to: "/investor-relations" },
         { label: "Investor Portal", to: "/investor" },
@@ -210,7 +230,18 @@ const Footer = () => {
       if (idx >= 0) merged[idx] = { title: b.title, links: b.links };
       else merged.push({ title: b.title, links: b.links });
     }
-    return merged.filter((g) => !/^(legal|policy|policies|resources)$/i.test(g.title)).slice(0, 3);
+    return merged
+      .filter((g) => !/^(legal|policy|policies|resources)$/i.test(g.title))
+      .slice(0, 3)
+      .map((g) => ({
+        ...g,
+        links: g.links.map((l) => {
+          if (l.label.toLowerCase() === "careers" || l.to === "/careers" || l.to.endsWith("/careers")) {
+            return { ...l, to: "https://careers.dynime.com" };
+          }
+          return l;
+        }),
+      }));
   }, [adminLinkBlocks]);
 
   // Legal links — always wired to the dedicated routes

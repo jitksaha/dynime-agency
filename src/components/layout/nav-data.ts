@@ -215,7 +215,7 @@ export const primaryNav: PrimaryNavItem[] = [
   { label: "Portfolio", to: "/portfolio", icon: FolderKanban },
   { label: "Blog", to: "/blog", icon: FileText },
   { label: "FlexPay", to: "/flexpay", icon: Wallet },
-  { label: "Careers", to: "/careers", icon: Briefcase },
+  { label: "Careers", to: "https://careers.dynime.com", icon: Briefcase },
   { label: "Contact", to: "/contact", icon: Phone },
 ];
 
