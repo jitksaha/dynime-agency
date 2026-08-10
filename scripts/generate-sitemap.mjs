@@ -31,7 +31,6 @@ const STATIC_ROUTES = [
   { path: "/portfolio", changefreq: "weekly", priority: "0.8" },
   { path: "/blog", changefreq: "daily", priority: "0.8" },
   { path: "/contact", changefreq: "monthly", priority: "0.7" },
-  { path: "/careers", changefreq: "weekly", priority: "0.7" },
   { path: "/track", changefreq: "yearly", priority: "0.4" },
   { path: "/usa-business-formation", changefreq: "monthly", priority: "0.8" },
   { path: "/pay-open-source", changefreq: "yearly", priority: "0.3" },
@@ -85,10 +84,9 @@ function urlEntry({ path: p, lastmod, changefreq, priority }) {
 }
 
 async function main() {
-  const [serviceSlugs, blogPosts, careers, pages] = await Promise.all([
+  const [serviceSlugs, blogPosts, pages] = await Promise.all([
     readServiceSlugs(),
     fetchTable("blog_posts?select=slug,updated_at,category,tags&is_published=eq.true&order=updated_at.desc"),
-    fetchTable("careers?select=slug,updated_at&is_active=eq.true"),
     fetchTable("pages?select=slug,updated_at&is_published=eq.true"),
   ]);
 
@@ -117,14 +115,6 @@ async function main() {
     entries.push({ path: `/blog/tag/${slugify(tag)}`, lastmod: today, changefreq: "weekly", priority: "0.5" });
   }
 
-  for (const c of careers) {
-    entries.push({
-      path: `/careers/${c.slug}`,
-      lastmod: (c.updated_at || today).slice(0, 10),
-      changefreq: "weekly",
-      priority: "0.6",
-    });
-  }
 
   for (const pg of pages) {
     if (!pg.slug) continue;

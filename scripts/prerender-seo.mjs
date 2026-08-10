@@ -87,7 +87,6 @@ const STATIC_ROUTES = [
   { path: "/portfolio", key: "portfolio", title: "Portfolio | AI, Web & Software Development Projects | Dynime", description: "Explore our portfolio featuring AI software, SaaS platforms, websites, business automation systems and digital transformation projects delivered for clients worldwide." },
   { path: "/contact", key: "contact", title: "Contact Dynime | Start Your Next Project | Dynime", description: "Contact Dynime to discuss AI software, web development, automation, SaaS, marketing or business consulting. Schedule your free consultation today." },
   { path: "/blog", key: "blog", title: "Blog | AI, Software Development & Business Growth Insights | Dynime", description: "Discover expert insights on AI, software development, SaaS, digital transformation, automation, web technologies and business growth strategies." },
-  { path: "/careers", key: "careers", title: "Careers at Dynime | Join Our Team | Dynime", description: "Explore career opportunities at Dynime and join a team building innovative AI software, digital products and technology solutions." },
   { path: "/products/os", key: "product-dbm", title: "Dynime OS | AI Business Management Software", description: "Manage CRM, HR, finance, projects and operations from one AI-powered business operating system designed for growing businesses." },
   { path: "/services/dss", key: "services-dss", title: "Software Development Services | Dynime Software Solutions", description: "Discover custom software development, AI solutions, SaaS platforms, testing and enterprise applications built for startups and growing businesses." },
   { path: "/usa-business-formation", key: "usa-formation", title: "US Company Formation Services | LLC & C Corp Registration | Dynime", description: "Register your US LLC or C Corporation with expert guidance. Dynime helps entrepreneurs establish compliant US businesses with ongoing support." },
@@ -123,21 +122,7 @@ const blogRoutes = blogPosts
     articleAuthor: p.author || undefined,
   }));
 
-const careers =
-  (await safeFetch(
-    `${SUPABASE_URL}/rest/v1/careers?select=slug,title,description,hero_image_url,is_active&is_active=eq.true`,
-  )) || [];
-const careerRoutes = (Array.isArray(careers) ? careers : [])
-  .filter((c) => c?.slug)
-  .map((c) => ({
-    path: `/careers/${c.slug}`,
-    key: `career:${c.slug}`,
-    title: c.title,
-    description: (c.description || DEFAULT_DESCRIPTION).replace(/<[^>]+>/g, "").slice(0, 300),
-    image: c.hero_image_url || undefined,
-  }));
-
-const allRoutes = [...STATIC_ROUTES, ...serviceRoutes, ...blogRoutes, ...careerRoutes];
+const allRoutes = [...STATIC_ROUTES, ...serviceRoutes, ...blogRoutes];
 
 // ── Render template ───────────────────────────────────────────────────────
 function applyOverrides(route) {

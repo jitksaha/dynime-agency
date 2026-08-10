@@ -11,7 +11,7 @@
 - [Blog](/blog): Essays on design, engineering and brand strategy.
 - [Shop](/shop): Digital products and packaged services.
 - [Contact](/contact): Project inquiries and partnerships.
-- [Careers](/careers): Open roles for senior designers, engineers and strategists.
+- [Careers](https://careers.dynime.com): Open roles for senior designers, engineers and strategists.
 - [Track Order](/track): Look up order status by invoice or email.
 
 ## Web development

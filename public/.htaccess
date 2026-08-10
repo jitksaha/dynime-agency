@@ -9,6 +9,9 @@ DirectoryIndex index.html index.php
     RewriteEngine On
     RewriteBase /
 
+    # Permanent 301 Redirect for Careers to external domain https://careers.dynime.com
+    RewriteRule ^careers(/.*)?$ https://careers.dynime.com [R=301,L]
+
     # Block cPanel's default page redirect
     RewriteRule ^cgi-sys/defaultwebpage\.cgi$ /index.html [R=301,L]
 
